@@ -1,0 +1,6 @@
+{
+    "verbose": true,
+    "ignore":["node_modules/**/*", ".git"],
+    "watch":["app.js", "routes/**/*", "models/**/*", "views/**/*"],
+    "ext":"js, css, hbs"
+}

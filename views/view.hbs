@@ -1,0 +1,10 @@
+<ul>유저 고유 ID: {{result.uuid}} </ul>
+<ul>유저 닉네임: <a href="/profile/{{userProfile.id}}">{{userProfile.nickname}}</a></ul>
+<ul>제목: {{result.title}} </ul>
+<ul>본문: {{result.content}}</ul>
+{{#images}}
+<img src="/{{this}}"><br>
+{{/images}}
+<input type="button" class="btn" onclick=" location.href='/board/update/{{result.post_id}}'" value="수정">
+<input type="button" class="btn" onclick=" location.href='/board/delete/{{result.post_id}}'" value="삭제">
+<input type="button" class="btn" onclick=" location.href='/board'" value="목록">

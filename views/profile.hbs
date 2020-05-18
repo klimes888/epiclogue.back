@@ -1,0 +1,11 @@
+<h1>유저 프로필</h1>
+<b>아이디: {{userProfile.id}}</b><br>
+<b>닉네임: {{userProfile.nickname}}</b><br>
+<b>소개: {{userProfile.intro}}</b>
+
+<h1>쓴 글</h1>
+{{#each userPost}}
+<tr>
+    <td><a href="/view/{{post_id}}">{{title}}</a></td><br>
+</tr>
+{{/each}}

@@ -1,0 +1,22 @@
+<body>
+    <h1>게시판</h1>
+    <table class="board">
+        <thead>
+            <tr>
+                <th>번호</th>
+                <th>제목</th>
+                <th>작성자</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#each result}}
+            <tr>
+                <td>{{post_id}}</td>
+                <td><a href="/view/{{post_id}}">{{title}}</a></td>
+                <td></td>
+            </tr>
+            {{/each}}
+            <input type="button" class="btn" onclick=" location.href='/board/compose'" value="글쓰기"/>
+        </tbody>
+    </table>
+</body>
