@@ -3,3 +3,4 @@ sessions
 .env
 public/uploads
 TODO
+.DS_Store

@@ -15,9 +15,9 @@ require('dotenv').config();
 
 const swaggerDefinition = {
   info: { // API informations (required)
-    title: 'dbeacon Service', // Title (required)
+    title: 'lunarcat Service', // Title (required)
     version: '1.0.0', // Version (required)
-    description: 'dbeacon service API' // Description (optional)
+    description: 'lunarcat service API' // Description (optional)
   },
   host: 'api.chiyak.duckdns.org', // Host (optional)
   basePath: '/', // Base path (optional)
