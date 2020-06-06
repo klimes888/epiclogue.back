@@ -1,25 +1,37 @@
-const createError = require('http-errors');
-const express = require('express');
-const path = require('path');
-const cookieParser = require('cookie-parser');
-const logger = require('morgan');
+var createError = require('http-errors');
+var express = require('express');
+var path = require('path');
+var cookieParser = require('cookie-parser');
+var logger = require('morgan');
+const mongoose = require('mongoose');
+const swaggerJSDoc = require('swagger-jsdoc');
+const swaggerUi = require('swagger-ui-express');
+var indexRouter = require('./routes/index');
+var usersRouter = require('./routes/users');
 
-const indexRouter = require('./routes/index');
-const usersRouter = require('./routes/users');
-const loginRouter = require('./routes/login');
-const joinRouter = require('./routes/join');
-const passwordChangeRouter = require('./routes/password-change');
-const showAllDataRouter = require('./routes/show-all-data');
-const deleteAccountRouter = require('./routes/delete-account');
-const showBoardRouter = require('./routes/board');
-const viewRouter = require('./routes/view');
-const profileRouter = require('./routes/profile');
-const settingsRouter = require('./routes/settings');
+var app = express();
 
-const session = require('express-session');                      
-const FileStore = require('session-file-store')(session);    
+require('dotenv').config();
 
-const app = express();
+const swaggerDefinition = {
+  info: { // API informations (required)
+    title: 'dbeacon Service', // Title (required)
+    version: '1.0.0', // Version (required)
+    description: 'dbeacon service API' // Description (optional)
+  },
+  host: 'api.chiyak.duckdns.org', // Host (optional)
+  basePath: '/', // Base path (optional)
+  schemes:["https"]
+};
+
+const options = {
+  // Import swaggerDefinitions
+  swaggerDefinition,
+  // Path to the API docs
+  apis: ['./routes/*.js']
+};
+
+const swaggerSpec = swaggerJSDoc(options);
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -27,31 +39,13 @@ app.set('view engine', 'hbs');
 
 app.use(logger('dev'));
 app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-// app.use('/static', express.static(__dirname + '/public'));
-
-app.use(session({                                              
-  secret:"lunakey",
-  resave:false,
-  saveUninitialized:true,
-  store: new FileStore()                                         
-}))
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
-app.use('/login', loginRouter);
-app.use('/join', joinRouter);
-app.use('/password-change', passwordChangeRouter);
-app.use('/show-all-data', showAllDataRouter);
-app.use('/delete-account', deleteAccountRouter);
-app.use('/board', showBoardRouter);
-app.use('/view', viewRouter);
-app.use('/profile', profileRouter);
-app.use('/settings', settingsRouter);
-// app.use('/img', express.static('public/uploads'));
-
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   next(createError(404));
@@ -67,5 +61,11 @@ app.use(function(err, req, res, next) {
   res.status(err.status || 500);
   res.render('error');
 });
+
+mongoose.Promise = global.Promise;
+
+mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => console.log('연결 성공'))
+  .catch(e => console.error(e));
 
 module.exports = app;
