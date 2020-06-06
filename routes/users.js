@@ -48,7 +48,7 @@ router.post('/login', async function(req, res, next) {
         expiresIn: '1h'
       });
 
-      res.cookie('user', token, {httpOnly:true});
+      res.cookie('user', token, {httpOnly:true, secure:true});
       
       res.status(201).json({
         result: 'ok',
@@ -126,11 +126,9 @@ router.post('/changePass', verifyToken, async function(req, res, next) {
       if(check) {
           const info = await Users.getUserInfo(uid);
           const saltNew = await randomBytesPromise(64);
-          console.log(info)
           const crypt_Pw = await pbkdf2Promise(userPw, info['salt'], 93782, 64, 'sha512');
           const crypt_PwNew = await pbkdf2Promise(userPwNew, saltNew.toString('base64'), 93782, 64, 'sha512');
           const result = await Users.changePass(uid, crypt_PwNew.toString('base64'), saltNew.toString('base64'));
-          console.log(result)
           if(result){
               res.status(201).json({
                 result:'ok'
@@ -168,7 +166,6 @@ router.post('/deleteAccount', verifyToken, async function(req, res, next) {
   const crypt_Pw = await pbkdf2Promise(userPw, info['salt'], 93782, 64, 'sha512');
   
   const result = await Users.deleteUser(uid, crypt_Pw.toString('base64'))
-  console.log(result)
   if(result['deletedCount'] == 1){
     res.status(201).json({
       result:'ok'
