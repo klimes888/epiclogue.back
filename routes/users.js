@@ -33,8 +33,18 @@ const verifyToken = (req, res, next) => {
 
 /* GET users listing. */
 router.get('/', function(req, res, next) {
-  res.send('respond with a resource');
+  res.status(201).json({
+    result:'ok',
+    comment:'users router is ok'
+  });
 });
+
+router.get('/login', function(req, res, next) {
+  res.status(401).json({
+    result:'error',
+    reason:'not allow method'
+  })
+})
 
 router.post('/login', async function(req, res, next) {
   const email = req.body['email'];
@@ -62,18 +72,23 @@ router.post('/login', async function(req, res, next) {
     } else {
       res.status(401).json({
         result:"error",
-        "reason":"잘못된 비밀번호 입니다."
+        reason:"잘못된 비밀번호 입니다."
       })
     }
   }
   else {
     res.status(401).json({
       result:"error",
-      "reason":"유저를 찾을 수 없습니다."
+      reason:"유저를 찾을 수 없습니다."
     })
   }
+})
 
-
+router.get('/join', function(req, res, next) {
+  res.status(401).json({
+    result:'error',
+    reason:'not allow method'
+  })
 })
 
 router.post('/join', async function(req, res, next) {
@@ -106,25 +121,39 @@ router.post('/join', async function(req, res, next) {
           else {
             res.status(401).json({
               result:"error",
-              "reason":"이미 존재하는 아이디 입니다. 다시 시도해주세요!"
+              reason:"이미 존재하는 아이디 입니다. 다시 시도해주세요!"
             })
           }
       } else {
         res.status(401).json({
           result:"error",
-          "reason":"패스워드가 일치하지 않습니다!"
+          reason:"패스워드가 일치하지 않습니다!"
         })
       }
   } else {
     res.status(401).json({
       result:"error",
-      "reason":"비밀번호 규칙을 다시 확인해주세요."
+      reason:"비밀번호 규칙을 다시 확인해주세요."
     })
   }
 })
 
+router.get('/editProfile', function(req, res, next) {
+  res.status(401).json({
+    result:'error',
+    reason:'not allow method'
+  })
+})
+
 router.post('/editProfile', async function(req, res, next) {
 
+})
+
+router.get('/changePass', function(req, res, next) {
+  res.status(401).json({
+    result:'error',
+    reason:'not allow method'
+  })
 })
 
 router.post('/changePass', verifyToken, async function(req, res, next) {
@@ -150,29 +179,36 @@ router.post('/changePass', verifyToken, async function(req, res, next) {
           } else {
             res.status(401).json({
               result:"error",
-              "reason":"기존 비밀번호가 일치하지 않거나 존재하지 않는 아이디입니다. 다시 확인하세요."
+              reason:"기존 비밀번호가 일치하지 않거나 존재하지 않는 아이디입니다. 다시 확인하세요."
             })
           } 
       } else {
         res.status(401).json({
           result:"error",
-          "reason":"비밀번호 규칙을 다시 확인해주세요."
+          reason:"비밀번호 규칙을 다시 확인해주세요."
         })
       }
     }
     else {
       res.status(401).json({
         result:"error",
-        "reason":"재입력된 비밀번호가 일치하지 않습니다."
+        reason:"재입력된 비밀번호가 일치하지 않습니다."
       })
     }
   }
   else {
     res.status(401).json({
       result:"error",
-      "reason":"기본 비밀번호와  동일한 비밀번호는 사용할 수 없습니다."
+      reason:"기본 비밀번호와  동일한 비밀번호는 사용할 수 없습니다."
     })
   }
+})
+
+router.get('/deleteAccount', function(req, res, next) {
+  res.status(401).json({
+    result:'error',
+    reason:'not allow method'
+  })
 })
 
 router.post('/deleteAccount', verifyToken, async function(req, res, next) {
@@ -192,7 +228,7 @@ router.post('/deleteAccount', verifyToken, async function(req, res, next) {
   } else {
     res.status(401).json({
       result:"error",
-      "reason":"비밀번호가 일치하지 않습니다. 다시 확인하세요."
+      reason:"비밀번호가 일치하지 않습니다. 다시 확인하세요."
     })
   } 
 })
