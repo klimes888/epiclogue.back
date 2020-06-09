@@ -3,8 +3,9 @@ const mongoose = require('mongoose');
 mongoose.set('useCreateIndex', true);
 
 const like = new mongoose.Schema({
-    email: {type: String, required: true},
-    boardId: {type: String, required: true},
+    uid: {type: String, required: true},
+    targetUid: {type: String, required: true},
+    targetType: {type: String, required: true}
 })
 
 

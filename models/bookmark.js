@@ -3,8 +3,8 @@ const mongoose = require('mongoose');
 mongoose.set('useCreateIndex', true);
 
 const book = new mongoose.Schema({
-    email: {type: String, required: true},
-    boardId: {type: String, required: true},
+    uid: {type: String, required: true},
+    boardUid: {type: String, required: true},
 })
 
 
