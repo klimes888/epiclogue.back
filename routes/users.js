@@ -8,28 +8,8 @@ require('dotenv').config();
 
 const randomBytesPromise = util.promisify(crypto.randomBytes);
 const pbkdf2Promise = util.promisify(crypto.pbkdf2);
-const SECRET_KEY = process.env.SECRET_KEY;
 
-const verifyToken = (req, res, next) => {
-  try {
-      const clientToken = req.cookies.user;
-      const decoded = jwt.verify(clientToken, SECRET_KEY);
-      if (decoded) {
-          res.locals.uid = decoded.uid;
-          next();
-      } else {
-          res.status(401).json({
-            result:'error', 
-            reason:'검증 실패'
-          });
-      }
-  } catch (err) {
-      res.status(401).json({
-        result: 'error',
-        reason:'token 유효기간 만료'
-      });
-  }
-};
+const {verifyToken} = require('./authorization');
 
 /* GET users listing. */
 router.get('/', function(req, res, next) {
@@ -145,8 +125,8 @@ router.get('/editProfile', function(req, res, next) {
   })
 })
 
-router.post('/editProfile', async function(req, res, next) {
-
+router.post('/editProfile', verifyToken, async function(req, res, next) {
+  const uid = res.locals.uid;
 })
 
 router.get('/changePass', function(req, res, next) {
