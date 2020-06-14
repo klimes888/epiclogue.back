@@ -5,7 +5,7 @@ const util = require('util');
 const Users = require('../models/users');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
-
+const SECRET_KEY = process.env.SECRET_KEY;
 const randomBytesPromise = util.promisify(crypto.randomBytes);
 const pbkdf2Promise = util.promisify(crypto.pbkdf2);
 
