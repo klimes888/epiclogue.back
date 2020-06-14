@@ -127,6 +127,13 @@ router.get('/editProfile', function(req, res, next) {
 
 router.post('/editProfile', verifyToken, async function(req, res, next) {
   const uid = res.locals.uid;
+  const userId = req.body['userId'];
+  const nick = req.body['userNick'];
+  const country = req.body['userCountry'];
+  const lang = req.body['userLang'];
+  const intro = req.body['userIntro'];
+  //const bann
+  //const prof
 })
 
 router.get('/changePass', function(req, res, next) {
