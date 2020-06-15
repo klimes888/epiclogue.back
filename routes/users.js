@@ -4,6 +4,8 @@ const crypto = require('crypto');
 const util = require('util');
 const Users = require('../models/users');
 const jwt = require('jsonwebtoken');
+const upload = require('./multer');
+const multer = require('multer');
 require('dotenv').config();
 const SECRET_KEY = process.env.SECRET_KEY;
 const randomBytesPromise = util.promisify(crypto.randomBytes);
@@ -125,15 +127,24 @@ router.get('/editProfile', function(req, res, next) {
   })
 })
 
-router.post('/editProfile', verifyToken, async function(req, res, next) {
-  const uid = res.locals.uid;
+router.post('/editProfile', verifyToken, upload.any(), async function(req, res, next) {
+  /*const uid = res.locals.uid;
   const userId = req.body['userId'];
   const nick = req.body['userNick'];
   const country = req.body['userCountry'];
   const lang = req.body['userLang'];
   const intro = req.body['userIntro'];
-  //const bann
-  //const prof
+  const bann
+  const prof*/
+    console.log('원본파일명1 : ' + req.files[0].originalname)
+    console.log('저장파일명1 : ' + req.files[0].filename)
+    console.log('크기1 : ' + req.files[0].size)
+    console.log('원본파일명2 : ' + req.files[1].originalname)
+    console.log('저장파일명2 : ' + req.files[1].filename)
+    console.log('크기2 : ' + req.files[1].size)
+    console.log(req.body) // json 객체를 toString으로 먼저 문자열로 직렬화 하고, 받고나서 다시 JSON 객체로 변환해서 써야하나 보다.
+    // console.log('경로 : ' + req.file.location) s3 업로드시 업로드 url을 가져옴
+    res.json({result:'success'});
 })
 
 router.get('/changePass', function(req, res, next) {
