@@ -128,23 +128,19 @@ router.get('/editProfile', function(req, res, next) {
 })
 
 router.post('/editProfile', verifyToken, upload.any(), async function(req, res, next) {
-  /*const uid = res.locals.uid;
+  const uid = res.locals.uid;
   const userId = req.body['userId'];
   const nick = req.body['userNick'];
   const country = req.body['userCountry'];
   const lang = req.body['userLang'];
   const intro = req.body['userIntro'];
-  const bann
-  const prof*/
-    console.log('원본파일명1 : ' + req.files[0].originalname)
-    console.log('저장파일명1 : ' + req.files[0].filename)
-    console.log('크기1 : ' + req.files[0].size)
-    console.log('원본파일명2 : ' + req.files[1].originalname)
-    console.log('저장파일명2 : ' + req.files[1].filename)
-    console.log('크기2 : ' + req.files[1].size)
-    console.log(req.body) // json 객체를 toString으로 먼저 문자열로 직렬화 하고, 받고나서 다시 JSON 객체로 변환해서 써야하나 보다.
+  const bann = req.files[0].location;
+  const prof = req.files[1].location;
+  console.log(req.body); // json 객체를 toString으로 먼저 문자열로 직렬화 하고, 받고나서 다시 JSON 객체로 변환해서 써야하나 보다.
+  console.log(req.files[0].location);
+  console.log(req.files[1].location); // 배너 이미지인지, 프로필 사진인지 구분할 방법?
     // console.log('경로 : ' + req.file.location) s3 업로드시 업로드 url을 가져옴
-    res.json({result:'success'});
+  res.json({result:'success'});
 })
 
 router.get('/changePass', function(req, res, next) {
