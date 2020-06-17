@@ -79,7 +79,7 @@ router.post('/join', async function(req, res, next) {
   const userPwRe = req.body['userPwRe'];
   const nick = req.body['userNick'];
   const check = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[$@$!%*#?&])[A-Za-z\d$@$!%*#?&]{8,}$/.test(userPw);
-
+  // 이메일 인증 추가필요
   if (check) {
       if (userPw == userPwRe) {
           const salt = await randomBytesPromise(64);
@@ -127,8 +127,17 @@ router.get('/editProfile', function(req, res, next) {
   })
 })
 
-router.post('/editProfile', verifyToken, upload.any(), async function(req, res, next) {
-  /*const uid = res.locals.uid;
+router.post('/editProfile', verifyToken, upload.single('ba'), (req, res, next) => {
+  console.log(req.file.location)
+  res.locals.bann = req.file.location;
+  next();
+}, upload.single('pr'), (req, res, next) => {
+  console.log(req.file.location);
+  res.locals.profile = req.file.location;
+  next();
+}, async function(req, res, next) {
+  const uid = res.locals.uid;
+  /*
   const userId = req.body['userId'];
   const nick = req.body['userNick'];
   const country = req.body['userCountry'];
@@ -136,12 +145,6 @@ router.post('/editProfile', verifyToken, upload.any(), async function(req, res, 
   const intro = req.body['userIntro'];
   const bann
   const prof*/
-    console.log('원본파일명1 : ' + req.files[0].originalname)
-    console.log('저장파일명1 : ' + req.files[0].filename)
-    console.log('크기1 : ' + req.files[0].size)
-    console.log('원본파일명2 : ' + req.files[1].originalname)
-    console.log('저장파일명2 : ' + req.files[1].filename)
-    console.log('크기2 : ' + req.files[1].size)
     console.log(req.body) // json 객체를 toString으로 먼저 문자열로 직렬화 하고, 받고나서 다시 JSON 객체로 변환해서 써야하나 보다.
     // console.log('경로 : ' + req.file.location) s3 업로드시 업로드 url을 가져옴
     res.json({result:'success'});
