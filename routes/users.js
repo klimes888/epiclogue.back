@@ -147,7 +147,7 @@ router.post('/editProfile', verifyToken, upload.single('ba'), (req, res, next) =
   const prof*/
     console.log(req.body) // json 객체를 toString으로 먼저 문자열로 직렬화 하고, 받고나서 다시 JSON 객체로 변환해서 써야하나 보다.
     // console.log('경로 : ' + req.file.location) s3 업로드시 업로드 url을 가져옴
-    res.json({result:'success'});
+  res.json({result:'success'});
 })
 
 router.get('/changePass', function(req, res, next) {
