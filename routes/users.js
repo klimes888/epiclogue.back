@@ -127,26 +127,43 @@ router.get('/editProfile', function(req, res, next) {
   })
 })
 
-router.post('/editProfile', verifyToken, upload.single('ba'), (req, res, next) => {
-  console.log(req.file.location)
-  res.locals.bann = req.file.location;
-  next();
-}, upload.single('pr'), (req, res, next) => {
-  console.log(req.file.location);
-  res.locals.profile = req.file.location;
-  next();
-}, async function(req, res, next) {
+router.post('/editProfile', verifyToken, upload.any(), async function(req, res, next) {
   const uid = res.locals.uid;
-  /*
   const userId = req.body['userId'];
   const nick = req.body['userNick'];
   const country = req.body['userCountry'];
   const lang = req.body['userLang'];
   const intro = req.body['userIntro'];
-  const bann
-  const prof*/
+  let bann;
+  let prof;
+  if(req.files.length > 1) {
+    if(req.files[0].fieldname == 'userBannerImg'){
+      bann = req.files[0].location;
+      prof = req.files[1].location;
+    } else {
+      bann = req.files[1].location;
+      prof = req.files[0].location;
+    }
+  }
+  else if(req.files.length == 1){
+    if(req.files[0].fieldname == 'userBannerImg'){
+      bann = req.files[0].location;
+    } else {
+      prof = req.files[0].location;
+    }
+  }
     console.log(req.body) // json 객체를 toString으로 먼저 문자열로 직렬화 하고, 받고나서 다시 JSON 객체로 변환해서 써야하나 보다.
-    // console.log('경로 : ' + req.file.location) s3 업로드시 업로드 url을 가져옴
+    console.log('경로 : ' + req.files[0].location) //s3 업로드시 업로드 url을 가져옴
+  const result = await Users.updateProfile({
+    uid,
+    userId,
+    nick,
+    country,
+    lang,
+    intro,
+    bann,
+    prof
+  })
   res.json({result:'success'});
 })
 

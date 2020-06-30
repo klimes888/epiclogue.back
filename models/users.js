@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const { lang } = require('moment');
 
 mongoose.set('useCreateIndex', true);
 
@@ -53,6 +54,10 @@ user.statics.changeInfo = function (uid, userpw) {
 
 user.statics.checkPass = function (uid, userpw) {
     return this.findOne({"_id":uid, "password":userpw})
+}
+
+user.statics.updateProfile = function(profile){
+    return this.updateOne({"_id":profile.uid}, {nickname:profile.nick, userid:profile.userId,country:profile.country,language:profile.lang,intro:profile.intro,banner:profile.bann, profile:profile.prof})
 }
 
 module.exports = mongoose.model('User', user);
