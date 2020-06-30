@@ -164,7 +164,7 @@ router.post('/editProfile', verifyToken, upload.any(), async function(req, res, 
     bann,
     prof
   })
-  res.json({result:'success'});
+  res.json({result:'ok'});
 })
 
 router.get('/changePass', function(req, res, next) {
