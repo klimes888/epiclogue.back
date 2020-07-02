@@ -9,6 +9,7 @@ const swaggerJSDoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
+const boardRouter = require('./routes/board')
 
 var app = express();
 
@@ -19,7 +20,7 @@ const swaggerDefinition = {
     title: 'lunarcat Service', // Title (required)
     version: '1.0.0', // Version (required)
     description: 'lunarcat service API' // Description (optional)
-  },
+  },  
   host: 'api.chiyak.duckdns.org', // Host (optional)
   basePath: '/', // Base path (optional)
   schemes:["https"]
@@ -46,6 +47,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
+app.use('/board', boardRouter);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

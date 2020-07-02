@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const User = require('./users');
-const reply = require('./reply');
+const reply = require('./reply').Schema;
 mongoose.set('useCreateIndex', true);
 
 const board = new mongoose.Schema({
@@ -14,7 +14,7 @@ const board = new mongoose.Schema({
     originUid:{type:String, required: true},
     originBuId:{type:String, required: true},
     likeCount:{type:Number},
-    replyList:{type:[reply]}
+    replyList:{type: [reply]}
 })
 
 board.static.create = function (data) {

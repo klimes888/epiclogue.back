@@ -5,7 +5,7 @@ const moment = require('moment');
 require('dotenv').config();
 
 const s3 = new aws.S3({
-  accessKeyId: process.env.accessKeyID, // 생성한 s3의 accesskey 
+  accessKeyId: process.env.AWS_ACCESS_ID, // 생성한 s3의 accesskey 
   secretAccessKey: process.env.secretAccesskey, // 생성한 s3의 secret key 
   region: process.env.region  // 지역설정 
 })

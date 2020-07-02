@@ -9,4 +9,4 @@ const reply = new mongoose.Schema({
     likeCount:{type:Number, required:true}
 })
 
-module.exports = mongoose.model('Reply', reply);
+module.exports = mongoose.model('Reply', reply);    

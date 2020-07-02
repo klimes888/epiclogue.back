@@ -3,14 +3,19 @@ const router = express.Router();
 const { verifyToken } = require("./authorization");
 require("dotenv").config();
 const Board = require("../models/board");
-const upload = require('./multer')
+const Reply = require('../models/reply');
+const upload = require('./multer');
 
-/* 투고 */
+router.get('/posting', (req, res) => {
+  res.send('Server is on');
+})
+
 router.post("/posting", verifyToken, upload.any(), async function (req, res, next) {
-  const uid = res.locals.uid;
+  // const uid = res.locals.uid;
+  const uid = req.body.uid;
   const boardTitle = req.body.boardTitle;
   const boardBody = req.body.boardBody;
-  const boardImg = req.body.boardImg;
+  const boardImg = req.files.boardImg;
   const category = req.body.category;
   const pub = req.body.pub;
   const writeDate = req.body.writeDate;
@@ -48,7 +53,7 @@ router.post("/editBoard", verifyToken, async function (req, res, next) {
   const updateData = {
     boardTitle: req.body.boardTitle,
     boardBody: req.body.boardBody,
-    boardImg: req.body.boardImg,
+    boardImg: req.files.boardImg,
     category: req.body.category,
     pub: req.body.pub,
     writeDate: req.body.writeDate,
@@ -69,16 +74,45 @@ router.post("/editBoard", verifyToken, async function (req, res, next) {
   }
 });
 
+/* API 미정의 */
 router.post("/translate", verifyToken, async function (req, res, next) {
-
+  
 });
 
 router.post("/comment", verifyToken, async function (req, res, next) {
+  const commentData = {
+    replyBody: req.body.replyBody,
+    boardUid: req.body.boardUid,
+    replyWriteDate: Date.now
+  }
 
-});
-
-router.get("/postlist", verifyToken, async function (req, res, next) {
+  const result = Reply.create(commentData);
+  if (result) {
+    res.status(201).json({
+      result: 'ok'
+    })
+  } else {
+    /* 댓글 상황에 따라 다르게 처리
+    1. 원문 삭제
+    2. 서버 오류
+    3. DB 오류
+    4. 클라이언트 통신 불가
+     */
+    res.status(401).json({
+      result: 'error',
+      reason: '코드 재작성 필요'
+    })
+  }
   
 });
+
+/* 유저마다 다르게 받아야 함 */
+router.get("/postlist", verifyToken, async function (req, res, next) {
+  const illust = req.body.illust;
+  const comic = req.body.comic;
+  Board.find({}, { pub: true, illust, comic })
+});
+
+
 
 module.exports = router;
