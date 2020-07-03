@@ -23,6 +23,10 @@ user.statics.create = function (data) {
     return userinfo.save();
 }
 
+user.statics.isExist = function (email) {
+    return this.findOne({ "email": email });
+}
+
 user.statics.findUser = function (email, userpw) {
     // 특수기호 $는 쓰지못하게 해야 기초적인 인젝션 방어가 가능함
     return this.findOne({"email": email, "password": userpw});

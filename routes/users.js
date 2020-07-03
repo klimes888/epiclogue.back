@@ -81,7 +81,18 @@ router.post('/join', async function(req, res, next) {
   const check = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[$@$!%*#?&])[A-Za-z\d$@$!%*#?&]{8,}$/.test(userPw);
   // 이메일 인증 추가필요
   if (check) {
-      if (userPw == userPwRe) {
+    if (userPw == userPwRe) {
+      /* 중복 가입 이메일 처리 */
+        const findData = await Users.isExist(email);
+        console.log(`dup: ${findData}`);
+          if ( dupFlag != undefined ) {
+            console.warn(`중복 발견`)
+            res.status(401).json({
+              result: 'error',
+              reason: '중복된 이메일입니다. 다른 이메일로 가입해주세요.'
+            });
+            return;
+          }
           const salt = await randomBytesPromise(64);
           const crypt_Pw = await pbkdf2Promise(userPw, salt.toString('base64'), 93782, 64, 'sha512');
           const result = await Users.create({
