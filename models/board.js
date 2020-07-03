@@ -6,7 +6,7 @@ mongoose.set('useCreateIndex', true);
 const board = new mongoose.Schema({
     uid: {type: String, required: true},
     boardTitle: {type: String},
-    boardImg: {type: String, required: true},
+    boardImg: {type: [String], required: true},
     boardBody:{type:String},
     catagory: {type:String, required: true},
     pub: {type:String, required: true},
@@ -14,7 +14,8 @@ const board = new mongoose.Schema({
     originUid:{type:String, required: true},
     originBuId:{type:String, required: true},
     likeCount:{type:Number},
-    replyList:{type: [reply]}
+    replyList:{type: [reply]},
+    // reactList:{type: [react]}
 })
 
 board.static.create = function (data) {

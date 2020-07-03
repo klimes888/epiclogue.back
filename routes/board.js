@@ -11,18 +11,20 @@ router.get('/posting', (req, res) => {
 })
 
 router.post("/posting", verifyToken, upload.any(), async function (req, res, next) {
-  // const uid = res.locals.uid;
-  const uid = req.body.uid;
+  const uid = res.locals.uid;
   const boardTitle = req.body.boardTitle;
   const boardBody = req.body.boardBody;
-  const boardImg = req.files.boardImg;
+  let boardImg = [];
+  for (let i = 0; i < req.files.length; i++) {
+    boardImg.push(req.files[i].location);
+  }
   const category = req.body.category;
   const pub = req.body.pub;
   const writeDate = req.body.writeDate;
   const language = req.body.language;
 
   for (let i = 0; i < req.file.length; i++) {
-    console.log(`이미지 ${i} 경로 : ${req.files[i].boardImg}`);
+    console.log(`이미지 ${i} 경로 : ${req.files[i].location}`);
   }
 
   const result = await Board.create({
