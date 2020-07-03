@@ -45,11 +45,10 @@ router.post('/login', async function(req, res, next) {
         }, SECRET_KEY, {
         expiresIn: '1h'
       });
-
-      res.cookie('user', token, {httpOnly:true, secure:true});
       
       res.status(201).json({
-        result: 'ok'
+        result: 'ok',
+        token
       });
     } else {
       res.status(401).json({
