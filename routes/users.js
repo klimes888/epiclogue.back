@@ -127,10 +127,12 @@ router.post('/join', async function(req, res, next) {
   }
 })
 
-router.get('/editProfile', function(req, res, next) {
-  res.status(401).json({
-    result:'error',
-    reason:'not allow method'
+router.get('/editProfile', verifyToken, function(req, res, next) {
+  const uid = res.locals.uid;
+  const result = await getUserInfo(uid);
+  res.status(201).json({
+    result:'ok',
+    data: result
   })
 })
 

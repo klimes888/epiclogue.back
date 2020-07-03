@@ -18,24 +18,24 @@ const board = new mongoose.Schema({
     // reactList:{type: [react]}
 })
 
-board.static.create = function (data) {
+board.statics.create = function (data) {
     const boardData = new this(data);
 
     return boardData.save();
 }
 
 /* 수정, 삭제, 댓글에 필요한 boardId GET (미검증) */
-board.static.getArticle = ( boardId ) => {
+board.statics.getArticle = function ( boardId ) {
     return this.findOne({ "_id" : boardId });
 }
 
 /* 특정 유저의 글 GET (미검증) */ 
-board.static.getUserArticleList = ( userId ) => {
+board.statics.getUserArticleList = function ( userId ) {
     return this.find({ uid: userId });
 }
 
 /* 글 수정 (미검증. 수정 후 뷰를 수정된 글을 보여줄 것인지 논의 필요(returnNewDocument T/F를 위함 )) */
-board.static.updateArticle = (articleData) => {
+board.statics.updateArticle = function (articleData) {
     return this.updateOne({ "_id": articleData.uid }, {
         $set: {
             boardTitle: articleData.boardTitle,
@@ -52,7 +52,7 @@ board.static.updateArticle = (articleData) => {
 }
 
 /* 글 전체 조회 (미검증) */
-board.static.findAll = function () {
+board.statics.findAll = function () {
     return this.find();
 }
 

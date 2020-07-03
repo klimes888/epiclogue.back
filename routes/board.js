@@ -119,7 +119,7 @@ router.get("/view/:buid", verifyToken, async (req, res, next) => {
   const buid = req.params.buid;
   const boardData = await Board.getArticle(buid);
 
-  res.status(20).json({
+  res.status(201).json({
     result: 'ok',
     data: boardData
   });
