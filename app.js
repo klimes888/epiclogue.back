@@ -1,12 +1,15 @@
 var createError = require('http-errors');
 var express = require('express');
-const cors = require('cors');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
+
+const cors = require('cors');
+const helmet = require('helmet');
 const mongoose = require('mongoose');
 const swaggerJSDoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
+const debug = require('debug')(process.env.DEBUG)
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 const boardRouter = require('./routes/board')
@@ -35,14 +38,12 @@ const options = {
 
 const swaggerSpec = swaggerJSDoc(options);
 
-// view engine setup
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'hbs');
 app.use(cors({credentials:true, origin:true}));
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+app.use(helmet());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
@@ -68,7 +69,7 @@ app.use(function(err, req, res, next) {
 mongoose.Promise = global.Promise;
 
 mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => console.log('연결 성공'))
+  .then(() => console.log('데이터베이스 연결 성공'))
   .catch(e => console.error(e));
 
 module.exports = app;

@@ -7,7 +7,9 @@ const Reply = require('../models/reply');
 const upload = require('./multer');
 
 router.get('/posting', (req, res) => {
-  res.send('Server is on');
+  res.status(200).json({
+    msg: "Server is on work"
+  })
 })
 
 router.post("/posting", verifyToken, upload.any(), async function (req, res, next) {

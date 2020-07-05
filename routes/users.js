@@ -127,7 +127,7 @@ router.post('/join', async function(req, res, next) {
   }
 })
 
-router.get('/editProfile', verifyToken, function(req, res, next) {
+router.get('/editProfile', verifyToken, async function(req, res, next) {
   const uid = res.locals.uid;
   const result = await getUserInfo(uid);
   res.status(201).json({
