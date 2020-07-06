@@ -25,10 +25,6 @@ router.post("/posting", verifyToken, upload.any(), async function (req, res, nex
   const writeDate = req.body.writeDate;
   const language = req.body.language;
 
-  for (let i = 0; i < req.file.length; i++) {
-    console.log(`이미지 ${i} 경로 : ${req.files[i].location}`);
-  }
-
   const result = await Board.create({
     uid,
     boardTitle,
@@ -112,9 +108,20 @@ router.post("/comment", verifyToken, async function (req, res, next) {
 
 /* 유저마다 다르게 받아야 함 */
 router.get("/postlist", verifyToken, async function (req, res, next) {
-  const illust = req.body.illust;
-  const comic = req.body.comic;
-  Board.find({}, { pub: true, illust, comic })
+  const category = req.query.category;
+  const result = await Board.findAll();
+
+  if(result) {
+    res.status(201).json({
+      result:'ok',
+      data: result
+    });
+  } else {
+    res.status(401).json({
+      result:'error',
+      reason: 'something is wrong'
+    })
+  }
 });
 
 router.get("/view/:buid", verifyToken, async (req, res, next) => {
