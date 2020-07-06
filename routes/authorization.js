@@ -11,7 +11,7 @@ const verifyToken = (req, res, next) => {
             res.locals.uid = decoded.uid;
             next();
           } else {
-            res.json({
+            res.status(401).json({
               result:'error',
               reason:'이메일 인증이 완료되지 않았습니다!'
             })
@@ -25,7 +25,7 @@ const verifyToken = (req, res, next) => {
     } catch (err) {
         res.status(401).json({
           result: 'error',
-          reason:'token 유효기간 만료'
+          reason:'token 유효기간 만료 또는 토큰이 전송되지 않았습니다.'
         });
     }
   };
