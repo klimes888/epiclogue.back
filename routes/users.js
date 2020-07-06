@@ -12,6 +12,7 @@ const randomBytesPromise = util.promisify(crypto.randomBytes);
 const pbkdf2Promise = util.promisify(crypto.pbkdf2);
 
 const {verifyToken} = require('./authorization');
+const transporter = require('./mailer');
 
 /* GET users listing. */
 router.get('/', function(req, res, next) {
@@ -91,21 +92,43 @@ router.post('/join', async function(req, res, next) {
           }
           const salt = await randomBytesPromise(64);
           const crypt_Pw = await pbkdf2Promise(userPw, salt.toString('base64'), 93782, 64, 'sha512');
+          const auth_token = crypt_Pw.toString('base64').substr(0,10);
           const result = await Users.create({
             email:email, 
             password: crypt_Pw.toString('base64'), 
             salt: salt.toString('base64'),
             nickname: nick,
-            isConfirmed: false
+            token: auth_token
           });
           if(result) {
-            res.status(201).json({
-              result: 'ok',
-              user:{
-                email:result['email'],
-                nick:result['nickname']
+            const option = {
+              from: process.env.MAIL_USER,
+              to: email,
+              subject: '이메일 인증을 완료해주세요.',
+              html: '<p> 아래 링크를 클릭해주세요. </p><br>' + 
+              "<a href='http://localhost:3000/users/mailauth/?email=" + email + "&token=" + auth_token
+              + "'> 인증하기 </a>"
+            }
+
+            transporter.sendMail(option, function(error, info) {
+              if(error){
+                console.log(error);
+                res.status(401).json({
+                  result: 'error',
+                  reason: error
+                });
+              } else {
+                console.log(info.response);
+                res.status(201).json({
+                  result:'ok',
+                  info:info.response,
+                  user:{
+                    email:result['email'],
+                    nick:result['nickname']
+                  }
+                })
               }
-            });
+            })
           }
           else {
             res.status(401).json({
@@ -123,6 +146,24 @@ router.post('/join', async function(req, res, next) {
     res.status(401).json({
       result:"error",
       reason:"비밀번호 규칙을 다시 확인해주세요."
+    })
+  }
+})
+
+router.get('/mailauth', async function(req, res, next) {
+  const email = req.query.email;
+  const token = req.query.token;
+  const result = await Users.isConfirmed(email, token);
+  if(result) {
+    await Users.confirmUser(email)
+    res.status(201).json({
+      result:'ok'
+    });
+  }
+  else {
+    res.status(401).json({
+      result:'error',
+      reason:'인증실패'
     })
   }
 })
