@@ -6,6 +6,7 @@ mongoose.set('useCreateIndex', true);
 
 const board = new mongoose.Schema({
     uid: {type: String, required: true},
+    // uid만 넣는게 아니라 Object 형식으로 필요한 유저정보를 모두 담고있어야 함
     boardTitle: {type: String},
     boardImg: {type: [String], required: true},
     boardBody:{type:String},
@@ -14,6 +15,7 @@ const board = new mongoose.Schema({
     writeDate: {type:Date, required: true, default: Date.now},
     originUid:{type:String},
     originBuId:{type:String},
+    // origin 정보들도 마찬가지로, uid값만 넣는게 아니라 필요한 모든 정보를 object 형태로 저장하고 있어야함.
     likeCount:{type:Number},
     replyList:{type: [Reply]},
     reactList:{type: [React]}
