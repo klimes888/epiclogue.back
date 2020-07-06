@@ -5,7 +5,6 @@ const util = require('util');
 const Users = require('../models/users');
 const jwt = require('jsonwebtoken');
 const upload = require('./multer');
-const multer = require('multer');
 require('dotenv').config();
 const SECRET_KEY = process.env.SECRET_KEY;
 const randomBytesPromise = util.promisify(crypto.randomBytes);
@@ -42,7 +41,8 @@ router.post('/login', async function(req, res, next) {
       const token = jwt.sign({
         email: result['email'],
         nick: result['nickname'],
-        uid: result['_id']
+        uid: result['_id'],
+        isConfirmed: result['isConfirmed']
         }, SECRET_KEY, {
         expiresIn: '1h'
       });
@@ -106,7 +106,7 @@ router.post('/join', async function(req, res, next) {
               to: email,
               subject: '이메일 인증을 완료해주세요.',
               html: '<p> 아래 링크를 클릭해주세요. </p><br>' + 
-              "<a href='http://localhost:3000/users/mailauth/?email=" + email + "&token=" + auth_token
+              "<a href='https://api.chiyak.duckdns.org/users/mailauth/?email=" + email + "&token=" + auth_token
               + "'> 인증하기 </a>"
             }
 
@@ -218,6 +218,7 @@ router.post('/editProfile', verifyToken, upload.any(), async function(req, res, 
 })
 
 router.get('/changePass', function(req, res, next) {
+  // 비로그인 비밀번호 찾기용으로 사용
   res.status(401).json({
     result:'error',
     reason:'not allow method'
