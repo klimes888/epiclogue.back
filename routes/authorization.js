@@ -7,15 +7,15 @@ const verifyToken = (req, res, next) => {
         const clientToken = req.headers['x-access-token'];
         const decoded = jwt.verify(clientToken, SECRET_KEY);
         if (decoded) {
-//          if(decoded.isConfirmed){
+          if(decoded.isConfirmed){
             res.locals.uid = decoded.uid;
             next();
-//          } else {
-//            res.json({
-//              result:'error',
-//              reason:'이메일 인증이 완료되지 않았습니다!'
-//            })
-//          }
+          } else {
+            res.json({
+              result:'error',
+              reason:'이메일 인증이 완료되지 않았습니다!'
+            })
+          }
         } else {
             res.status(401).json({
               result:'error', 

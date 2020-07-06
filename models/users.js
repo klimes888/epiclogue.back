@@ -14,13 +14,22 @@ const user = new mongoose.Schema({
     banner: {type:String},
     profile: {type:String},
     salt: {type:String},
-    isConfirmed:{type:Boolean, required: true}
+    isConfirmed:{type:Boolean, required: true, default:false},
+    token: {type:String}
 })
 
 user.statics.create = function (data) {
     const userinfo = new this(data);
     
     return userinfo.save();
+}
+
+user.statics.isConfirmed = function (email, token){
+    return this.findOne({email, token});
+}
+
+user.statics.confirmUser = function (email) {
+    return this.updateOne({email}, {isConfirmed:true, token:''})
 }
 
 user.statics.isExist = function (email) {
