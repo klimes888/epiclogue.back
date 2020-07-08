@@ -37,10 +37,11 @@ router.post("/posting", verifyToken, upload.any(), async function (req, res, nex
     language,
     likeCount: 0
   });
-
+  console.log(result)
   if (result) {
     res.status(201).json({
-      result: 'ok'
+      result: 'ok',
+      data: result
     })
   } else {
     // 서버, DB, 요청 데이터 이상 등 에러 상세화 필요
@@ -49,6 +50,25 @@ router.post("/posting", verifyToken, upload.any(), async function (req, res, nex
     })
   }
 });
+
+router.get('/deleteBoard/:buid', verifyToken, async function(req, res, next) {
+  const buid = req.params.buid;
+  const result = await Board.removeArticle(buid);
+  res.status(201).json({
+    result:'ok'
+  })
+})
+
+router.get('/editBoard/:buid', verifyToken, async function (req, res, next) {
+  const buid = req.params.buid;
+  const result = await Board.getArticle(buid);
+  console.log(result)
+
+  res.status(201).json({
+    result:'ok',
+    data: result
+  })
+})
 
 router.post("/editBoard", verifyToken, async function (req, res, next) {
   const updateData = {
@@ -137,10 +157,10 @@ router.get("/postlist", verifyToken, async function (req, res, next) {
 router.get("/view/:buid", verifyToken, async (req, res, next) => {
   const buid = req.params.buid;
   const boardData = await Board.getArticle(buid);
-
+  console.log(boardData)
   res.status(201).json({
     result: 'ok',
-    data: result
+    data: boardData
   });
 })
 

@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const User = require('./users');
 const Reply = require('./reply').Schema;
 const React = require('./react').Schema;
 mongoose.set('useCreateIndex', true);
@@ -60,6 +59,8 @@ board.statics.findAll = function () {
     return this.find({}, {_id:1, boardTitle:1, uid:1, pub:1, category:1, boardImg:1});
 }
 
-
+board.statics.removeArticle = function (buid) {
+    return this.deleteOne({ _id: buid })
+  }
 
 module.exports = mongoose.model('Board', board);
