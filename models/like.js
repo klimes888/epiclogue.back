@@ -1,12 +1,25 @@
-const mongoose = require('mongoose');
-
-mongoose.set('useCreateIndex', true);
+const mongoose = require("mongoose");
+const ObjectId = mongoose.ObjectId;
+mongoose.set("useCreateIndex", true);
 
 const like = new mongoose.Schema({
-    uid: {type: String, required: true},
-    targetUid: {type: String, required: true},
-    targetType: {type: String, required: true}
-})
+  uid: { type: ObjectId, required: true },
+  targetUid: { type: ObjectId, required: true },
+  targetType: { type: String, required: true }, // 글(article), 댓글(reply), 대댓글(replyOnReply)
+});
 
+like.statics.create = function (data) {
+  const likeData = new this(data);
+  return likeData.save();
+};
 
-module.exports = mongoose.model('Like', like);
+like.statics.removeLike = function (likeId) {
+  return this.deleteOne({ _id: likeId });
+};
+
+// 유저의 좋아요 목록
+like.statics.likeList = function (userId) {
+  return this.find({ uid: userId });
+};
+
+module.exports = mongoose.model("Like", like);
