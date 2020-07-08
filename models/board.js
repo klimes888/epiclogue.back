@@ -1,11 +1,12 @@
 const mongoose = require('mongoose');
+const ObjectId = mongoose.ObjectId;
 const User = require('./users');
 const Reply = require('./reply').Schema;
 const React = require('./react').Schema;
 mongoose.set('useCreateIndex', true);
 
 const board = new mongoose.Schema({
-    uid: {type: String, required: true},
+    uid: {type: ObjectId, required: true},
     // uid만 넣는게 아니라 Object 형식으로 필요한 유저정보를 모두 담고있어야 함
     boardTitle: {type: String},
     boardImg: {type: [String], required: true},
