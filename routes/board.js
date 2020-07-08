@@ -4,6 +4,7 @@ const { verifyToken } = require("./authorization");
 require("dotenv").config();
 const Board = require("../models/board");
 const Reply = require('../models/reply');
+const User = require('../models/users');
 const upload = require('./multer');
 
 router.get('/posting', (req, res) => {
@@ -108,9 +109,18 @@ router.post("/comment", verifyToken, async function (req, res, next) {
 
 /* 유저마다 다르게 받아야 함 */
 router.get("/postlist", verifyToken, async function (req, res, next) {
-  const category = req.query.category;
-  const result = await Board.findAll();
-
+  const boardList = await Board.findAll();
+  const result = new Array();
+  for(const data of boardList) {
+    let userInfo = await User.getUserInfo(data.uid);
+    result.push({
+      boardUid:data._id,
+      thumbPath:data.boardImg[0],
+      userNick: userInfo.nickname,
+      pub:data.pub,
+      category:data.category
+    });
+  }
   if(result) {
     res.status(201).json({
       result:'ok',
@@ -130,7 +140,7 @@ router.get("/view/:buid", verifyToken, async (req, res, next) => {
 
   res.status(201).json({
     result: 'ok',
-    data: boardData
+    data: result
   });
 })
 
