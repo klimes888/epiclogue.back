@@ -58,9 +58,11 @@ board.statics.updateArticle = function (articleData) {
 /* 글 전체 조회 */
 board.statics.findAll = function () {
     // uid를 이용해 유저 닉네임을 응답데이터에 넣어야하는데 어떻게 넣어야 효율적일지 고민이 필요
-    return this.find({}, {_id:1, boardTitle:1, uid:1});
+    return this.find({}, {_id:1, boardTitle:1, uid:1, pub:1, category:1, boardImg:1});
 }
 
-
+board.statics.removeArticle = function (buid) {
+    return this.deleteOne({ _id: buid })
+  }
 
 module.exports = mongoose.model('Board', board);
