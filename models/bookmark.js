@@ -3,8 +3,8 @@ const ObjectId = mongoose.ObjectId;
 mongoose.set("useCreateIndex", true);
 
 const book = new mongoose.Schema({
-  uid: { type: String, required: true },
-  boardUid: { type: String, required: true },
+  uid: { type: ObjectId, required: true },
+  boardUid: { type: ObjectId, required: true },
 });
 
 book.statics.create = function (data) {

@@ -1,14 +1,14 @@
 const mongoose = require("mongoose");
-const { LexModelBuildingService } = require("aws-sdk");
 const ObjectId = mongoose.ObjectId;
+mongoose.set("useCreateIndex", true);
 
 const ReplyOnReply = new mongoose.Schema({
   parentId: { type: ObjectId, required: true },
-  userId: { type: ObjectId, required: true },
+  uid: { type: ObjectId, required: true },
   body: { type: String, required: true },
   writeDate: { type: Date, default: Date.now },
   edited: { type: Boolean, default: false },
-  heartCount: { type: Number, default: 0 },
+  // heartCount: { type: Number, default: 0 },
 });
 
 ReplyOnReply.statics.create = function (data) {
@@ -22,6 +22,7 @@ ReplyOnReply.statics.updateReplyOnReply = function ({ replyOnReplyId, replyOnRep
     {
       $set: {
         body: replyOnReplyBody,
+        edited: true
       },
     }
   );
