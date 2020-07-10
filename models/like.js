@@ -13,7 +13,7 @@ like.statics.create = function (data) {
   return likeData.save();
 };
 
-like.statics.removeLike = function (likeId) {
+like.statics.unlike = function (likeId) {
   return this.deleteOne({ _id: likeId });
 };
 
