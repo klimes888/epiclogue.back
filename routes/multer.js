@@ -14,6 +14,7 @@ const storage = multerS3({
   s3: s3,
   bucket: process.env.AWS_BUCKET_NAME, // s3 생성시 버킷명
   acl: 'public-read',   // 업로드 된 데이터를 URL로 읽을 때 설정하는 값입니다. 업로드만 한다면 필요없습니다.
+  contentType: multerS3.AUTO_CONTENT_TYPE,
   metadata: function (req, file, cb) {
     cb(null, {fieldName: file.fieldname}); // 파일 메타정보를 저장합니다.
   },
