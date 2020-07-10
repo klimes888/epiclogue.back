@@ -10,9 +10,9 @@ const board = new mongoose.Schema({
     boardTitle: {type: String},
     boardImg: {type: [String], required: true},
     boardBody:{type:String},
-    category: {type:String, required: true},
-    pub: {type:String, required: true},
-    writeDate: {type:Date, required: true, default: Date.now},
+    category: {type:String, default: "Comic"},
+    pub: {type:String, default: true},
+    writeDate: {type:Date, default: Date.now},
     originUid:{type:ObjectId},
     originBuId:{type:ObjectId},
     // likeCount:{type:Number},
@@ -40,19 +40,41 @@ board.statics.getUserArticleList = function ( userId ) {
 }
 
 board.statics.updateArticle = function (articleData) {
-    return this.updateOne({ "_id": articleData.uid }, {
-        $set: {
-            boardTitle: articleData.boardTitle,
-            boardBody: articleData.boardBody,
-            boardImg: articleData.boardImg,
-            category: articleData.category,
-            pub: articleData.pub,
-            language: articlaData.language,
-            edited: true
+    let queryResult = {
+        result: true,
+        reason: null
+    }
+    // console.log('articleData ' +JSON.stringify(articleData))
+    this.find({ _id: articleData.boardId, uid: articleData.uid }, (err, data) => {
+        if (err) {
+            queryResult.result = false;
+            queryResult.reason = err
+            return result
         }
-    }, {
-        returnNewDocument: false
-    });
+        // console.log(data.length)
+        if (data.length === 1) { // 글쓴이인지 확인
+            this.updateOne({ _id: articleData.boardId }, {
+                boardTitle: articleData.boardTitle,
+                boardBody: articleData.boardBody,
+                boardImg: articleData.boardImg,
+                category: articleData.category,
+                pub: articleData.pub,
+                language: articleData.language,
+                edited: true
+            }, (err, data) => {
+                if (err) {
+                    queryResult.result = false;
+                    queryResult.reason = err
+                    return result
+                }
+                return result
+            });
+        } else {
+            queryResult.result = false;
+            queryResult.reason = "작성자만 수정할 수 있습니다."
+            return result
+        }
+    })
 }
 
 board.statics.removeArticle = function (buid) {
