@@ -172,10 +172,18 @@ router.get('/mailauth', async function(req, res, next) {
 
 router.get('/editProfile', verifyToken, async function(req, res, next) {
   const uid = res.locals.uid;
-  const result = await getUserInfo(uid);
+  const result = await Users.getUserInfo(uid);
   res.status(201).json({
     result:'ok',
-    data: result
+    data: {
+      userNick: result.nickname,
+      userIntro: result.intro,
+      userCountry: result.country,
+      userId: result.userid,
+      usersBannerImg: result.banner,
+      userProfileImg: result.profile,
+      email: result.email
+    }
   })
 })
 
@@ -205,7 +213,6 @@ router.post('/editProfile', verifyToken, upload.any(), async function(req, res, 
     }
   }
     console.log(req.body) // json 객체를 toString으로 먼저 문자열로 직렬화 하고, 받고나서 다시 JSON 객체로 변환해서 써야하나 보다.
-    console.log('경로 : ' + req.files[0].location) //s3 업로드시 업로드 url을 가져옴
   const result = await Users.updateProfile({
     uid,
     userId,

@@ -4,6 +4,7 @@ const { verifyToken } = require("./authorization");
 require("dotenv").config();
 const Board = require("../models/board");
 const Reply = require('../models/reply');
+const User = require('../models/users');
 const upload = require('./multer');
 
 router.get('/posting', (req, res) => {
@@ -36,10 +37,11 @@ router.post("/posting", verifyToken, upload.any(), async function (req, res, nex
     language,
     likeCount: 0
   });
-
+  console.log(result)
   if (result) {
     res.status(201).json({
-      result: 'ok'
+      result: 'ok',
+      data: result
     })
   } else {
     // 서버, DB, 요청 데이터 이상 등 에러 상세화 필요
@@ -48,6 +50,25 @@ router.post("/posting", verifyToken, upload.any(), async function (req, res, nex
     })
   }
 });
+
+router.get('/deleteBoard/:buid', verifyToken, async function(req, res, next) {
+  const buid = req.params.buid;
+  const result = await Board.removeArticle(buid);
+  res.status(201).json({
+    result:'ok'
+  })
+})
+
+router.get('/editBoard/:buid', verifyToken, async function (req, res, next) {
+  const buid = req.params.buid;
+  const result = await Board.getArticle(buid);
+  console.log(result)
+
+  res.status(201).json({
+    result:'ok',
+    data: result
+  })
+})
 
 router.post("/editBoard", verifyToken, async function (req, res, next) {
   const updateData = {
@@ -108,9 +129,18 @@ router.post("/comment", verifyToken, async function (req, res, next) {
 
 /* 유저마다 다르게 받아야 함 */
 router.get("/postlist", verifyToken, async function (req, res, next) {
-  const category = req.query.category;
-  const result = await Board.findAll();
-
+  const boardList = await Board.findAll();
+  const result = new Array();
+  for(const data of boardList) {
+    let userInfo = await User.getUserInfo(data.uid);
+    result.push({
+      boardUid:data._id,
+      thumbPath:data.boardImg[0],
+      userNick: userInfo.nickname,
+      pub:data.pub,
+      category:data.category
+    });
+  }
   if(result) {
     res.status(201).json({
       result:'ok',
@@ -127,7 +157,7 @@ router.get("/postlist", verifyToken, async function (req, res, next) {
 router.get("/view/:buid", verifyToken, async (req, res, next) => {
   const buid = req.params.buid;
   const boardData = await Board.getArticle(buid);
-
+  console.log(boardData)
   res.status(201).json({
     result: 'ok',
     data: boardData
