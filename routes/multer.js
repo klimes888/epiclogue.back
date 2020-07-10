@@ -2,6 +2,7 @@ const aws = require('aws-sdk');
 const multer = require('multer');
 const multerS3 = require('multer-s3');
 const moment = require('moment');
+const crypto = require('crypto');
 require('dotenv').config();
 
 const s3 = new aws.S3({
@@ -19,7 +20,7 @@ const storage = multerS3({
     cb(null, {fieldName: file.fieldname}); // 파일 메타정보를 저장합니다.
   },
   key: function (req, file, cb) {
-    cb(null, moment().format('YYYYMMDDHHmmss') + "_" + file.originalname) // key... 저장될 파일명과 같이 해봅니다.
+    cb(null, moment().format('YYYYMMDDHHmmss') + "_" + await crypto.createHash('sha256').update(file.originalname).digest('hex').slice(0, 10)) // key... 저장될 파일명과 같이 해봅니다.
   }
 })
 
