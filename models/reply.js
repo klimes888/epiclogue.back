@@ -4,20 +4,20 @@ mongoose.set("useCreateIndex", true);
 
 const reply = new mongoose.Schema({
   uid: { type: ObjectId, required: true },
-  boardId: { type: ObjectId, required: true },
-  replyBody: { type: String, required: true },
-  replyWriteDate: { type: Date, required: true, default: Date.now },
-  heartCount: { type: Number, default: 0 },
+  buid: { type: ObjectId, required: true },
+  body: { type: String, required: true },
+  writeDate: { type: Date, required: true, default: Date.now },
   edited: { type: Boolean, default: false },
-  replyOnReply: [
-    {
-      uid: { type: ObjectId },
-      body: { type: String },
-      writeDate: { type: Date, default: Date.now },
-      heartCount: { type: Number, default: 0 },
-      edited: { type: Boolean, default: false },
-    },
-  ],
+  // heartCount: { type: Number, default: 0 },
+  // replyOnReply: [
+  //   {
+  //     uid: { type: ObjectId },
+  //     body: { type: String },
+  //     writeDate: { type: Date, default: Date.now },
+  //     heartCount: { type: Number, default: 0 },
+  //     edited: { type: Boolean, default: false },
+  //   },
+  // ],
 });
 
 reply.statics.create = function (data) {
@@ -36,8 +36,7 @@ reply.statics.updateReply = function ({ replyId, newReplyBody }) {
     {
       $set: {
         replyBody: newReplyBody,
-        edited: true,
-        replyWriteDate: Date.now,
+        edited: true
       },
     }
   );
@@ -47,24 +46,27 @@ reply.statics.removeReply = function (replyId) {
   return this.deleteOne({ _id: replyId });
 };
 
-reply.statics.createReplyOnReply = function ({ replyId, replyOnReplyBody, uid }) {
-    return this.updateOne({ _id: replyId }, {
-        $push: {
-            replyOnReply: {
-                uid: uid,
-                body: replyOnReplyBody
-            }
-        }
-    })
+reply.statics.getRepliesByBoardId = function (boardId) {
+  return this.find({ buid: boardId });
 }
 
-/* 미완성 */
-reply.statics.updateReplyOnReply = function ({ replyId, newReplyOnReplyBody }) {
-    return this.updateOne({ _id: replyId }, {
-        $set: {
+// reply.statics.createReplyOnReply = function ({ replyId, replyOnReplyBody, uid }) {
+//     return this.updateOne({ _id: replyId }, {
+//         $push: {
+//             replyOnReply: {
+//                 uid: uid,
+//                 body: replyOnReplyBody
+//             }
+//         }
+//     })
+// }
 
-        }
-    })
-}
+// reply.statics.updateReplyOnReply = function ({ replyId, newReplyOnReplyBody }) {
+//     return this.updateOne({ _id: replyId }, {
+//         $set: {
+
+//         }
+//     })
+// }
 
 module.exports = mongoose.model("Reply", reply);

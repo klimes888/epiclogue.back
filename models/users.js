@@ -9,6 +9,7 @@ const user = new mongoose.Schema({
     password: {type: String, required: true},
     userid: {type:String},
     country: {type: String},
+    joinDate: { type: Date, required: true, default: Date.now },
     language: {type:[String]},
     intro: {type:String},
     banner: {type:String},

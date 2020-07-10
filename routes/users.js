@@ -90,6 +90,7 @@ router.post('/join', async function(req, res, next) {
             });
             return;
           }
+          const generatedId = await crypto.createHash('sha256').update(email).digest('hex').slice(14)
           const salt = await randomBytesPromise(64);
           const crypt_Pw = await pbkdf2Promise(userPw, salt.toString('base64'), 93782, 64, 'sha512');
           const auth_token = crypt_Pw.toString('base64').substr(0,10);
@@ -98,7 +99,8 @@ router.post('/join', async function(req, res, next) {
             password: crypt_Pw.toString('base64'), 
             salt: salt.toString('base64'),
             nickname: nick,
-            token: auth_token
+            token: auth_token,
+            userid: generatedId
           });
           if(result) {
             const option = {
