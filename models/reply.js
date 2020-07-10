@@ -34,10 +34,8 @@ reply.statics.updateReply = function ({ replyId, newReplyBody }) {
   return this.updateOne(
     { _id: replyId },
     {
-      $set: {
-        replyBody: newReplyBody,
-        edited: true
-      },
+      replyBody: newReplyBody,
+      edited: true,
     }
   );
 };

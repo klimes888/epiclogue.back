@@ -16,14 +16,12 @@ ReplyOnReply.statics.create = function (data) {
   return rorData.save();
 };
 
-ReplyOnReply.statics.updateReplyOnReply = function ({ replyOnReplyId, replyOnReplyBody }) {
+ReplyOnReply.statics.updateReplyOnReply = function ({replyOnReplyId, replyOnReplyBody}) {
   return this.updateOne(
     { _id: replyOnReplyId },
     {
-      $set: {
-        body: replyOnReplyBody,
-        edited: true
-      },
+      body: replyOnReplyBody,
+      edited: true,
     }
   );
 };

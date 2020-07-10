@@ -25,6 +25,16 @@ user.statics.create = function (data) {
     return userinfo.save();
 }
 
+user.statics.isIdUnique = async function (userId) {
+    const result = await this.findOne({ userid: userId })
+    console.log(result);
+    if (result === null) {
+        return true
+    } else {
+        return false
+    }
+}
+
 user.statics.isConfirmed = function (email, token){
     return this.findOne({email, token});
 }
@@ -70,8 +80,8 @@ user.statics.checkPass = function (uid, userpw) {
     return this.findOne({"_id":uid, "password":userpw})
 }
 
-user.statics.updateProfile = function(profile){
-    return this.updateOne({"_id":profile.uid}, {nickname:profile.nick, userid:profile.userId,country:profile.country,language:profile.lang,intro:profile.intro,banner:profile.bann, profile:profile.prof})
+user.statics.updateProfile = function(profile, cb){
+    return this.updateOne({"_id":profile.uid}, {nickname:profile.nick, userid:profile.userId,country:profile.country,language:profile.lang,intro:profile.intro,banner:profile.bann, profile:profile.prof}, cb)
 }
 
 module.exports = mongoose.model('User', user);
