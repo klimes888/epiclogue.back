@@ -49,7 +49,10 @@ router.post('/login', async function(req, res, next) {
       
       res.status(201).json({
         result: 'ok',
-        token
+        token,
+        email: result.email,
+        nick: result.nickname,
+        userId: result.userid
       });
     } else {
       res.status(401).json({
