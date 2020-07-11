@@ -8,7 +8,7 @@ const react = new mongoose.Schema({
   userId: { type: String, required: true },
   userNick: { type: String, required: true },
   type: { type: String, required: true },
-  reactTime: { type: Date, required: true, default: Date.now },
+  reactTime: { type: Date, default: Date.now },
 });
 
 react.statics.create = function (data) {

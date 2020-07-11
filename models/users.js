@@ -27,7 +27,7 @@ user.statics.create = function (data) {
 
 user.statics.isIdUnique = async function (userId) {
     const result = await this.findOne({ userid: userId })
-    console.log(result);
+    // console.log(result);
     if (result === null) {
         return true
     } else {

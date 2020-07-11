@@ -13,19 +13,17 @@ router.get('/posting', (req, res) => {
   })
 })
 
-router.post("/posting", verifyToken, upload.any(), async function (req, res, next) {
+router.post("/posting", verifyToken, async function (req, res, next) {
   const uid = res.locals.uid;
   const boardTitle = req.body.boardTitle;
   const boardBody = req.body.boardBody;
   let boardImg = [];
-  for (let i = 0; i < req.files.length; i++) {
-    boardImg.push(req.files[i].location);
-  }
+  // for (let i = 0; i < req.files.length; i++) {
+  //   boardImg.push(req.files[i].location);
+  // }
   const category = req.body.category;
   const pub = req.body.pub;
-  const writeDate = req.body.writeDate;
   const language = req.body.language;
-
   const result = await Board.create({
     uid,
     boardTitle,
@@ -33,11 +31,11 @@ router.post("/posting", verifyToken, upload.any(), async function (req, res, nex
     boardImg,
     category,
     pub,
-    writeDate,
+    writeDate: Date.now(),
     language,
     likeCount: 0
   });
-  console.log(result)
+  console.log(`Posting result: ${result}`)
   if (result) {
     res.status(201).json({
       result: 'ok',
@@ -77,11 +75,9 @@ router.post("/editBoard", verifyToken, async function (req, res, next) {
     boardImg: req.files.boardImg,
     category: req.body.category,
     pub: req.body.pub,
-    writeDate: req.body.writeDate,
     language: req.body.language
   }  
-
-  const result = await Board.updateArticle(res.locals.uid, updateData);
+  const result = await Board.updateArticle(req.body.buid, updateData);
   
   if (result) {
     res.status(201).json({

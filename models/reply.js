@@ -6,7 +6,7 @@ const reply = new mongoose.Schema({
   uid: { type: ObjectId, required: true },
   buid: { type: ObjectId, required: true },
   body: { type: String, required: true },
-  writeDate: { type: Date, required: true, default: Date.now },
+  writeDate: { type: Date, default: Date.now },
   edited: { type: Boolean, default: false },
   // heartCount: { type: Number, default: 0 },
   // replyOnReply: [

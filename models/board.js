@@ -12,7 +12,7 @@ const board = new mongoose.Schema({
     boardBody:{type:String},
     category: {type:String, required: true},
     pub: {type:String, required: true},
-    writeDate: {type:Date, required: true, default: Date.now},
+    writeDate: {type:Date, default: Date.now},
     originUid:{type:ObjectId},
     originBuId:{type:ObjectId},
     // likeCount:{type:Number},
@@ -39,9 +39,9 @@ board.statics.getUserArticleList = function ( userId ) {
     return this.find({ uid: userId });
 }
 
-board.statics.updateArticle = function (articleData) {
+board.statics.updateArticle = function (boardId, articleData) {
   return this.updateOne(
-    { _id: articleData.uid },
+    { _id: boardId },
     {
       boardTitle: articleData.boardTitle,
       boardBody: articleData.boardBody,
