@@ -70,23 +70,27 @@ router.get('/editBoard/:buid', verifyToken, async function (req, res, next) {
 
 router.post("/editBoard", verifyToken, async function (req, res, next) {
   const updateData = {
+    uid: res.locals.uid,
+    boardId: req.body.boardId,
     boardTitle: req.body.boardTitle,
-    boardBody: req.body.boardBody,
-    boardImg: req.files.boardImg,
+    boardBody: req.body.boardBody,  
+    // boardImg: req.files.boardImg,
     category: req.body.category,
     pub: req.body.pub,
+    // writeDate: req.body.writeDate,
     language: req.body.language
-  }  
-  const result = await Board.updateArticle(req.body.buid, updateData);
-  
-  if (result) {
+  }
+
+  const query = await Board.updateArticle(updateData);
+  console.log(JSON.stringify(query))
+  if (true) {
     res.status(201).json({
       result: 'ok'
     });
   } else {
-    // 서버, DB, 요청 데이터 이상 등 에러 상세화 필요
     res.status(401).json({
-      result: 'error'
+      result: 'error',
+      reason: query.reason
     })
   }
 });

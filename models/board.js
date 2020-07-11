@@ -39,20 +39,43 @@ board.statics.getUserArticleList = function ( userId ) {
     return this.find({ uid: userId });
 }
 
-board.statics.updateArticle = function (boardId, articleData) {
-  return this.updateOne(
-    { _id: boardId },
-    {
-      boardTitle: articleData.boardTitle,
-      boardBody: articleData.boardBody,
-      boardImg: articleData.boardImg,
-      category: articleData.category,
-      pub: articleData.pub,
-      language: articlaData.language,
-      edited: true,
+board.statics.updateArticle = function (articleData) {
+    let queryResult = {
+        result: true,
+        reason: null
     }
-  );
-};
+    // console.log('articleData ' +JSON.stringify(articleData))
+    this.find({ _id: articleData.boardId, uid: articleData.uid }, (err, data) => {
+        if (err) {
+            queryResult.result = false;
+            queryResult.reason = err
+            return queryResult
+        }
+        // console.log(data.length)
+        if (data.length === 1) { // 글쓴이인지 확인
+            this.updateOne({ _id: articleData.boardId }, {
+                boardTitle: articleData.boardTitle,
+                boardBody: articleData.boardBody,
+                boardImg: articleData.boardImg,
+                category: articleData.category,
+                pub: articleData.pub,
+                language: articleData.language,
+                edited: true
+            }, (err, data) => {
+                if (err) {
+                    queryResult.result = false;
+                    queryResult.reason = err
+                    return queryResult
+                }
+                return queryResult
+            });
+        } else {
+            queryResult.result = false;
+            queryResult.reason = "작성자만 수정할 수 있습니다."
+            return queryResult
+        }
+    })
+}
 
 board.statics.removeArticle = function (buid) {
     return this.deleteOne({ _id: buid })
