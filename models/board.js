@@ -1,8 +1,8 @@
 const mongoose = require('mongoose');
 const ObjectId = mongoose.ObjectId;
 const User = require('./users');
-const Reply = require('./reply').Schema;
-const React = require('./react').Schema;
+// const Reply = require('./reply').Schema;
+// const React = require('./react').Schema;
 mongoose.set('useCreateIndex', true);
 
 const board = new mongoose.Schema({
@@ -15,12 +15,11 @@ const board = new mongoose.Schema({
     writeDate: {type:Date, default: Date.now},
     originUid:{type:ObjectId},
     originBuId:{type:ObjectId},
-    // likeCount:{type:Number},
     edited: { type: Boolean, default: false },
+    // likeCount:{type:Number},
     // Reply와 React는 BoardId를 가지므로 Board Schema에는 넣지 않음.
-    
-    reactList:{type: [React]},
-    replyList:{type: [Reply]},
+    // reactList:{type: [React]},
+    // replyList:{type: [Reply]},
 })
 
 board.statics.create = function (data) {
@@ -39,46 +38,34 @@ board.statics.getUserArticleList = function ( userId ) {
     return this.find({ uid: userId });
 }
 
-board.statics.updateArticle = function (articleData) {
-    let queryResult = {
-        result: true,
-        reason: null
-    }
-    // console.log('articleData ' +JSON.stringify(articleData))
-    this.find({ _id: articleData.boardId, uid: articleData.uid }, (err, data) => {
-        if (err) {
-            queryResult.result = false;
-            queryResult.reason = err
-            return queryResult
-        }
-        // console.log(data.length)
-        if (data.length === 1) { // 글쓴이인지 확인
-            this.updateOne({ _id: articleData.boardId }, {
-                boardTitle: articleData.boardTitle,
-                boardBody: articleData.boardBody,
-                boardImg: articleData.boardImg,
-                category: articleData.category,
-                pub: articleData.pub,
-                language: articleData.language,
-                edited: true
-            }, (err, data) => {
-                if (err) {
-                    queryResult.result = false;
-                    queryResult.reason = err
-                    return queryResult
-                }
-                return queryResult
-            });
-        } else {
-            queryResult.result = false;
-            queryResult.reason = "작성자만 수정할 수 있습니다."
-            return queryResult
-        }
-    })
+board.statics.isWriter = function (userId, boardId) {
+  return this.findOne({ _id: boardId, uid: userId })
 }
 
-board.statics.removeArticle = function (buid) {
-    return this.deleteOne({ _id: buid })
+board.statics.updateArticle = function (articleData, cb) {
+  this.updateOne(
+    { _id: articleData.boardId },
+    {
+      boardTitle: articleData.boardTitle,
+      boardBody: articleData.boardBody,
+      boardImg: articleData.boardImg,
+      category: articleData.category,
+      pub: articleData.pub,
+      language: articleData.language,
+      edited: true,
+    },
+    function (err, data) {
+      if (err) {
+        console.log(err);
+        return false
+      }
+      return true;
+    }
+  );
+};
+
+board.statics.removeArticle = function (buid, cb) {
+    return this.deleteOne({ _id: buid }, cb)
 }
 
 /* 글 전체 조회 */
