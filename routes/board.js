@@ -23,9 +23,7 @@ router.post("/posting", verifyToken, upload.any(), async function (req, res, nex
   }
   const category = req.body.category;
   const pub = req.body.pub;
-  const writeDate = req.body.writeDate;
   const language = req.body.language;
-
   const result = await Board.create({
     uid,
     boardTitle,
@@ -33,11 +31,10 @@ router.post("/posting", verifyToken, upload.any(), async function (req, res, nex
     boardImg,
     category,
     pub,
-    writeDate,
     language,
     likeCount: 0
   });
-  console.log(result)
+  console.log(`Posting result: ${result}`)
   if (result) {
     res.status(201).json({
       result: 'ok',
@@ -53,10 +50,32 @@ router.post("/posting", verifyToken, upload.any(), async function (req, res, nex
 
 router.get('/deleteBoard/:buid', verifyToken, async function(req, res, next) {
   const buid = req.params.buid;
-  const result = await Board.removeArticle(buid);
-  res.status(201).json({
-    result:'ok'
-  })
+  const uid = res.locals.uid;
+
+  const isWriter = await Board.isWriter(uid, buid);
+  console.log('[LOG] Writer check: ' + isWriter);
+  if (isWriter) {
+    await Board.removeArticle(buid, (err, data) => {
+      if(err) {
+        res.status(503).json({
+          result: 'error',
+          reason: err
+        })
+      } else {
+        res.status(200).json({
+          result: 'ok'
+        })
+      }
+    });
+    res.status(201).json({
+      result:'ok'
+    })
+  } else {
+    res.status(400).json({
+      result: 'error',
+      reason: '작성자만 삭제할 수 있습니다.'
+    })
+  }
 })
 
 router.get('/editBoard/:buid', verifyToken, async function (req, res, next) {
@@ -70,27 +89,46 @@ router.get('/editBoard/:buid', verifyToken, async function (req, res, next) {
   })
 })
 
-router.post("/editBoard", verifyToken, async function (req, res, next) {
+router.post("/editBoard", verifyToken, upload.any(), async function (req, res, next) {
+  let boardImg = [];
+  for (let i = 0; i < req.files.length; i++) {
+    boardImg.push(req.files[i].location);
+  }
   const updateData = {
+    uid: res.locals.uid,
+    boardId: req.body.boardId,
     boardTitle: req.body.boardTitle,
-    boardBody: req.body.boardBody,
-    boardImg: req.files.boardImg,
+    boardBody: req.body.boardBody,  
+    boardImg: boardImg,
     category: req.body.category,
     pub: req.body.pub,
-    writeDate: req.body.writeDate,
     language: req.body.language
-  }  
+  }
 
-  const result = await Board.updateArticle(res.locals.uid, updateData);
-  
-  if (result) {
-    res.status(201).json({
+  // 글을 쓴 유저가 맞다면
+  if ((await Board.isWriter(updateData.uid, updateData.boardId)) !== null) {
+    console.log('isWriter passed')
+    const query = await Board.updateArticle(updateData);
+    // S3에서 이전 이미지 삭제하는 기능 추가 필요
+    console.log('[LOG] Update query result: ' + query)
+    res.status(200).json({
       result: 'ok'
-    });
+    })
+    /* 에러 핸들링이 작동하지 않아 리팩토링 할 때 고칠 것 */
+    // if (query) {
+    //   res.status(201).json({
+    //     result: "ok",
+    //   });
+    // } else {
+    //   res.status(401).json({
+    //     result: "error",
+    //     reason: query,
+    //   });
+    // }
   } else {
-    // 서버, DB, 요청 데이터 이상 등 에러 상세화 필요
-    res.status(401).json({
-      result: 'error'
+    res.status(400).json({
+      result: "error",
+      reason: "작성자만 수정할 수 있습니다."
     })
   }
 });

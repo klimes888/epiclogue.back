@@ -5,3 +5,4 @@ public/uploads
 TODO
 .DS_Store
 yarn.lock
+package-lock.json

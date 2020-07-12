@@ -76,6 +76,14 @@ router.get('/join', function(req, res, next) {
   })
 })
 
+router.get('/viewUserList', async (req, res, next) => {
+  const result = await Users.findAll();
+  res.json({
+    data: result
+  })
+})
+
+
 router.post('/join', async function(req, res, next) {
   const email = req.body['email'];
   const userPw = req.body['userPw'];
@@ -93,7 +101,7 @@ router.post('/join', async function(req, res, next) {
             });
             return;
           }
-          const generatedId = await crypto.createHash('sha256').update(email).digest('hex').slice(14)
+          const generatedId = await crypto.createHash('sha256').update(email).digest('hex').slice(0, 14)
           const salt = await randomBytesPromise(64);
           const crypt_Pw = await pbkdf2Promise(userPw, salt.toString('base64'), 93782, 64, 'sha512');
           const auth_token = crypt_Pw.toString('base64').substr(0,10);
@@ -190,44 +198,68 @@ router.get('/editProfile', verifyToken, async function(req, res, next) {
   })
 })
 
-router.post('/editProfile', verifyToken, upload.any(), async function(req, res, next) {
+router.post("/editProfile", verifyToken, upload.any(), async function (
+  req,
+  res,
+  next
+) {
   const uid = res.locals.uid;
-  const userId = req.body['userId'];
-  const nick = req.body['userNick'];
-  const country = req.body['userCountry'];
-  const lang = req.body['userLang'];
-  const intro = req.body['userIntro'];
+  const userId = req.body["userId"];
+  const nick = req.body["userNick"];
+  const country = req.body["userCountry"];
+  const lang = req.body["userLang"];
+  const intro = req.body["userIntro"];
   let bann;
   let prof;
-  if(req.files.length > 1) {
-    if(req.files[0].fieldname == 'userBannerImg'){
+  if (req.files.length > 1) {
+    if (req.files[0].fieldname == "userBannerImg") {
       bann = req.files[0].location;
       prof = req.files[1].location;
     } else {
       bann = req.files[1].location;
       prof = req.files[0].location;
     }
-  }
-  else if(req.files.length == 1){
-    if(req.files[0].fieldname == 'userBannerImg'){
+  } else if (req.files.length == 1) {
+    if (req.files[0].fieldname == "userBannerImg") {
       bann = req.files[0].location;
     } else {
       prof = req.files[0].location;
     }
   }
-    console.log(req.body) // json 객체를 toString으로 먼저 문자열로 직렬화 하고, 받고나서 다시 JSON 객체로 변환해서 써야하나 보다.
-  const result = await Users.updateProfile({
-    uid,
-    userId,
-    nick,
-    country,
-    lang,
-    intro,
-    bann,
-    prof
-  })
-  res.json({result:'ok'});
-})
+  console.log(req.body); // json 객체를 toString으로 먼저 문자열로 직렬화 하고, 받고나서 다시 JSON 객체로 변환해서 써야하나 보다.
+  const checkId = await Users.isIdUnique(userId);
+  if (checkId) {
+    const result = await Users.updateProfile(
+      {
+        uid,
+        userId,
+        nick,
+        country,
+        lang,
+        intro,
+        bann,
+        prof,
+      },
+      (err, data) => {
+        if (err) {
+          res.status(401).json({
+            result: "error",
+            reason: err,
+          });
+        } else {
+          res.status(200).json({
+            result: "ok",
+          });
+        }
+      }
+    );
+  } else {
+    res.status(401).json({
+      result: "error",
+      reason: "ID가 중복됩니다.",
+    });
+  }
+});
 
 router.get('/changePass', function(req, res, next) {
   // 비로그인 비밀번호 찾기용으로 사용
