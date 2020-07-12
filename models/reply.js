@@ -30,12 +30,14 @@ reply.statics.getRepliesByBoardId = function (boardId) {
 }
 
 reply.statics.isWriter = function (uid, replyId) {
-  const result = this.findOne({ _id: replyId, uid: uid})
-  if (result !== null) {
-    return true
-  } else {
-    return false
-  }
+  this.findOne({ _id: replyId, uid: uid}, (err, data) => {
+    // console.log(data)
+    if (data !== null) {
+      return true
+    } else {
+      return false
+    }
+  })
 }
 
 reply.statics.updateReply = function (replyId, newReplyBody) {

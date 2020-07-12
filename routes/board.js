@@ -170,20 +170,20 @@ router.post("/updateReply", verifyToken, async function (req, res, next) {
   const newReplyBody = req.body.replyBody;
   const replyId = req.body.replyId;
 
-  if (await Board.isWriter(uid, replyId)) {
-    const result = await Board.updateReply(replyId, newReplyBody);
+  if ( await Reply.isWriter(uid, replyId) ) {
+    const result = await Reply.updateReply(replyId, newReplyBody);
     if (result) {
       res.status(200).json({
         result: "ok",
       });
-    } else {
+    } else if (result !== true && result !== false) {
       res.status(400).json({
         result: "error",
-        reason: "댓글 수정 실패",
+        reason: result
       });
     }
   } else {
-    res.status(400).json({
+    res.status(401).json({
       result: "error",
       reason: "작성자만 수정할 수 있습니다.",
     });
@@ -207,7 +207,7 @@ router.post("/removeReply", verifyToken, async function (req, res, next) {
       });
     }
   } else {
-    res.status(400).json({
+    res.status(401).json({
       result: "error",
       reason: "작성자만 삭제할 수 있습니다.",
     });
@@ -277,7 +277,7 @@ router.post("/updateReplyOnReply", verifyToken, async function (req, res, next) 
       })
     }
   } else {
-    res.status(400).json({
+    res.status(401).json({
       result: "error",
       reason: "작성자만 수정할 수 있습니다."
     })
@@ -301,7 +301,7 @@ router.post("/removeReplyOnReply", verifyToken, async function (req, res, next) 
       })
     }
   } else {
-    res.status(400).json({
+    res.status(401).json({
       result: "error",
       reason: "작성자만 삭제할 수 있습니다."
     })
