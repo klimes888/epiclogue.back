@@ -28,11 +28,11 @@ ReplyOnReply.statics.isWriter = function (uid, replyOnReplyId) {
   }
 }
 
-ReplyOnReply.statics.updateReplyOnReply = function (replyOnReplyId, replyOnReplyBody) {
+ReplyOnReply.statics.updateReplyOnReply = function (replyOnReplyId, newReplyOnReplyBody) {
   return this.updateOne(
     { _id: replyOnReplyId },
     {
-      body: replyOnReplyBody,
+      replyOnReplyBody: newReplyOnReplyBody,
       edited: true,
     }
   );

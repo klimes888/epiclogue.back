@@ -4,35 +4,49 @@ mongoose.set("useCreateIndex", true);
 
 const reply = new mongoose.Schema({
   uid: { type: ObjectId, required: true },
-  buid: { type: ObjectId, required: true },
+  buid: { type: ObjectId, default: null },
   replyBody: { type: String, required: true },
   writeDate: { type: Date, default: Date.now },
   edited: { type: Boolean, default: false },
-  // heartCount: { type: Number, default: 0 },
-  // replyOnReply: [
-  //   {
-  //     uid: { type: ObjectId },
-  //     body: { type: String },
-  //     writeDate: { type: Date, default: Date.now },
-  //     heartCount: { type: Number, default: 0 },
-  //     edited: { type: Boolean, default: false },
-  //   },
-  // ],
+  parentId: { type: ObjectId, default: null},
+  hasChild: { type: Boolean, default: false }
 });
 
+// Create
 reply.statics.create = function (data) {
   const replyData = new this(data);
   return replyData.save();
 };
 
+reply.statics.createReplyOnReply = function (data) {
+  const replyOnReplyData = new this({
+    uid: data.uid,
+    replyBody: data.replyBody,
+    parentId: data.replyId
+  }, (err, data) => {
+    if (err) {
+      console.log("[LOG] 데이터베이스 질의 에러")
+      return;
+    }
+  })
+  
+  this.updateOne({ _id: data.replyId }, { hasChild: true });
+  return replyOnReplyData.save();
+}
+// Read
 reply.statics.getRepliesByBoardId = function (boardId) {
   return this.find({ buid: boardId });
+}
+
+reply.statics.getRepliesByParentId = function (replyId) {
+  return this.find({ parentId: replyId })
 }
 
 reply.statics.isWriter = function (uid, replyId) {
   this.findOne({ _id: replyId, uid: uid})
 }
 
+// Update
 reply.statics.updateReply = async function (replyId, newReplyBody) {
   this.updateOne(
     { _id: replyId },
@@ -61,6 +75,7 @@ reply.statics.updateReply = async function (replyId, newReplyBody) {
   );
 };
 
+// Delete
 reply.statics.removeReply = function (replyId) {
   return this.deleteOne({ _id: replyId }, (err, data) =>{
     if (err) {

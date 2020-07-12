@@ -140,12 +140,19 @@ router.post("/translate", verifyToken, async function (req, res, next) {
 });
 
 router.post("/reply", verifyToken, async function (req, res, next) {
-  const replyData = {
+  let replyData = {
     uid: res.locals.uid,
-    replyBody: req.body.replyBody,
-    buid: req.body.boardId
+    replyBody: req.body.replyBody
   }
-  const result = await Reply.create(replyData);
+  let result;
+  console.log(req.body.replyOnReply)
+  if (req.body.replyOnReply === '0') {
+    replyData.buid = req.body.boardId
+    result = await Reply.create(replyData);
+  } else if (req.body.replyOnReply === '1') {
+    replyData.replyId = req.body.replyId;
+    result = await Reply.createReplyOnReply(replyData);
+  }
 
   if (result) {
     res.status(201).json({
@@ -158,7 +165,7 @@ router.post("/reply", verifyToken, async function (req, res, next) {
     3. DB 오류
     4. 클라이언트 통신 불가
      */
-    res.status(401).json({
+    res.status(400).json({
       result: 'error',
       reason: '코드 재작성 필요'
     })
@@ -245,87 +252,92 @@ router.get("/postlist", verifyToken, async function (req, res, next) {
   }
 });
 
-router.post("/replyOnReply", verifyToken, async function (req, res, next) {
-  const uid = res.locals.uid;
-  const replyId = req.body.replyId;
-  const replyOnReplyBody = req.body.replyOnReplyBody;
+// router.post("/replyOnReply", verifyToken, async function (req, res, next) {
+//   const uid = res.locals.uid;
+//   const replyId = req.body.replyId;
+//   const replyOnReplyBody = req.body.replyOnReplyBody;
 
-  const result = await ReplyOnReply.create({ uid, replyId, replyOnReplyBody});
-  if (result) {
-    res.status(201).json({
-      result: 'ok'
-    })
-  } else {
-    res.status(401).json({
-      result: "error",
-      reason: "대댓글 작성 실패"
-    })
-  }
-})
+//   const result = await ReplyOnReply.create({ uid, replyId, replyOnReplyBody});
+//   if (result) {
+//     res.status(201).json({
+//       result: 'ok'
+//     })
+//   } else {
+//     res.status(401).json({
+//       result: "error",
+//       reason: "대댓글 작성 실패"
+//     })
+//   }
+// })
 
-router.post("/updateReplyOnReply", verifyToken, async function (req, res, next) {
-  const uid = res.locals.uid;
-  const replyOnReplyId = req.body.replyOnReplyId;
-  const newReplyOnReplyBody = req.body.replyOnReplyBody;
+// router.post("/updateReplyOnReply", verifyToken, async function (req, res, next) {
+//   const uid = res.locals.uid;
+//   const replyOnReplyId = req.body.replyOnReplyId;
+//   const newReplyOnReplyBody = req.body.replyOnReplyBody;
 
-  if (await ReplyOnReply.isWriter(uid, replyOnReplyId)) {
-    const result = await ReplyOnReply.updateReplyOnReply(replyOnReplyId, newReplyOnReplyBody);
-    if (result) {
-      res.status(201).json({
-        result: 'ok'
-      })
-    } else {
-      res.status(401).json({
-        result: "error",
-        reason: "대댓글 수정 실패"
-      })
-    }
-  } else {
-    res.status(401).json({
-      result: "error",
-      reason: "작성자만 수정할 수 있습니다."
-    })
-  }
-})
+//   if (await ReplyOnReply.isWriter(uid, replyOnReplyId)) {
+//     const result = await ReplyOnReply.updateReplyOnReply(replyOnReplyId, newReplyOnReplyBody);
+//     if (result) {
+//       res.status(201).json({
+//         result: 'ok'
+//       })
+//     } else {
+//       res.status(401).json({
+//         result: "error",
+//         reason: "대댓글 수정 실패"
+//       })
+//     }
+//   } else {
+//     res.status(401).json({
+//       result: "error",
+//       reason: "작성자만 수정할 수 있습니다."
+//     })
+//   }
+// })
 
-router.post("/removeReplyOnReply", verifyToken, async function (req, res, next) {
-  const uid = res.locals.uid;
-  const replyOnReplyId = req.body.replyOnReplyId;
+// router.post("/removeReplyOnReply", verifyToken, async function (req, res, next) {
+//   const uid = res.locals.uid;
+//   const replyOnReplyId = req.body.replyOnReplyId;
 
-  if (await ReplyOnReply.isWriter(uid, replyOnReplyId)) {
-    const result = await ReplyOnReply.removeReplyOnReply(replyOnReplyId);
-    if (result) {
-      res.status(201).json({
-        result: 'ok'
-      })
-    } else {
-      res.status(401).json({
-        result: "error",
-        reason: "대댓글 삭제 실패"
-      })
-    }
-  } else {
-    res.status(401).json({
-      result: "error",
-      reason: "작성자만 삭제할 수 있습니다."
-    })
-  }
-})
+//   if (await ReplyOnReply.isWriter(uid, replyOnReplyId)) {
+//     const result = await ReplyOnReply.removeReplyOnReply(replyOnReplyId);
+//     if (result) {
+//       res.status(201).json({
+//         result: 'ok'
+//       })
+//     } else {
+//       res.status(401).json({
+//         result: "error",
+//         reason: "대댓글 삭제 실패"
+//       })
+//     }
+//   } else {
+//     res.status(401).json({
+//       result: "error",
+//       reason: "작성자만 삭제할 수 있습니다."
+//     })
+//   }
+// })
 
-router.get("/view/:buid", verifyToken, async (req, res, next) => {
-  const buid = req.params.buid;
-  let boardData = await Board.getArticle(buid);
-  const replyData = await Reply.getRepliesByBoardId(buid);
-  boardData.replyList = new Array();
-  for (let i = 0; i < replyData.length; i++) {
-    (boardData.replyList).push(replyData[i])
-  }
-  // console.log('Reply: ' + replyData[0]);
-  // const replyOnReplyData = await ReplyOnReply.getRepliesByReplyId()
-  // console.log(boardData)
-  res.status(201).json({
+router.get("/view/:boardId", verifyToken, async (req, res, next) => {
+  const boardId = req.params.boardId;
+  const boardData = await Board.getArticle(boardId);
+  const replyData = await Reply.getRepliesByBoardId(boardId);
+  
+  res.status(200).json({
     result: 'ok',
-    data: boardData
+    board: boardData,
+    reply: replyData
+  });
+})
+
+router.get("/view/reply/:replyId", verifyToken, async (req, res, next) => {
+  const replyId = req.params.replyId;
+  const replyData = await Reply.getRepliesByParentId(replyId);
+  
+  res.status(200).json({
+    result: 'ok',
+    data: replyData
   });
 })
 
