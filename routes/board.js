@@ -143,7 +143,7 @@ router.post("/reply", verifyToken, async function (req, res, next) {
   const replyData = {
     uid: res.locals.uid,
     replyBody: req.body.replyBody,
-    buid: req.body.buid
+    buid: req.body.boardId
   }
   const result = await Reply.create(replyData);
 
@@ -167,19 +167,22 @@ router.post("/reply", verifyToken, async function (req, res, next) {
 
 router.post("/updateReply", verifyToken, async function (req, res, next) {
   const uid = res.locals.uid;
-  const newReplyBody = req.body.replyBody;
   const replyId = req.body.replyId;
-
-  if ( await Reply.isWriter(uid, replyId) ) {
-    const result = await Reply.updateReply(replyId, newReplyBody);
-    if (result) {
+  const newReplyBody = req.body.replyBody;
+  
+  if ( await Reply.isWriter(uid, replyId) !== null ) {
+    // models 에서는 return이 정상적이나 여기서는 undefined가 뜨므로 디버깅 필요.
+    // 임시적으로 모두 200을 보내도록 함
+    const result =  await Reply.updateReply(replyId, newReplyBody);
+    console.log(result)
+    if (true) {
       res.status(200).json({
         result: "ok",
       });
-    } else if (result !== true && result !== false) {
+    } else {
       res.status(400).json({
         result: "error",
-        reason: result
+        reason: "댓글 업데이트 실패"
       });
     }
   } else {
@@ -192,10 +195,11 @@ router.post("/updateReply", verifyToken, async function (req, res, next) {
 
 router.post("/removeReply", verifyToken, async function (req, res, next) {
   const uid = res.locals.uid;
-  const replyId = res.body.replyId;
+  const replyId = req.body.replyId;
 
-  if (await Board.isWriter(uid, replyId)) {
-    const result = await Board.removeReply(replyId);
+  if ( await Reply.isWriter(uid, replyId) !== null ) {
+    const result = await Reply.removeReply(replyId);
+    console.log(result);
     if (result) {
       res.status(200).json({
         result: "ok",
@@ -265,7 +269,7 @@ router.post("/updateReplyOnReply", verifyToken, async function (req, res, next) 
   const newReplyOnReplyBody = req.body.replyOnReplyBody;
 
   if (await ReplyOnReply.isWriter(uid, replyOnReplyId)) {
-    const result = await ReplyOnReply.updateReplyOnReply(replyOnReplyId, replyOnReplyBody);
+    const result = await ReplyOnReply.updateReplyOnReply(replyOnReplyId, newReplyOnReplyBody);
     if (result) {
       res.status(201).json({
         result: 'ok'

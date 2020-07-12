@@ -30,28 +30,50 @@ reply.statics.getRepliesByBoardId = function (boardId) {
 }
 
 reply.statics.isWriter = function (uid, replyId) {
-  this.findOne({ _id: replyId, uid: uid}, (err, data) => {
-    // console.log(data)
-    if (data !== null) {
-      return true
-    } else {
-      return false
-    }
-  })
+  this.findOne({ _id: replyId, uid: uid})
 }
 
-reply.statics.updateReply = function (replyId, newReplyBody) {
-  return this.updateOne(
+reply.statics.updateReply = async function (replyId, newReplyBody) {
+  this.updateOne(
     { _id: replyId },
     {
       replyBody: newReplyBody,
       edited: true,
+    }, function (err, data) {
+      if (err) {
+        console.log("[LOG] 데이터베이스 에러")
+        return false
+      }
+      console.log(data)
+      if (data.ok === 1 && data.nModified === data.n) { 
+        // n: 선택된 document 수
+        // nModified: 변경된 document 수
+        return true
+      } else if (data.ok === 1 && data.nModified !== data.n) {
+        // 내용이 변경되지 않음
+        return true
+      } 
+      else {
+        console.log("[LOG] 댓글 업데이트 실패")
+        return false
+      }
     }
   );
 };
 
 reply.statics.removeReply = function (replyId) {
-  return this.deleteOne({ _id: replyId });
+  return this.deleteOne({ _id: replyId }, (err, data) =>{
+    if (err) {
+      console.log(`[LOG] 데이터베이스 질의 에러`)
+      return false
+    }
+    if (data.ok === 1 && data.deletedCount === 1) {
+      return true
+    } else if (data.ok === 1 && data.deletedCount === 0) {
+      console.log(`[LOG] 댓글 삭제 실패: ${replyId} 가 존재하지 않음`)
+      return true
+    }
+  });
 };
 
 module.exports = mongoose.model("Reply", reply);
