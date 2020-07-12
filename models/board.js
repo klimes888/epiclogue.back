@@ -7,9 +7,9 @@ mongoose.set('useCreateIndex', true);
 
 const board = new mongoose.Schema({
     uid: {type: ObjectId, required: true},
-    boardTitle: {type: String},
+    boardTitle: {type: String, default:"" },
     boardImg: {type: [String], required: true},
-    boardBody:{type:String},
+    boardBody:{type:String, default: "" },
     category: {type:String, required: true},
     pub: {type:String, required: true},
     writeDate: {type:Date, default: Date.now},

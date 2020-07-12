@@ -5,7 +5,7 @@ mongoose.set("useCreateIndex", true);
 const reply = new mongoose.Schema({
   uid: { type: ObjectId, required: true },
   buid: { type: ObjectId, required: true },
-  body: { type: String, required: true },
+  replyBody: { type: String, required: true },
   writeDate: { type: Date, default: Date.now },
   edited: { type: Boolean, default: false },
   // heartCount: { type: Number, default: 0 },
@@ -25,12 +25,20 @@ reply.statics.create = function (data) {
   return replyData.save();
 };
 
-// 하나만 조회하는 일은 없을 것이라 생각하여 주석처리
-// reply.statics.getReplyById = function (replyId) {
-//   return this.find({ _id: replyId });
-// };
+reply.statics.getRepliesByBoardId = function (boardId) {
+  return this.find({ buid: boardId });
+}
 
-reply.statics.updateReply = function ({ replyId, newReplyBody }) {
+reply.statics.isWriter = function (uid, replyId) {
+  const result = this.findOne({ _id: replyId, uid: uid})
+  if (result !== null) {
+    return true
+  } else {
+    return false
+  }
+}
+
+reply.statics.updateReply = function (replyId, newReplyBody) {
   return this.updateOne(
     { _id: replyId },
     {
@@ -43,28 +51,5 @@ reply.statics.updateReply = function ({ replyId, newReplyBody }) {
 reply.statics.removeReply = function (replyId) {
   return this.deleteOne({ _id: replyId });
 };
-
-reply.statics.getRepliesByBoardId = function (boardId) {
-  return this.find({ buid: boardId });
-}
-
-// reply.statics.createReplyOnReply = function ({ replyId, replyOnReplyBody, uid }) {
-//     return this.updateOne({ _id: replyId }, {
-//         $push: {
-//             replyOnReply: {
-//                 uid: uid,
-//                 body: replyOnReplyBody
-//             }
-//         }
-//     })
-// }
-
-// reply.statics.updateReplyOnReply = function ({ replyId, newReplyOnReplyBody }) {
-//     return this.updateOne({ _id: replyId }, {
-//         $set: {
-
-//         }
-//     })
-// }
 
 module.exports = mongoose.model("Reply", reply);

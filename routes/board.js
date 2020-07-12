@@ -6,6 +6,7 @@ const Board = require("../models/board");
 const Reply = require('../models/reply');
 const User = require('../models/users');
 const upload = require('./multer');
+const ReplyOnReply = require("../models/replyOnReply");
 
 router.get('/posting', (req, res) => {
   res.status(200).json({
@@ -138,14 +139,14 @@ router.post("/translate", verifyToken, async function (req, res, next) {
   
 });
 
-router.post("/comment", verifyToken, async function (req, res, next) {
-  const commentData = {
+router.post("/reply", verifyToken, async function (req, res, next) {
+  const replyData = {
+    uid: res.locals.uid,
     replyBody: req.body.replyBody,
-    boardUid: req.body.boardUid,
-    replyWriteDate: Date.now
+    buid: req.body.buid
   }
+  const result = await Reply.create(replyData);
 
-  const result = Reply.create(commentData);
   if (result) {
     res.status(201).json({
       result: 'ok'
@@ -162,7 +163,55 @@ router.post("/comment", verifyToken, async function (req, res, next) {
       reason: '코드 재작성 필요'
     })
   }
-  
+});
+
+router.post("/updateReply", verifyToken, async function (req, res, next) {
+  const uid = res.locals.uid;
+  const newReplyBody = req.body.replyBody;
+  const replyId = req.body.replyId;
+
+  if (await Board.isWriter(uid, replyId)) {
+    const result = await Board.updateReply(replyId, newReplyBody);
+    if (result) {
+      res.status(200).json({
+        result: "ok",
+      });
+    } else {
+      res.status(400).json({
+        result: "error",
+        reason: "댓글 수정 실패",
+      });
+    }
+  } else {
+    res.status(400).json({
+      result: "error",
+      reason: "작성자만 수정할 수 있습니다.",
+    });
+  }
+});
+
+router.post("/removeReply", verifyToken, async function (req, res, next) {
+  const uid = res.locals.uid;
+  const replyId = res.body.replyId;
+
+  if (await Board.isWriter(uid, replyId)) {
+    const result = await Board.removeReply(replyId);
+    if (result) {
+      res.status(200).json({
+        result: "ok",
+      });
+    } else {
+      res.status(400).json({
+        result: "error",
+        reason: "댓글 삭제 실패",
+      });
+    }
+  } else {
+    res.status(400).json({
+      result: "error",
+      reason: "작성자만 삭제할 수 있습니다.",
+    });
+  }
 });
 
 /* 유저마다 다르게 받아야 함 */
@@ -192,10 +241,84 @@ router.get("/postlist", verifyToken, async function (req, res, next) {
   }
 });
 
+router.post("/replyOnReply", verifyToken, async function (req, res, next) {
+  const uid = res.locals.uid;
+  const replyId = req.body.replyId;
+  const replyOnReplyBody = req.body.replyOnReplyBody;
+
+  const result = await ReplyOnReply.create({ uid, replyId, replyOnReplyBody});
+  if (result) {
+    res.status(201).json({
+      result: 'ok'
+    })
+  } else {
+    res.status(401).json({
+      result: "error",
+      reason: "대댓글 작성 실패"
+    })
+  }
+})
+
+router.post("/updateReplyOnReply", verifyToken, async function (req, res, next) {
+  const uid = res.locals.uid;
+  const replyOnReplyId = req.body.replyOnReplyId;
+  const newReplyOnReplyBody = req.body.replyOnReplyBody;
+
+  if (await ReplyOnReply.isWriter(uid, replyOnReplyId)) {
+    const result = await ReplyOnReply.updateReplyOnReply(replyOnReplyId, replyOnReplyBody);
+    if (result) {
+      res.status(201).json({
+        result: 'ok'
+      })
+    } else {
+      res.status(401).json({
+        result: "error",
+        reason: "대댓글 수정 실패"
+      })
+    }
+  } else {
+    res.status(400).json({
+      result: "error",
+      reason: "작성자만 수정할 수 있습니다."
+    })
+  }
+})
+
+router.post("/removeReplyOnReply", verifyToken, async function (req, res, next) {
+  const uid = res.locals.uid;
+  const replyOnReplyId = req.body.replyOnReplyId;
+
+  if (await ReplyOnReply.isWriter(uid, replyOnReplyId)) {
+    const result = await ReplyOnReply.removeReplyOnReply(replyOnReplyId);
+    if (result) {
+      res.status(201).json({
+        result: 'ok'
+      })
+    } else {
+      res.status(401).json({
+        result: "error",
+        reason: "대댓글 삭제 실패"
+      })
+    }
+  } else {
+    res.status(400).json({
+      result: "error",
+      reason: "작성자만 삭제할 수 있습니다."
+    })
+  }
+})
+
 router.get("/view/:buid", verifyToken, async (req, res, next) => {
   const buid = req.params.buid;
-  const boardData = await Board.getArticle(buid);
-  console.log(boardData)
+  let boardData = await Board.getArticle(buid);
+  const replyData = await Reply.getRepliesByBoardId(buid);
+  boardData.replyList = new Array();
+  for (let i = 0; i < replyData.length; i++) {
+    (boardData.replyList).push(replyData[i])
+  }
+  // console.log('Reply: ' + replyData[0]);
+  // const replyOnReplyData = await ReplyOnReply.getRepliesByReplyId()
+  // console.log(boardData)
   res.status(201).json({
     result: 'ok',
     data: boardData
