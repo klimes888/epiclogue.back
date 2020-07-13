@@ -6,7 +6,7 @@ const Board = require("../models/board");
 const Reply = require('../models/reply');
 const User = require('../models/users');
 const upload = require('./multer');
-const ReplyOnReply = require("../models/replyOnReply");
+// const ReplyOnReply = require("../models/replyOnReply")
 
 router.get('/posting', (req, res) => {
   res.status(200).json({
@@ -148,10 +148,13 @@ router.post("/reply", verifyToken, async function (req, res, next) {
   console.log(req.body.replyOnReply)
   if (req.body.replyOnReply === '0') {
     replyData.buid = req.body.boardId
+    // console.log(replyData)
     result = await Reply.create(replyData);
   } else if (req.body.replyOnReply === '1') {
     replyData.replyId = req.body.replyId;
-    result = await Reply.createReplyOnReply(replyData);
+    // console.log(replyData)
+    result = await Reply.createReplyOnReply(replyData)
+    await Reply.becomeParent(replyData.replyId)    
   }
 
   if (result) {
@@ -251,73 +254,6 @@ router.get("/postlist", verifyToken, async function (req, res, next) {
     })
   }
 });
-
-// router.post("/replyOnReply", verifyToken, async function (req, res, next) {
-//   const uid = res.locals.uid;
-//   const replyId = req.body.replyId;
-//   const replyOnReplyBody = req.body.replyOnReplyBody;
-
-//   const result = await ReplyOnReply.create({ uid, replyId, replyOnReplyBody});
-//   if (result) {
-//     res.status(201).json({
-//       result: 'ok'
-//     })
-//   } else {
-//     res.status(401).json({
-//       result: "error",
-//       reason: "대댓글 작성 실패"
-//     })
-//   }
-// })
-
-// router.post("/updateReplyOnReply", verifyToken, async function (req, res, next) {
-//   const uid = res.locals.uid;
-//   const replyOnReplyId = req.body.replyOnReplyId;
-//   const newReplyOnReplyBody = req.body.replyOnReplyBody;
-
-//   if (await ReplyOnReply.isWriter(uid, replyOnReplyId)) {
-//     const result = await ReplyOnReply.updateReplyOnReply(replyOnReplyId, newReplyOnReplyBody);
-//     if (result) {
-//       res.status(201).json({
-//         result: 'ok'
-//       })
-//     } else {
-//       res.status(401).json({
-//         result: "error",
-//         reason: "대댓글 수정 실패"
-//       })
-//     }
-//   } else {
-//     res.status(401).json({
-//       result: "error",
-//       reason: "작성자만 수정할 수 있습니다."
-//     })
-//   }
-// })
-
-// router.post("/removeReplyOnReply", verifyToken, async function (req, res, next) {
-//   const uid = res.locals.uid;
-//   const replyOnReplyId = req.body.replyOnReplyId;
-
-//   if (await ReplyOnReply.isWriter(uid, replyOnReplyId)) {
-//     const result = await ReplyOnReply.removeReplyOnReply(replyOnReplyId);
-//     if (result) {
-//       res.status(201).json({
-//         result: 'ok'
-//       })
-//     } else {
-//       res.status(401).json({
-//         result: "error",
-//         reason: "대댓글 삭제 실패"
-//       })
-//     }
-//   } else {
-//     res.status(401).json({
-//       result: "error",
-//       reason: "작성자만 삭제할 수 있습니다."
-//     })
-//   }
-// })
 
 router.get("/view/:boardId", verifyToken, async (req, res, next) => {
   const boardId = req.params.boardId;

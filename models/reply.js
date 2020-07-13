@@ -46,6 +46,15 @@ reply.statics.isWriter = function (uid, replyId) {
   this.findOne({ _id: replyId, uid: uid})
 }
 
+reply.statics.becomeParent = function (replyId) {
+  console.log('띠용')
+  this.updateOne({ _id: replyId}, { hasChild: true }, (err, data) => {
+    if (err) {
+      console.log("[LOG] 데이터베이스 질의 에러" + err)
+    }
+  });
+}
+
 // Update
 reply.statics.updateReply = async function (replyId, newReplyBody) {
   this.updateOne(
