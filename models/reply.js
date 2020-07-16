@@ -43,7 +43,10 @@ reply.statics.getRepliesByParentId = function (replyId) {
 }
 
 reply.statics.isWriter = function (uid, replyId) {
-  this.findOne({ _id: replyId, uid: uid})
+  this.findOne({ _id: replyId, uid: uid}, (err, data) => {
+    if (err) return err
+    return data
+  })
 }
 
 reply.statics.becomeParent = function (replyId) {

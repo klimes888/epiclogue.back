@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { verifyToken } = require("./authorization");
+const { verifyToken, checkAuth } = require("./authorization");
 require("dotenv").config();
 const Board = require("../models/board");
 const Reply = require('../models/reply');
@@ -19,9 +19,9 @@ router.post("/posting", verifyToken, upload.any(), async function (req, res, nex
   const boardTitle = req.body.boardTitle;
   const boardBody = req.body.boardBody;
   let boardImg = [];
-  for (let i = 0; i < req.files.length; i++) {
-    boardImg.push(req.files[i].location);
-  }
+  // for (let i = 0; i < req.files.length; i++) {
+  //   boardImg.push(req.files[i].location);
+  // }
   const category = req.body.category;
   const pub = req.body.pub;
   const language = req.body.language;
@@ -49,37 +49,24 @@ router.post("/posting", verifyToken, upload.any(), async function (req, res, nex
   }
 });
 
-router.get('/deleteBoard/:buid', verifyToken, async function(req, res, next) {
+router.get("/deleteBoard/:buid", verifyToken, checkAuth, async function (req, res, next) {
   const buid = req.params.buid;
-  const uid = res.locals.uid;
+  await Board.removeArticle(buid, (err, data) => {
+    if (err) {
+      res.status(503).json({
+        result: "error",
+        reason: err,
+      });
+    } else {
+      res.status(200).json({
+        result: "ok",
+      });
+      return;
+    }
+  });
+});
 
-  const isWriter = await Board.isWriter(uid, buid);
-  console.log('[LOG] Writer check: ' + isWriter);
-  if (isWriter) {
-    await Board.removeArticle(buid, (err, data) => {
-      if(err) {
-        res.status(503).json({
-          result: 'error',
-          reason: err
-        })
-      } else {
-        res.status(200).json({
-          result: 'ok'
-        })
-      }
-    });
-    res.status(201).json({
-      result:'ok'
-    })
-  } else {
-    res.status(400).json({
-      result: 'error',
-      reason: '작성자만 삭제할 수 있습니다.'
-    })
-  }
-})
-
-router.get('/editBoard/:buid', verifyToken, async function (req, res, next) {
+router.get('/editBoard/:buid', verifyToken, checkAuth, async function (req, res, next) {
   const buid = req.params.buid;
   const result = await Board.getArticle(buid);
   console.log(result)
@@ -90,7 +77,7 @@ router.get('/editBoard/:buid', verifyToken, async function (req, res, next) {
   })
 })
 
-router.post("/editBoard", verifyToken, upload.any(), async function (req, res, next) {
+router.post("/editBoard", verifyToken, upload.any(), checkAuth, async function (req, res, next) {
   let boardImg = [];
   for (let i = 0; i < req.files.length; i++) {
     boardImg.push(req.files[i].location);
@@ -175,7 +162,7 @@ router.post("/reply", verifyToken, async function (req, res, next) {
   }
 });
 
-router.post("/updateReply", verifyToken, async function (req, res, next) {
+router.post("/updateReply", verifyToken, checkAuth, async function (req, res, next) {
   const uid = res.locals.uid;
   const replyId = req.body.replyId;
   const newReplyBody = req.body.replyBody;
@@ -203,7 +190,7 @@ router.post("/updateReply", verifyToken, async function (req, res, next) {
   }
 });
 
-router.post("/removeReply", verifyToken, async function (req, res, next) {
+router.post("/removeReply", verifyToken, checkAuth, async function (req, res, next) {
   const uid = res.locals.uid;
   const replyId = req.body.replyId;
 

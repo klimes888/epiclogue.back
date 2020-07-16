@@ -34,11 +34,16 @@ board.statics.getArticle = function ( boardId ) {
 }
 
 /* 특정 유저의 글 GET (미검증) */ 
-board.statics.getUserArticleList = function ( userId ) {
-    return this.find({ uid: userId });
-}
+board.statics.getUserArticleList = function (userId) {
+  this.find({ uid: userId }, (err, data) => {
+    return data;
+  });
+};
 
 board.statics.isWriter = function (userId, boardId) {
+  this.findOne({ _id: boardId, uid: userId }, (err, data) => {
+    console.log(data)
+  })
   return this.findOne({ _id: boardId, uid: userId })
 }
 
