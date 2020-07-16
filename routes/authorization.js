@@ -38,7 +38,6 @@ const verifyToken = (req, res, next) => {
 const checkAuth = async (req, res, next) => {
   try {
     let isWriter = false;
-    console.log (req.body.replyId ? true : false);
     if (req.body.replyId ? true : false) { // Reply auth
       isWriter = await Reply.isWriter(res.locals.uid, req.body.replyId) ? true : false;
       console.log(`[LOG] reply auth: ${isWriter}`)

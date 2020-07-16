@@ -6,7 +6,6 @@ const Board = require("../models/board");
 const Reply = require('../models/reply');
 const User = require('../models/users');
 const upload = require('./multer');
-// const ReplyOnReply = require("../models/replyOnReply")
 
 router.get('/posting', (req, res) => {
   res.status(200).json({
@@ -19,9 +18,9 @@ router.post("/posting", verifyToken, upload.any(), async function (req, res, nex
   const boardTitle = req.body.boardTitle;
   const boardBody = req.body.boardBody;
   let boardImg = [];
-  // for (let i = 0; i < req.files.length; i++) {
-  //   boardImg.push(req.files[i].location);
-  // }
+  for (let i = 0; i < req.files.length; i++) {
+    boardImg.push(req.files[i].location);
+  }
   const category = req.body.category;
   const pub = req.body.pub;
   const language = req.body.language;
@@ -53,7 +52,7 @@ router.get("/deleteBoard/:buid", verifyToken, checkAuth, async function (req, re
   const buid = req.params.buid;
   await Board.removeArticle(buid, (err, data) => {
     if (err) {
-      res.status(503).json({
+      res.status(400).json({
         result: "error",
         reason: err,
       });
@@ -77,142 +76,114 @@ router.get('/editBoard/:buid', verifyToken, checkAuth, async function (req, res,
   })
 })
 
-router.post("/editBoard", verifyToken, upload.any(), checkAuth, async function (req, res, next) {
-  let boardImg = [];
-  for (let i = 0; i < req.files.length; i++) {
-    boardImg.push(req.files[i].location);
+router.post(
+  "/view/:buid/edit",
+  verifyToken,
+  upload.any(),
+  checkAuth,
+  async function (req, res, next) {
+    let boardImg = [];
+    for (let i = 0; i < req.files.length; i++) {
+      boardImg.push(req.files[i].location);
+    }
+    const updateData = {
+      uid: res.locals.uid,
+      boardId: req.params.buid,
+      boardTitle: req.body.boardTitle,
+      boardBody: req.body.boardBody,
+      boardImg: boardImg,
+      category: req.body.category,
+      pub: req.body.pub,
+      language: req.body.language,
+    };
+
+    await Board.updateArticle(updateData, (err, data) => {
+      console.log("query result: " + data);
+      if (err) {
+        res.status(400).json({
+          msg: err,
+        });
+      }
+      /* S3 업로드 코드 필요 */
+      res.sendStatus(200);
+      return;
+    });
   }
-  const updateData = {
+);
+
+router.post("/view/:buid/reply", verifyToken, async function (req, res, next) {
+  const replyData = {
     uid: res.locals.uid,
-    boardId: req.body.boardId,
-    boardTitle: req.body.boardTitle,
-    boardBody: req.body.boardBody,  
-    boardImg: boardImg,
-    category: req.body.category,
-    pub: req.body.pub,
-    language: req.body.language
-  }
+    replyBody: req.body.replyBody,
+    buid: req.params.buid,
+  };
 
-  // 글을 쓴 유저가 맞다면
-  if ((await Board.isWriter(updateData.uid, updateData.boardId)) !== null) {
-    console.log('isWriter passed')
-    const query = await Board.updateArticle(updateData);
-    // S3에서 이전 이미지 삭제하는 기능 추가 필요
-    console.log('[LOG] Update query result: ' + query)
-    res.status(200).json({
-      result: 'ok'
-    })
-    /* 에러 핸들링이 작동하지 않아 리팩토링 할 때 고칠 것 */
-    // if (query) {
-    //   res.status(201).json({
-    //     result: "ok",
-    //   });
-    // } else {
-    //   res.status(401).json({
-    //     result: "error",
-    //     reason: query,
-    //   });
-    // }
+  if (!req.body.parentId) {
+    // 댓글
+    await Reply.create(replyData, (err, data) => {
+      console.log(data);
+      if (err) {
+        res.status(400).json({
+          msg: err,
+        });
+      } else {
+        res.sendStatus(201);
+      }
+    });
   } else {
-    res.status(400).json({
-      result: "error",
-      reason: "작성자만 수정할 수 있습니다."
-    })
-  }
-});
-
-/* API 미정의 */
-router.post("/translate", verifyToken, async function (req, res, next) {
-  
-});
-
-router.post("/reply", verifyToken, async function (req, res, next) {
-  let replyData = {
-    uid: res.locals.uid,
-    replyBody: req.body.replyBody
-  }
-  let result;
-  console.log(req.body.replyOnReply)
-  if (req.body.replyOnReply === '0') {
-    replyData.buid = req.body.boardId
-    // console.log(replyData)
-    result = await Reply.create(replyData);
-  } else if (req.body.replyOnReply === '1') {
-    replyData.replyId = req.body.replyId;
-    // console.log(replyData)
-    result = await Reply.createReplyOnReply(replyData)
-    await Reply.becomeParent(replyData.replyId)    
+    // 대댓글 생성
+    replyData.parentId = req.body.parentId;
+    await Reply.createReplyOnReply(replyData, (err, data) => {
+      console.log(data);
+      if (err) {
+        res.status(400).json({
+          msg: err,
+        });
+      } else {
+        res.sendStatus(201);
+      }
+    });
   }
 
-  if (result) {
-    res.status(201).json({
-      result: 'ok'
-    })
-  } else {
-    /* 댓글 상황에 따라 다르게 처리
+  /*
+   댓글과 원문 상태에 따라 추가적인 에러핸들링 필요
     1. 원문 삭제
     2. 서버 오류
     3. DB 오류
     4. 클라이언트 통신 불가
      */
-    res.status(400).json({
-      result: 'error',
-      reason: '코드 재작성 필요'
-    })
-  }
 });
 
-router.post("/updateReply", verifyToken, checkAuth, async function (req, res, next) {
-  const uid = res.locals.uid;
-  const replyId = req.body.replyId;
-  const newReplyBody = req.body.replyBody;
-  
-  if ( await Reply.isWriter(uid, replyId) !== null ) {
-    // models 에서는 return이 정상적이나 여기서는 undefined가 뜨므로 디버깅 필요.
-    // 임시적으로 모두 200을 보내도록 함
-    const result =  await Reply.updateReply(replyId, newReplyBody);
-    console.log(result)
-    if (true) {
-      res.status(200).json({
-        result: "ok",
-      });
-    } else {
-      res.status(400).json({
-        result: "error",
-        reason: "댓글 업데이트 실패"
-      });
-    }
-  } else {
-    res.status(401).json({
-      result: "error",
-      reason: "작성자만 수정할 수 있습니다.",
-    });
+router.post("/view/:buid/updateReply", verifyToken, checkAuth, async function (req, res, next) {
+  const newReplyData = {
+    replyId : req.body.replyId,
+    newReplyBody: req.body.replyBody
   }
+
+  await Reply.updateReply(newReplyData, (err, data) => {
+    console.log(data);
+    if (err) {
+      res.status(400).json({
+        msg: err
+      })
+    } else {
+      res.sendStatus(200)
+    }
+  })
 });
 
-router.post("/removeReply", verifyToken, checkAuth, async function (req, res, next) {
-  const uid = res.locals.uid;
+router.post("/view/:buid/removeReply", verifyToken, checkAuth, async function (req, res, next) {
   const replyId = req.body.replyId;
-
-  if ( await Reply.isWriter(uid, replyId) !== null ) {
-    const result = await Reply.removeReply(replyId);
-    console.log(result);
-    if (result) {
-      res.status(200).json({
-        result: "ok",
-      });
-    } else {
+  await Reply.removeReply(replyId, (err, data) => {
+    console.log(data);
+    if (err) {
       res.status(400).json({
-        result: "error",
-        reason: "댓글 삭제 실패",
-      });
+        msg: err
+      })
+    } else {
+      res.sendStatus(200);
     }
-  } else {
-    res.status(401).json({
-      result: "error",
-      reason: "작성자만 삭제할 수 있습니다.",
-    });
-  }
+  })
 });
 
 /* 유저마다 다르게 받아야 함 */

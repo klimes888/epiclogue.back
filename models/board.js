@@ -1,8 +1,5 @@
 const mongoose = require('mongoose');
 const ObjectId = mongoose.ObjectId;
-const User = require('./users');
-// const Reply = require('./reply').Schema;
-// const React = require('./react').Schema;
 mongoose.set('useCreateIndex', true);
 
 const board = new mongoose.Schema({
@@ -15,11 +12,7 @@ const board = new mongoose.Schema({
     writeDate: {type:Date, default: Date.now},
     originUid:{type:ObjectId},
     originBuId:{type:ObjectId},
-    edited: { type: Boolean, default: false },
-    // likeCount:{type:Number},
-    // Reply와 React는 BoardId를 가지므로 Board Schema에는 넣지 않음.
-    // reactList:{type: [React]},
-    // replyList:{type: [Reply]},
+    edited: { type: Boolean, default: false }
 })
 
 board.statics.create = function (data) {
@@ -58,14 +51,7 @@ board.statics.updateArticle = function (articleData, cb) {
       pub: articleData.pub,
       language: articleData.language,
       edited: true,
-    },
-    function (err, data) {
-      if (err) {
-        console.log(err);
-        return false
-      }
-      return true;
-    }
+    }, cb
   );
 };
 
@@ -81,30 +67,5 @@ board.statics.findAll = function () {
     { _id: 1, boardTitle: 1, uid: 1, pub: 1, category: 1, boardImg: 1 }
   );
 };
-
-/* 좋아요 수는 DB에 쿼리를 날린 후 배열 사이즈로  */
-// board.statics.like = function (boardId) {
-//     return this.updateOne(
-//         { _id: boardId },
-//         {
-//             $inc: {
-//                 likeCount: 1
-//             }
-//         }
-//     )
-// }
-
-// board.statics.unlike = function (boardId) {
-//         return this.updateOne(
-//         { _id: boardId },
-//         {
-//             $inc: {
-//                 likeCount: - 1
-//             }
-//         }
-//     )
-// }
-
-
 
 module.exports = mongoose.model('Board', board);
