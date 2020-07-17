@@ -47,8 +47,20 @@ router.post("/posting", verifyToken, upload.any(), async function (req, res, nex
     })
   }
 });
-
-router.get("/deleteBoard/:buid", verifyToken, checkAuth, async function (req, res, next) {
+// 글 뷰
+router.get("/view/:boardId", verifyToken, async (req, res, next) => {
+  const boardId = req.params.boardId;
+  const boardData = await Board.getArticle(boardId);
+  const replyData = await Reply.getRepliesByBoardId(boardId);
+  
+  res.status(200).json({
+    result: 'ok',
+    board: boardData,
+    reply: replyData
+  });
+})
+// 삭제
+router.get("/view/:buid/delete", verifyToken, checkAuth, async function (req, res, next) {
   const buid = req.params.buid;
   await Board.removeArticle(buid, (err, data) => {
     if (err) {
@@ -64,8 +76,8 @@ router.get("/deleteBoard/:buid", verifyToken, checkAuth, async function (req, re
     }
   });
 });
-
-router.get('/editBoard/:buid', verifyToken, checkAuth, async function (req, res, next) {
+// 수정 전 이전 데이터 불러오기
+router.get('/view/:buid/edit', verifyToken, checkAuth, async function (req, res, next) {
   const buid = req.params.buid;
   const result = await Board.getArticle(buid);
   console.log(result)
@@ -75,7 +87,7 @@ router.get('/editBoard/:buid', verifyToken, checkAuth, async function (req, res,
     data: result
   })
 })
-
+// 수정
 router.post(
   "/view/:buid/edit",
   verifyToken,
@@ -110,7 +122,7 @@ router.post(
     });
   }
 );
-
+// 댓글 생성
 router.post("/view/:buid/reply", verifyToken, async function (req, res, next) {
   const replyData = {
     uid: res.locals.uid,
@@ -154,6 +166,7 @@ router.post("/view/:buid/reply", verifyToken, async function (req, res, next) {
      */
 });
 
+// 댓글 수정
 router.post("/view/:buid/updateReply", verifyToken, checkAuth, async function (req, res, next) {
   const newReplyData = {
     replyId : req.body.replyId,
@@ -172,6 +185,7 @@ router.post("/view/:buid/updateReply", verifyToken, checkAuth, async function (r
   })
 });
 
+// 댓글 삭제
 router.post("/view/:buid/removeReply", verifyToken, checkAuth, async function (req, res, next) {
   const replyId = req.body.replyId;
   await Reply.removeReply(replyId, (err, data) => {
@@ -212,27 +226,5 @@ router.get("/postlist", verifyToken, async function (req, res, next) {
     })
   }
 });
-
-router.get("/view/:boardId", verifyToken, async (req, res, next) => {
-  const boardId = req.params.boardId;
-  const boardData = await Board.getArticle(boardId);
-  const replyData = await Reply.getRepliesByBoardId(boardId);
-  
-  res.status(200).json({
-    result: 'ok',
-    board: boardData,
-    reply: replyData
-  });
-})
-
-router.get("/view/reply/:replyId", verifyToken, async (req, res, next) => {
-  const replyId = req.params.replyId;
-  const replyData = await Reply.getRepliesByParentId(replyId);
-  
-  res.status(200).json({
-    result: 'ok',
-    data: replyData
-  });
-})
 
 module.exports = router;
