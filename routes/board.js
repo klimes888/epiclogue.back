@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { verifyToken } = require("./authorization");
+const { verifyToken, checkAuth } = require("./authorization");
 require("dotenv").config();
 const Board = require("../models/board");
 const Reply = require('../models/reply');
@@ -47,38 +47,37 @@ router.post("/posting", verifyToken, upload.any(), async function (req, res, nex
     })
   }
 });
-
-router.get('/deleteBoard/:buid', verifyToken, async function(req, res, next) {
-  const buid = req.params.buid;
-  const uid = res.locals.uid;
-
-  const isWriter = await Board.isWriter(uid, buid);
-  console.log('[LOG] Writer check: ' + isWriter);
-  if (isWriter) {
-    await Board.removeArticle(buid, (err, data) => {
-      if(err) {
-        res.status(503).json({
-          result: 'error',
-          reason: err
-        })
-      } else {
-        res.status(200).json({
-          result: 'ok'
-        })
-      }
-    });
-    res.status(201).json({
-      result:'ok'
-    })
-  } else {
-    res.status(400).json({
-      result: 'error',
-      reason: '작성자만 삭제할 수 있습니다.'
-    })
-  }
+// 글 뷰
+router.get("/view/:boardId", verifyToken, async (req, res, next) => {
+  const boardId = req.params.boardId;
+  const boardData = await Board.getArticle(boardId);
+  const replyData = await Reply.getRepliesByBoardId(boardId);
+  
+  res.status(200).json({
+    result: 'ok',
+    board: boardData,
+    reply: replyData
+  });
 })
-
-router.get('/editBoard/:buid', verifyToken, async function (req, res, next) {
+// 삭제
+router.get("/view/:buid/delete", verifyToken, checkAuth, async function (req, res, next) {
+  const buid = req.params.buid;
+  await Board.removeArticle(buid, (err, data) => {
+    if (err) {
+      res.status(400).json({
+        result: "error",
+        reason: err,
+      });
+    } else {
+      res.status(200).json({
+        result: "ok",
+      });
+      return;
+    }
+  });
+});
+// 수정 전 이전 데이터 불러오기
+router.get('/view/:buid/edit', verifyToken, checkAuth, async function (req, res, next) {
   const buid = req.params.buid;
   const result = await Board.getArticle(buid);
   console.log(result)
@@ -88,81 +87,117 @@ router.get('/editBoard/:buid', verifyToken, async function (req, res, next) {
     data: result
   })
 })
+// 수정
+router.post(
+  "/view/:buid/edit",
+  verifyToken,
+  upload.any(),
+  checkAuth,
+  async function (req, res, next) {
+    let boardImg = [];
+    for (let i = 0; i < req.files.length; i++) {
+      boardImg.push(req.files[i].location);
+    }
+    const updateData = {
+      uid: res.locals.uid,
+      boardId: req.params.buid,
+      boardTitle: req.body.boardTitle,
+      boardBody: req.body.boardBody,
+      boardImg: boardImg,
+      category: req.body.category,
+      pub: req.body.pub,
+      language: req.body.language,
+    };
 
-router.post("/editBoard", verifyToken, upload.any(), async function (req, res, next) {
-  let boardImg = [];
-  for (let i = 0; i < req.files.length; i++) {
-    boardImg.push(req.files[i].location);
+    await Board.updateArticle(updateData, (err, data) => {
+      console.log("query result: " + data);
+      if (err) {
+        res.status(400).json({
+          msg: err,
+        });
+      }
+      /* S3 업로드 코드 필요 */
+      res.sendStatus(200);
+      return;
+    });
   }
-  const updateData = {
+);
+// 댓글 생성
+router.post("/view/:buid/reply", verifyToken, async function (req, res, next) {
+  const replyData = {
     uid: res.locals.uid,
-    boardId: req.body.boardId,
-    boardTitle: req.body.boardTitle,
-    boardBody: req.body.boardBody,  
-    boardImg: boardImg,
-    category: req.body.category,
-    pub: req.body.pub,
-    language: req.body.language
-  }
-
-  // 글을 쓴 유저가 맞다면
-  if ((await Board.isWriter(updateData.uid, updateData.boardId)) !== null) {
-    console.log('isWriter passed')
-    const query = await Board.updateArticle(updateData);
-    // S3에서 이전 이미지 삭제하는 기능 추가 필요
-    console.log('[LOG] Update query result: ' + query)
-    res.status(200).json({
-      result: 'ok'
-    })
-    /* 에러 핸들링이 작동하지 않아 리팩토링 할 때 고칠 것 */
-    // if (query) {
-    //   res.status(201).json({
-    //     result: "ok",
-    //   });
-    // } else {
-    //   res.status(401).json({
-    //     result: "error",
-    //     reason: query,
-    //   });
-    // }
-  } else {
-    res.status(400).json({
-      result: "error",
-      reason: "작성자만 수정할 수 있습니다."
-    })
-  }
-});
-
-/* API 미정의 */
-router.post("/translate", verifyToken, async function (req, res, next) {
-  
-});
-
-router.post("/comment", verifyToken, async function (req, res, next) {
-  const commentData = {
     replyBody: req.body.replyBody,
-    boardUid: req.body.boardUid,
-    replyWriteDate: Date.now
+    buid: req.params.buid,
+  };
+
+  if (!req.body.parentId) {
+    // 댓글
+    await Reply.create(replyData, (err, data) => {
+      console.log(data);
+      if (err) {
+        res.status(400).json({
+          msg: err,
+        });
+      } else {
+        res.sendStatus(201);
+      }
+    });
+  } else {
+    // 대댓글 생성
+    replyData.parentId = req.body.parentId;
+    await Reply.createReplyOnReply(replyData, (err, data) => {
+      console.log(data);
+      if (err) {
+        res.status(400).json({
+          msg: err,
+        });
+      } else {
+        res.sendStatus(201);
+      }
+    });
   }
 
-  const result = Reply.create(commentData);
-  if (result) {
-    res.status(201).json({
-      result: 'ok'
-    })
-  } else {
-    /* 댓글 상황에 따라 다르게 처리
+  /*
+   댓글과 원문 상태에 따라 추가적인 에러핸들링 필요
     1. 원문 삭제
     2. 서버 오류
     3. DB 오류
     4. 클라이언트 통신 불가
      */
-    res.status(401).json({
-      result: 'error',
-      reason: '코드 재작성 필요'
-    })
+});
+
+// 댓글 수정
+router.post("/view/:buid/updateReply", verifyToken, checkAuth, async function (req, res, next) {
+  const newReplyData = {
+    replyId : req.body.replyId,
+    newReplyBody: req.body.replyBody
   }
-  
+
+  await Reply.updateReply(newReplyData, (err, data) => {
+    console.log(data);
+    if (err) {
+      res.status(400).json({
+        msg: err
+      })
+    } else {
+      res.sendStatus(200)
+    }
+  })
+});
+
+// 댓글 삭제
+router.post("/view/:buid/removeReply", verifyToken, checkAuth, async function (req, res, next) {
+  const replyId = req.body.replyId;
+  await Reply.removeReply(replyId, (err, data) => {
+    console.log(data);
+    if (err) {
+      res.status(400).json({
+        msg: err
+      })
+    } else {
+      res.sendStatus(200);
+    }
+  })
 });
 
 /* 유저마다 다르게 받아야 함 */
@@ -191,15 +226,5 @@ router.get("/postlist", verifyToken, async function (req, res, next) {
     })
   }
 });
-
-router.get("/view/:buid", verifyToken, async (req, res, next) => {
-  const buid = req.params.buid;
-  const boardData = await Board.getArticle(buid);
-  console.log(boardData)
-  res.status(201).json({
-    result: 'ok',
-    data: boardData
-  });
-})
 
 module.exports = router;

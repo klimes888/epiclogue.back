@@ -4,67 +4,57 @@ mongoose.set("useCreateIndex", true);
 
 const reply = new mongoose.Schema({
   uid: { type: ObjectId, required: true },
-  buid: { type: ObjectId, required: true },
-  body: { type: String, required: true },
+  buid: { type: ObjectId, default: null },
+  replyBody: { type: String, required: true },
   writeDate: { type: Date, default: Date.now },
   edited: { type: Boolean, default: false },
-  // heartCount: { type: Number, default: 0 },
-  // replyOnReply: [
-  //   {
-  //     uid: { type: ObjectId },
-  //     body: { type: String },
-  //     writeDate: { type: Date, default: Date.now },
-  //     heartCount: { type: Number, default: 0 },
-  //     edited: { type: Boolean, default: false },
-  //   },
-  // ],
+  parentId: { type: ObjectId, default: null },
 });
 
-reply.statics.create = function (data) {
+// Create
+reply.statics.create = function (data, cb) {
   const replyData = new this(data);
-  return replyData.save();
+  return replyData.save(cb);
 };
 
-// 하나만 조회하는 일은 없을 것이라 생각하여 주석처리
-// reply.statics.getReplyById = function (replyId) {
-//   return this.find({ _id: replyId });
-// };
+reply.statics.createReplyOnReply = function (replyOnReplyInput, cb) {
+  const replyOnReplyData = new this({
+    uid: replyOnReplyInput.uid,
+    buid: replyOnReplyInput.buid,
+    replyBody: replyOnReplyInput.replyBody,
+    parentId: replyOnReplyInput.parentId,
+  });
 
-reply.statics.updateReply = function ({ replyId, newReplyBody }) {
-  return this.updateOne(
-    { _id: replyId },
+  replyOnReplyData.save(cb);
+};
+// Read
+reply.statics.getRepliesByBoardId = function (boardId) {
+  return this.find({ buid: boardId });
+};
+
+reply.statics.getRepliesByParentId = function (replyId) {
+  return this.find({ parentId: replyId });
+};
+
+reply.statics.isWriter = function (uid, replyId) {
+  return this.findOne({ _id: replyId, uid: uid });
+};
+
+// Update
+reply.statics.updateReply = async function (newReplyData, cb) {
+  this.updateOne(
+    { _id: newReplyData.replyId },
     {
-      replyBody: newReplyBody,
+      replyBody: newReplyData.newReplyBody,
       edited: true,
-    }
+    },
+    cb
   );
 };
 
-reply.statics.removeReply = function (replyId) {
-  return this.deleteOne({ _id: replyId });
+// Delete
+reply.statics.removeReply = function (replyId, cb) {
+  return this.deleteOne({ _id: replyId }, cb);
 };
-
-reply.statics.getRepliesByBoardId = function (boardId) {
-  return this.find({ buid: boardId });
-}
-
-// reply.statics.createReplyOnReply = function ({ replyId, replyOnReplyBody, uid }) {
-//     return this.updateOne({ _id: replyId }, {
-//         $push: {
-//             replyOnReply: {
-//                 uid: uid,
-//                 body: replyOnReplyBody
-//             }
-//         }
-//     })
-// }
-
-// reply.statics.updateReplyOnReply = function ({ replyId, newReplyOnReplyBody }) {
-//     return this.updateOne({ _id: replyId }, {
-//         $set: {
-
-//         }
-//     })
-// }
 
 module.exports = mongoose.model("Reply", reply);
