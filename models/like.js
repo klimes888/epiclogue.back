@@ -3,9 +3,10 @@ const ObjectId = mongoose.ObjectId;
 mongoose.set("useCreateIndex", true);
 
 const like = new mongoose.Schema({
-  uid: { type: ObjectId, required: true },
-  targetUid: { type: ObjectId, required: true },
+  userId: { type: ObjectId, required: true },
   targetType: { type: String, required: true }, // 글(article), 댓글(reply), 대댓글(replyOnReply)
+  targetId: { type: ObjectId, required: true },
+  likeDate: { type: Date, default: Date.now },
 });
 
 like.statics.create = function (data) {
@@ -18,8 +19,8 @@ like.statics.unlike = function (likeId) {
 };
 
 // 유저의 좋아요 목록
-like.statics.likeList = function (userId) {
-  return this.find({ uid: userId });
+like.statics.getLikeList = function (userId) {
+  return this.find({ userId });
 };
 
 module.exports = mongoose.model("Like", like);

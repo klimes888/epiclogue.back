@@ -3,27 +3,27 @@ const ObjectId = mongoose.ObjectId;
 mongoose.set("useCreateIndex", true);
 
 const follow = new mongoose.Schema({
-  uid: { type: ObjectId, required: true },
-  targetUid: { type: ObjectId, required: true },
+  userId: { type: ObjectId, required: true },
+  targetUserId: { type: ObjectId, required: true },
 });
 
-follow.statics.create = function (data) {
+follow.statics.create = function (data, cb) {
   const followData = new this(data);
-  return followData.save();
+  return followData.save(cb);
 };
 
-follow.statics.unfollow = function ({ userId, targetUserId }) {
-  return this.deleteOne({ uid: userId, targetUid: targetUserId });
+follow.statics.unfollow = function (unFollowData, cb) {
+  return this.deleteOne({ userId: unFollowData.userId, targetUserId: unFollowData.targetUserId }, cb);
 };
 
-// 유저의 팔로우 목록
-follow.statics.followList = function (userId) {
-  return this.find({ uid: userId });
+// 유저의 팔로잉 목록
+follow.statics.followingList = function (userId, cb) {
+  return this.find({ userId }, cb);
 };
 
 // 유저의 팔로워 목록
-follow.statics.followerList = function (userId) {
-  return this.find({ targetUid: userId });
+follow.statics.followerList = function (targetUserId, cb) {
+  return this.find({ targetUserId }, cb);
 };
 
 module.exports = mongoose.model("follow", follow);

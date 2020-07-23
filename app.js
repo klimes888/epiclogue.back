@@ -51,6 +51,7 @@ app.use('/users', usersRouter);
 app.use('/board', boardRouter);
 app.use('/:screenId/posts/:boardId/replies', require('./routes/reply'));
 app.use('/:screenId/posts/:boardId/replies-on-reply', require('./routes/replyOnReply'));
+app.use('/:screenId', require('./routes/follow'))
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
