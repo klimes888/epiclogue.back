@@ -5,7 +5,7 @@ mongoose.set("useCreateIndex", true);
 const reply = new mongoose.Schema({
   uid: { type: ObjectId, required: true },
   buid: { type: ObjectId, required: true },
-  body: { type: String, required: true },
+  replyBody: { type: String, required: true },
   writeDate: { type: Date, default: Date.now },
   edited: { type: Boolean, default: false },
   childCount: { type: Number, default: 0 },
@@ -23,7 +23,7 @@ reply.statics.getRepliesByBoardId = function (boardId, cb) {
 };
 
 reply.statics.getBody = function (replyId, cb) {
-  return this.findOne({ _id: replyId }, { _id: 0, body: 1 }, cb);
+  return this.findOne({ _id: replyId }, { _id: 0, replyBody: 1 }, cb);
 };
 
 // Auth
@@ -36,7 +36,7 @@ reply.statics.update = async function ({replyId, newReplyBody}, cb) {
   this.updateOne(
     { _id: replyId },
     {
-      body: newReplyBody,
+      replyBody: newReplyBody,
       edited: true,
     },
     cb

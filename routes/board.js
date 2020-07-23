@@ -136,6 +136,7 @@ router.post(
     });
   }
 );
+
 // 댓글 생성
 router.post("/view/:buid/reply", verifyToken, async function (req, res, next) {
   const replyData = {
@@ -165,13 +166,13 @@ router.post("/view/:buid/reply", verifyToken, async function (req, res, next) {
 });
 
 // 댓글 수정
-router.post("/view/:buid/updateReply", verifyToken, checkWriter, async function (req, res, next) {
+router.post("/view/:buid/updateReply", verifyToken, async function (req, res, next) {
   const newReplyData = {
     replyId : req.body.replyId,
     newReplyBody: req.body.replyBody
   }
 
-  await Reply.updateReply(newReplyData, (err, data) => {
+  await Reply.update(newReplyData, (err, data) => {
     console.log(data);
     if (err) {
       res.status(400).json({
@@ -184,9 +185,9 @@ router.post("/view/:buid/updateReply", verifyToken, checkWriter, async function 
 });
 
 // 댓글 삭제
-router.post("/view/:buid/removeReply", verifyToken, checkWriter, async function (req, res, next) {
+router.post("/view/:buid/removeReply", verifyToken, async function (req, res, next) {
   const replyId = req.body.replyId;
-  await Reply.removeReply(replyId, (err, data) => {
+  await Reply.delete(replyId, (err, data) => {
     console.log(data);
     if (err) {
       res.status(400).json({

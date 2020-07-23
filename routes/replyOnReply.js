@@ -4,7 +4,7 @@ const router = express.Router();
 import { verifyToken, checkWriter } from "./authorization";
 import ReplyOnReply from "../models/replyOnReply";
 
-router.post("/", verifyToken, checkWriter, async (req, res, next) => {
+router.post("/", verifyToken, async (req, res, next) => {
   const userId = res.locals.uid;
   const parentId = req.body.parentId;
   const body = req.body.body;
