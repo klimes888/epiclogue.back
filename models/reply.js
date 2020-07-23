@@ -4,7 +4,7 @@ mongoose.set("useCreateIndex", true);
 
 const reply = new mongoose.Schema({
   uid: { type: ObjectId, required: true },
-  boardId: { type: ObjectId, required: true },
+  buid: { type: ObjectId, required: true },
   body: { type: String, required: true },
   writeDate: { type: Date, default: Date.now },
   edited: { type: Boolean, default: false },
@@ -12,14 +12,14 @@ const reply = new mongoose.Schema({
 });
 
 // Create
-reply.statics.create = function (data, cb) {
+reply.statics.create = function (data, session, cb) {
   const replyData = new this(data);
-  return replyData.save(cb);
+  return replyData.save(session, cb);
 };
 
 // Read
 reply.statics.getRepliesByBoardId = function (boardId, cb) {
-  return this.find({ boardId }, cb);
+  return this.find({ buid: boardId }, cb);
 };
 
 reply.statics.getBody = function (replyId, cb) {
