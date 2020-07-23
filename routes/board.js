@@ -145,6 +145,7 @@ router.post("/view/:buid/reply", verifyToken, async function (req, res, next) {
       res.sendStatus(201);
     }
   });
+
   /*
    댓글과 원문 상태에 따라 추가적인 에러핸들링 필요
     1. 원문 삭제
