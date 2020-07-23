@@ -10,6 +10,7 @@ const board = new mongoose.Schema({
     category: {type:String, required: true},
     pub: {type:String, required: true},
     writeDate: {type:Date, default: Date.now},
+    language: { type: String, default: "Korean" },
     originUid:{type:ObjectId},
     originBuId:{type:ObjectId},
     edited: { type: Boolean, default: false }
@@ -22,8 +23,8 @@ board.statics.create = function (data) {
 }
 
 /* 수정, 삭제, 댓글에 필요한 boardId GET (미검증) */
-board.statics.getArticle = function ( boardId ) {
-    return this.findOne({ "_id" : boardId });
+board.statics.getArticle = function ( boardId, cb ) {
+    return this.findOne({ "_id" : boardId }, cb);
 }
 
 /* 특정 유저의 글 GET (미검증) */ 

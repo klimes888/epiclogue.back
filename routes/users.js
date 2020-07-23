@@ -22,10 +22,7 @@ router.get('/', function(req, res, next) {
 });
 
 router.get('/login', function(req, res, next) {
-  res.status(401).json({
-    result:'error',
-    reason:'not allow method'
-  })
+  res.sendStatus(405);
 })
 
 router.post('/login', async function(req, res, next) {
