@@ -4,11 +4,11 @@ mongoose.set("useCreateIndex", true);
 
 const reply = new mongoose.Schema({
   uid: { type: ObjectId, required: true },
-  buid: { type: ObjectId, default: null },
-  replyBody: { type: String, required: true },
+  boardId: { type: ObjectId, required: true },
+  body: { type: String, required: true },
   writeDate: { type: Date, default: Date.now },
   edited: { type: Boolean, default: false },
-  parentId: { type: ObjectId, default: null },
+  childCount: { type: Number, default: 0 },
 });
 
 // Create
@@ -17,35 +17,26 @@ reply.statics.create = function (data, cb) {
   return replyData.save(cb);
 };
 
-reply.statics.createReplyOnReply = function (replyOnReplyInput, cb) {
-  const replyOnReplyData = new this({
-    uid: replyOnReplyInput.uid,
-    buid: replyOnReplyInput.buid,
-    replyBody: replyOnReplyInput.replyBody,
-    parentId: replyOnReplyInput.parentId,
-  });
-
-  replyOnReplyData.save(cb);
-};
 // Read
-reply.statics.getRepliesByBoardId = function (boardId) {
-  return this.find({ buid: boardId });
+reply.statics.getRepliesByBoardId = function (boardId, cb) {
+  return this.find({ boardId }, cb);
 };
 
-reply.statics.getRepliesByParentId = function (replyId) {
-  return this.find({ parentId: replyId });
+reply.statics.getBody = function (replyId, cb) {
+  return this.findOne({ _id: replyId }, { _id: 0, body: 1 }, cb);
 };
 
+// Auth
 reply.statics.isWriter = function (uid, replyId) {
   return this.findOne({ _id: replyId, uid: uid });
 };
 
 // Update
-reply.statics.updateReply = async function (newReplyData, cb) {
+reply.statics.update = async function ({replyId, newReplyBody}, cb) {
   this.updateOne(
-    { _id: newReplyData.replyId },
+    { _id: replyId },
     {
-      replyBody: newReplyData.newReplyBody,
+      body: newReplyBody,
       edited: true,
     },
     cb
@@ -53,8 +44,12 @@ reply.statics.updateReply = async function (newReplyData, cb) {
 };
 
 // Delete
-reply.statics.removeReply = function (replyId, cb) {
+reply.statics.delete = function (replyId, cb) {
   return this.deleteOne({ _id: replyId }, cb);
 };
+
+reply.statics.deleteByBoardId = function (boardId, cb) {
+  return this.deleteMany({ boardId }, cb)
+}
 
 module.exports = mongoose.model("Reply", reply);

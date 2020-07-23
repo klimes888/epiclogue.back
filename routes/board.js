@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { verifyToken, checkAuth } = require("./authorization");
+const { verifyToken, checkWriter } = require("./authorization");
 require("dotenv").config();
 const Board = require("../models/board");
 const Reply = require('../models/reply');
@@ -51,25 +51,13 @@ router.post("/posting", verifyToken, upload.any(), async function (req, res, nex
 router.get("/view/:boardId", verifyToken, async (req, res, next) => {
   const boardId = req.params.boardId;
   const boardData = await Board.getArticle(boardId);
-  const replyDataWithOutUserInfo = await Reply.getRepliesByBoardId(boardId);
-  const replyData = []
-  for(const reply of replyDataWithOutUserInfo) {
-    let {nickname, userid} = await User.getUserInfo(reply.uid);
-    replyData.push({
-      _id:reply._id,
-      buid:reply.buid,
-      edited:reply.edited,
-      replyBody:reply.replyBody,
-      writeDate:reply.writeDate,
-      userInfo:{
-        userId:userid,
-        userNick:nickname
-      }
-    })
-  }
-
-  console.log(replyData)
-
+  let replyData;
+  await Reply.getRepliesByBoardId(boardId, (err, data) => {
+    if (err) {
+      console.log(`[LOG] 데이터베이스 쿼리 에러`)
+    }
+    replyData = data;
+  });
   res.status(200).json({
     result: 'ok',
     board: boardData,
@@ -77,9 +65,9 @@ router.get("/view/:boardId", verifyToken, async (req, res, next) => {
   });
 })
 // 삭제
-router.get("/view/:buid/delete", verifyToken, checkAuth, async function (req, res, next) {
-  const buid = req.params.buid;
-  await Board.removeArticle(buid, (err, data) => {
+router.get("/view/:boardId/delete", verifyToken, checkWriter, async function (req, res, next) {
+  const boardId = req.params.boardId;
+  await Board.removeArticle(boardId, (err, data) => {
     if (err) {
       res.status(400).json({
         result: "error",
@@ -94,10 +82,10 @@ router.get("/view/:buid/delete", verifyToken, checkAuth, async function (req, re
   });
 });
 // 수정 전 이전 데이터 불러오기
-router.get('/view/:buid/edit', verifyToken, checkAuth, async function (req, res, next) {
-  const buid = req.params.buid;
-  const result = await Board.getArticle(buid);
-  console.log(result)
+router.get('/view/:boardId/edit', verifyToken, checkWriter, async function (req, res, next) {
+  const boardId = req.params.boardId;
+  const result = await Board.getArticle(boardId);
+  // console.log(result)
 
   res.status(201).json({
     result:'ok',
@@ -106,10 +94,10 @@ router.get('/view/:buid/edit', verifyToken, checkAuth, async function (req, res,
 })
 // 수정
 router.post(
-  "/view/:buid/edit",
+  "/view/:boardId/edit",
   verifyToken,
   upload.any(),
-  checkAuth,
+  checkWriter,
   async function (req, res, next) {
     let boardImg = [];
     for (let i = 0; i < req.files.length; i++) {
@@ -117,7 +105,7 @@ router.post(
     }
     const updateData = {
       uid: res.locals.uid,
-      boardId: req.params.buid,
+      boardId: req.params.boardId,
       boardTitle: req.body.boardTitle,
       boardBody: req.body.boardBody,
       boardImg: boardImg,
@@ -147,70 +135,16 @@ router.post("/view/:buid/reply", verifyToken, async function (req, res, next) {
     buid: req.params.buid,
   };
 
-  if (!req.body.parentId) {
-    // 댓글
-    await Reply.create(replyData, async (err, data) => {
-      console.log(data);
-      if (err) {
-        res.status(400).json({
-          msg: err,
-        });
-      } else {
-        const replyDataWithOutUserInfo = await Reply.getRepliesByBoardId(req.params.buid);
-        const replyData = []
-        for(const reply of replyDataWithOutUserInfo) {
-          let {nickname, userid} = await User.getUserInfo(reply.uid);
-          replyData.push({
-            _id:reply._id,
-            buid:reply.buid,
-            edited:reply.edited,
-            replyBody:reply.replyBody,
-            writeDate:reply.writeDate,
-            userInfo:{
-              userId:userid,
-              userNick:nickname
-            }
-          })
-        }
-        res.status(201).json({
-          result: 'ok',
-          reply: replyData
-        });
-      }
-    });
-  } else {
-    // 대댓글 생성
-    replyData.parentId = req.body.parentId;
-    await Reply.createReplyOnReply(replyData, async (err, data) => {
-      console.log(data);
-      if (err) {
-        res.status(400).json({
-          msg: err,
-        });
-      } else {
-        const replyDataWithOutUserInfo = await Reply.getRepliesByBoardId(req.params.buid);
-        const replyData = []
-        for(const reply of replyDataWithOutUserInfo) {
-          let {nickname, userid} = await User.getUserInfo(reply.uid);
-          replyData.push({
-            _id:reply._id,
-            buid:reply.buid,
-            edited:reply.edited,
-            replyBody:reply.replyBody,
-            writeDate:reply.writeDate,
-            userInfo:{
-              userId:userid,
-              userNick:nickname
-            }
-          })
-        }
-        res.status(201).json({
-          result: 'ok',
-          reply: replyData
-        });
-      }
-    });
-  }
+  await Reply.create(replyData, (err, data) => {
+    console.log(data);
+    if (err) {
+      res.status(400).json({
+        msg: err,
+      });
+    } else {
+      res.sendStatus(201);
+    }
+  });
 
   /*
    댓글과 원문 상태에 따라 추가적인 에러핸들링 필요
@@ -222,7 +156,7 @@ router.post("/view/:buid/reply", verifyToken, async function (req, res, next) {
 });
 
 // 댓글 수정
-router.post("/view/:buid/updateReply", verifyToken, checkAuth, async function (req, res, next) {
+router.post("/view/:buid/updateReply", verifyToken, checkWriter, async function (req, res, next) {
   const newReplyData = {
     replyId : req.body.replyId,
     newReplyBody: req.body.replyBody
@@ -241,7 +175,7 @@ router.post("/view/:buid/updateReply", verifyToken, checkAuth, async function (r
 });
 
 // 댓글 삭제
-router.post("/view/:buid/removeReply", verifyToken, checkAuth, async function (req, res, next) {
+router.post("/view/:buid/removeReply", verifyToken, checkWriter, async function (req, res, next) {
   const replyId = req.body.replyId;
   await Reply.removeReply(replyId, (err, data) => {
     console.log(data);
