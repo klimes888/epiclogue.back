@@ -51,13 +51,22 @@ router.post("/posting", verifyToken, upload.any(), async function (req, res, nex
 router.get("/view/:boardId", verifyToken, async (req, res, next) => {
   const boardId = req.params.boardId;
   const boardData = await Board.getArticle(boardId);
-  let replyData;
-  await Reply.getRepliesByBoardId(boardId, (err, data) => {
-    if (err) {
-      console.log(`[LOG] 데이터베이스 쿼리 에러`)
-    }
-    replyData = data;
-  });
+  const replyDataWithOutUserInfo = await Reply.getRepliesByBoardId(boardId);
+  const replyData = []
+  for(const reply of replyDataWithOutUserInfo) {
+    let {nickname, userid} = await User.getUserInfo(reply.uid);
+    replyData.push({
+      _id:reply._id,
+      buid:reply.buid,
+      edited:reply.edited,
+      replyBody:reply.replyBody,
+      writeDate:reply.writeDate,
+      userInfo:{
+        userId:userid,
+        userNick:nickname
+      }
+    })
+  }
   res.status(200).json({
     result: 'ok',
     board: boardData,
