@@ -56,8 +56,8 @@ user.statics.getSalt = function (email) {
     return this.findOne({"email":email},{_id:0, salt:1});
 }
 
-user.statics.getUserInfo = function (uid) {
-    return this.findOne({"_id":uid})
+user.statics.getUserInfo = function (uid, option) {
+    return this.findOne({"_id":uid}, option)
 }
 
 user.statics.deleteUser = function (uid, userpw) {

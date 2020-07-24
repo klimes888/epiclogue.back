@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { verifyToken, checkWriter } = require("./authorization");
+const { verifyToken, checkWriter, lagacyCheckWriter } = require("./authorization");
 require("dotenv").config();
 const Board = require("../models/board");
 const Reply = require('../models/reply');
@@ -51,6 +51,10 @@ router.post("/posting", verifyToken, upload.any(), async function (req, res, nex
 router.get("/view/:boardId", verifyToken, async (req, res, next) => {
   const boardId = req.params.boardId;
   const boardData = await Board.getArticle(boardId);
+  const writerData = await User.getUserInfo(res.locals.uid, {
+    nickname: 1,
+    userid: 1
+  })
   const replyDataWithOutUserInfo = await Reply.getRepliesByBoardId(boardId);
   const replyData = []
   for(const reply of replyDataWithOutUserInfo) {
@@ -69,12 +73,13 @@ router.get("/view/:boardId", verifyToken, async (req, res, next) => {
   }
   res.status(200).json({
     result: 'ok',
+    writer: writerData,
     board: boardData,
     reply: replyData
   });
 })
 // 삭제
-router.get("/view/:boardId/delete", verifyToken, checkWriter, async function (req, res, next) {
+router.get("/view/:boardId/delete", verifyToken, lagacyCheckWriter, async function (req, res, next) {
   const boardId = req.params.boardId;
   await Board.removeArticle(boardId, (err, data) => {
     if (err) {
@@ -91,7 +96,7 @@ router.get("/view/:boardId/delete", verifyToken, checkWriter, async function (re
   });
 });
 // 수정 전 이전 데이터 불러오기
-router.get('/view/:boardId/edit', verifyToken, checkWriter, async function (req, res, next) {
+router.get('/view/:boardId/edit', verifyToken, lagacyCheckWriter, async function (req, res, next) {
   const boardId = req.params.boardId;
   const result = await Board.getArticle(boardId);
   // console.log(result)
@@ -105,26 +110,25 @@ router.get('/view/:boardId/edit', verifyToken, checkWriter, async function (req,
 router.post(
   "/view/:boardId/edit",
   verifyToken,
-  upload.any(),
-  checkWriter,
-  async function (req, res, next) {
-    let boardImg = [];
-    for (let i = 0; i < req.files.length; i++) {
-      boardImg.push(req.files[i].location);
-    }
+  // upload.any(),
+  lagacyCheckWriter,
+  function (req, res, next) {
+    // let boardImg = [];
+    // for (let i = 0; i < req.files.length; i++) {
+    //   boardImg.push(req.files[i].location);
+    // }
     const updateData = {
       uid: res.locals.uid,
       boardId: req.params.boardId,
       boardTitle: req.body.boardTitle,
       boardBody: req.body.boardBody,
-      boardImg: boardImg,
+      boardImg: req.body.boardImg,
       category: req.body.category,
       pub: req.body.pub,
       language: req.body.language,
     };
 
-    await Board.updateArticle(updateData, (err, data) => {
-      console.log("query result: " + data);
+    Board.updateArticle(updateData, (err, data) => {
       if (err) {
         res.status(400).json({
           msg: err,
@@ -166,14 +170,13 @@ router.post("/view/:buid/reply", verifyToken, async function (req, res, next) {
 });
 
 // 댓글 수정
-router.post("/view/:buid/updateReply", verifyToken, async function (req, res, next) {
+router.post("/view/:buid/updateReply", verifyToken, lagacyCheckWriter, async function (req, res, next) {
   const newReplyData = {
     replyId : req.body.replyId,
     newReplyBody: req.body.replyBody
   }
 
   await Reply.update(newReplyData, (err, data) => {
-    console.log(data);
     if (err) {
       res.status(400).json({
         msg: err
@@ -185,7 +188,7 @@ router.post("/view/:buid/updateReply", verifyToken, async function (req, res, ne
 });
 
 // 댓글 삭제
-router.post("/view/:buid/removeReply", verifyToken, async function (req, res, next) {
+router.post("/view/:buid/removeReply", verifyToken, lagacyCheckWriter, async function (req, res, next) {
   const replyId = req.body.replyId;
   await Reply.delete(replyId, (err, data) => {
     console.log(data);

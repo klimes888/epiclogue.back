@@ -28,8 +28,8 @@ reply.statics.getBody = function (replyId, cb) {
 };
 
 // Auth
-reply.statics.isWriter = function (uid, replyId) {
-  return this.findOne({ _id: replyId, uid: uid });
+reply.statics.isWriter = function (uid, replyId, cb) {
+  return this.findOne({ _id: replyId, uid: uid }, cb);
 };
 
 // Update

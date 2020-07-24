@@ -37,11 +37,8 @@ board.statics.getUserArticleList = function (userId) {
   });
 };
 
-board.statics.isWriter = function (userId, boardId) {
-  this.findOne({ _id: boardId, uid: userId }, (err, data) => {
-    console.log(data)
-  })
-  return this.findOne({ _id: boardId, uid: userId })
+board.statics.isWriter = function (userId, boardId, cb) {
+  return this.findOne({ _id: boardId, uid: userId }, cb)
 }
 
 board.statics.updateArticle = function (articleData, cb) {
@@ -63,7 +60,6 @@ board.statics.removeArticle = function (buid, cb) {
     return this.deleteOne({ _id: buid }, cb)
 }
 
-// 카운팅 추가 필요
 
 /* 글 전체 조회 */
 board.statics.findAll = function () {
