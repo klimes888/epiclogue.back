@@ -99,5 +99,9 @@ const checkWriter = async (req, res, next) => {
   }
 }
 
-exports.verifyToken = verifyToken;
-exports.checkWriter = checkWriter;
+
+module.exports = {
+  verifyToken,
+  checkWriter,
+  lagacyCheckWriter
+}

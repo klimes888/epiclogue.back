@@ -11,6 +11,9 @@ const board = new mongoose.Schema({
     pub: {type:String, required: true},
     writeDate: {type:Date, default: Date.now},
     language: { type: String, default: "Korean" },
+    heartCount: { type: Number, default: 0 },
+    replyCount: { type: Number, default: 0 },
+    bookmarkCount: { type: Number, default: 0 },
     originUid:{type:ObjectId},
     originBuId:{type:ObjectId},
     edited: { type: Boolean, default: false }
@@ -59,6 +62,8 @@ board.statics.updateArticle = function (articleData, cb) {
 board.statics.removeArticle = function (buid, cb) {
     return this.deleteOne({ _id: buid }, cb)
 }
+
+// 카운팅 추가 필요
 
 /* 글 전체 조회 */
 board.statics.findAll = function () {

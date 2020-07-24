@@ -4,10 +4,13 @@ mongoose.set("useCreateIndex", true);
 
 const ReplyOnReply = new mongoose.Schema({
   userId: { type: ObjectId, required: true },
+  boardId: { type: ObjectId, required: true },
   parentId: { type: ObjectId, required: true },
-  body: { type: String, required: true },
+  replyBody: { type: String, required: true },
   writeDate: { type: Date, default: Date.now },
   edited: { type: Boolean, default: false },
+  heartCount: { type: Number, default: 0 },
+  bookmarkCount: { type: Number, default: 0 },
 });
 
 // Create
@@ -27,7 +30,7 @@ ReplyOnReply.statics.getByParentId = function (parentId, cb) {
 };
 
 ReplyOnReply.statics.getBody = function (repliesOnReplyId, cb) {
-  return this.findOne({ _id: repliesOnReplyId }, { _id: 0, body: 1 }, cb);
+  return this.findOne({ _id: repliesOnReplyId }, { _id: 0, replyBody: 1 }, cb);
 };
 
 // Update
@@ -35,7 +38,7 @@ ReplyOnReply.statics.update = async function (updateForm, cb) {
   return this.updateOne(
     { _id: updateForm.repliesOnReplyId },
     {
-      body: updateForm.newBody,
+      replyBody: updateForm.newReplyBody,
       edited: true,
     },
     cb
@@ -48,8 +51,14 @@ ReplyOnReply.statics.delete = function (repliesOnReplyId, cb) {
 };
 
 // Delete all
+ReplyOnReply.statics.deleteByBoardId = function (boardId, cb) {
+  return this.deleteMany({ boardId }, cb);
+};
+
 ReplyOnReply.statics.deleteByParentId = function (parentId, cb) {
   return this.deleteMany({ parentId }, cb);
 };
+
+// Counting
 
 module.exports = mongoose.model("RepliesOnReply", ReplyOnReply);
