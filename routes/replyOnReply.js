@@ -1,5 +1,7 @@
 import express from "express";
-const router = express.Router();
+const router = express.Router({
+  mergeParams: true
+});
 
 import { verifyToken, checkWriter } from "./authorization";
 import ReplyOnReply from "../models/replyOnReply";
@@ -7,11 +9,12 @@ import ReplyOnReply from "../models/replyOnReply";
 // 대댓글 생성
 router.post("/", verifyToken, (req, res, next) => {
   const userId = res.locals.uid;
+  const boardId = req.params.boardId;
   const parentId = req.body.parentId;
-  const boardId = req.body.boardId;
   const replyBody = req.body.replyBody;
+  console.log(parentId, boardId)
 
-   ReplyOnReply.create({ userId, parentId, replyBody, boardId }, (err, data) => {
+  ReplyOnReply.create({ userId, parentId, replyBody, boardId }, (err, data) => {
     console.log(data)
     if (err) {
       console.log(`[Error!] ${err}`)
