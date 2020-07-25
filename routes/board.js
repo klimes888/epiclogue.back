@@ -110,13 +110,13 @@ router.get('/view/:boardId/edit', verifyToken, lagacyCheckWriter, async function
 router.post(
   "/view/:boardId/edit",
   verifyToken,
-  // upload.any(),
+  upload.any(),
   lagacyCheckWriter,
   function (req, res, next) {
-    // let boardImg = [];
-    // for (let i = 0; i < req.files.length; i++) {
-    //   boardImg.push(req.files[i].location);
-    // }
+    let boardImg = [];
+    for (let i = 0; i < req.files.length; i++) {
+      boardImg.push(req.files[i].location);
+    }
     const updateData = {
       uid: res.locals.uid,
       boardId: req.params.boardId,
