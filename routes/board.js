@@ -122,7 +122,7 @@ router.post(
       boardId: req.params.boardId,
       boardTitle: req.body.boardTitle,
       boardBody: req.body.boardBody,
-      boardImg: req.body.boardImg,
+      boardImg: boardImg,
       category: req.body.category,
       pub: req.body.pub,
       language: req.body.language,
