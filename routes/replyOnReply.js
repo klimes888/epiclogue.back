@@ -1,15 +1,21 @@
 import express from "express";
-const router = express.Router();
+const router = express.Router({
+  mergeParams: true
+});
 
 import { verifyToken, checkWriter } from "./authorization";
 import ReplyOnReply from "../models/replyOnReply";
 
-router.post("/", verifyToken, async (req, res, next) => {
+// 대댓글 생성
+router.post("/", verifyToken, (req, res, next) => {
   const userId = res.locals.uid;
+  const boardId = req.params.boardId;
   const parentId = req.body.parentId;
-  const body = req.body.body;
+  const replyBody = req.body.replyBody;
+  console.log(parentId, boardId)
 
-  await ReplyOnReply.create({ userId, parentId, body }, (err, data) => {
+  ReplyOnReply.create({ userId, parentId, replyBody, boardId }, (err, data) => {
+    console.log(data)
     if (err) {
       console.log(`[Error!] ${err}`)
       res.status(400).json({
@@ -23,9 +29,10 @@ router.post("/", verifyToken, async (req, res, next) => {
   });
 });
 
+// 댓글 하위의 대댓글 뷰
 router.get("/:parentId", verifyToken, async (req, res, next) => {
   const parentId = req.params.parentId;
-  await ReplyOnReply.getByParentId(parentId, (err, data) => {
+  ReplyOnReply.getByParentId(parentId, (err, data) => {
     if (err) {
       console.log(`[Error!] ${err}`)
       res.status(400).json({
@@ -59,7 +66,7 @@ router.get("/:repliesOnReplyId/edit", verifyToken, checkWriter, async (req, res,
 router.patch("/:repliesOnReplyId", verifyToken, checkWriter, async (req, res, next) => {
   const newForm = {
     repliesOnReplyId: req.params.repliesOnReplyId,
-    newBody: req.body.newBody,
+    newReplyBody: req.body.newReplyBody,
   };
 
   await ReplyOnReply.update(newForm, (err, data) => {
@@ -97,7 +104,7 @@ router.patch("/:repliesOnReplyId", verifyToken, checkWriter, async (req, res, ne
 router.delete("/:repliesOnReplyId", verifyToken, checkWriter, async (req, res, next) => {
   const repliesOnReplyId = req.params.repliesOnReplyId;
 
-  await ReplyOnReply.delete(repliesOnReplyId, (err, data) => {
+  ReplyOnReply.delete(repliesOnReplyId, (err, data) => {
     if (err) {
       console.log(`[Error!] ${err}`)
       if (msg.kind === "ObjectID") {
@@ -109,7 +116,7 @@ router.delete("/:repliesOnReplyId", verifyToken, checkWriter, async (req, res, n
       }
       return;
     }
-    // console.log(data);
+    console.log(data);
 
     if (data.ok === 1) {
       if (data.n === 1 && data.n === data.deletedCount) {
@@ -134,7 +141,7 @@ router.delete("/:repliesOnReplyId", verifyToken, checkWriter, async (req, res, n
 });
 
 router.delete(
-  "/replies-on-reply/:replyId",
+  "/:replyId",
   verifyToken,
   async (req, res, next) => {
     const replyId = req.params.replyId;

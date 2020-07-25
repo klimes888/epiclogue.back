@@ -9,6 +9,7 @@ const reply = new mongoose.Schema({
   writeDate: { type: Date, default: Date.now },
   edited: { type: Boolean, default: false },
   childCount: { type: Number, default: 0 },
+  likeCount: { type: Number, default: 0 },
 });
 
 // Create
@@ -27,8 +28,8 @@ reply.statics.getBody = function (replyId, cb) {
 };
 
 // Auth
-reply.statics.isWriter = function (uid, replyId) {
-  return this.findOne({ _id: replyId, uid: uid });
+reply.statics.isWriter = function (uid, replyId, cb) {
+  return this.findOne({ _id: replyId, uid: uid }, cb);
 };
 
 // Update
@@ -51,5 +52,7 @@ reply.statics.delete = function (replyId, cb) {
 reply.statics.deleteByBoardId = function (boardId, cb) {
   return this.deleteMany({ boardId }, cb)
 }
+
+// Counting 추가 필요
 
 module.exports = mongoose.model("Reply", reply);

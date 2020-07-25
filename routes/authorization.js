@@ -36,15 +36,13 @@ const verifyToken = (req, res, next) => {
 // 유저 정보에 대한 권한 인증 미들웨어
 // 1. 글 수정/삭제 및 댓글과 대댓글 수정/삭제에 대한 작성자 인증
 // 2. 프로필 수정 진입 및 완료 쿼리시 사용자 인증
-const checkWriter = async (req, res, next) => {
+const checkWriter = (req, res, next) => {
   try {
     let isWriter = true;
-    console.log(req.params.repliesOnReplyId)
-    console.log(req.params.replyId)
-    console.log(req.params.boardId)
-    
+
     if (req.params.repliesOnReplyId !== undefined) {
-      await ReplyOnReply.isWriter(res.locals.uid, req.params.repliesOnReplyId, (err, data) => {
+      console.log(`[LOG] Reply on reply auth detected`)
+      ReplyOnReply.isWriter(res.locals.uid, req.params.repliesOnReplyId, (err, data) => {
         if (err) {
           res.status(401).json({
             access: "reply on reply",
@@ -55,7 +53,8 @@ const checkWriter = async (req, res, next) => {
         isWriter = true
       })
     } else if (req.params.replyId !== undefined) {
-      await Reply.isWriter(res.locals.uid, req.params.replyId, (err, data) => {
+      console.log(`[LOG] Reply auth detected`)
+      Reply.isWriter(res.locals.uid, req.params.replyId, (err, data) => {
         if (err) {
           res.status(401).json({
             access: "reply",
@@ -66,7 +65,8 @@ const checkWriter = async (req, res, next) => {
         isWriter = true
       })
     } else if (req.params.boardId !== undefined) {
-      await Board.isWriter(res.locals.uid, req.params.boardId, (err, data) => {
+      console.log(`[LOG] Board auth detected`)
+      Board.isWriter(res.locals.uid, req.params.boardId, (err, data) => {
         if (err) {
           res.status(401).json({
             access: "post",
@@ -84,6 +84,7 @@ const checkWriter = async (req, res, next) => {
     }
 
     if (isWriter) {
+      console.log(`[LOG] Auth passed`)
       next();
     } else {
       res.status(401).json({
@@ -99,5 +100,48 @@ const checkWriter = async (req, res, next) => {
   }
 }
 
-exports.verifyToken = verifyToken;
-exports.checkWriter = checkWriter;
+const lagacyCheckWriter = (req, res, next) => {
+  const userId = res.locals.uid;
+  if (req.params.boardId !== undefined) {
+    console.log(`[LOG] isWriter on board detected`);
+    const boardId = req.params.boardId;
+    Board.isWriter(userId, boardId, (err, data) => {
+      if (err) {
+        res.status(400).json({
+          msg: err,
+        });
+      }
+      if (data !== null) {
+        console.log(`[LOG] Board auth passed`);
+        next();
+      } else {
+        res.sendStatus(401);
+        return;
+      }
+    });
+  } else if (req.body.replyId !== undefined) {
+    console.log(`[LOG] isWriter on reply detected`);
+    const replyId = req.body.replyId;
+    Reply.isWriter(userId, replyId, (err, data) => {
+      if (err) {
+        res.status(400).json({
+          msg: err,
+        });
+      }
+      if (data !== null) {
+        console.log(`[LOG] Reply auth passed`);
+        next();
+      } else {
+        res.status(400).json({
+          msg: "없는 데이터에 접근하려 했습니다."
+        })
+      }
+    });
+  }
+};
+
+module.exports = {
+  verifyToken,
+  checkWriter,
+  lagacyCheckWriter
+}

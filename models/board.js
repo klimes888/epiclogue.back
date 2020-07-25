@@ -11,6 +11,9 @@ const board = new mongoose.Schema({
     pub: {type:String, required: true},
     writeDate: {type:Date, default: Date.now},
     language: { type: String, default: "Korean" },
+    heartCount: { type: Number, default: 0 },
+    replyCount: { type: Number, default: 0 },
+    bookmarkCount: { type: Number, default: 0 },
     originUid:{type:ObjectId},
     originBuId:{type:ObjectId},
     edited: { type: Boolean, default: false }
@@ -34,11 +37,8 @@ board.statics.getUserArticleList = function (userId) {
   });
 };
 
-board.statics.isWriter = function (userId, boardId) {
-  this.findOne({ _id: boardId, uid: userId }, (err, data) => {
-    console.log(data)
-  })
-  return this.findOne({ _id: boardId, uid: userId })
+board.statics.isWriter = function (userId, boardId, cb) {
+  return this.findOne({ _id: boardId, uid: userId }, cb)
 }
 
 board.statics.updateArticle = function (articleData, cb) {
@@ -59,6 +59,7 @@ board.statics.updateArticle = function (articleData, cb) {
 board.statics.removeArticle = function (buid, cb) {
     return this.deleteOne({ _id: buid }, cb)
 }
+
 
 /* 글 전체 조회 */
 board.statics.findAll = function () {
