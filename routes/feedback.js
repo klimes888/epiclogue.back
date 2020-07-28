@@ -1,23 +1,24 @@
 import express from "express";
-const router = express.Router({
-  mergeParams: true
-});
+const router = express.Router();
 
 import { verifyToken, checkWriter } from "./authorization";
-import ReplyOnReply from "../models/replyOnReply";
+import feedback from "../models/feedback";
 
-// 대댓글 생성
-router.post("/", verifyToken, (req, res, next) => {
-  const userId = res.locals.uid;
-  const boardId = req.params.boardId;
-  const parentId = req.body.parentId;
-  const replyBody = req.body.replyBody;
-  console.log(parentId, boardId)
+/*
+  This is reply router.
+  Base url: /{screen-id}/posts/{board-id}/replies
+*/
 
-  ReplyOnReply.create({ userId, parentId, replyBody, boardId }, (err, data) => {
-    console.log(data)
+router.post("/", verifyToken, async (req, res, next) => {
+  const replyData = {
+    uid: res.locals.uid,
+    boardId: req.body.boardId,
+    body: req.body.body
+  }
+
+  await feedback.create(replyData, (err, data) => {
     if (err) {
-      console.log(`[Error!] ${err}`)
+      console.log(`[Error!] ${err}`);
       res.status(400).json({
         msg: err.message,
       });
@@ -29,49 +30,30 @@ router.post("/", verifyToken, (req, res, next) => {
   });
 });
 
-// 댓글 하위의 대댓글 뷰
-router.get("/:parentId", verifyToken, async (req, res, next) => {
-  const parentId = req.params.parentId;
-  ReplyOnReply.getByParentId(parentId, (err, data) => {
+router.get("/:replyId/edit", verifyToken, checkWriter, async (req, res, next) => {
+  await feedback.getBody(req.params.replyId, (err, data) => {
     if (err) {
-      console.log(`[Error!] ${err}`)
-      res.status(400).json({
-        msg: err.message,
-      });
-      return;
-    } else {
-      res.status(200).json({
-        data,
-      });
-    }
-  });
-});
-
-router.get("/:repliesOnReplyId/edit", verifyToken, checkWriter, async (req, res, next) => {
-  const repliesOnReplyId = req.params.repliesOnReplyId
-  await ReplyOnReply.getBody(repliesOnReplyId, (err, data) => {
-    if (err) {
-      console.log(`[Error!] ${err}`)
+      console.log(`[Error!] ${err}`);
       res.status(400).json({
         msg: err.message,
       });
       return;
     }
-    console.log(data);
-    res.status(200).json(data);
-    return;
+    res.status(200).json({
+      data
+    })
   })
 })
 
-router.patch("/:repliesOnReplyId", verifyToken, checkWriter, async (req, res, next) => {
+router.patch("/:replyId", verifyToken, checkWriter, async (req, res, next) => {
   const newForm = {
-    repliesOnReplyId: req.params.repliesOnReplyId,
-    newReplyBody: req.body.newReplyBody,
+    replyId: req.params.replyId,
+    newBody: req.body.newBody,
   };
 
-  await ReplyOnReply.update(newForm, (err, data) => {
+  await feedback.update(newForm, (err, data) => {
     if (err) {
-      console.log(`[Error!] ${err}`)
+      console.log(`[Error!] ${err}`);
       res.status(400).json({
         msg: err.message,
       });
@@ -101,22 +83,22 @@ router.patch("/:repliesOnReplyId", verifyToken, checkWriter, async (req, res, ne
   });
 });
 
-router.delete("/:repliesOnReplyId", verifyToken, checkWriter, async (req, res, next) => {
-  const repliesOnReplyId = req.params.repliesOnReplyId;
+router.delete("/:replyId", verifyToken, checkWriter, async (req, res, next) => {
+  const replyId = req.params.replyId;
 
-  ReplyOnReply.delete(repliesOnReplyId, (err, data) => {
+  await feedback.delete(replyId, (err, data) => {
     if (err) {
-      console.log(`[Error!] ${err}`)
+      console.log(`[Error!] ${err}`);
       if (msg.kind === "ObjectID") {
         res.sendStatus(404);
       } else {
-      res.status(400).json({
-        msg: err.message,
-      });
+        res.status(400).json({
+          msg: err.message,
+        });
       }
       return;
     }
-    console.log(data);
+    // console.log(data);
 
     if (data.ok === 1) {
       if (data.n === 1 && data.n === data.deletedCount) {
@@ -141,20 +123,20 @@ router.delete("/:repliesOnReplyId", verifyToken, checkWriter, async (req, res, n
 });
 
 router.delete(
-  "/:replyId",
-  verifyToken,
+  "/replies-on-reply/:replyId",
+  verifyToken, checkWriter, 
   async (req, res, next) => {
     const replyId = req.params.replyId;
 
-    await ReplyOnReply.deleteByParentId(replyId, (err, data) => {
+    await feedback.deleteByParentId(replyId, (err, data) => {
       if (err) {
-        console.log(`[Error!] ${err}`) 
+        console.log(`[Error!] ${err}`);
         if (msg.kind === "ObjectID") {
           res.sendStatus(404);
         } else {
-      res.status(400).json({
-        msg: err.message,
-      });
+          res.status(400).json({
+            msg: err.message,
+          });
         }
         return;
       }
