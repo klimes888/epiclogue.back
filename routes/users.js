@@ -12,7 +12,11 @@ const pbkdf2Promise = util.promisify(crypto.pbkdf2);
 const mongoose = require('mongoose')
 const {verifyToken} = require('./authorization');
 const transporter = require('./mailer');
+const Board = require('../models/board')
 const Follow = require('../models/follow')
+const Like = require('../models/like');
+const Reply = require('../models/reply');
+const ReplyOnReply = require('../models/replyOnReply');
 
 /* GET users listing. */
 router.get('/', function(req, res, next) {
@@ -322,27 +326,33 @@ router.get('/deleteAccount', function(req, res, next) {
   })
 })
 
-router.post('/deleteAccount', verifyToken, async function(req, res, next) {
+router.post("/deleteAccount", verifyToken, async function (req, res, next) {
   //const email = req.body['email'];
   const uid = res.locals.uid;
-  const userPw = req.body['userPw'];
+  const userPw = req.body["userPw"];
 
   const info = await Users.getUserInfo(uid);
 
-  const crypt_Pw = await pbkdf2Promise(userPw, info['salt'], 93782, 64, 'sha512');
-  
-  const result = await Users.deleteUser(uid, crypt_Pw.toString('base64'))
-  if(result['deletedCount'] == 1){
+  const crypt_Pw = await pbkdf2Promise(
+    userPw,
+    info["salt"],
+    93782,
+    64,
+    "sha512"
+  );
+
+  const result = await Users.deleteUser(uid, crypt_Pw.toString("base64"));
+  if (result["deletedCount"] == 1) {
     res.status(201).json({
-      result:'ok'
-    })
+      result: "ok",
+    });
   } else {
     res.status(401).json({
-      result:"error",
-      reason:"비밀번호가 일치하지 않습니다. 다시 확인하세요."
-    })
-  } 
-})
+      result: "error",
+      reason: "비밀번호가 일치하지 않습니다. 다시 확인하세요.",
+    });
+  }
+});
 
 router.get("/:userId/following", (req, res, next) => {
   const userId = req.params.userId;
@@ -350,13 +360,14 @@ router.get("/:userId/following", (req, res, next) => {
 
   Follow.getFollowingList(userId) // for pipeline, use promise
     .exec()
-    .then( async (result) => { // no async-await, no data output...
+    .then(async (result) => {
+      // no async-await, no data output...
       console.log(result);
       for (let data of result) {
-        let temp = await Users.getUserInfo(
-          data.targetUserId,
-          { nickname: 1, userid: 1 }
-        );
+        let temp = await Users.getUserInfo(data.targetUserId, {
+          nickname: 1,
+          userid: 1,
+        });
         dataSet.push(temp);
       }
       return dataSet;
@@ -370,18 +381,19 @@ router.get("/:userId/following", (req, res, next) => {
     });
 });
 
-router.get('/:userId/follower', (req, res, next) => {
+router.get("/:userId/follower", (req, res, next) => {
   const userId = req.params.userId;
   const dataSet = [];
 
   Follow.getFollowerList(userId) // for pipeline, use promise
     .exec()
-    .then( async (result) => { // no async-await, no data output...
+    .then(async (result) => {
+      // no async-await, no data output...
       for (let data of result) {
-        let temp = await Users.getUserInfo(
-          data.userId,
-          { nickname: 1, userid: 1 }
-        );
+        let temp = await Users.getUserInfo(data.userId, {
+          nickname: 1,
+          userid: 1,
+        });
         dataSet.push(temp);
       }
       return dataSet;
@@ -393,6 +405,56 @@ router.get('/:userId/follower', (req, res, next) => {
       console.error(err);
       res.status(400).json({ msg: err });
     });
-})
+});
+
+router.get("/:userId/likes", (req, res, next) => {
+  const userId = req.params.userId;
+  const likeList = [];
+
+  Like.getLikeList(userId)
+    .exec()
+    .then(async (likeObjectIdList) => {
+      for (let data of likeObjectIdList) {
+        if (data.targetType === "board") {
+          await Board.getArticle(data.targetId, (err, result) => {
+            if (err) {
+              console.error(err);
+              res.sendStatus(500);
+              return;
+            }
+            likeList.push(result);
+          });
+          // 명칭 수정 필요. 댓글: comment, 대댓글: reply
+        } else if (data.targetType === "comment") {
+          await Reply.getById(data.targetId, (err, result) => {
+            if (err) {
+              console.error(err);
+              res.sendStatus(500);
+              return;
+            }
+            likeList.push(result);
+          });
+        } else if (data.targetType === "reply") {
+          await ReplyOnReply.getById(data.targetId, (err, result) => {
+            if (err) {
+              console.error(err);
+              res.sendStatus(500);
+              return;
+            }
+            likeList.push(result);
+          });
+        }
+      }
+      return likeList;
+    })
+    .then((resultSet) => {
+      console.log(resultSet);
+      res.status(200).json(resultSet);
+    })
+    .catch((err) => {
+      console.error(err);
+      res.sendStatus(500);
+    });
+});
 
 module.exports = router;

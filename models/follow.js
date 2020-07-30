@@ -29,4 +29,8 @@ follow.statics.getFollowerList = function (targetUserId, cb) {
   return this.find({ targetUserId }, cb);
 };
 
+follow.statics.isFollowing = function (userId, targetUserId, cb) {
+  return this.findOne({ userId, targetUserId }, cb)
+}
+
 module.exports = mongoose.model("follow", follow);

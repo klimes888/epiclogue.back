@@ -49,6 +49,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/board', boardRouter);
+app.use('/board/view/:boardId', require('./routes/like'));
 app.use('/:screenId/posts/:boardId/replies', require('./routes/reply'));
 app.use('/:screenId/posts/:boardId/replies-on-reply', require('./routes/replyOnReply'));
 app.use('/users/follow', require('./routes/follow'))
