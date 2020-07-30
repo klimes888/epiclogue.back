@@ -4,12 +4,12 @@ mongoose.set("useCreateIndex", true);
 
 const like = new mongoose.Schema({
   userId: { type: ObjectId, required: true },
-  targetType: { type: String, required: true }, // 글(article), 댓글(reply), 대댓글(replyOnReply)
+  targetType: { type: String, required: true }, // 글(posts), 댓글(relies), 대댓글(replies-on-reply)
   targetId: { type: ObjectId, required: true },
   likeDate: { type: Date, default: Date.now },
 });
 
-like.statics.create = function (data) {
+like.statics.like = function (data, cb) {
   const likeData = new this(data);
   return likeData.save();
 };

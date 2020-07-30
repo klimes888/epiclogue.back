@@ -56,8 +56,8 @@ user.statics.getSalt = function (email) {
     return this.findOne({"email":email},{_id:0, salt:1});
 }
 
-user.statics.getUserInfo = function (uid, option) {
-    return this.findOne({"_id":uid}, option)
+user.statics.getUserInfo = function (uid, option, cb) {
+    return this.findOne({"_id":uid}, option, cb)
 }
 
 user.statics.deleteUser = function (uid, userpw) {
@@ -82,6 +82,10 @@ user.statics.checkPass = function (uid, userpw) {
 
 user.statics.updateProfile = function(profile, cb){
     return this.updateOne({"_id":profile.uid}, {nickname:profile.nick, userid:profile.userId,country:profile.country,language:profile.lang,intro:profile.intro,banner:profile.bann, profile:profile.prof}, cb)
+}
+
+user.statics.getProfile = function(userId, cb) {
+    return this.find({ _id: userId }, { _id: 1, userid: 1, nickname: 1}, cb)
 }
 
 module.exports = mongoose.model('User', user);
