@@ -59,6 +59,10 @@ ReplyOnReply.statics.deleteByParentId = function (parentId, cb) {
   return this.deleteMany({ parentId }, cb);
 };
 
+ReplyOnReply.statics.getById = function (parentId, cb) {
+  return this.findOne({ parentId }, cb);
+};
+
 // Counting
 
 module.exports = mongoose.model("RepliesOnReply", ReplyOnReply);

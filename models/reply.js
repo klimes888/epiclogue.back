@@ -53,6 +53,10 @@ reply.statics.deleteByBoardId = function (boardId, cb) {
   return this.deleteMany({ boardId }, cb)
 }
 
+reply.statics.getById = function (replyId, cb) {
+  return this.findOne({ _id: replyId }, cb)
+}
+
 // Counting 추가 필요
 
 module.exports = mongoose.model("Reply", reply);
