@@ -12,29 +12,31 @@ router.post("/", verifyToken, async (req, res, next) => {
     targetType: req.body.targetType,
     targetId: req.body.targetId,
   };
-  const { toggleHeart } = req.body;
+  Like.like(likeData, (err, data) => {
+    if (err) {
+      console.error(err);
+      res.sendStatus(500);
+      return;
+    }
+    res.sendStatus(201);
+  });
+});
 
-  if (toggleHeart === true || toggleHeart === "true") {
-    Like.like(likeData, (err, data) => {
-      if (err) {
-        console.error(err);
-        res.sendStatus(500);
-        return;
-      }
-      res.sendStatus(201);
-    });
-  } else if (toggleHeart === false || toggleHeart === "false") {
-    Like.unlike(likeData, (err, data) => {
-      if (err) {
-        console.error(err);
-        res.sendStatus(500);
-        return;
-      }
-      res.sendStatus(200);
-    });
-  } else {
-    res.sendStatus(405);
-  }
+router.delete("/", verifyToken, (req, res, next) => {
+  const likeData = {
+    userId: res.locals.uid,
+    targetType: req.body.targetType,
+    targetId: req.body.targetId,
+  };
+
+  Like.unlike(likeData, (err, data) => {
+    if (err) {
+      console.error(err);
+      res.sendStatus(500);
+      return;
+    }
+    res.sendStatus(200);
+  });
 });
 
 router.get("/", (req, res, next) => {
