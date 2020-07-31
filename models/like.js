@@ -20,7 +20,7 @@ like.statics.unlike = function (likeId) {
 
 // 유저의 좋아요 목록
 like.statics.getLikeList = function (userId) {
-  return this.find({ userId }); // type 추가 필요
+  return this.find({ userId });
 };
 
 module.exports = mongoose.model("Like", like);
