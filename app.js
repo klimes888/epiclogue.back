@@ -13,10 +13,7 @@ const debug = require('debug')(process.env.DEBUG)
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 const boardRouter = require('./routes/board')
-const feedbackRouter = require('./routes/feedback')
-const replyRouter = require('./routes/reply')
-const followRouter = require('./routes/follow')
-const likeRouter = require('./routes/like')
+
 var app = express();
 
 require('dotenv').config();
@@ -52,10 +49,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/board', boardRouter);
-app.use('/:screenId/posts/:boardId/replies', feedbackRouter);
-app.use('/:screenId/posts/:boardId/replies-on-reply', replyRouter);
-app.use('/:screenId', followRouter)
-app.use('/like', likeRouter)
+app.use('/:screenId/posts/:boardId/replies', require('./routes/reply'));
+app.use('/:screenId/posts/:boardId/replies-on-reply', require('./routes/replyOnReply'));
+app.use('/:screenId', require('./routes/follow'))
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

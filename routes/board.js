@@ -3,7 +3,7 @@ const router = express.Router();
 const { verifyToken, checkWriter, lagacyCheckWriter } = require("./authorization");
 require("dotenv").config();
 const Board = require("../models/board");
-const feedback = require('../models/feedback');
+const Reply = require('../models/reply');
 const User = require('../models/users');
 const upload = require('./multer');
 
@@ -55,7 +55,7 @@ router.get("/view/:boardId", verifyToken, async (req, res, next) => {
     nickname: 1,
     userid: 1
   })
-  const replyDataWithOutUserInfo = await feedback.getRepliesByBoardId(boardId);
+  const replyDataWithOutUserInfo = await Reply.getRepliesByBoardId(boardId);
   const replyData = []
   for(const reply of replyDataWithOutUserInfo) {
     let {nickname, userid} = await User.getUserInfo(reply.uid);
@@ -149,7 +149,7 @@ router.post("/view/:buid/reply", verifyToken, async function (req, res, next) {
     buid: req.params.buid,
   };
 
-  await feedback.create(replyData, (err, data) => {
+  await Reply.create(replyData, (err, data) => {
     console.log(data);
     if (err) {
       res.status(400).json({
@@ -176,7 +176,7 @@ router.post("/view/:buid/updateReply", verifyToken, lagacyCheckWriter, async fun
     newReplyBody: req.body.replyBody
   }
 
-  await feedback.update(newReplyData, (err, data) => {
+  await Reply.update(newReplyData, (err, data) => {
     if (err) {
       res.status(400).json({
         msg: err
@@ -190,7 +190,7 @@ router.post("/view/:buid/updateReply", verifyToken, lagacyCheckWriter, async fun
 // 댓글 삭제
 router.post("/view/:buid/removeReply", verifyToken, lagacyCheckWriter, async function (req, res, next) {
   const replyId = req.body.replyId;
-  await feedback.delete(replyId, (err, data) => {
+  await Reply.delete(replyId, (err, data) => {
     console.log(data);
     if (err) {
       res.status(400).json({
