@@ -3,8 +3,8 @@ require('dotenv').config();
 const SECRET_KEY = process.env.SECRET_KEY;
 const User = require('../models/users');
 const Board = require('../models/board');
-const feedback = require('../models/feedback');
-const Reply = require('../models/reply')
+const Reply = require('../models/reply');
+const ReplyOnReply = require('../models/replyOnReply')
 
 const verifyToken = (req, res, next) => {
     try {
@@ -41,8 +41,8 @@ const checkWriter = (req, res, next) => {
     let isWriter = true;
 
     if (req.params.repliesOnReplyId !== undefined) {
-      console.log(`[LOG] feedback on reply auth detected`)
-      Reply.isWriter(res.locals.uid, req.params.repliesOnReplyId, (err, data) => {
+      console.log(`[LOG] Reply on reply auth detected`)
+      ReplyOnReply.isWriter(res.locals.uid, req.params.repliesOnReplyId, (err, data) => {
         if (err) {
           res.status(401).json({
             access: "reply on reply",
@@ -53,8 +53,8 @@ const checkWriter = (req, res, next) => {
         isWriter = true
       })
     } else if (req.params.replyId !== undefined) {
-      console.log(`[LOG] feedback auth detected`)
-      feedback.isWriter(res.locals.uid, req.params.replyId, (err, data) => {
+      console.log(`[LOG] Reply auth detected`)
+      Reply.isWriter(res.locals.uid, req.params.replyId, (err, data) => {
         if (err) {
           res.status(401).json({
             access: "reply",
@@ -122,14 +122,14 @@ const lagacyCheckWriter = (req, res, next) => {
   } else if (req.body.replyId !== undefined) {
     console.log(`[LOG] isWriter on reply detected`);
     const replyId = req.body.replyId;
-    feedback.isWriter(userId, replyId, (err, data) => {
+    Reply.isWriter(userId, replyId, (err, data) => {
       if (err) {
         res.status(400).json({
           msg: err,
         });
       }
       if (data !== null) {
-        console.log(`[LOG] feedback auth passed`);
+        console.log(`[LOG] Reply auth passed`);
         next();
       } else {
         res.status(400).json({
