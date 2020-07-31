@@ -57,7 +57,7 @@ router.get("/", (req, res, next) => {
             likeList.push(result);
           });
           // 명칭 수정 필요. 댓글: comment, 대댓글: reply
-        } else if (data.targetType === "comment") {
+        } else if (data.targetType === "feedback") {
           await Reply.getById(data.targetId, (err, result) => {
             if (err) {
               console.error(err);
