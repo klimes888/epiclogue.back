@@ -19,18 +19,17 @@ router.get("/", verifyToken, async (req, res, next) => {
     });
 });
 
-router.post("/", verifyToken, async function (req, res, next) {
+router.post("/", verifyToken, function (req, res, next) {
   const bookmarkData = {
     userId: res.locals.uid,
     boardId: req.body.boardId,
   };
 
   const toggleBookmark = req.body.toggleBookmark;
-  console.log(toggleBookmark)
+  console.log(toggleBookmark);
 
-  if (toggleBookmark === true || toggleBookmark === "true") {
-    // schema.save() returns a Promise, don't need to use exec()
-    Bookmark.create(bookmarkData)
+  // schema.save() returns a Promise, don't need to use exec()
+  Bookmark.create(bookmarkData)
     .then((result) => {
       console.log(result);
       res.sendStatus(200);
@@ -39,22 +38,24 @@ router.post("/", verifyToken, async function (req, res, next) {
       console.error(err);
       res.sendStatus(500);
     });
-  } else if (toggleBookmark === false || toggleBookmark === "false") {
-    Bookmark.remove(bookmarkData)
-      .exec()
-      .then((result) => {
-        console.log(result);
-        res.sendStatus(200);
-      })
-      .catch((err) => {
-        console.error(err);
-        res.sendStatus(500);
-      });
-  } else {
-    res.status(405).json({
-      msg: "not allowed",
+});
+
+router.delete("/", verifyToken, (req, res, next) => {
+  const bookmarkData = {
+    userId: res.locals.uid,
+    boardId: req.body.boardId,
+  };
+
+  Bookmark.remove(bookmarkData)
+    .exec()
+    .then((result) => {
+      console.log(result);
+      res.sendStatus(200);
+    })
+    .catch((err) => {
+      console.error(err);
+      res.sendStatus(500);
     });
-  }
 });
 
 module.exports = router;
