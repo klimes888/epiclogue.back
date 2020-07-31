@@ -52,7 +52,8 @@ app.use('/board', boardRouter);
 app.use('/board/view/:boardId', require('./routes/like'));
 app.use('/:screenId/posts/:boardId/replies', require('./routes/reply'));
 app.use('/:screenId/posts/:boardId/replies-on-reply', require('./routes/replyOnReply'));
-app.use('/users/follow', require('./routes/follow'))
+app.use('/:screenId/follow', require('./routes/follow'))
+app.use('/:screenId/bookmark', require('./routes/bookmark'))
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

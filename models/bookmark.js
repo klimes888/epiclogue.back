@@ -2,23 +2,27 @@ const mongoose = require("mongoose");
 const ObjectId = mongoose.ObjectId;
 mongoose.set("useCreateIndex", true);
 
-const book = new mongoose.Schema({
-  uid: { type: ObjectId, required: true },
-  boardUid: { type: ObjectId, required: true },
+const Bookmark = new mongoose.Schema({
+  userId: { type: ObjectId, required: true },
+  boardId: { type: ObjectId, required: true },
+  craeteAt: { type: Date, default: Date.now },
 });
 
-book.statics.create = function (data) {
+Bookmark.statics.create = function (data) {
   const bookmarkData = new this(data);
   return bookmarkData.save();
 };
 
-book.static.removeBookmark = function (bookId) {
-  return this.deleteOne({ _id: bookId });
+Bookmark.static.remove = function (bookmarkData) {
+  return this.deleteOne({
+    userId: bookmarkData.userId,
+    boardId: bookmarkData.boardId,
+  });
 };
 
 // 유저의 북마크 목록
-book.statics.bookmarkList = function (userId) {
-  return this.find({ uid: userId });
+Bookmark.statics.getListByScreenId = function (userId) {
+  return this.find({ userId });
 };
 
-module.exports = mongoose.model("Book", book);
+module.exports = mongoose.model("Bookmark", Bookmark);
