@@ -26,7 +26,7 @@ board.statics.create = function (data) {
 }
 
 /* 수정, 삭제, 댓글에 필요한 boardId GET (미검증) */
-board.statics.getArticle = function ( boardId, cb ) {
+board.statics.getById = function ( boardId, cb ) {
     return this.findOne({ "_id" : boardId }, cb);
 }
 

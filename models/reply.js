@@ -58,8 +58,8 @@ Reply.statics.deleteByParentId = function (parentId, cb) {
   return this.deleteMany({ parentId }, cb);
 };
 
-Reply.statics.getById = function (parentId, cb) {
-  return this.findOne({ parentId }, cb);
+Reply.statics.getById = function (id, cb) {
+  return this.findOne({ _id: id }, cb);
 };
 
 // Counting

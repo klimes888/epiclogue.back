@@ -50,7 +50,7 @@ router.post("/posting", verifyToken, upload.any(), async function (req, res, nex
 // 글 뷰
 router.get("/view/:boardId", verifyToken, async (req, res, next) => {
   const boardId = req.params.boardId;
-  const boardData = await Board.getArticle(boardId);
+  const boardData = await Board.getById(boardId);
   const writerData = await User.getUserInfo(res.locals.uid, {
     nickname: 1,
     userid: 1
