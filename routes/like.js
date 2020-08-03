@@ -5,21 +5,26 @@ var router = express.Router({
 const { verifyToken } = require("./authorization");
 const Like = require("../models/like");
 
-/* url: /:screenId/like */
+/*
+  This is like router
+  base url: /:screenId/like 
+*/
 router.post("/", verifyToken, async (req, res, next) => {
   const likeData = {
     userId: res.locals.uid,
     targetType: req.body.targetType,
     targetId: req.body.targetId,
   };
-  Like.like(likeData, (err, data) => {
-    if (err) {
-      console.error(err);
-      res.sendStatus(500);
-      return;
-    }
-    res.sendStatus(201);
-  });
+
+  await Like.like(likeData);
+  // Like.like(likeData, (err, data) => {
+  //   if (err) {
+  //     console.error(err);
+  //     res.sendStatus(500);
+  //     return;
+  //   }
+  //   res.sendStatus(201);
+  // });
 });
 
 router.delete("/", verifyToken, (req, res, next) => {

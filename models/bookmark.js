@@ -21,7 +21,7 @@ Bookmark.static.delete = function (bookmarkData) {
 };
 
 // 유저의 북마크 목록
-Bookmark.statics.getListByScreenId = function (userId) {
+Bookmark.statics.getByUserId = function (userId) {
   return this.find({ userId });
 };
 

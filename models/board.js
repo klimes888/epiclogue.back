@@ -41,7 +41,7 @@ board.statics.isWriter = function (userId, boardId, cb) {
   return this.findOne({ _id: boardId, uid: userId }, cb)
 }
 
-board.statics.updateArticle = function (articleData, cb) {
+board.statics.update = function (articleData, cb) {
   this.updateOne(
     { _id: articleData.boardId },
     {

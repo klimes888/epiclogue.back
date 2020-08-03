@@ -3,9 +3,9 @@ const ObjectId = mongoose.ObjectId;
 mongoose.set("useCreateIndex", true);
 
 const Feedback = new mongoose.Schema({
-  uid: { type: ObjectId, required: true },
-  buid: { type: ObjectId, required: true },
-  replyBody: { type: String, required: true },
+  userId: { type: ObjectId, required: true },
+  boardId: { type: ObjectId, required: true },
+  feedbackBody: { type: String, required: true },
   writeDate: { type: Date, default: Date.now },
   edited: { type: Boolean, default: false },
   childCount: { type: Number, default: 0 },
@@ -20,16 +20,16 @@ Feedback.statics.create = function (data, cb) {
 
 // Read
 Feedback.statics.getByBoardId = function (boardId, cb) {
-  return this.find({ buid: boardId }, cb);
+  return this.find({ boardId }, cb);
 };
 
 Feedback.statics.getBody = function (feedbackId, cb) {
-  return this.findOne({ _id: feedbackId }, { _id: 0, replyBody: 1 }, cb);
+  return this.findOne({ _id: feedbackId }, { _id: 0, feedbackBody: 1 }, cb);
 };
 
 // Auth
-Feedback.statics.isWriter = function (uid, feedbackId, cb) {
-  return this.findOne({ _id: feedbackId, uid: uid }, cb);
+Feedback.statics.isWriter = function (userId, feedbackId, cb) {
+  return this.findOne({ _id: feedbackId, userId }, cb);
 };
 
 // Update
@@ -37,7 +37,7 @@ Feedback.statics.update = async function (newFeedbackData, cb) {
   this.updateOne(
     { _id: newFeedbackData.feedbackId },
     {
-      replyBody: newFeedbackData.newBody,
+      feedbackBody: newFeedbackData.newFeedbackBody,
       edited: true,
     },
     cb

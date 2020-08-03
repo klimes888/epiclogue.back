@@ -55,11 +55,11 @@ router.get("/view/:boardId", verifyToken, async (req, res, next) => {
     nickname: 1,
     userid: 1
   })
-  const replyDataWithOutUserInfo = await Feedback.getByBoardId(boardId);
-  const replyData = []
-  for(const reply of replyDataWithOutUserInfo) {
-    let {nickname, userid} = await User.getUserInfo(reply.uid);
-    replyData.push({
+  const feedbackWithoutUserInfo = await Feedback.getByBoardId(boardId);
+  const feedbackData = []
+  for(const reply of feedbackWithoutUserInfo) {
+    let {nickname, userid} = await User.getUserInfo(reply.userId);
+    feedbackData.push({
       _id:reply._id,
       buid:reply.buid,
       edited:reply.edited,
@@ -75,11 +75,11 @@ router.get("/view/:boardId", verifyToken, async (req, res, next) => {
     result: 'ok',
     writer: writerData,
     board: boardData,
-    reply: replyData
+    feedback: feedbackData
   });
 })
 // 삭제
-router.get("/view/:boardId/delete", verifyToken, lagacyCheckWriter, async function (req, res, next) {
+router.delete("/view/:boardId", verifyToken, lagacyCheckWriter, async function (req, res, next) {
   const boardId = req.params.boardId;
   await Board.delete(boardId, async (err, data) => {
     if (err) {
@@ -115,8 +115,8 @@ router.get('/view/:boardId/edit', verifyToken, lagacyCheckWriter, async function
   })
 })
 // 수정
-router.post(
-  "/view/:boardId/edit",
+router.patch(
+  "/view/:boardId",
   verifyToken,
   upload.any(),
   lagacyCheckWriter,
@@ -136,7 +136,7 @@ router.post(
       language: req.body.language,
     };
 
-    Board.updateArticle(updateData, (err, data) => {
+    Board.update(updateData, (err, data) => {
       if (err) {
         res.status(400).json({
           msg: err,

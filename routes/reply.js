@@ -6,15 +6,21 @@ const router = express.Router({
 import { verifyToken, checkWriter } from "./authorization";
 import Reply from "../models/reply";
 
+/* 
+  This is reply router.
+  base url: /:userId/posts/:boardId/reply
+*/
+
 // 대댓글 생성
 router.post("/", verifyToken, (req, res, next) => {
-  const userId = res.locals.uid;
-  const boardId = req.params.boardId;
-  const parentId = req.body.parentId;
-  const replyBody = req.body.replyBody;
-  console.log(parentId, boardId)
+  const replyForm = {
+    userId: res.locals.uid,
+    boardId: req.params.boardId,
+    parentId: req.body.parentId,
+    replyBody: req.body.replyBody
+  }
 
-  Reply.create({ userId, parentId, replyBody, boardId }, (err, data) => {
+  Reply.create(replyForm, (err, data) => {
     console.log(data)
     if (err) {
       console.log(`[Error!] ${err}`)
@@ -47,21 +53,22 @@ router.get("/:parentId", verifyToken, async (req, res, next) => {
   });
 });
 
-router.get("/:replyId/edit", verifyToken, checkWriter, async (req, res, next) => {
-  const replyId = req.params.replyId
-  await Reply.getBody(replyId, (err, data) => {
-    if (err) {
-      console.log(`[Error!] ${err}`)
-      res.status(400).json({
-        msg: err.message,
-      });
-      return;
-    }
-    console.log(data);
-    res.status(200).json(data);
-    return;
-  })
-})
+/* Deprecated:  */
+// router.get("/:replyId/edit", verifyToken, checkWriter, async (req, res, next) => {
+//   const replyId = req.params.replyId
+//   await Reply.getBody(replyId, (err, data) => {
+//     if (err) {
+//       console.log(`[Error!] ${err}`)
+//       res.status(400).json({
+//         msg: err.message,
+//       });
+//       return;
+//     }
+//     console.log(data);
+//     res.status(200).json(data);
+//     return;
+//   })
+// })
 
 router.patch("/:replyId", verifyToken, checkWriter, async (req, res, next) => {
   const newForm = {

@@ -15,7 +15,7 @@ const Reply = new mongoose.Schema({
 // Create
 Reply.statics.create = function (data, cb) {
   const ReplyData = new this(data);
-  return Reply.save(cb);
+  return ReplyData.save(cb);
 };
 
 // Auth

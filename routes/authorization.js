@@ -40,7 +40,7 @@ const checkWriter = (req, res, next) => {
   try {
     let isWriter = true;
 
-    if (req.params.repliesOnReplyId !== undefined) {
+    if (req.params.replyId !== undefined) {
       console.log(`[LOG] Reply auth detected`)
       Reply.isWriter(res.locals.uid, req.params.repliesOnReplyId, (err, data) => {
         if (err) {
@@ -52,7 +52,7 @@ const checkWriter = (req, res, next) => {
         }
         isWriter = true
       })
-    } else if (req.params.replyId !== undefined) {
+    } else if (req.params.feedbackId !== undefined) {
       console.log(`[LOG] Feedback auth detected`)
       Feedback.isWriter(res.locals.uid, req.params.replyId, (err, data) => {
         if (err) {
