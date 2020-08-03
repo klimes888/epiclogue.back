@@ -1,4 +1,4 @@
-import { Router } from "express";
+import { Router, response } from "express";
 import { verifyToken } from "./authorization";
 import Bookmark from "../models/bookmark";
 const router = new Router({
