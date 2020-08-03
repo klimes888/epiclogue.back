@@ -31,15 +31,6 @@ router.post("/", verifyToken, async (req, res, next) => {
   } finally {
     res.sendStatus(201);
   }
-  
-  // => {
-  //   if (err) {
-  //     console.error(err);
-  //     res.sendStatus(500);
-  //     return;
-  //   }
-  //   res.sendStatus(201);
-  // });
 });
 
 router.delete("/", verifyToken, (req, res, next) => {
