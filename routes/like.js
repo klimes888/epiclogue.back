@@ -8,10 +8,12 @@ const Feedback = require('../models/feedback')
 const Board = require('../models/board');
 const Reply = require('../models/reply');
 const reply = require("../models/reply");
+
 /*
   This is like router
   base url: /:screenId/like 
 */
+
 router.post("/", verifyToken, async (req, res, next) => {
   const likeData = {
     userId: res.locals.uid,
