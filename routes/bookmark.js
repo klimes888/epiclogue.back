@@ -46,7 +46,7 @@ router.delete("/", verifyToken, (req, res, next) => {
     boardId: req.body.boardId,
   };
 
-  Bookmark.remove(bookmarkData)
+  Bookmark.delete(bookmarkData)
     .exec()
     .then((result) => {
       console.log(result);

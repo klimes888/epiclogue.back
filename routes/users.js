@@ -9,14 +9,9 @@ require('dotenv').config();
 const SECRET_KEY = process.env.SECRET_KEY;
 const randomBytesPromise = util.promisify(crypto.randomBytes);
 const pbkdf2Promise = util.promisify(crypto.pbkdf2);
-const mongoose = require('mongoose')
 const {verifyToken} = require('./authorization');
 const transporter = require('./mailer');
-const Board = require('../models/board')
 const Follow = require('../models/follow')
-const Like = require('../models/like');
-const Reply = require('../models/reply');
-const ReplyOnReply = require('../models/replyOnReply');
 
 /* GET users listing. */
 router.get('/', function(req, res, next) {

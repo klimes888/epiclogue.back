@@ -13,7 +13,7 @@ Bookmark.statics.create = function (data) {
   return bookmarkData.save();
 };
 
-Bookmark.static.remove = function (bookmarkData) {
+Bookmark.static.delete = function (bookmarkData) {
   return this.deleteOne({
     userId: bookmarkData.userId,
     boardId: bookmarkData.boardId,

@@ -56,7 +56,7 @@ board.statics.updateArticle = function (articleData, cb) {
   );
 };
 
-board.statics.removeArticle = function (buid, cb) {
+board.statics.delete = function (buid, cb) {
     return this.deleteOne({ _id: buid }, cb)
 }
 
