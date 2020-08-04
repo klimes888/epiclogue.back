@@ -3,8 +3,8 @@ require('dotenv').config();
 const SECRET_KEY = process.env.SECRET_KEY;
 const User = require('../models/users');
 const Board = require('../models/board');
-const Reply = require('../models/reply');
-const ReplyOnReply = require('../models/replyOnReply')
+const Feedback = require('../models/feedback');
+const Reply = require('../models/reply')
 
 const verifyToken = (req, res, next) => {
     try {
@@ -40,24 +40,24 @@ const checkWriter = (req, res, next) => {
   try {
     let isWriter = true;
 
-    if (req.params.repliesOnReplyId !== undefined) {
-      console.log(`[LOG] Reply on reply auth detected`)
-      ReplyOnReply.isWriter(res.locals.uid, req.params.repliesOnReplyId, (err, data) => {
+    if (req.params.replyId !== undefined) {
+      console.log(`[LOG] Reply auth detected`)
+      Reply.isWriter(res.locals.uid, req.params.repliesOnReplyId, (err, data) => {
         if (err) {
           res.status(401).json({
-            access: "reply on reply",
+            access: "reply",
             msg: "허가되지 않은 사용자입니다."
           })
           return;
         }
         isWriter = true
       })
-    } else if (req.params.replyId !== undefined) {
-      console.log(`[LOG] Reply auth detected`)
-      Reply.isWriter(res.locals.uid, req.params.replyId, (err, data) => {
+    } else if (req.params.feedbackId !== undefined) {
+      console.log(`[LOG] Feedback auth detected`)
+      Feedback.isWriter(res.locals.uid, req.params.replyId, (err, data) => {
         if (err) {
           res.status(401).json({
-            access: "reply",
+            access: "feedback",
             msg: "허가되지 않은 사용자입니다."
           })
           return;
@@ -122,7 +122,7 @@ const lagacyCheckWriter = (req, res, next) => {
   } else if (req.body.replyId !== undefined) {
     console.log(`[LOG] isWriter on reply detected`);
     const replyId = req.body.replyId;
-    Reply.isWriter(userId, replyId, (err, data) => {
+    Feedback.isWriter(userId, replyId, (err, data) => {
       if (err) {
         res.status(400).json({
           msg: err,

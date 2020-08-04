@@ -4,9 +4,9 @@ mongoose.set("useCreateIndex", true);
 
 const like = new mongoose.Schema({
   userId: { type: ObjectId, required: true },
-  targetType: { type: String, required: true }, // 글(posts), 댓글(relies), 대댓글(replies-on-reply)
+  targetType: { type: String, required: true }, // 글(posts), 댓글(feedback), 대댓글(reply)
   targetId: { type: ObjectId, required: true },
-  likeDate: { type: Date, default: Date.now },
+  createdAt: { type: Date, default: Date.now },
 });
 
 like.statics.like = function (data, cb) {
@@ -23,7 +23,7 @@ like.statics.unlike = function (data, cb) {
 };
 
 // 유저의 좋아요 목록
-like.statics.getLikeList = function (userId, cb) {
+like.statics.getByUserId = function (userId, cb) {
   return this.find({ userId }, cb);
 };
 

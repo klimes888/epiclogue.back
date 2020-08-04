@@ -3,7 +3,7 @@ const router = express.Router();
 const { verifyToken, checkWriter, lagacyCheckWriter } = require("./authorization");
 require("dotenv").config();
 const Board = require("../models/board");
-const Reply = require('../models/reply');
+const Feedback = require('../models/feedback');
 const User = require('../models/users');
 const upload = require('./multer');
 
@@ -50,16 +50,16 @@ router.post("/posting", verifyToken, upload.any(), async function (req, res, nex
 // 글 뷰
 router.get("/view/:boardId", verifyToken, async (req, res, next) => {
   const boardId = req.params.boardId;
-  const boardData = await Board.getArticle(boardId);
+  const boardData = await Board.getById(boardId);
   const writerData = await User.getUserInfo(res.locals.uid, {
     nickname: 1,
     userid: 1
   })
-  const replyDataWithOutUserInfo = await Reply.getRepliesByBoardId(boardId);
-  const replyData = []
-  for(const reply of replyDataWithOutUserInfo) {
-    let {nickname, userid} = await User.getUserInfo(reply.uid);
-    replyData.push({
+  const feedbackWithoutUserInfo = await Feedback.getByBoardId(boardId);
+  const feedbackData = []
+  for(const reply of feedbackWithoutUserInfo) {
+    let {nickname, userid} = await User.getUserInfo(reply.userId);
+    feedbackData.push({
       _id:reply._id,
       buid:reply.buid,
       edited:reply.edited,
@@ -75,23 +75,31 @@ router.get("/view/:boardId", verifyToken, async (req, res, next) => {
     result: 'ok',
     writer: writerData,
     board: boardData,
-    reply: replyData
+    feedback: feedbackData
   });
 })
 // 삭제
-router.get("/view/:boardId/delete", verifyToken, lagacyCheckWriter, async function (req, res, next) {
+router.delete("/view/:boardId", verifyToken, lagacyCheckWriter, async function (req, res, next) {
   const boardId = req.params.boardId;
-  await Board.removeArticle(boardId, (err, data) => {
+  await Board.delete(boardId, async (err, data) => {
     if (err) {
       res.status(400).json({
         result: "error",
         reason: err,
       });
     } else {
-      res.status(200).json({
-        result: "ok",
-      });
-      return;
+      const result = await Feedback.deleteByBoardId(boardId);
+      
+      if (result) {
+        res.status(200).json({
+          result: "ok",
+        });
+        return;
+      } else {
+        res.status(500).json({
+          msg:result
+        })
+      }
     }
   });
 });
@@ -107,8 +115,8 @@ router.get('/view/:boardId/edit', verifyToken, lagacyCheckWriter, async function
   })
 })
 // 수정
-router.post(
-  "/view/:boardId/edit",
+router.patch(
+  "/view/:boardId",
   verifyToken,
   upload.any(),
   lagacyCheckWriter,
@@ -128,7 +136,7 @@ router.post(
       language: req.body.language,
     };
 
-    Board.updateArticle(updateData, (err, data) => {
+    Board.update(updateData, (err, data) => {
       if (err) {
         res.status(400).json({
           msg: err,
@@ -141,66 +149,66 @@ router.post(
   }
 );
 
-// 댓글 생성
-router.post("/view/:buid/reply", verifyToken, async function (req, res, next) {
-  const replyData = {
-    uid: res.locals.uid,
-    replyBody: req.body.replyBody,
-    buid: req.params.buid,
-  };
+// // 댓글 생성
+// router.post("/view/:buid/reply", verifyToken, async function (req, res, next) {
+//   const feedbackData = {
+//     uid: res.locals.uid,
+//     replyBody: req.body.replyBody,
+//     buid: req.params.buid,
+//   };
 
-  await Reply.create(replyData, (err, data) => {
-    console.log(data);
-    if (err) {
-      res.status(400).json({
-        msg: err,
-      });
-    } else {
-      res.sendStatus(201);
-    }
-  });
+//   await Feedback.create(feedbackData, (err, data) => {
+//     console.log(data);
+//     if (err) {
+//       res.status(400).json({
+//         msg: err,
+//       });
+//     } else {
+//       res.sendStatus(201);
+//     }
+//   });
 
-  /*
-   댓글과 원문 상태에 따라 추가적인 에러핸들링 필요
-    1. 원문 삭제
-    2. 서버 오류
-    3. DB 오류
-    4. 클라이언트 통신 불가
-     */
-});
+//   /*
+//    댓글과 원문 상태에 따라 추가적인 에러핸들링 필요
+//     1. 원문 삭제
+//     2. 서버 오류
+//     3. DB 오류
+//     4. 클라이언트 통신 불가
+//      */
+// });
 
-// 댓글 수정
-router.post("/view/:buid/updateReply", verifyToken, lagacyCheckWriter, async function (req, res, next) {
-  const newReplyData = {
-    replyId : req.body.replyId,
-    newReplyBody: req.body.replyBody
-  }
+// // 댓글 수정
+// router.post("/view/:buid/updateReply", verifyToken, lagacyCheckWriter, async function (req, res, next) {
+//   const newReplyData = {
+//     replyId : req.body.replyId,
+//     newReplyBody: req.body.replyBody
+//   }
 
-  await Reply.update(newReplyData, (err, data) => {
-    if (err) {
-      res.status(400).json({
-        msg: err
-      })
-    } else {
-      res.sendStatus(200)
-    }
-  })
-});
+//   await Reply.update(newReplyData, (err, data) => {
+//     if (err) {
+//       res.status(400).json({
+//         msg: err
+//       })
+//     } else {
+//       res.sendStatus(200)
+//     }
+//   })
+// });
 
-// 댓글 삭제
-router.post("/view/:buid/removeReply", verifyToken, lagacyCheckWriter, async function (req, res, next) {
-  const replyId = req.body.replyId;
-  await Reply.delete(replyId, (err, data) => {
-    console.log(data);
-    if (err) {
-      res.status(400).json({
-        msg: err
-      })
-    } else {
-      res.sendStatus(200);
-    }
-  })
-});
+// // 댓글 삭제
+// router.post("/view/:buid/removeReply", verifyToken, lagacyCheckWriter, async function (req, res, next) {
+//   const replyId = req.body.replyId;
+//   await Reply.delete(replyId, (err, data) => {
+//     console.log(data);
+//     if (err) {
+//       res.status(400).json({
+//         msg: err
+//       })
+//     } else {
+//       res.sendStatus(200);
+//     }
+//   })
+// });
 
 /* 유저마다 다르게 받아야 함 */
 router.get("/postlist", verifyToken, async function (req, res, next) {

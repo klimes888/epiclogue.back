@@ -26,7 +26,7 @@ board.statics.create = function (data) {
 }
 
 /* 수정, 삭제, 댓글에 필요한 boardId GET (미검증) */
-board.statics.getArticle = function ( boardId, cb ) {
+board.statics.getById = function ( boardId, cb ) {
     return this.findOne({ "_id" : boardId }, cb);
 }
 
@@ -41,7 +41,7 @@ board.statics.isWriter = function (userId, boardId, cb) {
   return this.findOne({ _id: boardId, uid: userId }, cb)
 }
 
-board.statics.updateArticle = function (articleData, cb) {
+board.statics.update = function (articleData, cb) {
   this.updateOne(
     { _id: articleData.boardId },
     {
@@ -56,7 +56,7 @@ board.statics.updateArticle = function (articleData, cb) {
   );
 };
 
-board.statics.removeArticle = function (buid, cb) {
+board.statics.delete = function (buid, cb) {
     return this.deleteOne({ _id: buid }, cb)
 }
 

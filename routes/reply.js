@@ -1,25 +1,29 @@
 import express from "express";
-const router = express.Router();
+const router = express.Router({
+  mergeParams: true
+});
 
 import { verifyToken, checkWriter } from "./authorization";
 import Reply from "../models/reply";
-import ReplyOnReply from "../models/replyOnReply";
 
-/*
+/* 
   This is reply router.
-  Base url: /{screen-id}/posts/{board-id}/replies
+  base url: /:userId/posts/:boardId/reply
 */
 
-router.post("/", verifyToken, async (req, res, next) => {
-  const replyData = {
-    uid: res.locals.uid,
-    boardId: req.body.boardId,
-    body: req.body.body
+// 대댓글 생성
+router.post("/", verifyToken, (req, res, next) => {
+  const replyForm = {
+    userId: res.locals.uid,
+    boardId: req.params.boardId,
+    parentId: req.body.parentId,
+    replyBody: req.body.replyBody
   }
 
-  await Reply.create(replyData, (err, data) => {
+  Reply.create(replyForm, (err, data) => {
+    console.log(data)
     if (err) {
-      console.log(`[Error!] ${err}`);
+      console.log(`[Error!] ${err}`)
       res.status(400).json({
         msg: err.message,
       });
@@ -31,30 +35,50 @@ router.post("/", verifyToken, async (req, res, next) => {
   });
 });
 
-router.get("/:replyId/edit", verifyToken, checkWriter, async (req, res, next) => {
-  await Reply.getBody(req.params.replyId, (err, data) => {
+// 댓글 하위의 대댓글 뷰
+router.get("/:parentId", verifyToken, async (req, res, next) => {
+  const parentId = req.params.parentId;
+  Reply.getByParentId(parentId, (err, data) => {
     if (err) {
-      console.log(`[Error!] ${err}`);
+      console.log(`[Error!] ${err}`)
       res.status(400).json({
         msg: err.message,
       });
       return;
+    } else {
+      res.status(200).json({
+        data,
+      });
     }
-    res.status(200).json({
-      data
-    })
-  })
-})
+  });
+});
+
+/* Deprecated:  */
+// router.get("/:replyId/edit", verifyToken, checkWriter, async (req, res, next) => {
+//   const replyId = req.params.replyId
+//   await Reply.getBody(replyId, (err, data) => {
+//     if (err) {
+//       console.log(`[Error!] ${err}`)
+//       res.status(400).json({
+//         msg: err.message,
+//       });
+//       return;
+//     }
+//     console.log(data);
+//     res.status(200).json(data);
+//     return;
+//   })
+// })
 
 router.patch("/:replyId", verifyToken, checkWriter, async (req, res, next) => {
   const newForm = {
     replyId: req.params.replyId,
-    newBody: req.body.newBody,
+    newReplyBody: req.body.newReplyBody,
   };
 
   await Reply.update(newForm, (err, data) => {
     if (err) {
-      console.log(`[Error!] ${err}`);
+      console.log(`[Error!] ${err}`)
       res.status(400).json({
         msg: err.message,
       });
@@ -87,19 +111,19 @@ router.patch("/:replyId", verifyToken, checkWriter, async (req, res, next) => {
 router.delete("/:replyId", verifyToken, checkWriter, async (req, res, next) => {
   const replyId = req.params.replyId;
 
-  await Reply.delete(replyId, (err, data) => {
+  Reply.delete(replyId, (err, data) => {
     if (err) {
-      console.log(`[Error!] ${err}`);
+      console.log(`[Error!] ${err}`)
       if (msg.kind === "ObjectID") {
         res.sendStatus(404);
       } else {
-        res.status(400).json({
-          msg: err.message,
-        });
+      res.status(400).json({
+        msg: err.message,
+      });
       }
       return;
     }
-    // console.log(data);
+    console.log(data);
 
     if (data.ok === 1) {
       if (data.n === 1 && data.n === data.deletedCount) {
@@ -124,20 +148,20 @@ router.delete("/:replyId", verifyToken, checkWriter, async (req, res, next) => {
 });
 
 router.delete(
-  "/replies-on-reply/:replyId",
-  verifyToken, checkWriter, 
+  "/:replyId",
+  verifyToken,
   async (req, res, next) => {
     const replyId = req.params.replyId;
 
     await Reply.deleteByParentId(replyId, (err, data) => {
       if (err) {
-        console.log(`[Error!] ${err}`);
+        console.log(`[Error!] ${err}`) 
         if (msg.kind === "ObjectID") {
           res.sendStatus(404);
         } else {
-          res.status(400).json({
-            msg: err.message,
-          });
+      res.status(400).json({
+        msg: err.message,
+      });
         }
         return;
       }

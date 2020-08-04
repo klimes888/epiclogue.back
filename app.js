@@ -49,8 +49,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/board', boardRouter);
-app.use('/:screenId/posts/:boardId/replies', require('./routes/reply'));
-app.use('/:screenId/posts/:boardId/replies-on-reply', require('./routes/replyOnReply'));
+app.use('/:screenId/posts/:boardId/feedback', require('./routes/feedback'));
+app.use('/:screenId/posts/:boardId/reply', require('./routes/reply'));
 app.use('/:screenId/like', require('./routes/like'));
 app.use('/:screenId/follow', require('./routes/follow'))
 app.use('/:screenId/bookmark', require('./routes/bookmark'))

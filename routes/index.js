@@ -2,8 +2,8 @@ var express = require("express");
 var router = express.Router();
 
 const Board = require("../models/board");
+const Feedback = require("../models/feedback");
 const Reply = require("../models/reply");
-const ReplyOnReply = require("../models/replyOnReply");
 const Follow = require('../models/follow')
 const { verifyToken, checkWriter } = require("./authorization");
 const { response } = require("express");

@@ -13,7 +13,7 @@ Bookmark.statics.create = function (data) {
   return bookmarkData.save();
 };
 
-Bookmark.static.remove = function (bookmarkData) {
+Bookmark.statics.delete = function (bookmarkData) {
   return this.deleteOne({
     userId: bookmarkData.userId,
     boardId: bookmarkData.boardId,
@@ -21,7 +21,7 @@ Bookmark.static.remove = function (bookmarkData) {
 };
 
 // 유저의 북마크 목록
-Bookmark.statics.getListByScreenId = function (userId) {
+Bookmark.statics.getByUserId = function (userId) {
   return this.find({ userId });
 };
 

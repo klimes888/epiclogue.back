@@ -2,42 +2,42 @@ const mongoose = require("mongoose");
 const ObjectId = mongoose.ObjectId;
 mongoose.set("useCreateIndex", true);
 
-const reply = new mongoose.Schema({
-  uid: { type: ObjectId, required: true },
-  buid: { type: ObjectId, required: true },
+const Reply = new mongoose.Schema({
+  userId: { type: ObjectId, required: true },
+  boardId: { type: ObjectId, required: true },
+  parentId: { type: ObjectId, required: true },
   replyBody: { type: String, required: true },
   writeDate: { type: Date, default: Date.now },
   edited: { type: Boolean, default: false },
-  childCount: { type: Number, default: 0 },
-  likeCount: { type: Number, default: 0 },
+  heartCount: { type: Number, default: 0 },
 });
 
 // Create
-reply.statics.create = function (data, session, cb) {
-  const replyData = new this(data);
-  return replyData.save(session, cb);
-};
-
-// Read
-reply.statics.getRepliesByBoardId = function (boardId, cb) {
-  return this.find({ buid: boardId }, cb);
-};
-
-reply.statics.getBody = function (replyId, cb) {
-  return this.findOne({ _id: replyId }, { _id: 0, replyBody: 1 }, cb);
+Reply.statics.create = function (data, cb) {
+  const ReplyData = new this(data);
+  return ReplyData.save(cb);
 };
 
 // Auth
-reply.statics.isWriter = function (uid, replyId, cb) {
-  return this.findOne({ _id: replyId, uid: uid }, cb);
+Reply.statics.isWriter = function (userId, replyId, cb) {
+  return this.findOne({ _id: replyId, userId: userId }, cb);
+};
+
+// Read
+Reply.statics.getByParentId = function (parentId, cb) {
+  return this.find({ parentId }, cb);
+};
+
+Reply.statics.getBody = function (replyId, cb) {
+  return this.findOne({ _id: replyId }, { _id: 0, replyBody: 1 }, cb);
 };
 
 // Update
-reply.statics.update = async function ({replyId, newReplyBody}, cb) {
-  this.updateOne(
-    { _id: replyId },
+Reply.statics.update = async function (updateForm, cb) {
+  return this.updateOne(
+    { _id: updateForm.replyId },
     {
-      replyBody: newReplyBody,
+      replyBody: updateForm.newReplyBody,
       edited: true,
     },
     cb
@@ -45,18 +45,23 @@ reply.statics.update = async function ({replyId, newReplyBody}, cb) {
 };
 
 // Delete
-reply.statics.delete = function (replyId, cb) {
+Reply.statics.delete = function (replyId, cb) {
   return this.deleteOne({ _id: replyId }, cb);
 };
 
-reply.statics.deleteByBoardId = function (boardId, cb) {
-  return this.deleteMany({ boardId }, cb)
-}
+// Delete all
+Reply.statics.deleteByBoardId = function (boardId, cb) {
+  return this.deleteMany({ boardId }, cb);
+};
 
-reply.statics.getById = function (replyId, cb) {
-  return this.findOne({ _id: replyId }, cb)
-}
+Reply.statics.deleteByParentId = function (parentId, cb) {
+  return this.deleteMany({ parentId }, cb);
+};
 
-// Counting 추가 필요
+Reply.statics.getById = function (id, cb) {
+  return this.findOne({ _id: id }, cb);
+};
 
-module.exports = mongoose.model("Reply", reply);
+// Counting
+
+module.exports = mongoose.model("Reply", Reply);
