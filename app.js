@@ -13,6 +13,7 @@ const debug = require('debug')(process.env.DEBUG)
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 const boardRouter = require('./routes/board')
+const reactRouter = require('./routes/react')
 
 var app = express();
 
@@ -54,6 +55,7 @@ app.use('/:screenId/posts/:boardId/reply', require('./routes/reply'));
 app.use('/:screenId/like', require('./routes/like'));
 app.use('/:screenId/follow', require('./routes/follow'))
 app.use('/:screenId/bookmark', require('./routes/bookmark'))
+app.use('/:screenId/posts/:boardId/react', reactRouter)
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
