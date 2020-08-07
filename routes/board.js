@@ -149,67 +149,6 @@ router.patch(
   }
 );
 
-// // 댓글 생성
-// router.post("/view/:buid/reply", verifyToken, async function (req, res, next) {
-//   const feedbackData = {
-//     uid: res.locals.uid,
-//     replyBody: req.body.replyBody,
-//     buid: req.params.buid,
-//   };
-
-//   await Feedback.create(feedbackData, (err, data) => {
-//     console.log(data);
-//     if (err) {
-//       res.status(400).json({
-//         msg: err,
-//       });
-//     } else {
-//       res.sendStatus(201);
-//     }
-//   });
-
-//   /*
-//    댓글과 원문 상태에 따라 추가적인 에러핸들링 필요
-//     1. 원문 삭제
-//     2. 서버 오류
-//     3. DB 오류
-//     4. 클라이언트 통신 불가
-//      */
-// });
-
-// // 댓글 수정
-// router.post("/view/:buid/updateReply", verifyToken, lagacyCheckWriter, async function (req, res, next) {
-//   const newReplyData = {
-//     replyId : req.body.replyId,
-//     newReplyBody: req.body.replyBody
-//   }
-
-//   await Reply.update(newReplyData, (err, data) => {
-//     if (err) {
-//       res.status(400).json({
-//         msg: err
-//       })
-//     } else {
-//       res.sendStatus(200)
-//     }
-//   })
-// });
-
-// // 댓글 삭제
-// router.post("/view/:buid/removeReply", verifyToken, lagacyCheckWriter, async function (req, res, next) {
-//   const replyId = req.body.replyId;
-//   await Reply.delete(replyId, (err, data) => {
-//     console.log(data);
-//     if (err) {
-//       res.status(400).json({
-//         msg: err
-//       })
-//     } else {
-//       res.sendStatus(200);
-//     }
-//   })
-// });
-
 /* 유저마다 다르게 받아야 함 */
 router.get("/postlist", verifyToken, async function (req, res, next) {
   const boardList = await Board.findAll();

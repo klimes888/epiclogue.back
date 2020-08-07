@@ -46,7 +46,11 @@ user.statics.confirmUser = function (email) {
 user.statics.isExist = function (email) {
     return this.findOne({ "email": email });
 }
-
+/* 
+    @2020-08-07
+    find 함수가 4개 (findUser, getUserInfo, findAll, getProfile)인데,
+    리팩토링 때 option을 parameter로 주고 필요한 데이터만 뽑아내는 작업이 필요해보임.
+*/
 user.statics.findUser = function (email, userpw) {
     // 특수기호 $는 쓰지못하게 해야 기초적인 인젝션 방어가 가능함
     return this.findOne({"email": email, "password": userpw});
@@ -86,6 +90,11 @@ user.statics.updateProfile = function(profile, cb){
 
 user.statics.getProfile = function(userId, cb) {
     return this.find({ _id: userId }, { _id: 1, userid: 1, nickname: 1}, cb)
+}
+
+user.statics.getByQuery = function (query) {
+    return this.find({ userid: { $regex: query }},
+    { userid: 1, nickname: 1, profile: 1 })
 }
 
 module.exports = mongoose.model('User', user);
