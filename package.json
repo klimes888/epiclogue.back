@@ -4,9 +4,9 @@
   "private": true,
   "scripts": {
     "start": "node ./bin/www",
-    "dev": "sudo service mongodb start && nodemon ./bin/www --exec babel-node",
+    "dev": "nodemon ./bin/www --exec babel-node",
     "babel": "babel-node ./bin/www",
-    "start_nodemon": "yarn install && nodemon ./bin/www --exec babel-node"
+    "docker": "yarn install && nodemon ./bin/www --exec babel-node"
   },
   "dependencies": {
     "@sentry/node": "5.19.0",

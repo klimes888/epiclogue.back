@@ -1,0 +1,44 @@
+version: "3"
+services:
+  server:                          
+    build:
+      dockerfile: ./Dockerfile.dev
+    volumes:
+      - ./epiclogue.back/:/usr/src/app  
+      - /usr/src/app/node_modules      
+    environment:
+      - PORT=3000
+    networks:
+      - backend  
+    depends_on:
+      - mongo
+    ports:
+      - 3000:3000
+
+  mongo:
+    container_name: mongo
+    image: mongo
+    volumes:
+      - ./data:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: lunarcat1234!
+    networks:
+      - backend
+
+  nginx:
+    restart: always
+    image: nginx
+    volumes: 
+      - ./epiclogue.ssl:/ssl
+      - ./nginx.back/server.conf:/etc/nginx/nginx.conf
+    ports:
+      - 443:443
+      - 80:80
+    networks:
+      - backend
+    
+
+networks: 
+  backend:
+    driver: bridge
