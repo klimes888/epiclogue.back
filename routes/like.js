@@ -1,5 +1,5 @@
-var express = require("express");
-var router = express.Router({
+import express from "express";
+const router = express.Router({
   mergeParams: true,
 });
 const { verifyToken } = require("./authorization");
@@ -8,6 +8,7 @@ const Feedback = require('../models/feedback')
 const Board = require('../models/board');
 const Reply = require('../models/reply');
 const reply = require("../models/reply");
+import react from '../models/react'
 
 /*
   This is like router
@@ -22,32 +23,44 @@ router.post("/", verifyToken, async (req, res, next) => {
   };
 
   try {
-    await Like.like(likeData);
+    const result = await Like.like(likeData);
+    if (likeData.targetType === "board") {
+      const reactData = {
+        userId: res.locals.uid,
+        boardId: req.body.targetId,
+        type: "like"
+      }
+      await react.create(reactData)
+    }
+    res.sendStatus(201);
   } catch (err) {
     console.log(err);
     res.status(500).json({
       msg: err
     })
-  } finally {
-    res.sendStatus(201);
   }
 });
 
-router.delete("/", verifyToken, (req, res, next) => {
+router.delete("/", verifyToken, async (req, res, next) => {
   const likeData = {
     userId: res.locals.uid,
     targetType: req.body.targetType,
     targetId: req.body.targetId,
   };
 
-  Like.unlike(likeData, (err, data) => {
-    if (err) {
-      console.error(err);
-      res.sendStatus(500);
-      return;
+  try {
+    const result = await Like.unlike(likeData);
+    if (likeData.targetType === "board") {
+      const userId = res.locals.uid;
+      const boardId = req.body.targetId;
+
+      await react.delete(userId, boardId);
     }
     res.sendStatus(200);
-  });
+  } catch (e) {
+    console.log(e);
+    res.status(500).json(e);
+  }
 });
 
 router.get("/", (req, res, next) => {
