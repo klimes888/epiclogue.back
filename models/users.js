@@ -94,7 +94,7 @@ user.statics.getProfile = function(userId, cb) {
 
 user.statics.getByQuery = function (query) {
     return this.find({ userid: { $regex: query }},
-    { userid: 1, nickname: 1, profile: 1 })
+    { userid: 1, nickname: 1, profile: 1 }).sort({ userid: 'asc' })
 }
 
 module.exports = mongoose.model('User', user);
