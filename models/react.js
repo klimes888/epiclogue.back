@@ -5,24 +5,23 @@ mongoose.set("useCreateIndex", true);
 const react = new mongoose.Schema({
   userId: { type: ObjectId, required: true },
   boardId: { type: ObjectId, required: true },
-  userScreenId: { type: String, required: true },
-  userNick: { type: String, required: true },
-  type: { type: String, required: true },
-  reactTime: { type: Date, default: Date.now },
+  type: { type: String, required: true }, // like, bookmark, translate
+  createdAt: { type: Date, default: Date.now },
 });
 
-react.statics.create = function (data, cb) {
+react.statics.create = function (data) {
   const reactData = new this(data);
-  return reactData.save(cb);
+  return reactData.save();
 };
 
-react.statics.removeReact = function (reactId, cb) {
-  return this.deleteOne({ _id: reactId }, cb);
+react.statics.delete = function (userId, boardId) {
+  return this.deleteOne({ userId, boardId });
 };
 
-// 글에 대한 반응 뷰
-react.statics.getReactListByBoardId = function (boardId, cb) {
-  return this.find({ boardId }, cb);
+react.statics.getByBoardId = function (boardId) {
+  return this.find({ boardId }, {
+    _id: 0, __v: 0
+  });
 };
 
 module.exports = mongoose.model("React", react);

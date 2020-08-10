@@ -64,6 +64,10 @@ user.statics.getUserInfo = function (uid, option, cb) {
     return this.findOne({"_id":uid}, option, cb)
 }
 
+user.statics.getUserInfoByScreenId = function (screenId, option) {
+    return this.findOne({ userid: screenId}, option)
+}
+
 user.statics.deleteUser = function (uid, userpw) {
     return this.deleteOne({"_id":uid, "password":userpw});
 }
