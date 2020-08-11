@@ -7,13 +7,13 @@ const Feedback = require('../models/feedback');
 const User = require('../models/users');
 const upload = require('./multer');
 
-router.get('/posting', (req, res) => {
+router.get('/health', (req, res) => {
   res.status(200).json({
     msg: "Server is on work"
   })
 })
 
-router.post("/posting", verifyToken, upload.any(), async function (req, res, next) {
+router.post("/", verifyToken, upload.any(), async function (req, res, next) {
   const uid = res.locals.uid;
   const boardTitle = req.body.boardTitle;
   const boardBody = req.body.boardBody;
@@ -48,7 +48,7 @@ router.post("/posting", verifyToken, upload.any(), async function (req, res, nex
   }
 });
 // 글 뷰
-router.get("/view/:boardId", verifyToken, async (req, res, next) => {
+router.get("/:boardId", verifyToken, async (req, res, next) => {
   const boardId = req.params.boardId;
   const boardData = await Board.getById(boardId);
   const writerData = await User.getUserInfo(res.locals.uid, {
@@ -79,7 +79,7 @@ router.get("/view/:boardId", verifyToken, async (req, res, next) => {
   });
 })
 // 삭제
-router.delete("/view/:boardId", verifyToken, lagacyCheckWriter, async function (req, res, next) {
+router.delete("/:boardId", verifyToken, lagacyCheckWriter, async function (req, res, next) {
   const boardId = req.params.boardId;
   await Board.delete(boardId, async (err, data) => {
     if (err) {
@@ -104,7 +104,7 @@ router.delete("/view/:boardId", verifyToken, lagacyCheckWriter, async function (
   });
 });
 // 수정 전 이전 데이터 불러오기
-router.get('/view/:boardId/edit', verifyToken, lagacyCheckWriter, async function (req, res, next) {
+router.get('/:boardId/edit', verifyToken, lagacyCheckWriter, async function (req, res, next) {
   const boardId = req.params.boardId;
   const result = await Board.getArticle(boardId);
   // console.log(result)
@@ -116,7 +116,7 @@ router.get('/view/:boardId/edit', verifyToken, lagacyCheckWriter, async function
 })
 // 수정
 router.patch(
-  "/view/:boardId",
+  "/:boardId/edit",
   verifyToken,
   upload.any(),
   lagacyCheckWriter,
@@ -211,7 +211,7 @@ router.patch(
 // });
 
 /* 유저마다 다르게 받아야 함 */
-router.get("/postlist", verifyToken, async function (req, res, next) {
+router.get("/", verifyToken, async function (req, res, next) {
   const boardList = await Board.findAll();
   const result = new Array();
   for(const data of boardList) {

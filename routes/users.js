@@ -14,7 +14,7 @@ const transporter = require('./mailer');
 const Follow = require('../models/follow')
 
 /* GET users listing. */
-router.get('/', function(req, res, next) {
+router.get('/health', function(req, res, next) {
   res.status(201).json({
     result:'ok',
     comment:'users router is ok'
@@ -72,14 +72,6 @@ router.get('/join', function(req, res, next) {
     reason:'not allow method'
   })
 })
-
-router.get('/viewUserList', async (req, res, next) => {
-  const result = await Users.findAll();
-  res.json({
-    data: result
-  })
-})
-
 
 router.post('/join', async function(req, res, next) {
   const email = req.body['email'];
@@ -195,7 +187,7 @@ router.get('/editProfile', verifyToken, async function(req, res, next) {
   })
 })
 
-router.post("/editProfile", verifyToken, upload.any(), async function (
+router.patch("/editProfile", verifyToken, upload.any(), async function (
   req,
   res,
   next
@@ -314,14 +306,7 @@ router.post('/changePass', verifyToken, async function(req, res, next) {
   }
 })
 
-router.get('/deleteAccount', function(req, res, next) {
-  res.status(401).json({
-    result:'error',
-    reason:'not allow method'
-  })
-})
-
-router.post("/deleteAccount", verifyToken, async function (req, res, next) {
+router.delete("/", verifyToken, async function (req, res, next) {
   //const email = req.body['email'];
   const uid = res.locals.uid;
   const userPw = req.body["userPw"];
