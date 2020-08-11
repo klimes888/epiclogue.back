@@ -2,9 +2,10 @@ version: "3"
 services:
   server:                          
     build:
-      dockerfile: ./Dockerfile.dev
+      context: ./
+      dockerfile: Dockerfile.dev
     volumes:
-      - ./epiclogue.back/:/usr/src/app  
+      - ./:/usr/src/app  
       - /usr/src/app/node_modules      
     environment:
       - PORT=3000
@@ -21,7 +22,7 @@ services:
     volumes:
       - ./data:/data/db
     environment:
-      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_USERNAME: lunadev
       MONGO_INITDB_ROOT_PASSWORD: lunarcat1234!
     networks:
       - backend
