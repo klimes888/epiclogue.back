@@ -116,7 +116,7 @@ router.post('/join', async function(req, res, next) {
               to: email,
               subject: '이메일 인증을 완료해주세요.',
               html: '<p> 아래 링크를 클릭해주세요. </p><br>' + 
-              "<a href='https://api.chiyak.duckdns.org/users/mailauth/?email=" + email + "&token=" + auth_token
+              "<a href='https://api.epiclogue.tk/users/mailauth/?email=" + email + "&token=" + auth_token
               + "'> 인증하기 </a>"
             }
 
