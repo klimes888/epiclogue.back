@@ -5,6 +5,7 @@
   "scripts": {
     "start": "node ./bin/www",
     "dev": "nodemon ./bin/www --exec babel-node",
+    "dev:db:start": "sudo service mongodb start && nodemon ./bin/www --exec babel-node",
     "babel": "babel-node ./bin/www",
     "docker": "yarn install && nodemon ./bin/www --exec babel-node"
   },

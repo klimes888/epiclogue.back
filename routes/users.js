@@ -334,57 +334,48 @@ router.delete("/", verifyToken, async function (req, res, next) {
   }
 });
 
-router.get("/:userId/following", (req, res, next) => {
+router.get("/:userId/following", async (req, res, next) => {
   const userId = req.params.userId;
-  const dataSet = [];
+  const followingDataSet = [];
 
-  Follow.getFollowingList(userId) // for pipeline, use promise
-    .exec()
-    .then(async (result) => {
-      // no async-await, no data output...
-      console.log(result);
-      for (let data of result) {
-        let temp = await Users.getUserInfo(data.targetUserId, {
-          nickname: 1,
-          userid: 1,
-        });
-        dataSet.push(temp);
-      }
-      return dataSet;
-    })
-    .then((data) => {
-      res.status(200).json(data);
-    })
-    .catch((err) => {
-      console.error(err);
-      res.status(400).json({ msg: err });
-    });
+  try {
+    const followingList = await Follow.getFollowingList(userId);
+    
+    for (let data of followingList) {
+      let temp = await Users.getUserInfo(data.targetUserId, {
+        nickname: 1,
+        userid: 1,
+      });
+      followingDataSet.push(temp);
+    }
+
+    res.status(200).json(followingDataSet)
+  } catch (e) {
+    console.error(e)
+    res.status(400).json({ msg: e})
+  }
 });
 
-router.get("/:userId/follower", (req, res, next) => {
+router.get("/:userId/follower", async (req, res, next) => {
   const userId = req.params.userId;
-  const dataSet = [];
+  const followerDataSet = [];
 
-  Follow.getFollowerList(userId) // for pipeline, use promise
-    .exec()
-    .then(async (result) => {
-      // no async-await, no data output...
-      for (let data of result) {
-        let temp = await Users.getUserInfo(data.userId, {
-          nickname: 1,
-          userid: 1,
-        });
-        dataSet.push(temp);
-      }
-      return dataSet;
-    })
-    .then((data) => {
-      res.status(200).json(data);
-    })
-    .catch((err) => {
-      console.error(err);
-      res.status(400).json({ msg: err });
-    });
+  try {
+    const followerList = await Follow.getFollowerList(userId);
+    
+    for (let data of followerList) {
+      let temp = await Users.getUserInfo(data.targetUserId, {
+        nickname: 1,
+        userid: 1,
+      });
+      followerDataSet.push(temp);
+    }
+
+    res.status(200).json(followerDataSet)
+  } catch (e) {
+    console.error(e)
+    res.status(400).json({ msg: e})
+  } 
 });
 
 module.exports = router;

@@ -32,11 +32,11 @@ router.post("/", verifyToken, async (req, res, next) => {
       }
       await react.create(reactData)
     }
-    res.sendStatus(201);
-  } catch (err) {
-    console.log(err);
-    res.status(500).json({
-      msg: err
+    return res.sendStatus(201);
+  } catch (e) {
+    console.log(e);
+    return res.status(500).json({
+      msg: e
     })
   }
 });
@@ -49,69 +49,43 @@ router.delete("/", verifyToken, async (req, res, next) => {
   };
 
   try {
-    const result = await Like.unlike(likeData);
+    await Like.unlike(likeData);
     if (likeData.targetType === "board") {
-      const userId = res.locals.uid;
-      const boardId = req.body.targetId;
-
-      await react.delete(userId, boardId);
+      await react.delete(likeData.userId, likeData.targetId);
     }
-    res.sendStatus(200);
+    return res.sendStatus(200);
   } catch (e) {
     console.log(e);
-    res.status(500).json(e);
+    return res.status(500).json(e);
   }
 });
 
-router.get("/", (req, res, next) => {
+router.get("/", async (req, res, next) => {
   const userId = req.params.screenId;
   const likeList = [];
 
-  Like.getByUserId(userId)
-    .exec()
-    .then(async (likeObjectIdList) => {
-      for (let data of likeObjectIdList) {
-        if (data.targetType === "board") {
-          await Board.getById(data.targetId, (err, result) => {
-            if (err) {
-              console.error(err);
-              res.sendStatus(500);
-              return;
-            }
-            likeList.push(result);
-          });
-          // 명칭 수정 필요. 댓글: comment, 대댓글: reply
-        } else if (data.targetType === "feedback") {
-          await Feedback.getById(data.targetId, (err, result) => {
-            if (err) {
-              console.error(err);
-              res.sendStatus(500);
-              return;
-            }
-            likeList.push(result);
-          });
-        } else if (data.targetType === "reply") {
-          await Reply.getById(data.targetId, (err, result) => {
-            if (err) {
-              console.error(err);
-              res.sendStatus(500);
-              return;
-            }
-            reply.type = "reply";
-            likeList.push(result);
-          });
-        }
+  try {
+    const likeObjectIdList = await Like.getByUserId(userId);
+
+    for (let data of likeObjectIdList) {
+      let result
+
+      if (data.targetType === "board") {
+        result = await Board.getById(data.targetId);
+      } else if (data.targetType === "feedback") {
+        result = await Feedback.getById(data.targetId);
+      } else if (data.targetType === "reply") {
+        result = await Reply.getById(data.targetId);
       }
-      return likeList;
+      likeList.push(result);
+    }
+    return res.status(200).json(likeList);
+  } catch (e) {
+    console.log(e)
+    return res.status(400).json({
+      msg: e.message
     })
-    .then((resultSet) => {
-      console.log(resultSet);
-      res.status(200).json(resultSet);
-    })
-    .catch((err) => {
-      console.error(err);
-      res.sendStatus(500);
-    });
+  }
 });
 
 module.exports = router;

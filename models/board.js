@@ -42,7 +42,7 @@ board.statics.isWriter = function (userId, boardId, cb) {
 }
 
 board.statics.update = function (articleData, cb) {
-  this.updateOne(
+  return this.updateOne(
     { _id: articleData.boardId },
     {
       boardTitle: articleData.boardTitle,

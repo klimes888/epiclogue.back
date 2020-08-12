@@ -18,36 +18,16 @@ router.post("/", verifyToken, async (req, res, next) => {
     feedbackBody: req.body.feedbackBody
   }
 
-  await Feedback.create(feedbackData, (err, data) => {
-    if (err) {
-      console.log(`[Error!] ${err}`);
-      res.status(400).json({
-        msg: err.message,
-      });
-      return;
-    } else {
-      res.sendStatus(200);
-      return;
-    }
-  });
+  try {
+    await Feedback.create(feedbackData);
+    return res.sendStatus(201)
+  } catch (e) {
+    console.error(`[Error] ${e}`);
+    return res.status(400).json({
+      msg: e.message
+    })
+  }
 });
-
-/* Deprecated: Browser could contain contents, API server don't need to give data back */
-
-// router.get("/:feedbackId/edit", verifyToken, checkWriter, async (req, res, next) => {
-//   await Feedback.getBody(req.params.feedbackId, (err, data) => {
-//     if (err) {
-//       console.log(`[Error!] ${err}`);
-//       res.status(400).json({
-//         msg: err.message,
-//       });
-//       return;
-//     }
-//     res.status(200).json({
-//       data
-//     })
-//   })
-// })
 
 router.patch("/:feedbackId", verifyToken, checkWriter, async (req, res, next) => {
   const newForm = {
@@ -55,75 +35,63 @@ router.patch("/:feedbackId", verifyToken, checkWriter, async (req, res, next) =>
     newFeedbackBody: req.body.newFeedbackBody,
   };
 
-  await Feedback.update(newForm, (err, data) => {
-    if (err) {
-      console.log(`[Error!] ${err}`);
-      res.status(400).json({
-        msg: err.message,
-      });
-      return;
-    } else {
-      console.log(data);
-      if (data.ok === 1) {
-        if (data.n === 1 && data.n === data.nModified) {
-          res.sendStatus(200);
-        } else if (data.n === 1 && data.n !== data.nModified) {
-          res.status(200).json({
-            msg: "질의에 성공했으나 데이터가 수정되지 않았습니다.",
-          });
-        } else if (data.n === 0) {
-          res.status(400).json({
-            msg: "존재하지 않는 데이터에 접근했습니다.",
-          });
-        }
-        return;
-      } else {
-        res.status(400).json({
-          msg: `데이터베이스 질의 실패; ${data.ok}`,
+  try {
+    const patchResult = await Feedback.update(newForm);
+
+    if (patchResult.ok === 1) {
+      if (patchResult.n === 1 && patchResult.n === patchResult.nModified) {
+        return res.sendStatus(200);
+      } else if (patchResult.n === 1 && patchResult.n !== patchResult.nModified) {
+        return res.status(200).json({
+          msg: "질의에 성공했으나 데이터가 수정되지 않았습니다.",
         });
-        return;
+      } else if (patchResult.n === 0) {
+        return res.status(404).json({
+          msg: "존재하지 않는 데이터에 접근했습니다.",
+        });
       }
+    } else {
+      return res.status(500).json({
+        msg: `데이터베이스 질의 실패; ${patchResult.ok}`,
+      });
     }
-  });
+  } catch (e) {
+    console.error(`[Error] ${e}`);
+    return res.status(400).json({
+      msg: e
+    })
+  }
 });
 
 router.delete("/:feedbackId", verifyToken, checkWriter, async (req, res, next) => {
   const feedbackId = req.params.feedbackId;
 
-  await Feedback.delete(feedbackId, (err, data) => {
-    if (err) {
-      console.log(`[Error!] ${err}`);
-      if (msg.kind === "ObjectID") {
-        res.sendStatus(404);
-      } else {
-        res.status(400).json({
-          msg: err.message,
-        });
-      }
-      return;
-    }
-    // console.log(data);
-
-    if (data.ok === 1) {
-      if (data.n === 1 && data.n === data.deletedCount) {
-        res.sendStatus(200);
-      } else if (data.ok === 1 && data.n !== data.deletedCount) {
-        res.status(200).json({
+  try {
+    const deleteResult = await Feedback.delete(feedbackId);
+    
+    if (deleteResult.ok === 1) {
+      if (deleteResult.n === 1 && deleteResult.n === deleteResult.deletedCount) {
+        return res.sendStatus(200);
+      } else if (deleteResult.ok === 1 && deleteResult.n !== deleteResult.deletedCount) {
+        return res.status(200).json({
           msg: "질의에 성공했으나 데이터가 삭제되지 않았습니다.",
         });
-      } else if (data.n === 0) {
-        res.status(400).json({
+      } else if (deleteResult.n === 0) {
+        return res.status(404).json({
           msg: "존재하지 않는 데이터에 접근했습니다.",
         });
       }
-      return;
-    } else if (data.ok === 0) {
+    } else if (deleteResult.ok === 0) {
       res.status(400).json({
         msg: "데이터베이스 질의 실패",
       });
     }
-    return;
-  });
+  } catch (e) {
+    console.error(`[Error] ${e}`);
+    return res.status(400).json({
+      msg: e
+    })
+  }
 });
 
 module.exports = router;

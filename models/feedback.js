@@ -34,13 +34,12 @@ Feedback.statics.isWriter = function (userId, feedbackId, cb) {
 
 // Update
 Feedback.statics.update = async function (newFeedbackData, cb) {
-  this.updateOne(
+  return this.updateOne(
     { _id: newFeedbackData.feedbackId },
     {
       feedbackBody: newFeedbackData.newFeedbackBody,
       edited: true,
-    },
-    cb
+    }
   );
 };
 

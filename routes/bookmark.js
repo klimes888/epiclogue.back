@@ -16,10 +16,10 @@ router.get("/", verifyToken, async (req, res, next) => {
 
   try {
     const result = await Bookmark.getByUserId(screenId);
-    res.status(200).json(result);
+    return res.status(200).json(result);
   } catch (err) {
     console.log(`[Error] ${err}`);
-    res.status(500).json({
+    return res.status(500).json({
       msg: err
     })
   }
@@ -40,10 +40,10 @@ router.post("/", verifyToken, async function (req, res, next) {
   try {
     await Bookmark.create(bookmarkData);
     await react.create(reactData);
-    res.sendStatus(201)
+    return res.sendStatus(201)
   } catch (err) {
     console.log(`[Error] ${err}`);
-    res.status(500).json({
+    return res.status(500).json({
       msg: err
     })
   }
@@ -56,10 +56,10 @@ router.delete("/", verifyToken, async (req, res, next) => {
   try {
     await Bookmark.delete(userId, boardId);
     await react.delete(userId, boardId);
-    res.sendStatus(200);
+    return res.sendStatus(200);
   } catch (err) {
     console.log(`[Error] ${err}`);
-    res.status(500).json({
+    return res.status(500).json({
       msg: err
     })
   }
