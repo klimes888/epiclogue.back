@@ -14,8 +14,8 @@ const board = new mongoose.Schema({
     heartCount: { type: Number, default: 0 },
     replyCount: { type: Number, default: 0 },
     bookmarkCount: { type: Number, default: 0 },
-    originUid:{type:ObjectId},
-    originBuId:{type:ObjectId},
+    originUserId:{type:ObjectId},
+    originBoardId:{type:ObjectId},
     edited: { type: Boolean, default: false }
 })
 

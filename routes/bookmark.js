@@ -2,7 +2,6 @@ import { Router } from "express";
 import { verifyToken } from "./authorization";
 import Bookmark from "../models/bookmark";
 import react from "../models/react";
-import  user  from "../models/users"
 const router = new Router({
   mergeParams: true,
 });
@@ -11,6 +10,7 @@ const router = new Router({
   This is bookmark router.
   base url: /:screenId/bookmark
 */
+
 router.get("/", verifyToken, async (req, res, next) => {
   const screenId = req.params.screenId;
 
