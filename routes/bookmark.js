@@ -17,10 +17,11 @@ router.get("/", verifyToken, async (req, res, next) => {
   try {
     const result = await Bookmark.getByUserId(screenId);
     return res.status(200).json(result);
-  } catch (err) {
-    console.log(`[Error] ${err}`);
+  } catch (e) {
+    console.log(`[Error] ${e}`);
     return res.status(500).json({
-      msg: err
+      result: "error",
+      message: e.message
     })
   }
 });
@@ -40,11 +41,14 @@ router.post("/", verifyToken, async function (req, res, next) {
   try {
     await Bookmark.create(bookmarkData);
     await react.create(reactData);
-    return res.sendStatus(201)
-  } catch (err) {
-    console.log(`[Error] ${err}`);
+    return res.status(201).json({
+      result: 'ok'
+    })
+  } catch (e) {
+    console.log(`[Error] ${e}`);
     return res.status(500).json({
-      msg: err
+      result: "error",
+      message: e.message
     })
   }
 });
@@ -56,11 +60,14 @@ router.delete("/", verifyToken, async (req, res, next) => {
   try {
     await Bookmark.delete(userId, boardId);
     await react.delete(userId, boardId);
-    return res.sendStatus(200);
-  } catch (err) {
-    console.log(`[Error] ${err}`);
+    return res.status(200).json({
+      result: 'ok'
+    })
+  } catch (e) {
+    console.log(`[Error] ${e}`);
     return res.status(500).json({
-      msg: err
+      result: "error",
+      message: e.message
     })
   }
 });

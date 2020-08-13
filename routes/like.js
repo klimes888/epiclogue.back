@@ -4,11 +4,10 @@ const router = express.Router({
 });
 const { verifyToken } = require("./authorization");
 const Like = require("../models/like");
-const Feedback = require('../models/feedback')
-const Board = require('../models/board');
-const Reply = require('../models/reply');
-const reply = require("../models/reply");
-import react from '../models/react'
+const Feedback = require("../models/feedback");
+const Board = require("../models/board");
+const Reply = require("../models/reply");
+import react from "../models/react";
 
 /*
   This is like router
@@ -28,16 +27,19 @@ router.post("/", verifyToken, async (req, res, next) => {
       const reactData = {
         userId: res.locals.uid,
         boardId: req.body.targetId,
-        type: "like"
-      }
-      await react.create(reactData)
+        type: "like",
+      };
+      await react.create(reactData);
     }
-    return res.sendStatus(201);
+    return res.status(201).json({
+      result: "ok",
+    });
   } catch (e) {
-    console.log(e);
+    console.error(`[Error] ${e}`);
     return res.status(500).json({
-      msg: e
-    })
+      result: "error",
+      message: e.message,
+    });
   }
 });
 
@@ -55,8 +57,11 @@ router.delete("/", verifyToken, async (req, res, next) => {
     }
     return res.sendStatus(200);
   } catch (e) {
-    console.log(e);
-    return res.status(500).json(e);
+    console.error(`[Error] ${e}`);
+    return res.status(500).json({
+      result: "error",
+      message: e.message,
+    });
   }
 });
 
@@ -68,7 +73,7 @@ router.get("/", async (req, res, next) => {
     const likeObjectIdList = await Like.getByUserId(userId);
 
     for (let data of likeObjectIdList) {
-      let result
+      let result;
 
       if (data.targetType === "board") {
         result = await Board.getById(data.targetId);
@@ -79,12 +84,16 @@ router.get("/", async (req, res, next) => {
       }
       likeList.push(result);
     }
-    return res.status(200).json(likeList);
+    return res.status(200).json({
+      result: "ok",
+      data: likeList,
+    });
   } catch (e) {
-    console.log(e)
-    return res.status(400).json({
-      msg: e.message
-    })
+    console.error(`[Error] ${e}`);
+    return res.status(500).json({
+      result: "error",
+      message: e.message,
+    });
   }
 });
 

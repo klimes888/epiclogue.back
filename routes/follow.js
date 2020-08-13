@@ -6,7 +6,6 @@ const router = new Router({
 import { verifyToken, checkWriter } from "./authorization";
 import Follow from "../models/follow";
 
-
 /* 
   This is follow router.
   base url: /:screenId/follow
@@ -17,17 +16,20 @@ router.post("/", verifyToken, async (req, res, next) => {
     userId: res.locals.uid,
     targetUserId: req.body.targetUserId,
   };
-  
+
   /* 유저 검증 필요(존재 유무, 플텍 계정의 경우 팔로우 승인 과정 필요) */
 
   try {
     await Follow.follow(followData);
-    return res.sendStatus(201)
+    return res.status(201).json({
+      result: "ok",
+    });
   } catch (e) {
-    console.error(e);
-    return res.status(400).json({
-      msg: e.message
-    })
+    console.error(`[Error] ${e}`);
+    return res.status(500).json({
+      result: "error",
+      message: e.message,
+    });
   }
 });
 
@@ -36,17 +38,20 @@ router.delete("/", verifyToken, async (req, res, next) => {
     userId: res.locals.uid,
     targetUserId: req.body.targetUserId,
   };
-  
+
   /* 유저 검증 필요(존재 유무, 플텍 계정의 경우 팔로우 승인 과정 필요) */
 
   try {
-    await Follow.unfollow(followData)
-    return res.sendStatus(200)
+    await Follow.unfollow(followData);
+    return res.status(200).json({
+      result: "ok",
+    });
   } catch (e) {
-    console.error(e);
-    return res.status(400).json({
-      msg: e.message
-    })
+    console.error(`[Error] ${e}`);
+    return res.status(500).json({
+      result: "error",
+      message: e.message,
+    });
   }
 });
 

@@ -49,13 +49,13 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
-app.use('/board', boardRouter);
-app.use('/:screenId/posts/:boardId/feedback', require('./routes/feedback'));
-app.use('/:screenId/posts/:boardId/reply', require('./routes/reply'));
+app.use('/boards', boardRouter);
+app.use('/:screenId/boards/:boardId/feedback', require('./routes/feedback'));
+app.use('/:screenId/boards/:boardId/reply', require('./routes/reply'));
+app.use('/:screenId/boards/:boardId/react', reactRouter)
 app.use('/:screenId/like', require('./routes/like'));
 app.use('/:screenId/follow', require('./routes/follow'))
 app.use('/:screenId/bookmark', require('./routes/bookmark'))
-app.use('/:screenId/posts/:boardId/react', reactRouter)
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
