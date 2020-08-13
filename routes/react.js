@@ -7,7 +7,7 @@ const router = express.Router({
 
 /* 
   This is react router.
-  base url: /:screenId/posts/:boardId/react
+  base url: /:screenId/boards/:boardId/react
 */
 
 router.get("/", async (req, res, next) => {

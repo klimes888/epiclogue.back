@@ -55,7 +55,9 @@ router.delete("/", verifyToken, async (req, res, next) => {
     if (likeData.targetType === "board") {
       await react.delete(likeData.userId, likeData.targetId);
     }
-    return res.sendStatus(200);
+    return res.status(200).json({
+      result: 'ok'
+    })
   } catch (e) {
     console.error(`[Error] ${e}`);
     return res.status(500).json({
@@ -71,7 +73,6 @@ router.get("/", async (req, res, next) => {
 
   try {
     const likeObjectIdList = await Like.getByUserId(userId);
-
     for (let data of likeObjectIdList) {
       let result;
 

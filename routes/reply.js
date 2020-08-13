@@ -8,7 +8,7 @@ import Reply from "../models/reply";
 
 /* 
   This is reply router.
-  base url: /:userId/posts/:boardId/reply
+  base url: /:userId/boards/:boardId/reply
 */
 
 // 대댓글 생성
