@@ -68,4 +68,27 @@ board.statics.findAll = function () {
   );
 };
 
-module.exports = mongoose.model("Board", board);
+board.statics.getTitlesByQuery = function (query) {
+  return this.find(
+    { boardTitle: { $regex: query } },
+    {
+      boardTitle: 1,
+    }
+  ).sort({ boardTitle: 'asc' });
+};
+
+board.statics.getByQuery = function (query) {
+  return this.find(
+    { boardTitle: { $regex: query } },
+    {
+      boardTitle: 1,
+      boardImg: 1,
+      heartCount: 1,
+      bookmarkCount: 1,
+      category: 1,
+      writeDate: 1,
+    }
+  ).sort({ writeDate: 1, heartCount: 1 });
+};
+
+module.exports = mongoose.model('Board', board);
