@@ -13,27 +13,27 @@ const Feedback = new mongoose.Schema({
 });
 
 // Create
-Feedback.statics.create = function (data, cb) {
+Feedback.statics.create = function (data) {
   const feedbackData = new this(data);
-  return feedbackData.save(cb);
+  return feedbackData.save();
 };
 
 // Read
-Feedback.statics.getByBoardId = function (boardId, cb) {
-  return this.find({ boardId }, cb);
+Feedback.statics.getByBoardId = function (boardId) {
+  return this.find({ boardId });
 };
 
-Feedback.statics.getBody = function (feedbackId, cb) {
-  return this.findOne({ _id: feedbackId }, { _id: 0, feedbackBody: 1 }, cb);
+Feedback.statics.getBody = function (feedbackId) {
+  return this.findOne({ _id: feedbackId }, { _id: 0, feedbackBody: 1 });
 };
 
 // Auth
-Feedback.statics.isWriter = function (userId, feedbackId, cb) {
-  return this.findOne({ _id: feedbackId, userId }, cb);
+Feedback.statics.isWriter = function (userId, feedbackId) {
+  return this.findOne({ _id: feedbackId, userId });
 };
 
 // Update
-Feedback.statics.update = async function (newFeedbackData, cb) {
+Feedback.statics.update = async function (newFeedbackData) {
   return this.updateOne(
     { _id: newFeedbackData.feedbackId },
     {
@@ -44,16 +44,16 @@ Feedback.statics.update = async function (newFeedbackData, cb) {
 };
 
 // Delete
-Feedback.statics.delete = function (feedbackId, cb) {
-  return this.deleteOne({ _id: feedbackId }, cb);
+Feedback.statics.delete = function (feedbackId) {
+  return this.deleteOne({ _id: feedbackId });
 };
 
-Feedback.statics.deleteByBoardId = function (boardId, cb) {
-  return this.deleteMany({ boardId }, cb)
+Feedback.statics.deleteByBoardId = function (boardId) {
+  return this.deleteMany({ boardId })
 }
 
-Feedback.statics.getById = function (feedbackId, cb) {
-  return this.findOne({ _id: feedbackId }, cb)
+Feedback.statics.getById = function (feedbackId) {
+  return this.findOne({ _id: feedbackId })
 }
 
 // Counting 추가 필요
