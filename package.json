@@ -6,7 +6,8 @@
     "start": "node ./bin/www",
     "dev": "nodemon ./bin/www --exec babel-node",
     "babel": "babel-node ./bin/www",
-    "docker": "yarn install && nodemon ./bin/www --exec babel-node"
+    "docker": "yarn install && nodemon ./bin/www --exec babel-node",
+    "test": "./node_modules/.bin/jest tests --config .jestrc.js"
   },
   "dependencies": {
     "@sentry/node": "5.19.0",
@@ -39,7 +40,11 @@
     "@babel/preset-env": "^7.10.4",
     "@typescript-eslint/eslint-plugin": "^3.7.1",
     "@typescript-eslint/parser": "^3.7.1",
+    "babel-jest": "^26.3.0",
     "eslint": "^7.5.0",
-    "eslint-plugin-react": "^7.20.4"
+    "eslint-plugin-react": "^7.20.4",
+    "jest": "^26.4.2",
+    "random-string": "^0.2.0",
+    "supertest": "^4.0.2"
   }
 }

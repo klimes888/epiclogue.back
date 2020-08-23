@@ -44,7 +44,7 @@ router.post('/login', async function(req, res, next) {
         expiresIn: '1h'
       });
       
-      res.status(201).json({
+      res.status(200).json({
         result: 'ok',
         token,
         email: result.email,
@@ -52,14 +52,13 @@ router.post('/login', async function(req, res, next) {
         userId: result.userid
       });
     } else {
-      res.status(401).json({
+      res.status(400).json({
         result:"error",
         reason:"잘못된 비밀번호 입니다."
       })
     }
-  }
-  else {
-    res.status(401).json({
+  } else {
+    res.status(400).json({
       result:"error",
       reason:"유저를 찾을 수 없습니다."
     })
@@ -67,7 +66,7 @@ router.post('/login', async function(req, res, next) {
 })
 
 router.get('/join', function(req, res, next) {
-  res.status(401).json({
+  res.status(405).json({
     result:'error',
     reason:'not allow method'
   })
@@ -84,7 +83,7 @@ router.post('/join', async function(req, res, next) {
     if (userPw == userPwRe) {
       /* 중복 가입 이메일 처리 */
           if ( await Users.isExist(email) != null ) {
-            res.status(401).json({
+            res.status(400).json({
               result: 'error',
               reason: '중복된 이메일입니다. 다른 이메일로 가입해주세요.'
             });
@@ -133,19 +132,19 @@ router.post('/join', async function(req, res, next) {
             })
           }
           else {
-            res.status(401).json({
+            res.status(400).json({
               result:"error",
               reason:"이미 존재하는 아이디 입니다. 다시 시도해주세요!"
             })
           }
       } else {
-        res.status(401).json({
+        res.status(400).json({
           result:"error",
           reason:"패스워드가 일치하지 않습니다!"
         })
       }
   } else {
-    res.status(401).json({
+    res.status(400).json({
       result:"error",
       reason:"비밀번호 규칙을 다시 확인해주세요."
     })
