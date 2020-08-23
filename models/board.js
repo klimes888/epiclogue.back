@@ -1,48 +1,47 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 const ObjectId = mongoose.ObjectId;
-mongoose.set('useCreateIndex', true);
+mongoose.set("useCreateIndex", true);
 
 const board = new mongoose.Schema({
-    uid: {type: ObjectId, required: true},
-    boardTitle: {type: String, default:"" },
-    boardImg: {type: [String], required: true},
-    boardBody:{type:String, default: "" },
-    category: {type:String, required: true},
-    pub: {type:String, required: true},
-    writeDate: {type:Date, default: Date.now},
-    language: { type: String, default: "Korean" },
-    heartCount: { type: Number, default: 0 },
-    replyCount: { type: Number, default: 0 },
-    bookmarkCount: { type: Number, default: 0 },
-    originUid:{type:ObjectId},
-    originBuId:{type:ObjectId},
-    edited: { type: Boolean, default: false }
-})
+  uid: { type: ObjectId, required: true },
+  boardTitle: { type: String, default: "" },
+  boardImg: { type: [String], required: true },
+  boardBody: { type: String, default: "" },
+  category: { type: String, required: true },
+  pub: { type: String, required: true },
+  writeDate: { type: Date, default: Date.now },
+  language: { type: String, default: "Korean" },
+  heartCount: { type: Number, default: 0 },
+  replyCount: { type: Number, default: 0 },
+  bookmarkCount: { type: Number, default: 0 },
+  originUserId: { type: ObjectId },
+  originBoardId: { type: ObjectId },
+  edited: { type: Boolean, default: false },
+});
 
 board.statics.create = function (data) {
-    const boardData = new this(data);
+  const boardData = new this(data);
 
-    return boardData.save();
-}
-
-/* 수정, 삭제, 댓글에 필요한 boardId GET (미검증) */
-board.statics.getById = function ( boardId, cb ) {
-    return this.findOne({ "_id" : boardId }, cb);
-}
-
-/* 특정 유저의 글 GET (미검증) */ 
-board.statics.getUserArticleList = function (userId) {
-  this.find({ uid: userId }, (err, data) => {
-    return data;
-  });
+  return boardData.save();
 };
 
-board.statics.isWriter = function (userId, boardId, cb) {
-  return this.findOne({ _id: boardId, uid: userId }, cb)
-}
+/* 수정, 삭제, 댓글에 필요한 boardId GET (미검증) */
+board.statics.getById = function (boardId) {
+  return this.findOne({ _id: boardId });
+};
 
-board.statics.update = function (articleData, cb) {
-  this.updateOne(
+/* 특정 유저의 글 GET (미검증) */
+
+board.statics.getUserArticleList = function (userId) {
+  return this.find({ uid: userId });
+};
+
+board.statics.isWriter = function (userId, boardId) {
+  return this.findOne({ _id: boardId, uid: userId });
+};
+
+board.statics.update = function (articleData) {
+  return this.updateOne(
     { _id: articleData.boardId },
     {
       boardTitle: articleData.boardTitle,
@@ -52,13 +51,13 @@ board.statics.update = function (articleData, cb) {
       pub: articleData.pub,
       language: articleData.language,
       edited: true,
-    }, cb
+    }
   );
 };
 
-board.statics.delete = function (buid, cb) {
-    return this.deleteOne({ _id: buid }, cb)
-}
+board.statics.delete = function (buid) {
+  return this.deleteOne({ _id: buid });
+};
 
 /* 글 전체 조회 */
 board.statics.findAll = function () {

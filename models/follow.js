@@ -7,30 +7,30 @@ const follow = new mongoose.Schema({
   targetUserId: { type: ObjectId, required: true },
 });
 
-follow.statics.follow = function (data, cb) {
+follow.statics.follow = function (data) {
   const followData = new this(data);
-  return followData.save(cb);
+  return followData.save();
 };
 
-follow.statics.unfollow = function (unFollowData, cb) {
-  return this.deleteOne(
-    { userId: unFollowData.userId, targetUserId: unFollowData.targetUserId },
-    cb
-  );
+follow.statics.unfollow = function (unFollowData) {
+  return this.deleteOne({
+    userId: unFollowData.userId,
+    targetUserId: unFollowData.targetUserId,
+  });
 };
 
 // 유저의 팔로잉 목록
-follow.statics.getFollowingList = function (userId, cb) {
-  return this.find({ userId }, cb);
+follow.statics.getFollowingList = function (userId) {
+  return this.find({ userId });
 };
 
 // 유저의 팔로워 목록
-follow.statics.getFollowerList = function (targetUserId, cb) {
-  return this.find({ targetUserId }, cb);
+follow.statics.getFollowerList = function (targetUserId) {
+  return this.find({ targetUserId });
 };
 
-follow.statics.isFollowing = function (userId, targetUserId, cb) {
-  return this.findOne({ userId, targetUserId }, cb)
-}
+follow.statics.isFollowing = function (userId, targetUserId) {
+  return this.findOne({ userId, targetUserId });
+};
 
 module.exports = mongoose.model("follow", follow);

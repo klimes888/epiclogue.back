@@ -2,7 +2,6 @@ import { Router } from "express";
 import { verifyToken } from "./authorization";
 import Bookmark from "../models/bookmark";
 import react from "../models/react";
-import  user  from "../models/users"
 const router = new Router({
   mergeParams: true,
 });
@@ -11,16 +10,18 @@ const router = new Router({
   This is bookmark router.
   base url: /:screenId/bookmark
 */
+
 router.get("/", verifyToken, async (req, res, next) => {
   const screenId = req.params.screenId;
 
   try {
     const result = await Bookmark.getByUserId(screenId);
-    res.status(200).json(result);
-  } catch (err) {
-    console.log(`[Error] ${err}`);
-    res.status(500).json({
-      msg: err
+    return res.status(200).json(result);
+  } catch (e) {
+    console.log(`[Error] ${e}`);
+    return res.status(500).json({
+      result: "error",
+      message: e.message
     })
   }
 });
@@ -40,11 +41,14 @@ router.post("/", verifyToken, async function (req, res, next) {
   try {
     await Bookmark.create(bookmarkData);
     await react.create(reactData);
-    res.sendStatus(201)
-  } catch (err) {
-    console.log(`[Error] ${err}`);
-    res.status(500).json({
-      msg: err
+    return res.status(201).json({
+      result: 'ok'
+    })
+  } catch (e) {
+    console.log(`[Error] ${e}`);
+    return res.status(500).json({
+      result: "error",
+      message: e.message
     })
   }
 });
@@ -56,11 +60,14 @@ router.delete("/", verifyToken, async (req, res, next) => {
   try {
     await Bookmark.delete(userId, boardId);
     await react.delete(userId, boardId);
-    res.sendStatus(200);
-  } catch (err) {
-    console.log(`[Error] ${err}`);
-    res.status(500).json({
-      msg: err
+    return res.status(200).json({
+      result: 'ok'
+    })
+  } catch (e) {
+    console.log(`[Error] ${e}`);
+    return res.status(500).json({
+      result: "error",
+      message: e.message
     })
   }
 });

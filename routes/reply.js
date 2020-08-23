@@ -1,6 +1,6 @@
 import express from "express";
 const router = express.Router({
-  mergeParams: true
+  mergeParams: true,
 });
 
 import { verifyToken, checkWriter } from "./authorization";
@@ -8,67 +8,52 @@ import Reply from "../models/reply";
 
 /* 
   This is reply router.
-  base url: /:userId/posts/:boardId/reply
+  base url: /:userId/boards/:boardId/reply
 */
 
 // 대댓글 생성
-router.post("/", verifyToken, (req, res, next) => {
+router.post("/", verifyToken, async (req, res, next) => {
   const replyForm = {
     userId: res.locals.uid,
     boardId: req.params.boardId,
     parentId: req.body.parentId,
-    replyBody: req.body.replyBody
-  }
+    replyBody: req.body.replyBody,
+  };
 
-  Reply.create(replyForm, (err, data) => {
-    console.log(data)
-    if (err) {
-      console.log(`[Error!] ${err}`)
-      res.status(400).json({
-        msg: err.message,
-      });
-      return;
-    } else {
-      res.sendStatus(200);
-      return;
-    }
-  });
+  try {
+    await Reply.create(replyForm);
+    const newerReplyData = await Reply.getByParentId(parentId);
+    return res.status(200).json({
+      result: "ok",
+      data: newerReplyData,
+    });
+  } catch (e) {
+    console.error(`[Error] ${e}`);
+    return res.status(500).json({
+      result: "error",
+      message: e.message,
+    });
+  }
 });
 
 // 댓글 하위의 대댓글 뷰
 router.get("/:parentId", verifyToken, async (req, res, next) => {
   const parentId = req.params.parentId;
-  Reply.getByParentId(parentId, (err, data) => {
-    if (err) {
-      console.log(`[Error!] ${err}`)
-      res.status(400).json({
-        msg: err.message,
-      });
-      return;
-    } else {
-      res.status(200).json({
-        data,
-      });
-    }
-  });
-});
 
-/* Deprecated:  */
-// router.get("/:replyId/edit", verifyToken, checkWriter, async (req, res, next) => {
-//   const replyId = req.params.replyId
-//   await Reply.getBody(replyId, (err, data) => {
-//     if (err) {
-//       console.log(`[Error!] ${err}`)
-//       res.status(400).json({
-//         msg: err.message,
-//       });
-//       return;
-//     }
-//     console.log(data);
-//     res.status(200).json(data);
-//     return;
-//   })
-// })
+  try {
+    const replyData = await Reply.getByParentId(parentId);
+    return res.status(200).json({
+      result: "ok",
+      data: replyData,
+    });
+  } catch (e) {
+    console.error(`[Error] ${e}`);
+    return res.status(500).json({
+      result: "error",
+      message: e.message,
+    });
+  }
+});
 
 router.patch("/:replyId", verifyToken, checkWriter, async (req, res, next) => {
   const newForm = {
@@ -76,119 +61,85 @@ router.patch("/:replyId", verifyToken, checkWriter, async (req, res, next) => {
     newReplyBody: req.body.newReplyBody,
   };
 
-  await Reply.update(newForm, (err, data) => {
-    if (err) {
-      console.log(`[Error!] ${err}`)
-      res.status(400).json({
-        msg: err.message,
-      });
-      return;
-    } else {
-      console.log(data);
-      if (data.ok === 1) {
-        if (data.n === 1 && data.n === data.nModified) {
-          res.sendStatus(200);
-        } else if (data.n === 1 && data.n !== data.nModified) {
-          res.status(200).json({
-            msg: "질의에 성공했으나 데이터가 수정되지 않았습니다.",
-          });
-        } else if (data.n === 0) {
-          res.status(400).json({
-            msg: "존재하지 않는 데이터에 접근했습니다.",
-          });
-        }
-        return;
-      } else {
-        res.status(400).json({
-          msg: `데이터베이스 질의 실패; ${data.ok}`,
+  try {
+    const patchResult = await Reply.update(newForm);
+    const parentId = await Reply.getParentId(req.params.replyId);
+
+    if (patchResult.ok === 1) {
+      if (patchResult.n === 1 && patchResult.n === patchResult.nModified) {
+        const newerReplyData = await Reply.getByParentId(parentId);
+        return res.status(200).json({
+          result: "ok",
+          data: newerReplyData,
         });
-        return;
+      } else if (
+        patchResult.n === 1 &&
+        patchResult.n !== patchResult.nModified
+      ) {
+        return res.status(200).json({
+          result: "ok",
+          message: "질의에 성공했으나 데이터가 수정되지 않았습니다.",
+        });
+      } else if (patchResult.n === 0) {
+        return res.status(404).json({
+          result: "error",
+          message: "존재하지 않는 데이터에 접근했습니다.",
+        });
       }
     }
-  });
+  } catch (e) {
+    console.error(`[Error] ${e}`);
+    return res.status(500).json({
+      result: "error",
+      message: e.message,
+    });
+  }
 });
 
 router.delete("/:replyId", verifyToken, checkWriter, async (req, res, next) => {
   const replyId = req.params.replyId;
 
-  Reply.delete(replyId, (err, data) => {
-    if (err) {
-      console.log(`[Error!] ${err}`)
-      if (msg.kind === "ObjectID") {
-        res.sendStatus(404);
-      } else {
-      res.status(400).json({
-        msg: err.message,
-      });
+  try {
+    const parentId = await Reply.getById(replyId);
+    const deleteResult = await Reply.delete(replyId, { parentId: 1 });
+    if (deleteResult.ok === 1) {
+      const newerReplyData = await Reply.getByParentId(parentId);
+
+      if (
+        deleteResult.n === 1 &&
+        deleteResult.n === deleteResult.deletedCount
+      ) {
+        return res.send(200).json({
+          result: "ok",
+          data: newerReplyData,
+        });
+      } else if (
+        deleteResult.ok === 1 &&
+        deleteResult.n !== deleteResult.deletedCount
+      ) {
+        return res.status(200).json({
+          result: "ok",
+          message: "질의에 성공했으나 데이터가 삭제되지 않았습니다.",
+        });
+      } else if (deleteResult.n === 0) {
+        return res.status(404).json({
+          result: "error",
+          message: "존재하지 않는 데이터에 접근했습니다.",
+        });
       }
-      return;
+    } else {
+      return res.status(500).json({
+        result: "error",
+        message: "데이터베이스 질의 실패",
+      });
     }
-    console.log(data);
-
-    if (data.ok === 1) {
-      if (data.n === 1 && data.n === data.deletedCount) {
-        res.sendStatus(200);
-      } else if (data.ok === 1 && data.n !== data.deletedCount) {
-        res.status(200).json({
-          msg: "질의에 성공했으나 데이터가 삭제되지 않았습니다.",
-        });
-      } else if (data.n === 0) {
-        res.status(400).json({
-          msg: "존재하지 않는 데이터에 접근했습니다.",
-        });
-      }
-      return;
-    } else if (data.ok === 0) {
-      res.status(400).json({
-        msg: "데이터베이스 질의 실패",
-      });
-    }
-    return;
-  });
-});
-
-router.delete(
-  "/:replyId",
-  verifyToken,
-  async (req, res, next) => {
-    const replyId = req.params.replyId;
-
-    await Reply.deleteByParentId(replyId, (err, data) => {
-      if (err) {
-        console.log(`[Error!] ${err}`) 
-        if (msg.kind === "ObjectID") {
-          res.sendStatus(404);
-        } else {
-      res.status(400).json({
-        msg: err.message,
-      });
-        }
-        return;
-      }
-
-      if (data.ok === 1) {
-        if (data.n === 1 && data.n === data.deletedCount) {
-          res.sendStatus(200);
-        } else if (data.ok === 1 && data.n !== data.deletedCount) {
-          res.status(200).json({
-            msg: "질의에 성공했으나 데이터가 삭제되지 않았습니다.",
-          });
-        } else if (data.n === 0) {
-          res.status(400).json({
-            msg: "존재하지 않는 데이터에 접근했습니다.",
-          });
-        }
-        return;
-      } else if (data.ok === 0) {
-        res.status(400).json({
-          msg: "데이터베이스 질의 실패",
-        });
-      }
-      return;
+  } catch (e) {
+    console.error(`[Error] ${e}`);
+    return res.status(500).json({
+      result: "error",
+      message: e.message,
     });
   }
-);
-
-// 글 삭제시 모든 댓글 및 대댓글 삭제 쿼리 필요
+});
 
 module.exports = router;
