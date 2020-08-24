@@ -1,8 +1,8 @@
-var createError = require('http-errors');
-var express = require('express');
-var path = require('path');
-var cookieParser = require('cookie-parser');
-var logger = require('morgan');
+const createError = require('http-errors');
+const express = require('express');
+const path = require('path');
+const cookieParser = require('cookie-parser');
+const logger = require('morgan');
 
 const cors = require('cors');
 const helmet = require('helmet');
@@ -10,12 +10,13 @@ const mongoose = require('mongoose');
 const swaggerJSDoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
 const debug = require('debug')(process.env.DEBUG)
-var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
+const indexRouter = require('./routes/index');
+const usersRouter = require('./routes/users');
 const boardRouter = require('./routes/board')
+const searchRouter = require('./routes/search')
 const reactRouter = require('./routes/react')
 
-var app = express();
+const app = express();
 
 require('dotenv').config();
 
@@ -49,13 +50,14 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
-app.use('/board', boardRouter);
-app.use('/:screenId/posts/:boardId/feedback', require('./routes/feedback'));
-app.use('/:screenId/posts/:boardId/reply', require('./routes/reply'));
+app.use('/boards', boardRouter);
+app.use('/:screenId/boards/:boardId/feedback', require('./routes/feedback'));
+app.use('/:screenId/boards/:boardId/reply', require('./routes/reply'));
+app.use('/:screenId/boards/:boardId/react', reactRouter)
 app.use('/:screenId/like', require('./routes/like'));
 app.use('/:screenId/follow', require('./routes/follow'))
 app.use('/:screenId/bookmark', require('./routes/bookmark'))
-app.use('/:screenId/posts/:boardId/react', reactRouter)
+app.use('/search', searchRouter)
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

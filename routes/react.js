@@ -1,16 +1,16 @@
-import express from 'express'
-import react from '../models/react'
-import user from '../models/users'
+import express from "express";
+import react from "../models/react";
+import user from "../models/users";
 const router = express.Router({
-  mergeParams: true
+  mergeParams: true,
 });
 
 /* 
   This is react router.
-  base url: /:screenId/posts/:boardId/react
+  base url: /:screenId/boards/:boardId/react
 */
 
-router.get('/', async (req, res, next) => {
+router.get("/", async (req, res, next) => {
   const boardId = req.params.boardId;
   const _ReactData = [];
 
@@ -24,15 +24,21 @@ router.get('/', async (req, res, next) => {
         userProfileImage: userData.profile || null,
         nickname: userData.nickname,
         type: data.type,
-        createdAt: data.createdAt
-      }
+        createdAt: data.createdAt,
+      };
       _ReactData.push(tempData);
     }
-    res.status(200).json(_ReactData)
-  } catch (e) { 
-    console.log(e);
-    res.status(500).json(e)
+    return res.status(200).json({
+      result: "ok",
+      data: _ReactData,
+    });
+  } catch (e) {
+    console.error(`[Error] ${e}`);
+    return res.status(500).json({
+      result: "error",
+      message: e.message,
+    });
   }
-})
+});
 
 module.exports = router;

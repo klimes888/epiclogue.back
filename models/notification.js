@@ -10,24 +10,24 @@ const notification = new mongoose.Schema({
   read: { type: Boolean, default: false}
 });
 
-notification.statics.create = function (data, cb) {
+notification.statics.create = function (data) {
   const likeData = new this(data);
-  return likeData.save(cb);
+  return likeData.save();
 };
 
 // 알림목록
-notification.statics.getLikeList = function (userId, cb) {
-  return this.find({ userId }, cb);
+notification.statics.getLikeList = function (userId) {
+  return this.find({ userId });
 };
 
 // 읽음처리
-notification.statics.read = function (notificationId, cb) {
-  return this.updateOne({ _id: notificationId }, { read: true }, cb);
+notification.statics.read = function (notificationId) {
+  return this.updateOne({ _id: notificationId }, { read: true });
 }
 
 // 삭제
-notification.statics.delete = function (notificationId, cb) {
-  return this.deleteOne({ _id: notificationId }, cb);
+notification.statics.delete = function (notificationId) {
+  return this.deleteOne({ _id: notificationId });
 };
 
 

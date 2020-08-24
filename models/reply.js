@@ -13,53 +13,56 @@ const Reply = new mongoose.Schema({
 });
 
 // Create
-Reply.statics.create = function (data, cb) {
+Reply.statics.create = function (data) {
   const ReplyData = new this(data);
-  return ReplyData.save(cb);
+  return ReplyData.save();
 };
 
 // Auth
-Reply.statics.isWriter = function (userId, replyId, cb) {
-  return this.findOne({ _id: replyId, userId: userId }, cb);
+Reply.statics.isWriter = function (userId, replyId) {
+  return this.findOne({ _id: replyId, userId: userId });
 };
 
 // Read
-Reply.statics.getByParentId = function (parentId, cb) {
-  return this.find({ parentId }, cb);
+Reply.statics.getByParentId = function (parentId) {
+  return this.find({ parentId });
 };
 
-Reply.statics.getBody = function (replyId, cb) {
-  return this.findOne({ _id: replyId }, { _id: 0, replyBody: 1 }, cb);
+Reply.statics.getBody = function (replyId) {
+  return this.findOne({ _id: replyId }, { _id: 0, replyBody: 1 });
 };
 
 // Update
-Reply.statics.update = async function (updateForm, cb) {
+Reply.statics.update = async function (updateForm) {
   return this.updateOne(
     { _id: updateForm.replyId },
     {
       replyBody: updateForm.newReplyBody,
       edited: true,
-    },
-    cb
+    }
   );
 };
 
 // Delete
-Reply.statics.delete = function (replyId, cb) {
-  return this.deleteOne({ _id: replyId }, cb);
+Reply.statics.delete = function (replyId) {
+  return this.deleteOne({ _id: replyId });
 };
 
 // Delete all
-Reply.statics.deleteByBoardId = function (boardId, cb) {
-  return this.deleteMany({ boardId }, cb);
+Reply.statics.deleteByBoardId = function (boardId) {
+  return this.deleteMany({ boardId });
 };
 
-Reply.statics.deleteByParentId = function (parentId, cb) {
-  return this.deleteMany({ parentId }, cb);
+Reply.statics.deleteByParentId = function (parentId) {
+  return this.deleteMany({ parentId });
 };
 
-Reply.statics.getById = function (id, cb) {
-  return this.findOne({ _id: id }, cb);
+Reply.statics.getById = function (replyId) {
+  return this.findOne({ _id: replyId });
+};
+
+Reply.statics.getParentId = function (replyId) {
+  return this.findOne({ _id: replyId }, { parentId: 1 });
 };
 
 // Counting

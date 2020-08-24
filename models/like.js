@@ -9,22 +9,22 @@ const like = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
 });
 
-like.statics.like = function (data, cb) {
+like.statics.like = function (data) {
   const likeData = new this(data);
-  return likeData.save(cb);
+  return likeData.save();
 };
 
-like.statics.unlike = function (data, cb) {
+like.statics.unlike = function (data) {
   return this.deleteOne({
     userId: data.userId,
     targetType: data.targetType,
     targetId: data.targetId,
-  }, cb);
+  });
 };
 
 // 유저의 좋아요 목록
-like.statics.getByUserId = function (userId, cb) {
-  return this.find({ userId }, cb);
+like.statics.getByUserId = function (userId) {
+  return this.find({ userId });
 };
 
 module.exports = mongoose.model("Like", like);

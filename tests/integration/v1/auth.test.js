@@ -3,29 +3,19 @@ require('dotenv').config()
 import randomString from 'random-string'
 import request from 'supertest'
 import jwt from 'jsonwebtoken'
-import User from '../../../models/users'
-import util from 'util'
-import crypto from 'crypto'
 import mongoose from 'mongoose'
 
 const app = require('../../../app')
 
 /* 
- * 유저 인증테스트 목록
- * 1. 회원가입
- *   1.1 성공
- *   1.2 실패
- *     1.2.1 존재하는 이메일
- *     1.2.2 비밀번호 규칙 미준수
- *     1.2.3 비밀번호 불일치
- * 
- * 2. 로그인
+ * 토큰기반 인증 테스트
+ * 1. 로그인
  *   2.1 성공
  *   2.2 실패
  *     2.2.1 존재하지 않는 아이디
  *     2.2.2 이메일 미인증
  * 
- * 3. 권한 auth (UD)
+ * 2. 권한검사 (수정 삭제)
  *   3.1 글
  *   3.2 피드백
  *   3.3 대댓글
@@ -34,7 +24,7 @@ const app = require('../../../app')
 
 beforeAll( done => done() )
 
-describe('유저 인증 테스트 GET/POST /users', () => {
+describe('토큰기반 인증 테스트', () => {
   const tempPw = randomString(8) + '1234!@#$';
   const userData = {
     email: randomString() + '@lunarcat.com',
@@ -52,9 +42,16 @@ describe('유저 인증 테스트 GET/POST /users', () => {
     })
   })
 
-  describe('로그인 테스트', () => {
-
+  describe('회원가입 테스트', () => {
     test("성공 | 200", async () => {
+      const res = await request(app).post("/users/join").send(userData);
+
+      expect(res.statusCode).toBe(201)
+    })    
+  })
+
+  describe('로그인 테스트', () => {
+    test("정상 로그인 성공 | 200", async () => {
       const res = await request(app).post("/users/login").send({
         email: userData.email,
         userPw: userData.userPw,
@@ -62,7 +59,7 @@ describe('유저 인증 테스트 GET/POST /users', () => {
 
       const jwtToken = jwt.verify(res.body.token, process.env.SECRET_KEY);
 
-      expect(userData.email).toBe(res.body.email);
+      expect(jwtToken.email).toBe(res.body.email);
       expect(res.statusCode).toBe(200);
     });
 
@@ -85,11 +82,12 @@ describe('유저 인증 테스트 GET/POST /users', () => {
 
       expect(res.statusCode).toBe(400)
     })
-
-
-
-    
   })
+
+  describe('권한 검사 테스트', () => {
+
+  })
+
 })
 
 afterAll(() => mongoose.disconnect())
