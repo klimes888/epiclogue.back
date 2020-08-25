@@ -56,20 +56,22 @@ router.post("/login", async function (req, res, next) {
         }
       );
 
-      return res.status(201).json({
+      return res.status(200).json({
         result: "ok",
         token,
         nick: result.nickname,
         userId: result.userid,
       });
     } else {
+      console.warn(`잘못된 비밀번호로 로그인을 시도했습니다: email: ${email}, password: ${userPw}`)
       return res.status(400).json({
         result: "error",
         message: "잘못된 비밀번호 입니다.",
       });
     }
   } else {
-    return res.status(404).json({
+    console.warn(`존재하지 않는 유저의 로그인을 감지했습니다: email: ${email}, password: ${userPw}`)
+    return res.status(400).json({
       result: "error",
       message: "유저를 찾을 수 없습니다.",
     });
@@ -132,7 +134,7 @@ router.post("/join", async function (req, res, next) {
 
         transporter.sendMail(option, function (error, info) {
           if (error) {
-            console.log(error);
+            console.error(error);
             res.status(401).json({
               result: "error",
               reason: error,
@@ -150,19 +152,20 @@ router.post("/join", async function (req, res, next) {
           }
         });
       } else {
-        return res.status(401).json({
+        console.error(`존재하는 이메일로 회원가입을 시도했습니다. email: ${email}`)
+        return res.status(400).json({
           result: "error",
           message: "이미 존재하는 아이디 입니다. 다시 시도해주세요!",
         });
       }
     } else {
-      return res.status(401).json({
+      return res.status(400).json({
         result: "error",
         message: "패스워드가 일치하지 않습니다!",
       });
     }
   } else {
-    return res.status(401).json({
+    return res.status(400).json({
       result: "error",
       message: "비밀번호 규칙을 다시 확인해주세요.",
     });
