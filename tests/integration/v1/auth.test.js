@@ -1,9 +1,12 @@
+'use strict'
 require('dotenv').config()
 
 import randomString from 'random-string'
 import request from 'supertest'
 import jwt from 'jsonwebtoken'
 import mongoose from 'mongoose'
+
+import User from '../../../models/users'
 
 const app = require('../../../app')
 
@@ -24,16 +27,23 @@ const app = require('../../../app')
 
 beforeAll( done => done() )
 
-describe('토큰기반 인증 테스트', () => {
+describe('토큰기반 인증 테스트', async () => {
   const tempPw = randomString(8) + '1234!@#$';
   const userData = {
     email: randomString() + '@lunarcat.com',
     userPw: tempPw,
     userPwRe: tempPw,
     userNick: randomString()
+  }
+  const verifiedUserData = {
+    email: 'verify@lunarcat.com',
+    userPw: tempPw,
+    userPwRe: tempPw,
+    userNick: randomString()
   }  
   let userObject
-  let verifiedData 
+  await request(app).post('/users/join').send(verifiedUserData)
+  await User.confirmUser(verifiedUserData.email)
 
   beforeAll( async() => {
     userObject = await request(app).post('/users/join').send(userData)
@@ -108,9 +118,12 @@ describe('토큰기반 인증 테스트', () => {
 
   describe('권한 검사 테스트', () => {
     test('이메일 인증된 로그인', async() => {
+      // 특정 기기가 아닌 테스트할 때마다 만들어야함
       const res = await request(app).post('/users/login').send({
-        email: 'taypark2020@gmail.com', userPw: '1q2w3e4r!!'
+        email: 'verify@lunarcat.com', userPw: tempPw
       })
+
+      console.log(res)
 
       const decodedJWT = jwt.verify(res.body.token, process.env.SECRET_KEY)
       

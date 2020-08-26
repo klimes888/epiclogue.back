@@ -21,32 +21,38 @@ const app = require('../../../app')
  * 3. 차단
  */
 
-let userToken;
-let newUserId;
-let invalidId;
 
-describe('유저 테스트', () => {
+let newUserId;
+let verifiedToken
+const invalidId = "123456789012345678901234"
+
+describe('유저 테스트', async () => {
   beforeAll(async() => {
     const tempPw = randomString() + "1!2@3#4$"
+    
+    // 임시 유저
     const userData = {
       email: randomString() + '@lunarcat.com',
       userPw: tempPw,
       userPwRe: tempPw,
       userNick: randomString()
     }
-
+        
     await request(app).post('/users/join').send(userData)
-
     const newUserData = await User.isExist(userData.email);
-
     newUserId = newUserData._id
-    invalidId = "123456789012345678901234"
 
-    const verifiedLoginResponse = await request(app).post('/users/login').send({
-      email: 'taypark2020@gmail.com', userPw: '1q2w3e4r!!'
-    })
+    // 이메일 인증 사용자(팔로우 수행자)
+    const verifiedUserData = {
+      email: 'verify@lunarcat.com',
+      userPw: tempPw,
+      userPwRe: tempPw,
+      userNick: randomString()
+    }  
 
-    userToken = verifiedLoginResponse.body.token
+    const verifiedLoginReponse = await request(app).post('/users/login').send(verifiedUserData)
+    
+    verifiedToken = verifiedLoginReponse.body.token
   })
 
   describe("팔로우 테스트", () => {
@@ -54,7 +60,7 @@ describe('유저 테스트', () => {
       await request(app)
         .post(`/SCREENID/follow`)
         .send({ targetUserId: newUserId })
-        .set("x-access-token", userToken)
+        .set("x-access-token", verifiedToken)
         .expect(201)
     });
 
@@ -62,7 +68,7 @@ describe('유저 테스트', () => {
       await request(app)
         .delete('/SCREENID/follow')
         .send({ targetUserId: newUserId })
-        .set("x-access-token", userToken)
+        .set("x-access-token", verifiedToken)
         .expect(200)
     })
 
@@ -70,7 +76,7 @@ describe('유저 테스트', () => {
       await request(app)
         .post(`/SCREENID/follow`)
         .send({ targetUserId: invalidId })
-        .set("x-access-token", userToken)
+        .set("x-access-token", verifiedToken)
         .expect(400)
     })
   });
