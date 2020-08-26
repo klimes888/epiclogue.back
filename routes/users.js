@@ -91,7 +91,7 @@ router.post("/join", async function (req, res, next) {
     if (userPw == userPwRe) {
       /* 중복 가입 이메일 처리 */
       if ((await Users.isExist(email)) != null) {
-        return res.status(401).json({
+        return res.status(400).json({
           result: "error",
           message: "중복된 이메일입니다. 다른 이메일로 가입해주세요.",
         });

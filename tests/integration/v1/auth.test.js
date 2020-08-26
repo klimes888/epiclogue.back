@@ -25,9 +25,14 @@ const app = require('../../../app')
  *   3.4 
 */
 
-beforeAll( done => done() )
+beforeAll(() => {})
 
-describe('토큰기반 인증 테스트', async () => {
+afterAll(() => {
+  mongoose.connection.db.dropDatabase('lunarcat_test')
+  mongoose.disconnect()
+})
+
+describe('토큰기반 인증 테스트', () => {
   const tempPw = randomString(8) + '1234!@#$';
   const userData = {
     email: randomString() + '@lunarcat.com',
@@ -41,28 +46,28 @@ describe('토큰기반 인증 테스트', async () => {
     userPwRe: tempPw,
     userNick: randomString()
   }  
-  let userObject
-  await request(app).post('/users/join').send(verifiedUserData)
-  await User.confirmUser(verifiedUserData.email)
 
   beforeAll( async() => {
-    userObject = await request(app).post('/users/join').send(userData)
+    // 임시 유저와 이메일 인증을 진행한 유저 생성
+    await request(app).post('/users/join').send(verifiedUserData)
+    await User.confirmUser(verifiedUserData.email)
   })
 
   /* 메일 문제로 테스트 진행하지 않음. 특정 환경에서는 정상적으로 작동. */
-  // describe('회원가입 테스트', () => {
-  //   test("성공 | 201", async () => {
-  //     const res = await request(app).post("/users/join").send(userData);
+  describe('회원가입 테스트 | 201', () => {
+    test("성공 | 201", async () => {
+      const res = await request(app).post("/users/join").send(userData);
 
-  //     expect(res.statusCode).toBe(201)
-  //   })    
+      expect(res.statusCode).toBe(201)
+    })    
 
-  //   test("실패: 중복 회원가입 시도", async() => {
-  //     const res = await request(app).post("/users/join").send(userData);
+    test("실패: 중복 회원가입 시도 | 400", async() => {
+      await request(app).post("/users/join").send(userData);
+      const res = await request(app).post("/users/join").send(userData);
 
-  //     expect(res.statusCode).toBe(400)
-  //   })
-  // })
+      expect(res.statusCode).toBe(400)
+    })
+  })
 
   describe('로그인 테스트', () => {
     test("정상 로그인 성공 | 200", async () => {
@@ -117,20 +122,15 @@ describe('토큰기반 인증 테스트', async () => {
   })
 
   describe('권한 검사 테스트', () => {
-    test('이메일 인증된 로그인', async() => {
-      // 특정 기기가 아닌 테스트할 때마다 만들어야함
+    test('이메일 인증된 로그인 | 200', async() => {
       const res = await request(app).post('/users/login').send({
-        email: 'verify@lunarcat.com', userPw: tempPw
-      })
-
-      console.log(res)
+        email: verifiedUserData.email, userPw: verifiedUserData.userPw
+      }).expect(200)
 
       const decodedJWT = jwt.verify(res.body.token, process.env.SECRET_KEY)
       
       expect(decodedJWT.isConfirmed).toBeTruthy()
     })
   })
-
 })
 
-afterAll(() => mongoose.disconnect())

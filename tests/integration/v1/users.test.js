@@ -21,37 +21,41 @@ const app = require('../../../app')
  * 3. 차단
  */
 
-
-let newUserId;
+let newUserId
 let verifiedToken
 const invalidId = "123456789012345678901234"
 
-describe('유저 테스트', async () => {
+describe('유저 테스트', () => {
+  const tempPw = randomString() + "1!2@3#4$"
+
+  const userData = {
+    email: randomString() + '@lunarcat.com',
+    userPw: tempPw,
+    userPwRe: tempPw,
+    userNick: randomString()
+  }
+  const verifiedUserData = {
+    email: 'verified@lunarcat.com',
+    userPw: tempPw,
+    userPwRe: tempPw,
+    userNick: randomString()
+  }  
+
   beforeAll(async() => {
-    const tempPw = randomString() + "1!2@3#4$"
-    
-    // 임시 유저
-    const userData = {
-      email: randomString() + '@lunarcat.com',
-      userPw: tempPw,
-      userPwRe: tempPw,
-      userNick: randomString()
-    }
-        
+    // 임시유저 생성   
     await request(app).post('/users/join').send(userData)
     const newUserData = await User.isExist(userData.email);
     newUserId = newUserData._id
 
-    // 이메일 인증 사용자(팔로우 수행자)
-    const verifiedUserData = {
-      email: 'verify@lunarcat.com',
-      userPw: tempPw,
-      userPwRe: tempPw,
-      userNick: randomString()
-    }  
-
-    const verifiedLoginReponse = await request(app).post('/users/login').send(verifiedUserData)
+    // 이메일 인증된 사용자
+    await request(app).post('/users/join').send(verifiedUserData)
+    await User.confirmUser(verifiedUserData.email)
+    const verifiedLoginReponse = await request(app).post('/users/login').send({
+      email: verifiedUserData.email, userPw: verifiedUserData.userPw
+    })
     
+    console.log(verifiedLoginReponse.body)
+
     verifiedToken = verifiedLoginReponse.body.token
   })
 
@@ -82,4 +86,8 @@ describe('유저 테스트', async () => {
   });
 })
 
-afterAll(() => mongoose.disconnect())
+afterAll(() => {
+  // drop test db
+  mongoose.connection.db.dropDatabase('lunarcat_test')
+  mongoose.disconnect()
+})

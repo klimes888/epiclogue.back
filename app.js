@@ -77,8 +77,14 @@ app.use(function(err, req, res, next) {
 
 mongoose.Promise = global.Promise;
 
-mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+if (process.env.NODE_ENV === 'test') {
+  mongoose.connect(process.env.MONGO_TEST_URI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log('데이터베이스 연결 성공'))
   .catch(e => console.error(e));
+} else {
+  mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => console.log('데이터베이스 연결 성공'))
+  .catch(e => console.error(e));
+}
 
 module.exports = app;
