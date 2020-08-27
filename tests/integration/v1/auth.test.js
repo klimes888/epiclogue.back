@@ -47,11 +47,7 @@ describe('토큰기반 인증 테스트', () => {
     userNick: randomString()
   }  
 
-  beforeAll( async() => {
-    // 임시 유저와 이메일 인증을 진행한 유저 생성
-    await request(app).post('/users/join').send(verifiedUserData)
-    await User.confirmUser(verifiedUserData.email)
-  })
+  // beforeAll()
 
   /* 메일 문제로 테스트 진행하지 않음. 특정 환경에서는 정상적으로 작동. */
   describe('회원가입 테스트 | 201', () => {
@@ -123,6 +119,8 @@ describe('토큰기반 인증 테스트', () => {
 
   describe('권한 검사 테스트', () => {
     test('이메일 인증된 로그인 | 200', async() => {
+      await request(app).post('/users/join').send(verifiedUserData)
+      await User.confirmUser(verifiedUserData.email)
       const res = await request(app).post('/users/login').send({
         email: verifiedUserData.email, userPw: verifiedUserData.userPw
       }).expect(200)
