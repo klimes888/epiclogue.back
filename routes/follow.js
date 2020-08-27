@@ -92,11 +92,12 @@ router.delete("/", verifyToken, async (req, res, next) => {
       });
     }
   } catch (e) {
-    console.error(`[Error] ${e}`);
-    return res.status(500).json({
-      result: "error",
-      message: e,
-    });
+    next(e)
+    // console.error(`[Error] ${e}`);
+    // return res.status(500).json({
+    //   result: "error",
+    //   message: e,
+    // });
   }
 });
 

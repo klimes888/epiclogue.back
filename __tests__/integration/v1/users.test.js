@@ -1,9 +1,8 @@
+'use strict';
 require('dotenv').config()
 
 import randomString from 'random-string'
 import request from 'supertest'
-import jwt from 'jsonwebtoken'
-import mongoose from 'mongoose'
 
 import User from '../../../models/users'
 
@@ -54,7 +53,7 @@ describe('유저 테스트', () => {
       email: verifiedUserData.email, userPw: verifiedUserData.userPw
     })
     
-    console.log(verifiedLoginReponse.body)
+    // console.log(verifiedLoginReponse.body)
 
     verifiedToken = verifiedLoginReponse.body.token
   })
@@ -76,7 +75,7 @@ describe('유저 테스트', () => {
         .expect(200)
     })
 
-    test("팔로우 실패: 없는 아이디에 접근", async () => {
+    test("팔로우 실패: 없는 아이디에 접근 | 400", async () => {
       await request(app)
         .post(`/SCREENID/follow`)
         .send({ targetUserId: invalidId })
@@ -84,10 +83,4 @@ describe('유저 테스트', () => {
         .expect(400)
     })
   });
-})
-
-afterAll(() => {
-  // drop test db
-  mongoose.connection.db.dropDatabase('lunarcat_test')
-  mongoose.disconnect()
 })
