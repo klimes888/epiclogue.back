@@ -18,6 +18,8 @@ const reactRouter = require('./routes/react')
 
 const app = express();
 
+import Database from './database'
+
 require('dotenv').config();
 
 const swaggerDefinition = {
@@ -75,16 +77,18 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
-mongoose.Promise = global.Promise;
+Database.connect()
 
-if (process.env.NODE_ENV === 'test') {
-  mongoose.connect(process.env.MONGO_TEST_URI, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => console.log('데이터베이스 연결 성공'))
-  .catch(e => console.error(e));
-} else {
-  mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => console.log('데이터베이스 연결 성공'))
-  .catch(e => console.error(e));
-}
+// mongoose.Promise = global.Promise;
+
+// if (process.env.NODE_ENV === 'test') {
+//   mongoose.connect(process.env.MONGO_TEST_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+//   .then(() => console.log('데이터베이스 연결 성공'))
+//   .catch(e => console.error(e));
+// } else {
+//   mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+//   .then(() => console.log('데이터베이스 연결 성공'))
+//   .catch(e => console.error(e));
+// }
 
 module.exports = app;

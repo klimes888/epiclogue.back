@@ -4,7 +4,6 @@ require('dotenv').config()
 import randomString from 'random-string'
 import request from 'supertest'
 import jwt from 'jsonwebtoken'
-import mongoose from 'mongoose'
 
 import User from '../../../models/users'
 
@@ -27,11 +26,6 @@ const app = require('../../../app')
 
 beforeAll(() => {})
 
-afterAll(() => {
-  mongoose.connection.db.dropDatabase('lunarcat_test')
-  mongoose.disconnect()
-})
-
 describe('토큰기반 인증 테스트', () => {
   const tempPw = randomString(8) + '1234!@#$';
   const userData = {
@@ -47,7 +41,10 @@ describe('토큰기반 인증 테스트', () => {
     userNick: randomString()
   }  
 
-  // beforeAll()
+  beforeAll(async() => {
+    await request(app).post('/users/join').send(verifiedUserData)
+    await User.confirmUser(verifiedUserData.email)
+  })
 
   /* 메일 문제로 테스트 진행하지 않음. 특정 환경에서는 정상적으로 작동. */
   describe('회원가입 테스트 | 201', () => {
@@ -119,8 +116,6 @@ describe('토큰기반 인증 테스트', () => {
 
   describe('권한 검사 테스트', () => {
     test('이메일 인증된 로그인 | 200', async() => {
-      await request(app).post('/users/join').send(verifiedUserData)
-      await User.confirmUser(verifiedUserData.email)
       const res = await request(app).post('/users/login').send({
         email: verifiedUserData.email, userPw: verifiedUserData.userPw
       }).expect(200)
