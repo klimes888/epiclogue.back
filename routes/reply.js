@@ -5,7 +5,7 @@ const router = express.Router({
 
 import { verifyToken, checkWriter } from "./authorization";
 import Reply from "../models/reply";
-
+import User from '../models/users'
 /* 
   This is reply router.
   base url: /:userId/boards/:boardId/reply
@@ -20,12 +20,29 @@ router.post("/", verifyToken, async (req, res, next) => {
     replyBody: req.body.replyBody,
   };
 
+  const newerData = []
+
   try {
     await Reply.create(replyForm);
-    const newerReplyData = await Reply.getByParentId(parentId);
+    const newerReplyData = await Reply.getByParentId(replyForm.parentId);
+    for (let data of newerReplyData) {
+      let userData = await User.getUserInfo(data.userId, { _id: 0, nickname: 1, userid: 1, profile: 1 })
+      console.log(data)
+      let feedbackData = {
+        _id: data._id,
+        boardId: data.boardId,
+        parentId: data.parentId,
+        replyBody: data.replyBody,
+        edited: data.edited,
+        heartCount: data.heartCount,
+        writeDate: data.writeDate,
+        userInfo: userData
+      }
+      newerData.push(feedbackData)
+    }
     return res.status(200).json({
       result: "ok",
-      data: newerReplyData,
+      data: newerData,
     });
   } catch (e) {
     console.error(`[Error] ${e}`);

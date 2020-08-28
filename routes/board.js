@@ -14,14 +14,14 @@ router.get("/health", (req, res) => {
   });
 });
 
-router.post("/", verifyToken, upload.any(), async function (req, res, next) {
+router.post("/", verifyToken, async function (req, res, next) {
   const uid = res.locals.uid;
   const boardTitle = req.body.boardTitle;
   const boardBody = req.body.boardBody;
   let boardImg = [];
-  for (let i = 0; i < req.files.length; i++) {
-    boardImg.push(req.files[i].location);
-  }
+  // for (let i = 0; i < req.files.length; i++) {
+  //   boardImg.push(req.files[i].location);
+  // }
   const category = req.body.category;
   const pub = req.body.pub;
   const language = req.body.language;

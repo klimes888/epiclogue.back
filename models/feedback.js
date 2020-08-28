@@ -20,7 +20,9 @@ Feedback.statics.create = function (data) {
 
 // Read
 Feedback.statics.getByBoardId = function (boardId) {
-  return this.find({ boardId });
+  return this.find({ boardId }, {
+    __v: 0
+  });
 };
 
 Feedback.statics.getBody = function (feedbackId) {
@@ -49,7 +51,9 @@ Feedback.statics.delete = function (feedbackId) {
 };
 
 Feedback.statics.deleteByBoardId = function (boardId) {
-  return this.deleteMany({ boardId })
+  return this.deleteMany({ boardId }, {
+    
+  })
 }
 
 Feedback.statics.getById = function (feedbackId) {
