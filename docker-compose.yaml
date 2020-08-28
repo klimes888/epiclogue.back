@@ -31,8 +31,8 @@ services:
     restart: always
     image: nginx
     volumes: 
-      - ./epiclogue.ssl:/ssl
-      - ./epiclogue.ssl/server.conf:/etc/nginx/nginx.conf
+      - ./epiclogue.ssl/cert:/ssl
+      - ./epiclogue.ssl/conf/server.conf:/etc/nginx/nginx.conf
     ports:
       - 443:443
       - 80:80
