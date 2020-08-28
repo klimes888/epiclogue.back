@@ -70,7 +70,7 @@ router.get("/:boardId", verifyToken, async (req, res, next) => {
         _id: reply._id,
         buid: reply.buid,
         edited: reply.edited,
-        replyBody: reply.replyBody,
+        feedbackBody: reply.replyBody,
         writeDate: reply.writeDate,
         userInfo: {
           userId: userid,
@@ -250,12 +250,28 @@ router.post("/:boardId/feedback", verifyToken, async (req, res, next) => {
     feedbackBody: req.body.feedbackBody,
   };
 
+  const newerData = []
+
   try {
     await Feedback.create(feedbackData);
     const newerFeedbackData = await Feedback.getByBoardId(req.params.boardId);
+    for (let data of newerFeedbackData) {
+      let userData = await User.getUserInfo(data.userId, { _id: 0, nickname: 1, userid: 1, profile: 1 })
+      let feedbackData = {
+        _id: data._id,
+        boardId: data.boardId,
+        childCount: data.childCount,
+        edited: data.edited,
+        feedbackBody: data.feedbackBody,
+        likeCount: data.likeCount,
+        writeDate: data.writeDate,
+        userInfo: userData
+      }
+      newerData.push(feedbackData)
+    }
     return res.status(201).json({
       result: "ok",
-      data: newerFeedbackData,
+      data: newerData
     });
   } catch (e) {
     console.error(`[Error] ${e}`);
@@ -376,12 +392,29 @@ router.post("/:boardId/reply", verifyToken, async (req, res, next) => {
     replyBody: req.body.replyBody,
   };
 
+  const newerData = []
+
   try {
     await Reply.create(replyForm);
-    const newerReplyData = await Reply.getByParentId(parentId);
+    const newerReplyData = await Reply.getByParentId(replyForm.parentId);
+    for (let data of newerReplyData) {
+      let userData = await User.getUserInfo(data.userId, { _id: 0, nickname: 1, userid: 1, profile: 1 })
+      console.log(data)
+      let feedbackData = {
+        _id: data._id,
+        boardId: data.boardId,
+        parentId: data.parentId,
+        replyBody: data.replyBody,
+        edited: data.edited,
+        heartCount: data.heartCount,
+        writeDate: data.writeDate,
+        userInfo: userData
+      }
+      newerData.push(feedbackData)
+    }
     return res.status(200).json({
       result: "ok",
-      data: newerReplyData,
+      data: newerData,
     });
   } catch (e) {
     console.error(`[Error] ${e}`);
