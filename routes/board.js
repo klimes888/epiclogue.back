@@ -243,7 +243,7 @@ router.get("/", verifyToken, async (req, res, next) => {
   }
 });
 
-router.post("/feedback", verifyToken, async (req, res, next) => {
+router.post("/:boardId/feedback", verifyToken, async (req, res, next) => {
   const feedbackData = {
     userId: res.locals.uid,
     boardId: req.params.boardId,
@@ -267,7 +267,7 @@ router.post("/feedback", verifyToken, async (req, res, next) => {
 });
 
 router.patch(
-  "/feedback/:feedbackId",
+  "/:boardId/feedback/:feedbackId",
   verifyToken,
   checkWriter,
   async (req, res, next) => {
@@ -318,7 +318,7 @@ router.patch(
 );
 
 router.delete(
-  "/feedback/:feedbackId",
+  "/:boardId/feedback/:feedbackId",
   verifyToken,
   checkWriter,
   async (req, res, next) => {
@@ -368,7 +368,7 @@ router.delete(
   }
 );
 
-router.post("/reply", verifyToken, async (req, res, next) => {
+router.post("/:boardId/reply", verifyToken, async (req, res, next) => {
   const replyForm = {
     userId: res.locals.uid,
     boardId: req.params.boardId,
@@ -393,7 +393,7 @@ router.post("/reply", verifyToken, async (req, res, next) => {
 });
 
 // 댓글 하위의 대댓글 뷰
-router.get("/reply/:parentId", verifyToken, async (req, res, next) => {
+router.get("/:boardId/reply/:parentId", verifyToken, async (req, res, next) => {
   const parentId = req.params.parentId;
 
   try {
@@ -411,7 +411,7 @@ router.get("/reply/:parentId", verifyToken, async (req, res, next) => {
   }
 });
 
-router.patch("/reply/:replyId", verifyToken, checkWriter, async (req, res, next) => {
+router.patch("/:boardId/reply/:replyId", verifyToken, checkWriter, async (req, res, next) => {
   const newForm = {
     replyId: req.params.replyId,
     newReplyBody: req.body.newReplyBody,
@@ -452,7 +452,7 @@ router.patch("/reply/:replyId", verifyToken, checkWriter, async (req, res, next)
   }
 });
 
-router.delete("/reply/:replyId", verifyToken, checkWriter, async (req, res, next) => {
+router.delete("/:boardId/reply/:replyId", verifyToken, checkWriter, async (req, res, next) => {
   const replyId = req.params.replyId;
 
   try {
