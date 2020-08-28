@@ -73,8 +73,8 @@ router.get("/:boardId", verifyToken, async (req, res, next) => {
         feedbackBody: reply.feedbackBody,
         writeDate: reply.writeDate,
         userInfo: {
-          userId: userid,
-          userNick: nickname,
+          userid,
+          nickname,
         },
       });
     }
