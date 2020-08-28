@@ -428,12 +428,28 @@ router.post("/:boardId/reply", verifyToken, async (req, res, next) => {
 // 댓글 하위의 대댓글 뷰
 router.get("/:boardId/reply/:parentId", verifyToken, async (req, res, next) => {
   const parentId = req.params.parentId;
+  const resultDataSet = []
 
   try {
     const replyData = await Reply.getByParentId(parentId);
+    for (let data of replyData) {
+      let userData = await User.getUserInfo(data.userId, { _id: 0, nickname: 1, userid: 1, profile: 1 })
+      console.log(data)
+      let resultData = {
+        _id: data._id,
+        boardId: data.boardId,
+        parentId: data.parentId,
+        replyBody: data.replyBody,
+        edited: data.edited,
+        heartCount: data.heartCount,
+        writeDate: data.writeDate,
+        userInfo: userData
+      }
+      resultDataSet.push(resultData)
+    }
     return res.status(200).json({
       result: "ok",
-      data: replyData,
+      data: resultDataSet,
     });
   } catch (e) {
     console.error(`[Error] ${e}`);
