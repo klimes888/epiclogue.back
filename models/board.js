@@ -81,12 +81,7 @@ board.statics.getByQuery = function (query) {
   return this.find(
     { boardTitle: { $regex: query } },
     {
-      boardTitle: 1,
-      boardImg: 1,
-      heartCount: 1,
-      bookmarkCount: 1,
-      category: 1,
-      writeDate: 1,
+      _id: 1, boardTitle: 1, uid: 1, pub: 1, category: 1, boardImg: 1 
     }
   ).sort({ writeDate: 1, heartCount: 1 });
 };
