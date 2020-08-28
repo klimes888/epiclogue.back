@@ -20,7 +20,7 @@ router.post("/", verifyToken, async (req, res, next) => {
     replyBody: req.body.replyBody,
   };
 
-  const newerData = []
+  const newerDataSet = []
 
   try {
     await Reply.create(replyForm);
@@ -28,7 +28,7 @@ router.post("/", verifyToken, async (req, res, next) => {
     for (let data of newerReplyData) {
       let userData = await User.getUserInfo(data.userId, { _id: 0, nickname: 1, userid: 1, profile: 1 })
       console.log(data)
-      let feedbackData = {
+      let resultData = {
         _id: data._id,
         boardId: data.boardId,
         parentId: data.parentId,
@@ -38,11 +38,11 @@ router.post("/", verifyToken, async (req, res, next) => {
         writeDate: data.writeDate,
         userInfo: userData
       }
-      newerData.push(feedbackData)
+      newerDataSet.push(resultData)
     }
     return res.status(200).json({
       result: "ok",
-      data: newerData,
+      data: newerDataSet,
     });
   } catch (e) {
     console.error(`[Error] ${e}`);
@@ -56,12 +56,28 @@ router.post("/", verifyToken, async (req, res, next) => {
 // 댓글 하위의 대댓글 뷰
 router.get("/:parentId", verifyToken, async (req, res, next) => {
   const parentId = req.params.parentId;
+  const resultDataSet = []
 
   try {
     const replyData = await Reply.getByParentId(parentId);
+    for (let data of replyData) {
+      let userData = await User.getUserInfo(data.userId, { _id: 0, nickname: 1, userid: 1, profile: 1 })
+      console.log(data)
+      let resultData = {
+        _id: data._id,
+        boardId: data.boardId,
+        parentId: data.parentId,
+        replyBody: data.replyBody,
+        edited: data.edited,
+        heartCount: data.heartCount,
+        writeDate: data.writeDate,
+        userInfo: userData
+      }
+      resultDataSet.push(resultData)
+    }
     return res.status(200).json({
       result: "ok",
-      data: replyData,
+      data: resultDataSet,
     });
   } catch (e) {
     console.error(`[Error] ${e}`);
