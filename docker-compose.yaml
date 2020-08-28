@@ -32,7 +32,7 @@ services:
     image: nginx
     volumes: 
       - ./epiclogue.ssl:/ssl
-      - ./nginx.back/server.conf:/etc/nginx/nginx.conf
+      - ./epiclogue.ssl/server.conf:/etc/nginx/nginx.conf
     ports:
       - 443:443
       - 80:80
