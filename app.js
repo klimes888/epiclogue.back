@@ -51,8 +51,6 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/boards', boardRouter);
-app.use('/boards/:boardId/feedback', require('./routes/feedback'));
-app.use('/boards/:boardId/reply', require('./routes/reply'));
 app.use('/interaction/:screenId/like', require('./routes/like'));
 app.use('/interaction/:screenId/follow', require('./routes/follow'))
 app.use('/interaction/:screenId/bookmark', require('./routes/bookmark'))
