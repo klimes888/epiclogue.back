@@ -4,7 +4,7 @@ mongoose.set("useCreateIndex", true);
 
 const like = new mongoose.Schema({
   userId: { type: ObjectId, required: true },
-  targetType: { type: String, required: true }, // 글(posts), 댓글(feedback), 대댓글(reply)
+  targetType: { type: String, required: true }, // 글(board), 댓글(feedback), 대댓글(reply)
   targetId: { type: ObjectId, required: true },
   createdAt: { type: Date, default: Date.now },
 });
