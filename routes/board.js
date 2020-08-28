@@ -5,6 +5,7 @@ require("dotenv").config();
 const Board = require("../models/board");
 const Feedback = require("../models/feedback");
 const User = require("../models/users");
+const Reply = require('../models/reply')
 const upload = require("./multer");
 
 router.get("/health", (req, res) => {
@@ -384,7 +385,7 @@ router.delete(
   }
 );
 
-router.post("/:boardId/reply", verifyToken, async (req, res, next) => {
+router.post("/:boardId/feedback/:feedbackId/reply", verifyToken, async (req, res, next) => {
   const replyForm = {
     userId: res.locals.uid,
     boardId: req.params.boardId,
@@ -426,8 +427,8 @@ router.post("/:boardId/reply", verifyToken, async (req, res, next) => {
 });
 
 // 댓글 하위의 대댓글 뷰
-router.get("/:boardId/reply/:parentId", verifyToken, async (req, res, next) => {
-  const parentId = req.params.parentId;
+router.get("/:boardId/feedback/:feedbackId/reply", verifyToken, async (req, res, next) => {
+  const parentId = req.params.feedbackId;
   const resultDataSet = []
 
   try {
@@ -460,7 +461,7 @@ router.get("/:boardId/reply/:parentId", verifyToken, async (req, res, next) => {
   }
 });
 
-router.patch("/:boardId/reply/:replyId", verifyToken, checkWriter, async (req, res, next) => {
+router.patch("/:boardId/feedback/:feedbackId/reply/:replyId", verifyToken, checkWriter, async (req, res, next) => {
   const newForm = {
     replyId: req.params.replyId,
     newReplyBody: req.body.newReplyBody,
@@ -501,7 +502,7 @@ router.patch("/:boardId/reply/:replyId", verifyToken, checkWriter, async (req, r
   }
 });
 
-router.delete("/:boardId/reply/:replyId", verifyToken, checkWriter, async (req, res, next) => {
+router.delete("/:boardId/feedback/:feedbackId/reply/:replyId", verifyToken, checkWriter, async (req, res, next) => {
   const replyId = req.params.replyId;
 
   try {
