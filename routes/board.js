@@ -70,7 +70,7 @@ router.get("/:boardId", verifyToken, async (req, res, next) => {
         _id: reply._id,
         buid: reply.buid,
         edited: reply.edited,
-        feedbackBody: reply.replyBody,
+        feedbackBody: reply.feedbackBody,
         writeDate: reply.writeDate,
         userInfo: {
           userId: userid,
