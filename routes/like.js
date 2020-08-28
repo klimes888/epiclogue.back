@@ -22,7 +22,7 @@ router.post("/", verifyToken, async (req, res, next) => {
   };
 
   try {
-    const result = await Like.like(likeData);
+    await Like.like(likeData);
     if (likeData.targetType === "board") {
       const reactData = {
         userId: res.locals.uid,
@@ -30,6 +30,12 @@ router.post("/", verifyToken, async (req, res, next) => {
         type: "like",
       };
       await react.create(reactData);
+      await Board.countHeart(req.body.targetId, 1)
+      await Board.countReact(req.body.targetId, 1)
+    } else if (likeData.targetType === "feedback") {
+      await Feedback.countHeart(req.body.targetId, 1)
+    } else if (likeData.targetType === "reply") {
+      await Reply.countHeart(req.body.targetId, 1)
     }
     return res.status(201).json({
       result: "ok",
@@ -54,6 +60,12 @@ router.delete("/", verifyToken, async (req, res, next) => {
     await Like.unlike(likeData);
     if (likeData.targetType === "board") {
       await react.delete(likeData.userId, likeData.targetId);
+      await Board.countHeart(req.body.targetId, 0)
+      await Board.countReact(req.body.targetId, 0)
+    } else if (likeData.targetType === "feedback") {
+      await Feedback.countHeart(req.body.targetId, 0)
+    } else if (likeData.targetType === "reply") {
+      await Reply.countHeart(req.body.targetId, 0)
     }
     return res.status(200).json({
       result: 'ok'

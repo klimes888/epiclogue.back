@@ -3,9 +3,9 @@ const router = new Router({
   mergeParams: true,
 });
 
-import { verifyToken, checkWriter } from "./authorization";
+import { verifyToken } from "./authorization";
 import Follow from "../models/follow";
-
+import User from '../models/users'
 /* 
   This is follow router.
   base url: /:screenId/follow
@@ -20,8 +20,9 @@ router.post("/", verifyToken, async (req, res, next) => {
   /* 유저 검증 필요(존재 유무, 플텍 계정의 경우 팔로우 승인 과정 필요) */
 
   try {
-    const result = await Follow.follow(followData);
-    console.log(typeof result)
+    await Follow.follow(followData);
+    await User.countFollowing(followData.userId, 1)
+    await User.countFollower(followData.targetUserId, 1)
     return res.status(201).json({
       result: "ok",
     });
@@ -44,7 +45,8 @@ router.delete("/", verifyToken, async (req, res, next) => {
 
   try {
     const unfollowResult = await Follow.unfollow(followData);
-    
+    await User.countFollowing(followData.userId, 0)
+    await User.countFollower(followData.targetUserId, 0)
     if (unfollowResult.ok === 1) {
       if (
         unfollowResult.n === 1 &&

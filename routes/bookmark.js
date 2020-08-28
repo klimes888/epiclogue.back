@@ -5,6 +5,7 @@ import react from "../models/react";
 const router = new Router({
   mergeParams: true,
 });
+import Board from '../models/board'
 
 /* 
   This is bookmark router.
@@ -41,6 +42,8 @@ router.post("/", verifyToken, async function (req, res, next) {
   try {
     await Bookmark.create(bookmarkData);
     await react.create(reactData);
+    await Board.countBookmark(req.body.boardId, 1)
+    await Board.countReact(req.body.boardId, 1)
     return res.status(201).json({
       result: 'ok'
     })
@@ -60,6 +63,8 @@ router.delete("/", verifyToken, async (req, res, next) => {
   try {
     await Bookmark.delete(userId, boardId);
     await react.delete(userId, boardId);
+    await Board.countBookmark(req.body.boardId, 0)
+    await Board.countReact(req.body.boardId, 0)
     return res.status(200).json({
       result: 'ok'
     })

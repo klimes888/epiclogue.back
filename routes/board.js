@@ -255,6 +255,7 @@ router.post("/:boardId/feedback", verifyToken, async (req, res, next) => {
 
   try {
     await Feedback.create(feedbackData);
+    await Board.countFeedback(req.params.boardId, 1)
     const newerFeedbackData = await Feedback.getByBoardId(req.params.boardId);
     for (let data of newerFeedbackData) {
       let userData = await User.getUserInfo(data.userId, { _id: 0, nickname: 1, userid: 1, profile: 1 })
@@ -343,6 +344,7 @@ router.delete(
 
     try {
       const deleteResult = await Feedback.delete(feedbackId);
+      await Board.countFeedback(req.params.boardId, 0)
       const boardId = req.params.boardId;
 
       if (deleteResult.ok === 1) {
@@ -397,6 +399,7 @@ router.post("/:boardId/feedback/:feedbackId/reply", verifyToken, async (req, res
 
   try {
     await Reply.create(replyForm);
+    await Feedback.countReply(replyForm.parentId, 1)
     const newerReplyData = await Reply.getByParentId(replyForm.parentId);
     for (let data of newerReplyData) {
       let userData = await User.getUserInfo(data.userId, { _id: 0, nickname: 1, userid: 1, profile: 1 })
@@ -507,6 +510,7 @@ router.delete("/:boardId/feedback/:feedbackId/reply/:replyId", verifyToken, chec
 
   try {
     const parentId = await Reply.getById(replyId);
+    await Feedback.countReply(replyForm.parentId, 0)
     const deleteResult = await Reply.delete(replyId, { parentId: 1 });
     if (deleteResult.ok === 1) {
       const newerReplyData = await Reply.getByParentId(parentId);

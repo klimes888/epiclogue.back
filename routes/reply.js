@@ -6,6 +6,7 @@ const router = express.Router({
 import { verifyToken, checkWriter } from "./authorization";
 import Reply from "../models/reply";
 import User from '../models/users'
+import Feedback from '../models/feedback'
 /* 
   This is reply router.
   base url: /:userId/boards/:boardId/reply
@@ -24,6 +25,7 @@ router.post("/", verifyToken, async (req, res, next) => {
 
   try {
     await Reply.create(replyForm);
+    await Feedback.getChild(replyForm.parentId)
     const newerReplyData = await Reply.getByParentId(replyForm.parentId);
     for (let data of newerReplyData) {
       let userData = await User.getUserInfo(data.userId, { _id: 0, nickname: 1, userid: 1, profile: 1 })
