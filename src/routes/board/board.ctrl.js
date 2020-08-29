@@ -1,7 +1,6 @@
 import express from "express";
 const router = express.Router();
 import { verifyToken, checkWriter } from "./authorization";
-import dotenv from 'dotenv'
 import Board from "../../models/board";
 import Feedback from "../../models/feedback";
 import User from "../models/users"

@@ -144,10 +144,6 @@ router.post("/join", async function (req, res, next) {
             return res.status(201).json({
               result: "ok",
               info: info.response,
-              user: {
-                email: result["email"],
-                nick: result["nickname"],
-              },
             });
           }
         });
