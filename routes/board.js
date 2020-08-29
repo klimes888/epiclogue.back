@@ -224,6 +224,7 @@ router.get("/", verifyToken, async (req, res, next) => {
 
       result.push({
         boardUid: data._id,
+        boardTitle: data.boardTitle,
         thumbPath: data.boardImg[0],
         userNick: userInfo.nickname,
         pub: data.pub,
