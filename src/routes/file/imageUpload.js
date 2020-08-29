@@ -1,11 +1,12 @@
-const aws = require('aws-sdk');
-const multer = require('multer');
-const multerS3 = require('multer-s3');
-const moment = require('moment');
-const crypto = require('crypto');
-const util = require('util');
+import aws from 'aws-sdk';
+import multer from 'multer';
+import multerS3 from 'multer-s3';
+import moment from 'moment';
+import crypto from 'crypto';
+import util from 'util';
+import dotenv from 'dotenv'
 const randomBytesPromise = util.promisify(crypto.randomBytes);
-require('dotenv').config();
+dotenv.config();
 
 const s3 = new aws.S3({
   accessKeyId: process.env.AWS_ACCESS_ID, // 생성한 s3의 accesskey 

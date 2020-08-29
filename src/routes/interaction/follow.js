@@ -4,7 +4,7 @@ const router = new Router({
 });
 
 import { verifyToken, checkWriter } from "./authorization";
-import Follow from "../models/follow";
+import Follow from "../../models/follow";
 
 /* 
   This is follow router.

@@ -1,17 +1,19 @@
-const express = require("express");
+import express from "express";
 const router = express.Router();
-const crypto = require("crypto");
-const util = require("util");
-const Users = require("../models/users");
-const jwt = require("jsonwebtoken");
-const upload = require("./multer");
-require("dotenv").config();
+import crypto from "crypto";
+import util from "util";
+import Users from "../../models/users";
+import jwt from "jsonwebtoken";
+import upload from "../file/imageUpload";
+import dotenv from 'dotenv'
 const SECRET_KEY = process.env.SECRET_KEY;
 const randomBytesPromise = util.promisify(crypto.randomBytes);
 const pbkdf2Promise = util.promisify(crypto.pbkdf2);
-const { verifyToken } = require("./authorization");
-const transporter = require("./mailer");
-const Follow = require("../models/follow");
+import { verifyToken } from "../lib/middleware/tokenAuth";
+import transporter from "../auth/auth.ctrl";
+import Follow from "../../models/follow";
+
+dotenv.config()
 
 /* GET users listing. */
 router.get("/health", function (req, res, next) {

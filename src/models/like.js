@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 const ObjectId = mongoose.ObjectId;
 mongoose.set("useCreateIndex", true);
 

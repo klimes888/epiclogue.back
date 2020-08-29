@@ -4,12 +4,12 @@ const router = express.Router({
 });
 
 import { verifyToken, checkWriter } from "./authorization";
-import Feedback from "../models/feedback";
+import Feedback from "../../../models/feedback";
 import User from '../models/users'
 
 /*
   This is reply router.
-  Base url: /{screen-id}/posts/{board-id}/feedback
+  Base url: /boards/{board-id}/feedback
 */
 
 router.post("/", verifyToken, async (req, res, next) => {

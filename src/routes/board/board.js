@@ -1,12 +1,12 @@
-const express = require("express");
+import express from "express";
 const router = express.Router();
-const { verifyToken, checkWriter } = require("./authorization");
-require("dotenv").config();
-const Board = require("../models/board");
-const Feedback = require("../models/feedback");
-const User = require("../models/users");
-const Reply = require('../models/reply')
-const upload = require("./multer");
+import { verifyToken, checkWriter } from "./authorization";
+import dotenv from 'dotenv'
+import Board from "../../models/board";
+import Feedback from "../../models/feedback";
+import User from "../models/users"
+import Reply from '../models/reply'
+import upload from "./multer"
 
 router.get("/health", (req, res) => {
   res.status(200).json({

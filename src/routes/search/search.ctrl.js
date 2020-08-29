@@ -1,6 +1,6 @@
 import express from "express";
 import user from "../models/users";
-import board from "../models/board";
+import board from "../../models/board";
 const router = express.Router({ mergeParams: true });
 
 /* 검색 전 미리보기 기능 */

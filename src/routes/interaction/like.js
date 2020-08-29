@@ -2,12 +2,12 @@ import express from "express";
 const router = express.Router({
   mergeParams: true,
 });
-const { verifyToken } = require("./authorization");
-const Like = require("../models/like");
-const Feedback = require("../models/feedback");
-const Board = require("../models/board");
-const Reply = require("../models/reply");
-import react from "../models/react";
+import { verifyToken } from"./authorization";
+import Like from "../../models/like";
+import Feedback from "../../models/feedback";
+import Board from "../../models/board";
+import Reply from "../../models/reply";
+import react from "../../models/react";
 
 /*
   This is like router
