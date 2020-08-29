@@ -29,7 +29,7 @@ router.post("/", verifyToken, async (req, res, next) => {
     const newerReplyData = await Reply.getByParentId(replyForm.parentId);
     for (let data of newerReplyData) {
       let userData = await User.getUserInfo(data.userId, { _id: 0, nickname: 1, userid: 1, profile: 1 })
-      console.log(data)
+      
       let resultData = {
         _id: data._id,
         boardId: data.boardId,
@@ -64,7 +64,6 @@ router.get("/:parentId", verifyToken, async (req, res, next) => {
     const replyData = await Reply.getByParentId(parentId);
     for (let data of replyData) {
       let userData = await User.getUserInfo(data.userId, { _id: 0, nickname: 1, userid: 1, profile: 1 })
-      console.log(data)
       let resultData = {
         _id: data._id,
         boardId: data.boardId,
@@ -95,27 +94,22 @@ router.patch("/:replyId", verifyToken, checkWriter, async (req, res, next) => {
     replyId: req.params.replyId,
     newReplyBody: req.body.newReplyBody,
   };
-
+  const resultDataSet = [];
+  const parentId = await Reply.getParentId(req.params.replyId);
+  
   try {
-    const patchResult = await Reply.update(newForm);
-    const parentId = await Reply.getParentId(req.params.replyId);
+    const patch = await Reply.update(newForm);
 
-    if (patchResult.ok === 1) {
-      if (patchResult.n === 1 && patchResult.n === patchResult.nModified) {
-        const newerReplyData = await Reply.getByParentId(parentId);
-        return res.status(200).json({
-          result: "ok",
-          data: newerReplyData,
-        });
-      } else if (
-        patchResult.n === 1 &&
-        patchResult.n !== patchResult.nModified
-      ) {
+    if (patch.ok === 1) {
+      if (patch.n === 1 && patch.n === patch.nModified) {
+        console.log(`Feedback ${parentId} 의 reply ${req.params.replyId} 수정 완료`)
+      } else if (patch.n === 1 && patch.n !== patch.nModified) {
+        console.warn(`Feedback ${parentId} 의 reply ${req.params.replyId} 의 수정이 질의에 성공했으나 데이터가 수정되지 않았습니다.`)
         return res.status(200).json({
           result: "ok",
           message: "질의에 성공했으나 데이터가 수정되지 않았습니다.",
         });
-      } else if (patchResult.n === 0) {
+      } else if (patch.n === 0) {
         return res.status(404).json({
           result: "error",
           message: "존재하지 않는 데이터에 접근했습니다.",
