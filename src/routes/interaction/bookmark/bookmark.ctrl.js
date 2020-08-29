@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { verifyToken } from "./authorization";
-import Bookmark from "../../models/bookmark";
-import react from "../../models/react";
+import Bookmark from "../../../models/bookmark";
+import react from "../../../models/react";
 const router = new Router({
   mergeParams: true,
 });

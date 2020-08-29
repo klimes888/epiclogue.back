@@ -9,7 +9,7 @@ import dotenv from 'dotenv'
 const SECRET_KEY = process.env.SECRET_KEY;
 const randomBytesPromise = util.promisify(crypto.randomBytes);
 const pbkdf2Promise = util.promisify(crypto.pbkdf2);
-import { verifyToken } from "../lib/middleware/tokenAuth";
+import { verifyToken } from "../../lib/middleware/tokenAuth";
 import transporter from "../auth/auth.ctrl";
 import Follow from "../../models/follow";
 

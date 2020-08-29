@@ -3,11 +3,11 @@ const router = express.Router({
   mergeParams: true,
 });
 import { verifyToken } from"./authorization";
-import Like from "../../models/like";
-import Feedback from "../../models/feedback";
-import Board from "../../models/board";
-import Reply from "../../models/reply";
-import react from "../../models/react";
+import Like from "../../../models/like";
+import Feedback from "../../../models/feedback";
+import Board from "../../../models/board";
+import Reply from "../../../models/reply";
+import react from "../../../models/react";
 
 /*
   This is like router

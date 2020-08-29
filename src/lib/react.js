@@ -1,6 +1,6 @@
 import express from "express";
-import react from "../../models/react";
-import user from "../../models/users";
+import react from "../models/react";
+import user from "../models/users";
 const router = express.Router({
   mergeParams: true,
 });
