@@ -97,6 +97,10 @@ board.statics.countBookmark = function (boardId, flag) {
   return this.findOneAndUpdate({ _id: boardId }, { $inc: { bookmarkCount: increment } })
 }
 
+board.statics.getBookmarkCount = function (boardId) {
+  return this.findOne({ _id: boardId }, { bookmarkCount: 1 })
+}
+
 board.statics.countHeart = function (boardId, flag) {
   const increment = flag ? 1 : -1
   return this.findOneAndUpdate({ _id: boardId }, { $inc: { heartCount: increment } })
