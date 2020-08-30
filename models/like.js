@@ -27,4 +27,14 @@ like.statics.getByUserId = function (userId) {
   return this.find({ userId });
 };
 
+like.statics.getCount = function (targetType, targetId) {
+  return this.find({ targetType, targetId },
+    {
+      _id: 0,
+      __v: 0,
+      createAt: 1,
+    }
+  );
+};
+
 module.exports = mongoose.model("Like", like);
