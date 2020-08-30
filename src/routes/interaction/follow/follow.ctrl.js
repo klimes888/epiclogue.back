@@ -83,4 +83,60 @@ router.delete("/", verifyToken, async (req, res, next) => {
   }
 });
 
+router.get("/:userId/following", async (req, res, next) => {
+  const userId = req.params.userId;
+  const followingDataSet = [];
+
+  try {
+    const followingList = await Follow.getFollowingList(userId);
+
+    for (let data of followingList) {
+      let temp = await Users.getUserInfo(data.targetUserId, {
+        nickname: 1,
+        userid: 1,
+      });
+      followingDataSet.push(temp);
+    }
+
+    return res.status(200).json({
+      result: "ok",
+      data: followingDataSet,
+    });
+  } catch (e) {
+    console.error(`[Error] ${e}`);
+    return res.status(500).json({
+      result: "error",
+      message: e.message,
+    });
+  }
+});
+
+router.get("/:userId/follower", async (req, res, next) => {
+  const userId = req.params.userId;
+  const followerDataSet = [];
+
+  try {
+    const followerList = await Follow.getFollowerList(userId);
+
+    for (let data of followerList) {
+      let temp = await Users.getUserInfo(data.targetUserId, {
+        nickname: 1,
+        userid: 1,
+      });
+      followerDataSet.push(temp);
+    }
+
+    return res.status(200).json({
+      result: "ok",
+      data: followerDataSet,
+    });
+  } catch (e) {
+    console.error(`[Error] ${e}`);
+    return res.status(500).json({
+      result: "error",
+      message: e.message,
+    });
+  }
+});
+
 module.exports = router;

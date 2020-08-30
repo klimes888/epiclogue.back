@@ -9,10 +9,10 @@ import helmet from 'helmet';
 import mongoose from 'mongoose';
 import swaggerJSDoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
-import indexRouter from './routes/index';
-import usersRouter from './routes/users';
-import boardRouter from './routes/board'
-import searchRouter from './routes/search'
+import indexRouter from './src/routes';
+import usersRouter from './src/routes/user';
+import boardRouter from './src/routes/board'
+import searchRouter from './src/routes/search'
 import interactionRouter from './src/routes/interaction'
 import dotenv from 'dotenv'
 

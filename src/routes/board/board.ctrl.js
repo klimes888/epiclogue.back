@@ -5,7 +5,7 @@ import Board from "../../models/board";
 import Feedback from "../../models/feedback";
 import User from "../models/users"
 import Reply from '../models/reply'
-import upload from "./multer"
+import upload from "../../lib/common/imageUpload"
 
 router.get("/health", (req, res) => {
   res.status(200).json({
