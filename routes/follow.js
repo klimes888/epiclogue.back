@@ -44,38 +44,21 @@ router.delete("/", verifyToken, async (req, res, next) => {
   /* 유저 검증 필요(존재 유무, 플텍 계정의 경우 팔로우 승인 과정 필요) */
 
   try {
-    const unfollowResult = await Follow.unfollow(followData);
+    const unfollow = await Follow.unfollow(followData);
     await User.countFollowing(followData.userId, 0)
     await User.countFollower(followData.targetUserId, 0)
-    if (unfollowResult.ok === 1) {
-      if (
-        unfollowResult.n === 1 &&
-        unfollowResult.n === unfollowResult.deletedCount
-      ) {
-        return res.send(200).json({
-          result: "ok",
-        });
-      } else if (
-        unfollowResult.ok === 1 &&
-        unfollowResult.n !== unfollowResult.deletedCount
-      ) {
-        return res.status(200).json({
-          result: "ok",
-          message: "질의에 성공했으나 데이터가 삭제되지 않았습니다.",
-        });
-      } else if (unfollowResult.n === 0) {
-        return res.status(404).json({
-          result: "error",
-          message: "존재하지 않는 데이터에 접근했습니다.",
-        });
-      }
-    } else {
+    if (unfollow.ok === 1) {
+      console.log(`[INFO] 유저 ${res.locals.uid}가 ${followData.targetUserId}를 언팔로우했습니다.`)
+      return res.status(200).json({
+        result: 'ok'
+      })
+    } else if (unfollow.ok === 0){
+      console.log(`[INFO] 유저 ${res.locals.uid}가 ${followData.targetUserId}의 언팔로우를 시도했으나 실패했습니다.`)
       return res.status(500).json({
         result: "error",
         message: "데이터베이스 질의 실패",
       });
     }
-
   } catch (e) {
     console.error(`[Error] ${e}`);
     return res.status(500).json({
