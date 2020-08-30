@@ -38,12 +38,13 @@ router.post("/", verifyToken, upload.any(), async function (req, res, next) {
       language,
       likeCount: 0,
     });
+    console.log(`[INFO] user ${uid}가 글 ${result._id}를 작성했습니다.`)
     return res.status(201).json({
       result: "ok",
       data: result,
     });
   } catch (e) {
-    console.error(`[Error!] ${e}`);
+    console.error(`[ERROR] ${e}`);
     return res.status(500).json({
       result: "error",
       message: e.message,
@@ -79,6 +80,7 @@ router.get("/:boardId", verifyToken, async (req, res, next) => {
         },
       });
     }
+    console.log(`[INFO] 유저 ${res.locals.uid}가 글 ${boardId}를 접근했습니다.`)
     return res.status(200).json({
       result: "ok",
       data: {
@@ -88,7 +90,7 @@ router.get("/:boardId", verifyToken, async (req, res, next) => {
       },
     });
   } catch (e) {
-    console.error(`[Error!] ${e}`);
+    console.error(`[ERROR] ${e}`);
     return res.status(500).json({
       result: "error",
       message: e.message,
@@ -108,24 +110,18 @@ router.delete("/:boardId", verifyToken, checkWriter, async function (
     const deletion = await Board.delete(boardId);
 
     if (deletion.ok === 1) {
-      if (deletion.n === 1 && deletion.n === deletion.deletedCount) {
-        return res.sendStatus(200);
-      } else if (deletion.ok === 1 && deletion.n !== deletion.deletedCount) {
-        return res.status(200).json({
-          message: "질의에 성공했으나 데이터가 삭제되지 않았습니다.",
-        });
-      } else if (deletion.n === 0) {
-        return res.status(404).json({
-          message: "존재하지 않는 데이터에 접근했습니다.",
-        });
-      }
+      console.log(`[INFO] 글 ${boardId}가 삭제되었습니다.`)
+      return res.status(200).json({
+        result: 'ok'
+      })
     } else {
-      return res.status(500).json({
-        message: "데이터베이스 질의 실패",
-      });
+      console.warn(`[ERROR] 글 ${boardId}의 삭제가 실패하였습니다.`)
+      return res.status(400).json({
+      
+      })
     }
   } catch (e) {
-    console.error(`[Error!] ${e}`);
+    console.error(`[ERROR] ${e}`);
     return res.status(500).json({
       result: "error",
       message: e.message,
@@ -142,13 +138,13 @@ router.get("/:boardId/edit", verifyToken, checkWriter, async function (
   const boardId = req.params.boardId;
 
   try {
-    const result = await Board.getArticle(boardId);
+    const previousData = await Board.getArticle(boardId);
     return res.status(200).json({
       result: "ok",
-      data: result,
+      data: previousData,
     });
   } catch (e) {
-    console.error(`[Error!] ${e}`);
+    console.error(`[ERROR] ${e}`);
     return res.status(500).json({
       result: "error",
       message: e.message,
@@ -183,11 +179,9 @@ router.patch(
       if (patch.ok === 1) {
         if (patch.n === 1 && patch.n === patch.nModified) {
           return res.sendStatus(200);
-        } else if (
-          patch.n === 1 &&
-          patch.n !== patch.nModified
-        ) {
+        } else if (patch.n === 1 && patch.n !== patch.nModified) {
           return res.status(200).json({
+
             msg: "질의에 성공했으나 데이터가 수정되지 않았습니다.",
           });
         } else if (patch.n === 0) {
@@ -197,7 +191,7 @@ router.patch(
         }
       }
     } catch (e) {
-      console.error(`[Error!] ${e}`);
+      console.error(`[ERROR] ${e}`);
       return res.status(500).json({
         result: "ok",
         message: e.message,
@@ -231,7 +225,7 @@ router.get("/", verifyToken, async (req, res, next) => {
       data: result,
     });
   } catch (e) {
-    console.error(`[Error!] ${e}`);
+    console.error(`[ERROR] ${e}`);
     return res.status(500).json({
       result: "error",
       message: e.message,
@@ -266,13 +260,13 @@ router.post("/:boardId/feedback", verifyToken, async (req, res, next) => {
       }
       newerData.push(feedbackData)
     }
-    console.log(`[INFO] 유저 ${res.locals.uid}가 ${req.params.boardId}에 피드백을 작성했습니다.`)
+    console.log(`[INFO] 유저 ${res.locals.uid}가 글 ${req.params.boardId}에 피드백을 작성했습니다.`)
     return res.status(201).json({
       result: "ok",
       data: newerData
     });
   } catch (e) {
-    console.error(`[Error] ${e}`);
+    console.error(`[ERROR ${e}`);
     return res.status(500).json({
       result: "error",
       message: e.message,
@@ -293,8 +287,9 @@ router.patch(
     const newerData = [];
     try {
       const patch = await Feedback.update(newForm);
-
+      
       if (patch.ok === 1) {
+        console.log(`[INFO] 유저 ${res.locals.uid}가 피드백 ${req.params.feedbackId}을 수정했습니다.`)
         const newerFeedbackData = await Feedback.getByBoardId(boardId);
         for (let data of newerFeedbackData) {
           let userData = await User.getUserInfo(data.userId, { _id: 0, nickname: 1, userid: 1, profile: 1 })
@@ -310,19 +305,19 @@ router.patch(
           }
           newerData.push(feedbackData)
         }
-        console.log(`[INFO] 유저 ${res.locals.uid}가 피드백 ${req.params.feedbackId}을 수정했습니다.`)
         return res.status(200).json({
           result: "ok",
           data: newerData,
         });
       } else {
+        console.warn(`[ERROR] 유저 ${res.locals.uid}의 피드백 ${req.params.feedbackId}의 수정을 시도하였지만 실패했습니다.`)
         return res.status(500).json({
           result: "error",
-          message: `데이터베이스 질의 실패; ${patch.ok}`,
+          message: "데이터베이스 질의 실패",
         });
       }
     } catch (e) {
-      console.error(`[Error] ${e}`);
+      console.error(`[ERROR ${e}`);
       return res.status(500).json({
         result: "error",
         message: e.message,
@@ -344,7 +339,7 @@ router.delete(
       const boardId = req.params.boardId;
 
       if (deletion.ok === 1) {
-        console.log(`[INFO] 유저 ${res.locals.uid}가 피드백 ${req.params.feedbackId}을 삭제했습니다.`)
+        console.log(`[INFO] 유저 ${res.locals.uid}가 피드백 ${req.params.feedbackId}을 성공적으로 삭제했습니다.`)
       } else if (deletion.ok === 0) {
         console.warn(`[ERROR] 유저 ${res.locals.uid}가 피드백 ${req.params.feedbackId}의 삭제를 시도했지만 실패했습니다.`)
       }
@@ -368,7 +363,7 @@ router.delete(
         data: newerData
       })
     } catch (e) {
-      console.error(`[Error] ${e}`);
+      console.error(`[ERROR ${e}`);
       return res.status(500).json({
         result: "error",
         message: e.message,
@@ -393,7 +388,7 @@ router.post("/:boardId/feedback/:feedbackId/reply", verifyToken, async (req, res
     const newerReplyData = await Reply.getByParentId(replyForm.parentId);
     for (let data of newerReplyData) {
       let userData = await User.getUserInfo(data.userId, { _id: 0, nickname: 1, userid: 1, profile: 1 })
-      console.log(data)
+
       let feedbackData = {
         _id: data._id,
         boardId: data.boardId,
@@ -412,7 +407,7 @@ router.post("/:boardId/feedback/:feedbackId/reply", verifyToken, async (req, res
       data: newerData,
     });
   } catch (e) {
-    console.error(`[Error] ${e}`);
+    console.error(`[ERROR ${e}`);
     return res.status(500).json({
       result: "error",
       message: e.message,
@@ -423,13 +418,14 @@ router.post("/:boardId/feedback/:feedbackId/reply", verifyToken, async (req, res
 // 댓글 하위의 대댓글 뷰
 router.get("/:boardId/feedback/:feedbackId/reply", verifyToken, async (req, res, next) => {
   const parentId = req.params.feedbackId;
-  const resultDataSet = []
+  const newerData = []
 
   try {
     const replyData = await Reply.getByParentId(parentId);
+    console.log(`[INFO] 유저 ${res.locals.uid}가 피드백 ${req.params.feedbackId}에 대한 대댓글에 접근했습니다.`)
     for (let data of replyData) {
       let userData = await User.getUserInfo(data.userId, { _id: 0, nickname: 1, userid: 1, profile: 1 })
-      console.log(data)
+
       let resultData = {
         _id: data._id,
         boardId: data.boardId,
@@ -440,14 +436,14 @@ router.get("/:boardId/feedback/:feedbackId/reply", verifyToken, async (req, res,
         writeDate: data.writeDate,
         userInfo: userData
       }
-      resultDataSet.push(resultData)
+      newerData.push(resultData)
     }
     return res.status(200).json({
       result: "ok",
-      data: resultDataSet,
+      data: newerData,
     });
   } catch (e) {
-    console.error(`[Error] ${e}`);
+    console.error(`[ERROR ${e}`);
     return res.status(500).json({
       result: "error",
       message: e.message,
@@ -466,15 +462,42 @@ router.patch("/:boardId/feedback/:feedbackId/reply/:replyId", verifyToken, check
   try {
     const patch = await Reply.update(newForm);
     const parentId = await Reply.getParentId(req.params.replyId);
-
     if (patch.ok === 1) {
+      console.log(`[INFO] 유저 ${res.locals.uid}가 대댓글 ${req.params.replyId}를 성공적으로 수정했습니다.`)
       const newerReplyData = await Reply.getByParentId(parentId);
-      
+      for (let data of newerReplyData) {
+        let userData = await User.getUserInfo(data.userId, {
+          _id: 0,
+          nickname: 1,
+          userid: 1,
+          profile: 1,
+        });
+
+        let resultData = {
+          _id: data._id,
+          boardId: data.boardId,
+          parentId: data.parentId,
+          replyBody: data.replyBody,
+          edited: data.edited,
+          heartCount: data.heartCount,
+          writeDate: data.writeDate,
+          userInfo: userData,
+        };
+        newerData.push(resultData);
+      }
+      return res.status(200).json({
+        result:'ok', 
+        data: newerData
+      })
     } else {
-      
+      console.warn(`[ERROR] 유저 ${res.locals.uid}가 존재하지 않는 대댓글 ${req.params.replyId}의 수정을 요청했습니다.`)
+      return res.status(404).json({
+        result: 'error',
+        message: "데이터가 존재하지 않습니다."
+      })
     }
   } catch (e) {
-    console.error(`[Error] ${e}`);
+    console.error(`[ERROR ${e}`);
     return res.status(500).json({
       result: "error",
       message: e.message,
@@ -484,44 +507,47 @@ router.patch("/:boardId/feedback/:feedbackId/reply/:replyId", verifyToken, check
 
 router.delete("/:boardId/feedback/:feedbackId/reply/:replyId", verifyToken, checkWriter, async (req, res, next) => {
   const replyId = req.params.replyId;
+  const newerData = [];
 
   try {
     const parentId = await Reply.getById(replyId);
     await Feedback.countReply(replyForm.parentId, 0)
     const deletion = await Reply.delete(replyId, { parentId: 1 });
     if (deletion.ok === 1) {
+      console.log(`[INFO] 유저 ${res.locals.uid}가 대댓글 ${req.params.replyId}를 성공적으로 삭제했습니다.`)
       const newerReplyData = await Reply.getByParentId(parentId);
-
-      if (
-        deletion.n === 1 &&
-        deletion.n === deletion.deletedCount
-      ) {
-        return res.send(200).json({
-          result: "ok",
-          data: newerReplyData,
+      for (let data of newerReplyData) {
+        let userData = await User.getUserInfo(data.userId, {
+          _id: 0,
+          nickname: 1,
+          userid: 1,
+          profile: 1,
         });
-      } else if (
-        deletion.ok === 1 &&
-        deletion.n !== deletion.deletedCount
-      ) {
-        return res.status(200).json({
-          result: "ok",
-          message: "질의에 성공했으나 데이터가 삭제되지 않았습니다.",
-        });
-      } else if (deletion.n === 0) {
-        return res.status(404).json({
-          result: "error",
-          message: "존재하지 않는 데이터에 접근했습니다.",
-        });
+        let resultData = {
+          _id: data._id,
+          boardId: data.boardId,
+          parentId: data.parentId,
+          replyBody: data.replyBody,
+          edited: data.edited,
+          heartCount: data.heartCount,
+          writeDate: data.writeDate,
+          userInfo: userData,
+        };
+        newerData.push(resultData);
       }
+      return res.status(200).json({
+        result:'ok', 
+        data: newerData
+      })
     } else {
-      return res.status(500).json({
+      console.log(`[INFO] 유저 ${res.locals.uid}가 대댓글 ${req.params.replyId}를 성공적으로 삭제했습니다.`)
+      return res.status(404).json({
         result: "error",
-        message: "데이터베이스 질의 실패",
+        message: "데이터가 존재하지 않습니다.",
       });
     }
   } catch (e) {
-    console.error(`[Error] ${e}`);
+    console.error(`[ERROR ${e}`);
     return res.status(500).json({
       result: "error",
       message: e.message,
