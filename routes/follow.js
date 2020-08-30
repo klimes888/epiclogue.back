@@ -23,6 +23,7 @@ router.post("/", verifyToken, async (req, res, next) => {
     await Follow.follow(followData);
     await User.countFollowing(followData.userId, 1)
     await User.countFollower(followData.targetUserId, 1)
+    console.log(`[INFO] 유저 ${res.locals.uid}가 ${followData.targetUserId}를 팔로우합니다.`)
     return res.status(201).json({
       result: "ok",
     });

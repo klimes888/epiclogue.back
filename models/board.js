@@ -98,7 +98,7 @@ board.statics.countBookmark = function (boardId, flag) {
 }
 
 board.statics.getBookmarkCount = function (boardId) {
-  return this.findOne({ _id: boardId }, { bookmarkCount: 1 })
+  return this.findOne({ _id: boardId }, { _id: 0, bookmarkCount: 1 })
 }
 
 board.statics.countHeart = function (boardId, flag) {

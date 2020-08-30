@@ -55,10 +55,11 @@ router.post("/login", async function (req, res, next) {
           expiresIn: "1h",
         }
       );
+      console.log(`[INFO] 유저 ${result._id}가 로그인했습니다.`)
 
       return res.status(201).json({
         result: "ok",
-        token,
+        token, 
         nick: result.nickname,
         userId: result.userid,
       });

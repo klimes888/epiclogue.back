@@ -138,7 +138,10 @@ router.get("/:boardId/edit", verifyToken, checkWriter, async function (
   const boardId = req.params.boardId;
 
   try {
-    const previousData = await Board.getArticle(boardId);
+    const previousData = await Board.getById(boardId);
+    
+    console.log(`[INFO] 유저 ${res.locals.uid}가 글 ${boardId}을 수정을 위해 데이터를 요청했습니다.`)
+    
     return res.status(200).json({
       result: "ok",
       data: previousData,
@@ -175,8 +178,8 @@ router.patch(
 
     try {
       const patch = await Board.update(updateData);
-
       if (patch.ok === 1) {
+        console.log(`[INFO] 유저 ${res.locals.uid}가 글 ${req.params.boardId}을 수정했습니다.`)
         if (patch.n === 1 && patch.n === patch.nModified) {
           return res.sendStatus(200);
         } else if (patch.n === 1 && patch.n !== patch.nModified) {
@@ -376,7 +379,7 @@ router.post("/:boardId/feedback/:feedbackId/reply", verifyToken, async (req, res
   const replyForm = {
     userId: res.locals.uid,
     boardId: req.params.boardId,
-    parentId: req.body.parentId,
+    parentId: req.params.feedbackId,
     replyBody: req.body.replyBody,
   };
 
@@ -461,10 +464,9 @@ router.patch("/:boardId/feedback/:feedbackId/reply/:replyId", verifyToken, check
 
   try {
     const patch = await Reply.update(newForm);
-    const parentId = await Reply.getParentId(req.params.replyId);
     if (patch.ok === 1) {
       console.log(`[INFO] 유저 ${res.locals.uid}가 대댓글 ${req.params.replyId}를 성공적으로 수정했습니다.`)
-      const newerReplyData = await Reply.getByParentId(parentId);
+      const newerReplyData = await Reply.getByParentId(req.params.feedbackId);
       for (let data of newerReplyData) {
         let userData = await User.getUserInfo(data.userId, {
           _id: 0,
@@ -510,12 +512,11 @@ router.delete("/:boardId/feedback/:feedbackId/reply/:replyId", verifyToken, chec
   const newerData = [];
 
   try {
-    const parentId = await Reply.getById(replyId);
-    await Feedback.countReply(replyForm.parentId, 0)
+    await Feedback.countReply(req.params.feedbackId, 0)
     const deletion = await Reply.delete(replyId, { parentId: 1 });
     if (deletion.ok === 1) {
       console.log(`[INFO] 유저 ${res.locals.uid}가 대댓글 ${req.params.replyId}를 성공적으로 삭제했습니다.`)
-      const newerReplyData = await Reply.getByParentId(parentId);
+      const newerReplyData = await Reply.getByParentId(req.params.feedbackId);
       for (let data of newerReplyData) {
         let userData = await User.getUserInfo(data.userId, {
           _id: 0,
