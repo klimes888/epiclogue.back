@@ -26,7 +26,7 @@ const swaggerDefinition = {
     version: '1.0.0', // Version (required)
     description: 'lunarcat service API' // Description (optional)
   },  
-  host: 'api.chiyak.duckdns.org', // Host (optional)
+  host: 'api.epiclogue.tk', // Host (optional)
   basePath: '/', // Base path (optional)
   schemes:["https"]
 };
@@ -35,7 +35,7 @@ const options = {
   // Import swaggerDefinitions
   swaggerDefinition,
   // Path to the API docs
-  apis: ['./routes/*.js']
+  apis: ['./apidoc.yaml']
 };
 
 const swaggerSpec = swaggerJSDoc(options);
