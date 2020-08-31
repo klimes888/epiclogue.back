@@ -24,6 +24,8 @@ router.post("/", verifyToken, async (req, res, next) => {
   try {
     await Like.like(likeData);
     console.log(`[INFO] 유저 ${res.locals.uid}가 ${likeData.targetType}: ${likeData.targetId}를 좋아합니다.`)
+    let likeCount;
+
     if (likeData.targetType === "board") {
       const reactData = {
         userId: res.locals.uid,
@@ -31,17 +33,20 @@ router.post("/", verifyToken, async (req, res, next) => {
         type: "like",
       };
       await react.create(reactData);
-      await Board.countHeart(req.body.targetId, 1)
-      await Board.countReact(req.body.targetId, 1)
+      await Board.countHeart(likeData.targetId, 1)
+      await Board.countReact(likeData.targetId, 1)
+      likeCount = await Board.getHeartCount(likeData.targetId)
     } else if (likeData.targetType === "feedback") {
-      await Feedback.countHeart(req.body.targetId, 1)
+      await Feedback.countHeart(likeData.targetId, 1)
+      likeCount =  await Feedback.getHeartCount(likeData.targetId)
     } else if (likeData.targetType === "reply") {
       await Reply.countHeart(req.body.targetId, 1)
+      likeCount = await Reply.getHeartCount(likeData.targetId)
     }
-    const newerCount = await Like.getCount(likeData)
+
     return res.status(201).json({
       result: "ok",
-      data: newerCount
+      data: likeCount
     });
   } catch (e) {
     console.error(`[Error] ${e}`);
@@ -62,19 +67,24 @@ router.delete("/", verifyToken, async (req, res, next) => {
   try {
     await Like.unlike(likeData);
     console.log(`[INFO] 유저 ${res.locals.uid}가 ${likeData.targetType}: ${likeData.targetId}의 좋아요를 해제했습니다.`)
+    let likeCount;
+
     if (likeData.targetType === "board") {
       await react.delete(likeData.userId, likeData.targetId);
       await Board.countHeart(req.body.targetId, 0)
       await Board.countReact(req.body.targetId, 0)
+      likeCount = await Board.getHeartCount(likeData.targetId)
     } else if (likeData.targetType === "feedback") {
       await Feedback.countHeart(req.body.targetId, 0)
+      likeCount = await Feedback.getHeartCount(likeData.targetId)
     } else if (likeData.targetType === "reply") {
       await Reply.countHeart(req.body.targetId, 0)
+      likeCount = await Reply.getHeartCount(likeData.targetId)
     }
-    const newerCount = await Like.getCount(likeData)
+
     return res.status(200).json({
       result: 'ok',
-      data: newerCount
+      data: likeCount
     })
   } catch (e) {
     console.error(`[Error] ${e}`);
