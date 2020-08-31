@@ -27,11 +27,10 @@ like.statics.getByUserId = function (userId) {
   return this.find({ userId });
 };
 
-like.statics.getCount = function (targetType, targetId) {
-  return this.find({ targetType, targetId },
+like.statics.getCount = function (likeData) {
+  return this.find({ targetType: likeData.targetType, targetId: likeData.targetId },
     {
       _id: 0,
-      __v: 0,
       createAt: 1,
     }
   );

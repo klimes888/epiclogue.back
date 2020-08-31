@@ -106,6 +106,10 @@ board.statics.countHeart = function (boardId, flag) {
   return this.findOneAndUpdate({ _id: boardId }, { $inc: { heartCount: increment } })
 }
 
+board.statics.getHeartCount = function (boardId) {
+  return this.findOne({ _id: boardId }, { heartCount: 1, _id: 0 })
+}
+
 board.statics.countReact = function (boardId, flag) {
   const increment = flag ? 1 : -1
   return this.findOneAndUpdate({ _id: boardId }, { $inc: { reactCount: increment } })

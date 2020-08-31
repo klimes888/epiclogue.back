@@ -70,4 +70,8 @@ Reply.statics.countHeart = function (replyId, flag) {
   return this.findOneAndUpdate({ _id: replyId }, { $inc: { heartCount: increment } })
 }
 
+Reply.statics.getHeartCount = function (replyId) {
+  return this.findOne({ _id: replyId }, { heartCount: 1, _id: 0 })
+}
+
 module.exports = mongoose.model("Reply", Reply);
