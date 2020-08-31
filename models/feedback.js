@@ -68,4 +68,8 @@ Feedback.statics.countHeart = function (feedbackId, flag) {
   return this.findOneAndUpdate({ _id: feedbackId }, { $inc: { heartCount: increment } })
 }
 
+Feedback.statics.getHeartCount = function (feedbackId) {
+  return this.findOne({ _id: feedbackId }, { heartCount: 1, _id: 0 })
+}
+
 module.exports = mongoose.model("Feedback", Feedback);
