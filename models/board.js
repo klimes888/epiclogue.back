@@ -12,8 +12,9 @@ const board = new mongoose.Schema({
   writeDate: { type: Date, default: Date.now },
   language: { type: String, default: "Korean" },
   heartCount: { type: Number, default: 0 },
-  replyCount: { type: Number, default: 0 },
+  feedbackCount: { type: Number, default: 0 },
   bookmarkCount: { type: Number, default: 0 },
+  reactCount: { type: Number, default: 0 },
   originUserId: { type: ObjectId },
   originBoardId: { type: ObjectId },
   edited: { type: Boolean, default: false },
@@ -81,14 +82,33 @@ board.statics.getByQuery = function (query) {
   return this.find(
     { boardTitle: { $regex: query } },
     {
-      boardTitle: 1,
-      boardImg: 1,
-      heartCount: 1,
-      bookmarkCount: 1,
-      category: 1,
-      writeDate: 1,
+      _id: 1, boardTitle: 1, uid: 1, pub: 1, category: 1, boardImg: 1 
     }
   ).sort({ writeDate: 1, heartCount: 1 });
 };
+
+board.statics.countFeedback = function (boardId, flag) {
+  const increment = flag ? 1 : -1
+  return this.findOneAndUpdate({ _id: boardId }, { $inc: { feedbackCount: increment } })
+}
+
+board.statics.countBookmark = function (boardId, flag) {
+  const increment = flag ? 1 : -1
+  return this.findOneAndUpdate({ _id: boardId }, { $inc: { bookmarkCount: increment } })
+}
+
+board.statics.getBookmarkCount = function (boardId) {
+  return this.findOne({ _id: boardId }, { _id: 0, bookmarkCount: 1 })
+}
+
+board.statics.countHeart = function (boardId, flag) {
+  const increment = flag ? 1 : -1
+  return this.findOneAndUpdate({ _id: boardId }, { $inc: { heartCount: increment } })
+}
+
+board.statics.countReact = function (boardId, flag) {
+  const increment = flag ? 1 : -1
+  return this.findOneAndUpdate({ _id: boardId }, { $inc: { reactCount: increment } })
+}
 
 module.exports = mongoose.model('Board', board);
