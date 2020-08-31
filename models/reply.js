@@ -65,9 +65,6 @@ Reply.statics.getParentId = function (replyId) {
   return this.findOne({ _id: replyId }, { parentId: 1 });
 };
 
-Reply.statics.countHeart = function (replyId, flag) {
-  const increment = flag ? 1 : -1
-  return this.findOneAndUpdate({ _id: replyId }, { $inc: { heartCount: increment } })
-}
+// Counting
 
 module.exports = mongoose.model("Reply", Reply);

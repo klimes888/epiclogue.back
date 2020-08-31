@@ -55,11 +55,10 @@ router.post("/login", async function (req, res, next) {
           expiresIn: "1h",
         }
       );
-      console.log(`[INFO] 유저 ${result._id}가 로그인했습니다.`)
 
       return res.status(201).json({
         result: "ok",
-        token, 
+        token,
         nick: result.nickname,
         userId: result.userid,
       });
@@ -251,22 +250,11 @@ router.patch("/editProfile", verifyToken, upload.any(), async function (
   console.log(req.body); // json 객체를 toString으로 먼저 문자열로 직렬화 하고, 받고나서 다시 JSON 객체로 변환해서 써야하나 보다.
 
   try {
-    const checkId = await Users.isScreenIdUnique(userId);
+    const checkId = await Users.isIdUnique(userId);
     if (checkId) {
-      const newerUserData = {
-        uid,
-        userId,
-        nickname: nick,
-        language: lang,
-        country,
-        intro,
-        bann,
-        prof
-      }
-      
       await Users.updateProfile({
         uid,
-        screenId: userId,
+        userId,
         nick,
         country,
         lang,
@@ -274,11 +262,6 @@ router.patch("/editProfile", verifyToken, upload.any(), async function (
         bann,
         prof,
       });
-
-      return res.status(200).json({
-        result: "ok",
-        data: newerUserData
-      })
     } else {
       return res.status(400).json({
         result: "error",

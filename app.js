@@ -1,8 +1,8 @@
-const createError = require('http-errors');
-const express = require('express');
-const path = require('path');
-const cookieParser = require('cookie-parser');
-const logger = require('morgan');
+var createError = require('http-errors');
+var express = require('express');
+var path = require('path');
+var cookieParser = require('cookie-parser');
+var logger = require('morgan');
 
 const cors = require('cors');
 const helmet = require('helmet');
@@ -10,13 +10,13 @@ const mongoose = require('mongoose');
 const swaggerJSDoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
 const debug = require('debug')(process.env.DEBUG)
-const indexRouter = require('./routes/index');
-const usersRouter = require('./routes/users');
+var indexRouter = require('./routes/index');
+var usersRouter = require('./routes/users');
 const boardRouter = require('./routes/board')
 const searchRouter = require('./routes/search')
 const reactRouter = require('./routes/react')
 
-const app = express();
+var app = express();
 
 require('dotenv').config();
 
@@ -74,7 +74,7 @@ app.use(function(err, req, res, next) {
 
 mongoose.Promise = global.Promise;
 
-mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false })
+mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log('데이터베이스 연결 성공'))
   .catch(e => console.error(e));
 

@@ -6,7 +6,7 @@ const user = new mongoose.Schema({
   nickname: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
-  screenId: { type: String },
+  userid: { type: String },
   country: { type: String },
   joinDate: { type: Date, required: true, default: Date.now },
   language: { type: [String] },
@@ -16,8 +16,6 @@ const user = new mongoose.Schema({
   salt: { type: String },
   isConfirmed: { type: Boolean, required: true, default: false },
   token: { type: String },
-  followerCount: { type: Number },
-  followingCount: { type: Number },
 });
 
 user.statics.create = function (data) {
@@ -26,9 +24,9 @@ user.statics.create = function (data) {
   return userinfo.save();
 };
 
-user.statics.isScreenIdUnique = async function (screenId) {
-  const result = await this.findOne({ screenId });
-
+user.statics.isIdUnique = async function (userId) {
+  const result = await this.findOne({ userid: userId });
+  // console.log(result);
   if (result === null) {
     return true;
   } else {
@@ -45,7 +43,7 @@ user.statics.confirmUser = function (email) {
 };
 
 user.statics.isExist = function (email) {
-  return this.findOne({ email });
+  return this.findOne({ email: email });
 };
 
 /* 
@@ -59,7 +57,7 @@ user.statics.findUser = function (email, userpw) {
 };
 
 user.statics.getSalt = function (email) {
-  return this.findOne({ email }, { _id: 0, salt: 1 });
+  return this.findOne({ email: email }, { _id: 0, salt: 1 });
 };
 
 user.statics.getUserInfo = function (uid, option) {
@@ -67,7 +65,7 @@ user.statics.getUserInfo = function (uid, option) {
 };
 
 user.statics.getUserInfoByScreenId = function (screenId, option) {
-  return this.findOne({ screenId: screenId }, option);
+  return this.findOne({ userid: screenId }, option);
 };
 
 user.statics.deleteUser = function (uid, userpw) {
@@ -98,7 +96,7 @@ user.statics.updateProfile = function (profile) {
     { _id: profile.uid },
     {
       nickname: profile.nick,
-      screenId: profile.screenId,
+      userid: profile.userId,
       country: profile.country,
       language: profile.lang,
       intro: profile.intro,
@@ -108,23 +106,13 @@ user.statics.updateProfile = function (profile) {
   );
 };
 
-user.statics.getProfile = function (screenId) {
-  return this.find({ _id: screenId }, { _id: 1, screenId: 1, nickname: 1 });
+user.statics.getProfile = function (userId) {
+  return this.find({ _id: userId }, { _id: 1, userid: 1, nickname: 1 });
 };
 
 user.statics.getByQuery = function (query) {
-  return this.find({ screenId: { $regex: query } },
-    { screenId: 1, nickname: 1, profile: 1 }).sort({ screenId: 'asc' })
-}
-
-user.statics.countFollower = function (userId, flag) {
-  const increment = flag ? 1 : -1
-  return this.updateOne({ _id: userId }, { followerCount: increment })
-}
-
-user.statics.countFollowing = function (userId, flag) {
-  const increment = flag ? 1 : -1
-  return this.updateOne({ _id: userId }, { followingCount: increment })
+    return this.find({ userid: { $regex: query }},
+    { userid: 1, nickname: 1, profile: 1 }).sort({ userid: 'asc' })
 }
 
 module.exports = mongoose.model('User', user);
