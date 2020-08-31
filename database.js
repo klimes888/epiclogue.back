@@ -41,7 +41,7 @@ class Database {
 
   async drop() {
     try {
-      await mongoose.Connection.dropDatabase()
+      await mongoose.connection.db.dropDatabase()
       console.log(`테스트 데이터베이스 ${process.env.DB_TEST} 삭제됨`)
     } catch (e) {
       console.error(e)

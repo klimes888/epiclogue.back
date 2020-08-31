@@ -9,3 +9,4 @@ package-lock.json
 .eslintrc.js
 data
 coverage
+.node-version
