@@ -5,7 +5,6 @@ mongoose.set("useCreateIndex", true);
 const follow = new mongoose.Schema({
   userId: { type: ObjectId, required: true },
   targetUserId: { type: ObjectId, required: true },
-  createdAt: { type: Date, default: Date.now },
 });
 
 follow.statics.follow = function (data) {
