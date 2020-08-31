@@ -16,9 +16,9 @@ const boardRouter = require('./routes/board')
 const searchRouter = require('./routes/search')
 const reactRouter = require('./routes/react')
 
-const app = express();
-
 import Database from './database'
+
+const app = express();
 
 require('dotenv').config();
 
@@ -53,12 +53,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/boards', boardRouter);
-app.use('/:screenId/boards/:boardId/feedback', require('./routes/feedback'));
-app.use('/:screenId/boards/:boardId/reply', require('./routes/reply'));
-app.use('/:screenId/boards/:boardId/react', reactRouter)
-app.use('/:screenId/like', require('./routes/like'));
-app.use('/:screenId/follow', require('./routes/follow'))
-app.use('/:screenId/bookmark', require('./routes/bookmark'))
+app.use('/interaction/:screenId/like', require('./routes/like'));
+app.use('/interaction/:screenId/follow', require('./routes/follow'))
+app.use('/interaction/:screenId/bookmark', require('./routes/bookmark'))
 app.use('/search', searchRouter)
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 // catch 404 and forward to error handler
@@ -79,16 +76,5 @@ app.use(function(err, req, res, next) {
 
 Database.connect()
 
-// mongoose.Promise = global.Promise;
-
-// if (process.env.NODE_ENV === 'test') {
-//   mongoose.connect(process.env.MONGO_TEST_URI, { useNewUrlParser: true, useUnifiedTopology: true })
-//   .then(() => console.log('데이터베이스 연결 성공'))
-//   .catch(e => console.error(e));
-// } else {
-//   mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
-//   .then(() => console.log('데이터베이스 연결 성공'))
-//   .catch(e => console.error(e));
-// }
 
 module.exports = app;

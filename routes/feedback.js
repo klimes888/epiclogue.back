@@ -5,6 +5,7 @@ const router = express.Router({
 
 import { verifyToken, checkWriter } from "./authorization";
 import Feedback from "../models/feedback";
+import User from '../models/users'
 
 /*
   This is reply router.
@@ -18,12 +19,28 @@ router.post("/", verifyToken, async (req, res, next) => {
     feedbackBody: req.body.feedbackBody,
   };
 
+  const newerData = []
+
   try {
     await Feedback.create(feedbackData);
     const newerFeedbackData = await Feedback.getByBoardId(req.params.boardId);
+    for (let data of newerFeedbackData) {
+      let userData = await User.getUserInfo(data.userId,   { _id: 0, nickname: 1, userid: 1, profile: 1 })
+      let feedbackData = {
+        _id: data._id,
+        boardId: data.boardId,
+        childCount: data.childCount,
+        edited: data.edited,
+        feedbackBody: data.feedbackBody,
+        likeCount: data.likeCount,
+        writeDate: data.writeDate,
+        userInfo: userData
+      }
+      newerData.push(feedbackData)
+    }
     return res.status(201).json({
       result: "ok",
-      data: newerFeedbackData,
+      data: newerData
     });
   } catch (e) {
     console.error(`[Error] ${e}`);
@@ -44,26 +61,40 @@ router.patch(
       newFeedbackBody: req.body.newFeedbackBody,
     };
     const boardId = req.params.boardId;
+    const newerData = [];
 
     try {
-      const patchResult = await Feedback.update(newForm);
+      const result = await Feedback.update(newForm);
 
-      if (patchResult.ok === 1) {
-        if (patchResult.n === 1 && patchResult.n === patchResult.nModified) {
-          const newerFeedbackData = await Feedback.getByBoardId(boardId);
+      if (result.ok === 1) {
+        const newerFeedbackData = await Feedback.getByBoardId(boardId);
+        for (let data of newerFeedbackData) {
+          let userData = await User.getUserInfo(data.userId, { _id: 0, nickname: 1, userid: 1, profile: 1 })
+          let feedbackData = {
+            _id: data._id,
+            boardId: data.boardId,
+            childCount: data.childCount,
+            edited: data.edited,
+            feedbackBody: data.feedbackBody,
+            likeCount: data.likeCount,
+            writeDate: data.writeDate,
+            userInfo: userData
+          }
+          newerData.push(feedbackData)
+        }
+        if (result.n === 1 && result.n === result.nModified) { 
+          console.log(`boardId: ${boardId}의 피드백이 정상적으로 삭제되었습니다.`)          
           return res.status(200).json({
             result: "ok",
-            data: newerFeedbackData,
+            data: newerData,
           });
-        } else if (
-          patchResult.n === 1 &&
-          patchResult.n !== patchResult.nModified
-        ) {
+        } else if (result.n === 1 && result.n !== result.nModified) {
           return res.status(200).json({
             result: "ok",
             message: "질의에 성공했으나 데이터가 수정되지 않았습니다.",
           });
-        } else if (patchResult.n === 0) {
+        } else if (result.n === 0) {
+          console.log(`boardId: ${boardId}의 피드백이 정상적으로 삭제되었습니다.`)          
           return res.status(404).json({
             result: "error",
             message: "존재하지 않는 데이터에 접근했습니다.",
@@ -72,7 +103,7 @@ router.patch(
       } else {
         return res.status(500).json({
           result: "error",
-          message: `데이터베이스 질의 실패; ${patchResult.ok}`,
+          message: `데이터베이스 질의 실패: ${result.ok}`,
         });
       }
     } catch (e) {
@@ -91,36 +122,31 @@ router.delete(
   checkWriter,
   async (req, res, next) => {
     const feedbackId = req.params.feedbackId;
+    const newerData = [];
 
     try {
-      const deleteResult = await Feedback.delete(feedbackId);
+      const result = await Feedback.delete(feedbackId);
       const boardId = req.params.boardId;
-
-      if (deleteResult.ok === 1) {
-        if (
-          deleteResult.n === 1 &&
-          deleteResult.n === deleteResult.deletedCount
-        ) {
+      if (result.ok === 1) {
+        if (result.n === 1 && result.n === result.deletedCount) {
           const newerFeedbackData = await Feedback.getByBoardId(boardId);
           return res.status(200).json({
             result: "ok",
             data: newerFeedbackData,
           });
-        } else if (
-          deleteResult.ok === 1 &&
-          deleteResult.n !== deleteResult.deletedCount
-        ) {
+        } else if (result.ok === 1 && result.n !== result.deletedCount) {
+          console.warn("질의에 성공했으나 데이터가 삭제되지 않았습니다.")
           return res.status(200).json({
             result: "ok",
             message: "질의에 성공했으나 데이터가 삭제되지 않았습니다.",
           });
-        } else if (deleteResult.n === 0) {
+        } else if (result.n === 0) {
           return res.status(404).json({
             result: "error",
             message: "존재하지 않는 데이터에 접근했습니다.",
           });
         }
-      } else if (deleteResult.ok === 0) {
+      } else if (result.ok === 0) {
         res.status(500).json({
           result: "error",
           message: "데이터베이스 질의 실패",

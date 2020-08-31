@@ -18,8 +18,8 @@ router.get("/", async (req, res, next) => {
       const userData = await user.getByQuery(_query);
       res.status(200).json(userData);
     } else {  // title searching
-      const boardData = await board.getTitlesByQuery(queryString);
-      res.status(200).json(boardData, { boardTitle: 1 });
+      const boardData = await board.getByQuery(queryString);
+      res.status(200).json(boardData);
     }
   } catch (e) {
     console.log(e);
