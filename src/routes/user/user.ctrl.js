@@ -13,7 +13,7 @@ dotenv.config()
 
 /* GET users listing. */
 
-router.get("/editProfile", verifyToken, async function (req, res, next) {
+router.get("/", verifyToken, async function (req, res, next) {
   const uid = res.locals.uid;
   try {
     const result = await Users.getUserInfo(uid);
@@ -38,7 +38,7 @@ router.get("/editProfile", verifyToken, async function (req, res, next) {
   }
 });
 
-router.patch("/editProfile", verifyToken, upload.any(), async function (
+router.post("/", verifyToken, upload.any(), async function (
   req,
   res,
   next
@@ -112,7 +112,7 @@ router.patch("/editProfile", verifyToken, upload.any(), async function (
   }
 });
 
-router.post("/changePass", verifyToken, async function (req, res, next) {
+router.patch("/", verifyToken, async function (req, res, next) {
   const uid = res.locals.uid;
   const userPw = req.body["userPw"];
   const userPwNew = req.body["newUserPw"];
