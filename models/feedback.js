@@ -9,7 +9,7 @@ const Feedback = new mongoose.Schema({
   writeDate: { type: Date, default: Date.now },
   edited: { type: Boolean, default: false },
   childCount: { type: Number, default: 0 },
-  likeCount: { type: Number, default: 0 },
+  heartCount: { type: Number, default: 0 },
 });
 
 // Create
@@ -51,15 +51,21 @@ Feedback.statics.delete = function (feedbackId) {
 };
 
 Feedback.statics.deleteByBoardId = function (boardId) {
-  return this.deleteMany({ boardId }, {
-    
-  })
+  return this.deleteMany({ boardId })
 }
 
 Feedback.statics.getById = function (feedbackId) {
   return this.findOne({ _id: feedbackId })
 }
 
-// Counting 추가 필요
+Feedback.statics.countReply = function (feedbackId, flag) {
+  const increment = flag ? 1 : -1
+  return this.findOneAndUpdate({ _id: feedbackId }, { $inc: { childCount: increment } })
+}
+
+Feedback.statics.countHeart = function (feedbackId, flag) {
+  const increment = flag ? 1 : -1
+  return this.findOneAndUpdate({ _id: feedbackId }, { $inc: { heartCount: increment } })
+}
 
 module.exports = mongoose.model("Feedback", Feedback);
