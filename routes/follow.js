@@ -70,7 +70,7 @@ router.delete("/", verifyToken, async (req, res, next) => {
       console.log(
         `[INFO] 유저 ${res.locals.uid}가 ${followData.targetUserId}의 언팔로우를 시도했으나 실패했습니다.`
       );
-      return res.status(500).json({
+      return res.status(404).json({
         result: "error",
         message: "존재하지 않는 유저에게 접근했습니다.",
       });
