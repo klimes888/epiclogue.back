@@ -22,9 +22,9 @@ dotenv.config();
 
 const swaggerDefinition = {
   info: { // API informations (required)
-    title: 'lunarcat Service', // Title (required)
+    title: 'epiclogue API', // Title (required)
     version: '1.0.0', // Version (required)
-    description: 'lunarcat service API' // Description (optional)
+    description: 'epiclogue service API' // Description (optional)
   },  
   host: 'api.epiclogue.tk', // Host (optional)
   basePath: '/', // Base path (optional)
