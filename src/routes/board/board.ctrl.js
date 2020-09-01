@@ -155,7 +155,7 @@ router.get("/:boardId/edit", verifyToken, checkWriter, async function (
 });
 
 // 수정
-router.patch(
+router.post(
   "/:boardId/edit",
   verifyToken,
   checkWriter,

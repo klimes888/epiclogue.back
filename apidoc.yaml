@@ -107,11 +107,11 @@ paths:
             userBannerImg:
               type: array
               items:
-                type: integer
+                type: string
             userProfileImg:
               type: array
               items:
-                type: integer
+                type: string
       responses:
         200:
           description: OK
@@ -195,9 +195,37 @@ paths:
       - "auth"
       summary: "for join"
       description: ""
+      parameters:
+      - name: "Body"
+        in: "body"
+        description: "join info"
+        required: true
+        schema:
+          type: object
+          properties:
+            email:
+              type: string
+            userPw:
+              type: string
+            userPwRe:
+              type: string
+            nick:
+              type: string
       responses:
-        200:
+        201:
           description: OK
+          schema:
+            type: object
+            properties:
+              result:
+                type: string
+                example: "ok"
+              info:
+                type: string
+        401:
+          description: ERROR
+          schema:
+            $ref: '#/definitions/API_response_error'
     
   /auth/mailAuth:
     get:
@@ -205,9 +233,24 @@ paths:
       - "auth"
       summary: "for mailAuth"
       description: ""
+      parameters:
+      - name: "email"
+        in: "query"
+        description: "user's email"
+        required: true
+        type: string
+      - name: "token"
+        in: "query"
+        description: "user's token"
+        required: true
+        type: string
       responses:
-        200:
+        201:
           description: OK
+        401:
+          description: ERROR
+          schema:
+            $ref: '#/definitions/API_response_error'
     
   /boards:
     get:
@@ -218,6 +261,14 @@ paths:
       responses:
         200:
           description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/board_thumb'
+        500:
+          description: ERROR
+          schema:
+            $ref: '#/definitions/API_response_error'
       security:
         - access_token: []
     
@@ -226,9 +277,35 @@ paths:
       - "boards"
       summary: "post board to server"
       description: ""
+      parameters:
+      - name: "Body"
+        in: "body"
+        required: true
+        description: "board info body"
+        schema:
+          type: object
+          properties:
+            boardTitle:
+              type: string
+            boardBody:
+              type: string
+            category:
+              type: string
+            pub:
+              type: string
+            language:
+              type: string
+            boardImg:
+              type: array
+              items:
+                type: string
       responses:
-        200:
+        201:
           description: OK
+        500:
+          description: ERROR
+          schema:
+            $ref: '#/definitions/API_response_error'
       security:
         - access_token: []
     
@@ -247,6 +324,12 @@ paths:
       responses:
         200:
           description: OK
+          schema:
+            $ref: '#/definitions/board_view'
+        500:
+          description: ERROR
+          schema:
+            $ref: '#/definitions/API_response_error'
       security:
         - access_token: []
     
@@ -264,6 +347,12 @@ paths:
       responses:
         200:
           description: OK
+        400:
+          description: FAIL
+        500:
+          description: ERROR
+          schema:
+            $ref: '#/definitions/API_response_error'
       security:
         - access_token: []
     
@@ -282,9 +371,62 @@ paths:
       responses:
         200:
           description: OK
+          schema:
+            type: object
+            properties:
+              result:
+                type: string
+                example: "ok"
+              data:
+                $ref: '#/definitions/board_view'
+        500:
+          description: ERROR
+          schema:
+            $ref: '#/definitions/API_response_error'
       security:
         - access_token: []
-    
+    post:
+      tags:
+      - "boards"
+      summary: "post new board info"
+      description: ""
+      parameters:
+      - name: "boardUid"
+        in: "path"
+        description: "ID of board"
+        required: true
+        type: string
+      - name: "Body"
+        in: "body"
+        description: "new info for board"
+        required: true
+        schema:
+          type: object
+          properties:
+            boardTitle:
+              type: string
+            boardBody:
+              type: string
+            boardImg:
+              type: array
+              items:
+                type: string
+            category:
+              type: string
+            pub:
+              type: string
+            language:
+              type: string
+      responses:
+        200:
+          description: OK
+        404:
+          description: not found
+        500:
+          description: ERROR
+          schema:
+            $ref: '#/definitions/API_response_error'
+
   /boards/{boardUid}/feedback:
     post:
       tags:
@@ -297,9 +439,32 @@ paths:
         description: "ID of board"
         required: true
         type: string
+      - name: "Body"
+        in: "body"
+        description: "feedback info"
+        required: true
+        schema:
+          type: object
+          properties:
+            feedbackBody:
+              type: string
       responses:
-        200:
+        201:
           description: OK
+          schema:
+            type: object
+            properties:
+              result:
+                type: string
+                example: "ok"
+              data:
+                type: array
+                items:
+                  $ref: '#/definitions/Feedback'
+        500:
+          description: ERROR
+          schema:
+            $ref: '#/definitions/API_response_error'
       security:
         - access_token: []
     
@@ -320,9 +485,32 @@ paths:
         description: "ID of feedback"
         required: true
         type: string
+      - name: "Body"
+        in: "body"
+        description: "feedback new info"
+        required: true
+        schema:
+          type: object
+          properties:
+            newFeedbackBody:
+              type: string
       responses:
         200:
           description: OK
+          schema:
+            type: object
+            properties:
+              result:
+                type: string
+                example: "ok"
+              data:
+                type: array
+                items:
+                  $ref: '#/definitions/Feedback'
+        500:
+          description: ERROR
+          schema:
+            $ref: '#/definitions/API_response_error'
       security:
         - access_token: []
 
@@ -345,6 +533,20 @@ paths:
       responses:
         200:
           description: OK
+          schema:
+            type: object
+            properties:
+              result:
+                type: string
+                example: "ok"
+              data:
+                type: array
+                items:
+                  $ref: '#/definitions/Feedback'
+        500:
+          description: ERROR
+          schema:
+            $ref: '#/definitions/API_response_error'
       security:
         - access_token: []
     
@@ -365,9 +567,32 @@ paths:
         description: "ID of feedback"
         required: true
         type: string
+      - name: "Body"
+        in: "body"
+        description: "reply info"
+        required: true
+        schema:
+          type: object
+          properties:
+            replyBody:
+              type: string
       responses:
         200:
           description: OK
+          schema:
+            type: object
+            properties:
+              result:
+                type: string
+                example: "ok"
+              data:
+                type: array
+                items:
+                  $ref: '#/definitions/Reply'
+        500:
+          description: ERROR
+          schema:
+            $ref: '#/definitions/API_response_error'
       security:
         - access_token: []
 
@@ -390,6 +615,20 @@ paths:
       responses:
         200:
           description: OK
+          schema:
+            type: object
+            properties:
+              result:
+                type: string
+                example: "ok"
+              data:
+                type: array
+                items:
+                  $ref: '#/definitions/Reply'
+        500:
+          description: ERROR
+          schema:
+            $ref: '#/definitions/API_response_error'
       security:
         - access_token: []
     
@@ -415,9 +654,36 @@ paths:
         description: "ID of reply"
         required: true
         type: string
+      - name: "Body"
+        in: "body"
+        description: "reply new info"
+        required: true
+        schema:
+          type: object
+          properties:
+            newReplyBody:
+              type: string
       responses:
         200:
           description: OK
+          schema:
+            type: object
+            properties:
+              result:
+                type: string
+                example: "ok"
+              data:
+                type: array
+                items:
+                  $ref: '#/definitions/Reply'
+        404:
+          description: not found
+          schema:
+            $ref: '#/definitions/API_response_error'
+        500:
+          description: ERROR
+          schema:
+            $ref: '#/definitions/API_response_error'
       security:
         - access_token: []
 
@@ -445,18 +711,61 @@ paths:
       responses:
         200:
           description: OK
+          schema:
+            type: object
+            properties:
+              result:
+                type: string
+                example: "ok"
+              data:
+                type: array
+                items:
+                  $ref: '#/definitions/Reply'
+        404:
+          description: not found
+          schema:
+            $ref: '#/definitions/API_response_error'
+        500:
+          description: ERROR
+          schema:
+            $ref: '#/definitions/API_response_error'
       security:
         - access_token: []
     
-  /interaction/bookmark:
+  /interaction/{screenId}/bookmark:
     post:
       tags:
       - "interaction"
       summary: "add board into bookmark"
       description: ""
+      parameters:
+      - name: "screenId"
+        in: "path"
+        required: true
+        type: string
+      - name: "Body"
+        in: "body"
+        required: true
+        schema:
+          type: object
+          properties:
+            boardId:
+              type: string
       responses:
-        200:
+        201:
           description: OK
+          schema:
+            type: object
+            properties:
+              result:
+                type: string
+                example: "ok"
+              data:
+                type: integer
+        500:
+          description: ERROR
+          schema:
+            $ref: '#/definitions/API_response_error'
       security:
         - access_token: []
 
@@ -465,9 +774,34 @@ paths:
       - "interaction"
       summary: "delete bookmark"
       description: ""
+      parameters:
+      - name: "screenId"
+        in: "path"
+        required: true
+        type: string
+      - name: "Body"
+        in: "body"
+        required: true
+        schema:
+          type: object
+          properties:
+            boardId:
+              type: string
       responses:
-        200:
+        201:
           description: OK
+          schema:
+            type: object
+            properties:
+              result:
+                type: string
+                example: "ok"
+              data:
+                type: integer
+        500:
+          description: ERROR
+          schema:
+            $ref: '#/definitions/API_response_error'
       security:
         - access_token: []
 
@@ -476,21 +810,67 @@ paths:
       - "interaction"
       summary: "get bookmark list"
       description: ""
+      parameters:
+      - name: "screenId"
+        in: "path"
+        required: true
+        type: string
       responses:
         200:
           description: OK
+          schema:
+            type: object
+            properties:
+              result:
+                type: string
+                example: "ok"
+              data:
+                type: array
+                items:
+                  $ref: '#/definitions/board_thumb'
+        500:
+          description: ERROR
+          schema:
+            $ref: '#/definitions/API_response_error'
       security:
         - access_token: []
     
-  /interaction/like:
+  /interaction/{screenId}/like:
     post:
       tags:
       - "interaction"
       summary: "add like"
       description: ""
+      parameters:
+      - name: "screenId"
+        in: "path"
+        required: true
+        type: string
+      - name: "Body"
+        in: "body"
+        required: true
+        schema:
+          type: object
+          properties:
+            targetId:
+              type: string
+            targetType:
+              type: string
       responses:
-        200:
+        201:
           description: OK
+          schema:
+            type: object
+            properties:
+              result:
+                type: string
+                example: "ok"
+              data:
+                type: integer
+        500:
+          description: ERROR
+          schema:
+            $ref: '#/definitions/API_response_error'
       security:
         - access_token: []
 
@@ -499,9 +879,36 @@ paths:
       - "interaction"
       summary: "delete like"
       description: ""
+      parameters:
+      - name: "screenId"
+        in: "path"
+        required: true
+        type: string
+      - name: "Body"
+        in: "body"
+        required: true
+        schema:
+          type: object
+          properties:
+            targetId:
+              type: string
+            targetType:
+              type: string
       responses:
-        200:
+        201:
           description: OK
+          schema:
+            type: object
+            properties:
+              result:
+                type: string
+                example: "ok"
+              data:
+                type: integer
+        500:
+          description: ERROR
+          schema:
+            $ref: '#/definitions/API_response_error'
       security:
         - access_token: []
 
@@ -510,21 +917,65 @@ paths:
       - "interaction"
       summary: "get like list"
       description: ""
+      parameters:
+      - name: "screenId"
+        in: "path"
+        required: true
+        type: string
       responses:
         200:
           description: OK
+          schema:
+            type: object
+            properties:
+              result:
+                type: string
+                example: "ok"
+              data:
+                type: array
+                items:
+                  $ref: '#/definitions/board_thumb'
+        500:
+          description: ERROR
+          schema:
+            $ref: '#/definitions/API_response_error'
       security:
         - access_token: []
     
-  /interaction/follow:
+  /interaction/{screenId}/follow:
     post:
       tags:
       - "interaction"
       summary: "add follow"
       description: ""
+      parameters:
+      - name: "screenId"
+        in: "path"
+        required: true
+        type: string
+      - name: "Body"
+        in: "body"
+        required: true
+        schema:
+          type: object
+          properties:
+            targetUserId:
+              type: string
       responses:
-        200:
+        201:
           description: OK
+          schema:
+            type: object
+            properties:
+              result:
+                type: string
+                example: "ok"
+              data:
+                type: integer
+        500:
+          description: ERROR
+          schema:
+            $ref: '#/definitions/API_response_error'
       security:
         - access_token: []
 
@@ -533,9 +984,34 @@ paths:
       - "interaction"
       summary: "delete follow"
       description: ""
+      parameters:
+      - name: "screenId"
+        in: "path"
+        required: true
+        type: string
+      - name: "Body"
+        in: "body"
+        required: true
+        schema:
+          type: object
+          properties:
+            targetUserId:
+              type: string
       responses:
-        200:
+        201:
           description: OK
+          schema:
+            type: object
+            properties:
+              result:
+                type: string
+                example: "ok"
+              data:
+                type: integer
+        500:
+          description: ERROR
+          schema:
+            $ref: '#/definitions/API_response_error'
       security:
         - access_token: []
 
@@ -544,9 +1020,28 @@ paths:
       - "interaction"
       summary: "get follow list"
       description: ""
+      parameters:
+      - name: "screenId"
+        in: "path"
+        required: true
+        type: string
       responses:
         200:
           description: OK
+          schema:
+            type: object
+            properties:
+              result:
+                type: string
+                example: "ok"
+              data:
+                type: array
+                items:
+                  $ref: '#/definitions/Follow'
+        500:
+          description: ERROR
+          schema:
+            $ref: '#/definitions/API_response_error'
       security:
         - access_token: []
     
@@ -575,7 +1070,24 @@ securityDefinitions:
     name: "x-access-token"
     in: "header"
 definitions:
-  Board:
+  board_thumb:
+    type: "object"
+    properties:
+      uid:
+        type: string
+      boardTitle:
+        type: string
+      thumbPath:
+        type: string
+      userNick:
+        type: string
+      category:
+        type: string
+        example: "comic"
+      pub:
+        type: string
+
+  board_view:
     type: "object"
     required: 
     - "uid"
