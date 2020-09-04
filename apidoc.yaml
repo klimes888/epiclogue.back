@@ -8,9 +8,11 @@ info:
 host: "api.epiclogue.tk"
 basePath: "/"
 tags:
-- name: "users"
+- name: "user"
   description: "user functions"
 - name: "boards"
+  description: "functions for boards"
+- name: "board"
   description: "board and feedback,reply functions"
 - name: "auth"
   description: "auth functions"
@@ -21,11 +23,11 @@ tags:
 schemes:
 - "https"
 paths:
-  /users:
+  /user:
     get:
       tags:
-      - "users"
-      summary: "get userInfo"
+      - "user"
+      summary: "get userInfo(myPage)"
       description: ""
       responses:
         200:
@@ -37,7 +39,7 @@ paths:
 
     delete:
       tags:
-      - "users"
+      - "user"
       summary: "user delete"
       description: ""
       responses:
@@ -48,10 +50,10 @@ paths:
       security:
         - access_token: []
 
-  /users/editprofile:
+  /user/editprofile:
     get:
       tags:
-      - "users"
+      - "user"
       summary: "get userInfo"
       description: ""
       responses:
@@ -83,7 +85,7 @@ paths:
 
     post:
       tags:
-      - "users"
+      - "user"
       summary: "post userInfo for edit"
       description: ""
       parameters:
@@ -120,10 +122,10 @@ paths:
       security:
         - access_token: []
   
-  /users/changePass:
+  /user/changePass:
     post:
       tags:
-      - "users"
+      - "user"
       summary: "for change user password"
       description: ""
       parameters:
@@ -209,7 +211,7 @@ paths:
               type: string
             userPwRe:
               type: string
-            nick:
+            userNick:
               type: string
       responses:
         201:
@@ -271,10 +273,10 @@ paths:
             $ref: '#/definitions/API_response_error'
       security:
         - access_token: []
-    
+  /board:
     post:
       tags:
-      - "boards"
+      - "board"
       summary: "post board to server"
       description: ""
       parameters:
@@ -309,10 +311,10 @@ paths:
       security:
         - access_token: []
     
-  /boards/{boardUid}:
+  /board/{boardUid}:
     get:
       tags:
-      - "boards"
+      - "board"
       summary: "get board info for view"
       description: ""
       parameters:
@@ -325,7 +327,27 @@ paths:
         200:
           description: OK
           schema:
-            $ref: '#/definitions/board_view'
+            type: object
+            properties:
+              result:
+                type: string
+                example: "ok"
+              data:
+                type: object
+                properties:
+                  writer:
+                    type: object
+                    properties:
+                      nickname:
+                        type: string
+                      userid:
+                        type: string
+                  board:
+                    $ref: '#/definitions/board_view'
+                  feedback:
+                    type: array
+                    items:
+                      $ref: '#/definitions/Feedback'
         500:
           description: ERROR
           schema:
@@ -335,7 +357,7 @@ paths:
     
     delete:
       tags:
-      - "boards"
+      - "board"
       summary: "delete board"
       description: ""
       parameters:
@@ -356,10 +378,10 @@ paths:
       security:
         - access_token: []
     
-  /boards/{boardUid}/edit:
+  /board/{boardUid}/edit:
     get:
       tags:
-      - "boards"
+      - "board"
       summary: "get board info for edit"
       description: ""
       parameters:
@@ -387,7 +409,7 @@ paths:
         - access_token: []
     post:
       tags:
-      - "boards"
+      - "board"
       summary: "post new board info"
       description: ""
       parameters:
@@ -427,10 +449,10 @@ paths:
           schema:
             $ref: '#/definitions/API_response_error'
 
-  /boards/{boardUid}/feedback:
+  /board/{boardUid}/feedback:
     post:
       tags:
-      - "boards"
+      - "board"
       summary: "post feedback into board"
       description: ""
       parameters:
@@ -468,10 +490,10 @@ paths:
       security:
         - access_token: []
     
-  /boards/{boardUid}/feedback/{feedbackUid}:
+  /board/{boardUid}/feedback/{feedbackUid}:
     patch:
       tags:
-      - "boards"
+      - "board"
       summary: "patch feedback"
       description: ""
       parameters:
@@ -516,7 +538,7 @@ paths:
 
     delete:
       tags:
-      - "boards"
+      - "board"
       summary: "delete feedback"
       description: ""
       parameters:
@@ -550,10 +572,10 @@ paths:
       security:
         - access_token: []
     
-  /boards/{boardUid}/feedback/{feedbackUid}/reply:
+  /board/{boardUid}/feedback/{feedbackUid}/reply:
     post:
       tags:
-      - "boards"
+      - "board"
       summary: "post reply into feedback"
       description: ""
       parameters:
@@ -598,7 +620,7 @@ paths:
 
     get:
       tags:
-      - "boards"
+      - "board"
       summary: "get reply list"
       description: ""
       parameters:
@@ -632,10 +654,10 @@ paths:
       security:
         - access_token: []
     
-  /boards/{boardUid}/feedback/{feedbackUid}/reply/{replyUid}:
+  /board/{boardUid}/feedback/{feedbackUid}/reply/{replyUid}:
     patch:
       tags:
-      - "boards"
+      - "board"
       summary: "patch reply"
       description: ""
       parameters:
@@ -689,7 +711,7 @@ paths:
 
     delete:
       tags:
-      - "boards"
+      - "board"
       summary: "delete reply"
       description: ""
       parameters:
