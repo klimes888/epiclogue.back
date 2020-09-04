@@ -23,12 +23,17 @@ tags:
 schemes:
 - "https"
 paths:
-  /user:
+  /user/{screenId}:
     get:
       tags:
       - "user"
       summary: "get userInfo(myPage)"
       description: ""
+      parameters:
+      - name: "screenId"
+        in: "path"
+        required: true
+        type: string
       responses:
         200:
           description: OK
@@ -36,7 +41,7 @@ paths:
           description: ERROR
       security:
         - access_token: []
-
+  /user:
     delete:
       tags:
       - "user"
