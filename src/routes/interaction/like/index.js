@@ -1,9 +1,10 @@
 import express from 'express';
 const like = express.Router();
 import * as likeCtrl from './like.ctrl'
+import {verifyToken} from '../../../lib/middleware/tokenAuth'
 
-like.get('/', likeCtrl.getLikeList);
-like.post('/', likeCtrl.addLike);
-like.delete('/', likeCtrl.deleteLike);
+like.get('/', verifyToken, likeCtrl.getLikeList);
+like.post('/', verifyToken, likeCtrl.addLike);
+like.delete('/', verifyToken, likeCtrl.deleteLike);
 
 export default like;

@@ -1,9 +1,3 @@
-import { Router } from "express";
-const router = new Router({
-  mergeParams: true,
-});
-
-import { verifyToken } from "../../../lib/middleware/tokenAuth";
 import Follow from "../../../models/follow";
 import User from '../../../models/users'
 /* 
@@ -11,7 +5,7 @@ import User from '../../../models/users'
   base url: /:screenId/follow
 */
 
-router.post("/", verifyToken, async (req, res, next) => {
+export const addFollow = async (req, res, next) => {
   const followData = {
     userId: res.locals.uid,
     targetUserId: req.body.targetUserId,
@@ -34,9 +28,9 @@ router.post("/", verifyToken, async (req, res, next) => {
       message: e.message,
     });
   }
-});
+};
 
-router.delete("/", verifyToken, async (req, res, next) => {
+export const deleteFollow = async (req, res, next) => {
   const followData = {
     userId: res.locals.uid,
     targetUserId: req.body.targetUserId,
@@ -67,9 +61,9 @@ router.delete("/", verifyToken, async (req, res, next) => {
       message: e
     });
   }
-});
+};
 
-router.get("/:userId/following", async (req, res, next) => {
+export const getFollowing = async (req, res, next) => {
   const userId = req.params.userId;
   const followingDataSet = [];
 
@@ -95,9 +89,9 @@ router.get("/:userId/following", async (req, res, next) => {
       message: e.message,
     });
   }
-});
+};
 
-router.get("/:userId/follower", async (req, res, next) => {
+export const getFollower = async (req, res, next) => {
   const userId = req.params.userId;
   const followerDataSet = [];
 
@@ -123,6 +117,4 @@ router.get("/:userId/follower", async (req, res, next) => {
       message: e.message,
     });
   }
-});
-
-module.exports = router;
+};
