@@ -1,10 +1,8 @@
-import express from "express";
 import user from "../models/users";
 import board from "../../models/board";
-const router = express.Router({ mergeParams: true });
 
 /* 검색 전 미리보기 기능 */
-router.get("/", async (req, res, next) => {
+export const searchPreview = async (req, res, next) => {
   const queryString = req.query.q;
 
   try {
@@ -18,17 +16,17 @@ router.get("/", async (req, res, next) => {
       const userData = await user.getByQuery(_query);
       res.status(200).json(userData);
     } else {  // title searching
-      const boardData = await board.getByQuery(queryString);
+      const boardData = await board.getTitlesByQuery(queryString);
       res.status(200).json(boardData);
     }
   } catch (e) {
     console.log(e);
     res.sendStatus(500)
   }
-});
+};
 
 /* 검색 화면 렌더링을 가정한 데이터 API */
-router.get("/result", async (req, res, next) => {
+export const searchResult = async (req, res, next) => {
   const queryString = req.query.q;
 
   try {
@@ -38,7 +36,4 @@ router.get("/result", async (req, res, next) => {
     console.log(e);
     res.sendStatus(500)
   }
-})
-
-
-module.exports = router;
+};
