@@ -1,19 +1,15 @@
-import express from "express";
-const router = express.Router();
 import crypto from "crypto";
 import util from "util";
 import Users from "../../models/users";
-import upload from "../file/imageUpload";
 import dotenv from 'dotenv'
 const randomBytesPromise = util.promisify(crypto.randomBytes);
 const pbkdf2Promise = util.promisify(crypto.pbkdf2);
-import { verifyToken } from "../../lib/middleware/tokenAuth";
 
 dotenv.config()
 
 /* GET users listing. */
 
-router.get("/", verifyToken, async function (req, res, next) {
+export const getUserEditInfo = async function (req, res, next) {
   const uid = res.locals.uid;
   try {
     const result = await Users.getUserInfo(uid);
@@ -36,9 +32,9 @@ router.get("/", verifyToken, async function (req, res, next) {
       message: e.message,
     });
   }
-});
+};
 
-router.post("/", verifyToken, upload.any(), async function (
+export const postUserEditInfo = async function (
   req,
   res,
   next
@@ -66,7 +62,6 @@ router.post("/", verifyToken, upload.any(), async function (
       prof = req.files[0].location;
     }
   }
-  console.log(req.body); // json 객체를 toString으로 먼저 문자열로 직렬화 하고, 받고나서 다시 JSON 객체로 변환해서 써야하나 보다.
 
   try {
     const checkId = await Users.isScreenIdUnique(userId);
@@ -110,9 +105,9 @@ router.post("/", verifyToken, upload.any(), async function (
       message: e.message,
     });
   }
-});
+};
 
-router.patch("/", verifyToken, async function (req, res, next) {
+export const changePass = async function (req, res, next) {
   const uid = res.locals.uid;
   const userPw = req.body["userPw"];
   const userPwNew = req.body["newUserPw"];
@@ -177,9 +172,9 @@ router.patch("/", verifyToken, async function (req, res, next) {
       message: "기본 비밀번호와  동일한 비밀번호는 사용할 수 없습니다.",
     });
   }
-});
+};
 
-router.delete("/", verifyToken, async function (req, res, next) {
+export const deleteUser = async function (req, res, next) {
   const uid = res.locals.uid;
   const userPw = req.body["userPw"];
 
@@ -233,6 +228,4 @@ router.delete("/", verifyToken, async function (req, res, next) {
       message: e.message,
     });
   }
-});
-
-module.exports = router;
+};
