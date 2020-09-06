@@ -3,7 +3,7 @@ import Feedback from "../../models/feedback";
 import Reply from "../../models/reply";
 
 // 작성자에 대한 인증 미들웨어
-const checkWriter = async (req, res, next) => {
+export const checkWriter = async (req, res, next) => {
     let isWriter = true;
     let type;
     let id;
@@ -43,8 +43,4 @@ const checkWriter = async (req, res, next) => {
       });
     }
   };
-
-module.exports = {
-  checkWriter,
-};
   
