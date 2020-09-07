@@ -12,8 +12,6 @@ tags:
   description: "user functions"
 - name: "boards"
   description: "functions for boards"
-- name: "board"
-  description: "board and feedback,reply functions"
 - name: "auth"
   description: "auth functions"
 - name: "interaction"
@@ -278,10 +276,10 @@ paths:
             $ref: '#/definitions/API_response_error'
       security:
         - access_token: []
-  /board:
+
     post:
       tags:
-      - "board"
+      - "boards"
       summary: "post board to server"
       description: ""
       parameters:
@@ -316,10 +314,10 @@ paths:
       security:
         - access_token: []
     
-  /board/{boardUid}:
+  /boards/{boardUid}:
     get:
       tags:
-      - "board"
+      - "boards"
       summary: "get board info for view"
       description: ""
       parameters:
@@ -383,10 +381,10 @@ paths:
       security:
         - access_token: []
     
-  /board/{boardUid}/edit:
+  /boards/{boardUid}/edit:
     get:
       tags:
-      - "board"
+      - "boards"
       summary: "get board info for edit"
       description: ""
       parameters:
@@ -454,10 +452,10 @@ paths:
           schema:
             $ref: '#/definitions/API_response_error'
 
-  /board/{boardUid}/feedback:
+  /boards/{boardUid}/feedback:
     post:
       tags:
-      - "board"
+      - "boards"
       summary: "post feedback into board"
       description: ""
       parameters:
@@ -495,10 +493,10 @@ paths:
       security:
         - access_token: []
     
-  /board/{boardUid}/feedback/{feedbackUid}:
+  /boards/{boardUid}/feedback/{feedbackUid}:
     patch:
       tags:
-      - "board"
+      - "boards"
       summary: "patch feedback"
       description: ""
       parameters:
@@ -577,10 +575,10 @@ paths:
       security:
         - access_token: []
     
-  /board/{boardUid}/feedback/{feedbackUid}/reply:
+  /boards/{boardUid}/feedback/{feedbackUid}/reply:
     post:
       tags:
-      - "board"
+      - "boards"
       summary: "post reply into feedback"
       description: ""
       parameters:
@@ -659,10 +657,10 @@ paths:
       security:
         - access_token: []
     
-  /board/{boardUid}/feedback/{feedbackUid}/reply/{replyUid}:
+  /boards/{boardUid}/feedback/{feedbackUid}/reply/{replyUid}:
     patch:
       tags:
-      - "board"
+      - "boards"
       summary: "patch reply"
       description: ""
       parameters:
