@@ -1,4 +1,4 @@
-import user from "../models/users";
+import user from "../../models/users";
 import board from "../../models/board";
 
 /* 검색 전 미리보기 기능 */
