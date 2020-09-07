@@ -8,24 +8,30 @@ import User from "../../../models/users";
 
 const app = require("../../../app");
 
-let newUserId;
 let verifiedToken;
+let newUserId;
 
 describe("유저 테스트", () => {
   const tempPw = randomString() + "1!2@3#4$";
-
+  const newPw = randomString() + "!!11@@22"
   const userData = {
     email: randomString() + "@lunarcat.com",
     userPw: tempPw,
     userPwRe: tempPw,
-    userNick: randomString(),
+    userNick: "AwesomeUser",
   };
   const verifiedUserData = {
     email: "usertest@lunarcat.com",
     userPw: tempPw,
     userPwRe: tempPw,
-    userNick: randomString(),
+    userNick: "Verification",
   };
+  const toBeDeletedData = {
+    email: "delete@lunarcat.com",
+    userPw: newPw,
+    userPwRe: newPw,
+    userNick: "ByeBye"
+  }
 
   beforeAll(async () => {
     // 임시유저 생성
@@ -112,10 +118,10 @@ describe("유저 테스트", () => {
   describe('비밀번호 변경', () => {
     test('성공 | 200', async() => {
       const res = await request(app).post('/users/changePass').set("x-access-token", verifiedToken).send({
-        userPw: verifiedUserData.userPw, userPwNew: 'geno1q2w3e4r!', userPwNewRe: 'geno1q2w3e4r!'
+        userPw: verifiedUserData.userPw, newUserPw: newPw, newUserPwRe: newPw
       })
 
-      console.log(res.body);
+      console.log(res)
 
       expect(res.statusCode).toBe(200)
     })
@@ -139,4 +145,16 @@ describe("유저 테스트", () => {
     })
   })
 
+  describe('회원 탈퇴', () => {
+    test('성공 | 200', async() => {
+      await request(app).post('/users/join').send(toBeDeletedData)
+      await User.confirmUser(toBeDeletedData.email)
+      
+      const res = await request(app).post('/users/login').send(toBeDeletedData)
+      
+      await request(app).delete('/users').set('x-access-token', res.body.token).send({
+        userPw: newPw
+      }).expect(200)
+    })
+  })
 });

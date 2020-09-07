@@ -47,7 +47,7 @@ describe('토큰기반 인증 테스트', () => {
   })
 
   describe('권한 검사 테스트', () => {
-    test('이메일 인증된 로그인 | 200', async() => {
+    test('이메일 인증된 토큰 | 200', async() => {
       const res = await request(app).post('/users/login').send({
         email: verifiedUserData.email, userPw: verifiedUserData.userPw
       }).expect(200)
@@ -57,7 +57,7 @@ describe('토큰기반 인증 테스트', () => {
       expect(decodedJWT.isConfirmed).toBeTruthy()
     })
 
-    test('이메일 인증되지 않은 로그인 | 400', async() => {
+    test('이메일 인증되지 않은 토큰 | 400', async() => {
       await request(app).post('/users/join').send(userData);
       const res = await request(app).post('/users/login').send({
         email: userData.email, userPw: userData.userPw
@@ -67,8 +67,6 @@ describe('토큰기반 인증 테스트', () => {
 
       expect(decodedJWT.isConfirmed).toBeFalsy();
     })
-
-    
   })
 })
 
