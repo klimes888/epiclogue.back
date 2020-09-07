@@ -1,5 +1,5 @@
-import express from 'express';
-const like = express.Router();
+import {Router} from 'express'
+const like = new Router({mergeParams: true});
 import * as likeCtrl from './like.ctrl'
 import {verifyToken} from '../../../lib/middleware/tokenAuth'
 

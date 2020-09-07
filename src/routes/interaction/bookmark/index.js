@@ -1,5 +1,5 @@
-import {Router} from 'express';
-const bookmark = new Router();
+import {Router} from 'express'
+const bookmark = new Router({mergeParams: true});
 import * as bookmarkCtrl from './bookmark.ctrl'
 import {verifyToken} from '../../../lib/middleware/tokenAuth'
 

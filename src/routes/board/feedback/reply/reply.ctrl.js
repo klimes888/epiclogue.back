@@ -1,19 +1,13 @@
-import express from "express";
-const router = express.Router({
-  mergeParams: true,
-});
-
-import { verifyToken, checkWriter } from "./authorization";
-import Reply from "../models/reply";
-import User from '../models/users'
-import Feedback from '../models/feedback'
+import Reply from "../../../../models/reply"
+import User from '../../../../models/users'
+import Feedback from '../../../../models/feedback'
 /* 
   This is reply router.
   base url: /:userId/boards/:boardId/reply
 */
 
 // 대댓글 생성
-router.post("/", verifyToken, async (req, res, next) => {
+export const postReply = async (req, res, next) => {
   const replyForm = {
     userId: res.locals.uid,
     boardId: req.params.boardId,
@@ -53,10 +47,10 @@ router.post("/", verifyToken, async (req, res, next) => {
       message: e.message,
     });
   }
-});
+};
 
 // 댓글 하위의 대댓글 뷰
-router.get("/:parentId", verifyToken, async (req, res, next) => {
+export const getReplys = async (req, res, next) => {
   const parentId = req.params.parentId;
   const resultDataSet = []
 
@@ -87,9 +81,9 @@ router.get("/:parentId", verifyToken, async (req, res, next) => {
       message: e.message,
     });
   }
-});
+};
 
-router.patch("/:replyId", verifyToken, checkWriter, async (req, res, next) => {
+export const editReply = async (req, res, next) => {
   const newForm = {
     replyId: req.params.replyId,
     newReplyBody: req.body.newReplyBody,
@@ -123,9 +117,9 @@ router.patch("/:replyId", verifyToken, checkWriter, async (req, res, next) => {
       message: e.message,
     });
   }
-});
+};
 
-router.delete("/:replyId", verifyToken, checkWriter, async (req, res, next) => {
+export const deleteReply = async (req, res, next) => {
   const replyId = req.params.replyId;
 
   try {
@@ -169,6 +163,4 @@ router.delete("/:replyId", verifyToken, checkWriter, async (req, res, next) => {
       message: e.message,
     });
   }
-});
-
-module.exports = router;
+};

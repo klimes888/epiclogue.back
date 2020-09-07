@@ -1,5 +1,5 @@
-import {Router} from 'express';
-const follow = new Router();
+import {Router} from 'express'
+const follow = new Router({mergeParams: true});
 import { verifyToken } from '../../../lib/middleware/tokenAuth';
 import * as followCtrl from './follow.ctrl';
 
