@@ -1,8 +1,3 @@
-import express from "express";
-const router = express.Router({
-  mergeParams: true,
-});
-import { verifyToken } from"./authorization";
 import Like from "../../../models/like";
 import Feedback from "../../../models/feedback";
 import Board from "../../../models/board";
@@ -14,7 +9,7 @@ import react from "../../../models/react";
   base url: /:screenId/like 
 */
 
-router.post("/", verifyToken, async (req, res, next) => {
+export const addLike = async (req, res, next) => {
   const likeData = {
     userId: res.locals.uid,
     targetType: req.body.targetType,
@@ -55,9 +50,9 @@ router.post("/", verifyToken, async (req, res, next) => {
       message: e.message,
     });
   }
-});
+};
 
-router.delete("/", verifyToken, async (req, res, next) => {
+export const deleteLike = async (req, res, next) => {
   const likeData = {
     userId: res.locals.uid,
     targetType: req.body.targetType,
@@ -93,9 +88,9 @@ router.delete("/", verifyToken, async (req, res, next) => {
       message: e.message,
     });
   }
-});
+};
 
-router.get("/", async (req, res, next) => {
+export const getLikeList = async (req, res, next) => {
   const userId = req.params.screenId;
   const likeList = [];
 
@@ -125,6 +120,4 @@ router.get("/", async (req, res, next) => {
       message: e.message,
     });
   }
-});
-
-module.exports = router;
+};
