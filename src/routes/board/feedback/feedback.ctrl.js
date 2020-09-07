@@ -1,18 +1,12 @@
-import express from "express";
-const router = express.Router({
-  mergeParams: true,
-});
-
-import { verifyToken, checkWriter } from "./authorization";
 import Feedback from "../../../models/feedback";
-import User from '../models/users'
+import User from '../../../models/users'
 
 /*
   This is reply router.
   Base url: /boards/{board-id}/feedback
 */
 
-router.post("/", verifyToken, async (req, res, next) => {
+export const postFeedback = async (req, res, next) => {
   const feedbackData = {
     userId: res.locals.uid,
     boardId: req.params.boardId,
@@ -25,7 +19,7 @@ router.post("/", verifyToken, async (req, res, next) => {
     await Feedback.create(feedbackData);
     const newerFeedbackData = await Feedback.getByBoardId(req.params.boardId);
     for (let data of newerFeedbackData) {
-      let userData = await User.getUserInfo(data.userId,   { _id: 0, nickname: 1, userid: 1, profile: 1 })
+      let userData = await User.getUserInfo(data.userId,   { _id: 0, nickname: 1, screenId: 1, profile: 1 })
       let feedbackData = {
         _id: data._id,
         boardId: data.boardId,
@@ -49,13 +43,9 @@ router.post("/", verifyToken, async (req, res, next) => {
       message: e.message,
     });
   }
-});
+};
 
-router.patch(
-  "/:feedbackId",
-  verifyToken,
-  checkWriter,
-  async (req, res, next) => {
+export const editFeedback = async (req, res, next) => {
     const newForm = {
       feedbackId: req.params.feedbackId,
       newFeedbackBody: req.body.newFeedbackBody,
@@ -113,14 +103,9 @@ router.patch(
         message: e.message,
       });
     }
-  }
-);
+  };
 
-router.delete(
-  "/:feedbackId",
-  verifyToken,
-  checkWriter,
-  async (req, res, next) => {
+export const deleteFeedback = async (req, res, next) => {
     const feedbackId = req.params.feedbackId;
     const newerData = [];
 
@@ -159,7 +144,4 @@ router.delete(
         message: e.message,
       });
     }
-  }
-);
-
-module.exports = router;
+  };

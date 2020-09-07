@@ -14,6 +14,7 @@ import usersRouter from './src/routes/user';
 import boardRouter from './src/routes/board'
 import searchRouter from './src/routes/search'
 import interactionRouter from './src/routes/interaction'
+import authRouter from './src/routes/auth'
 import dotenv from 'dotenv'
 
 const app = express();
@@ -49,7 +50,8 @@ app.use(helmet());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
-app.use('/users', usersRouter);
+app.use('/auth', authRouter);
+app.use('/user', usersRouter);
 app.use('/boards', boardRouter);
 app.use('/interaction', interactionRouter);
 app.use('/search', searchRouter)

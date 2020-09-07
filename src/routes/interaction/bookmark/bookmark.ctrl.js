@@ -1,18 +1,13 @@
-import { Router } from "express";
-import { verifyToken } from "./authorization";
 import Bookmark from "../../../models/bookmark";
 import react from "../../../models/react";
-const router = new Router({
-  mergeParams: true,
-});
-import Board from '../models/board'
+import Board from '../../../models/board'
 
 /* 
   This is bookmark router.
   base url: /:screenId/bookmark
 */
 
-router.get("/", verifyToken, async (req, res, next) => {
+export const getBookmarkList = async (req, res, next) => {
   const screenId = req.params.screenId;
 
   try {
@@ -26,9 +21,9 @@ router.get("/", verifyToken, async (req, res, next) => {
       message: e.message
     })
   }
-});
+};
 
-router.post("/", verifyToken, async function (req, res, next) {
+export const addBookmark = async function (req, res, next) {
   const bookmarkData = {
     userId: res.locals.uid,
     boardId: req.body.boardId,
@@ -60,9 +55,9 @@ router.post("/", verifyToken, async function (req, res, next) {
       message: e.message
     })
   }
-});
+};
 
-router.delete("/", verifyToken, async (req, res, next) => {
+export const deleteBookmark = async (req, res, next) => {
   const userId = res.locals.uid;
   const boardId = req.body.boardId;
 
@@ -86,6 +81,4 @@ router.delete("/", verifyToken, async (req, res, next) => {
       message: e.message
     })
   }
-});
-
-module.exports = router;
+};
