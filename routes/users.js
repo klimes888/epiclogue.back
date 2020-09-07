@@ -136,7 +136,7 @@ router.post("/join", async function (req, res, next) {
         transporter.sendMail(option, function (error, info) {
           if (error) {
             console.error(error);
-            res.status(401).json({
+            return res.status(500).json({
               result: "error",
               reason: error,
             });
