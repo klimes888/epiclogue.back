@@ -19,7 +19,7 @@ export const postFeedback = async (req, res, next) => {
     await Feedback.create(feedbackData);
     const newerFeedbackData = await Feedback.getByBoardId(req.params.boardId);
     for (let data of newerFeedbackData) {
-      let userData = await User.getUserInfo(data.userId,   { _id: 0, nickname: 1, userid: 1, profile: 1 })
+      let userData = await User.getUserInfo(data.userId,   { _id: 0, nickname: 1, screenId: 1, profile: 1 })
       let feedbackData = {
         _id: data._id,
         boardId: data.boardId,

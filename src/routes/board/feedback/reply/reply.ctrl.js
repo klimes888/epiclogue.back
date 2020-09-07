@@ -22,7 +22,7 @@ export const postReply = async (req, res, next) => {
     await Feedback.getChild(replyForm.parentId)
     const newerReplyData = await Reply.getByParentId(replyForm.parentId);
     for (let data of newerReplyData) {
-      let userData = await User.getUserInfo(data.userId, { _id: 0, nickname: 1, userid: 1, profile: 1 })
+      let userData = await User.getUserInfo(data.userId, { _id: 0, nickname: 1, screenId: 1, profile: 1 })
       
       let resultData = {
         _id: data._id,
@@ -57,7 +57,7 @@ export const getReplys = async (req, res, next) => {
   try {
     const replyData = await Reply.getByParentId(parentId);
     for (let data of replyData) {
-      let userData = await User.getUserInfo(data.userId, { _id: 0, nickname: 1, userid: 1, profile: 1 })
+      let userData = await User.getUserInfo(data.userId, { _id: 0, nickname: 1, screenId: 1, profile: 1 })
       let resultData = {
         _id: data._id,
         boardId: data.boardId,

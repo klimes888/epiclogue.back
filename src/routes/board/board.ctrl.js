@@ -45,7 +45,7 @@ export const viewBoard = async (req, res, next) => {
 
   try {
     const boardData = await Board.getById(boardId);
-    const writerData = await User.getUserInfo(res.locals.uid, {
+    const writerData = await User.getUserInfo(boardData.uid, {
       nickname: 1,
       userid: 1,
     });
@@ -53,7 +53,7 @@ export const viewBoard = async (req, res, next) => {
     const feedbackData = [];
 
     for (const reply of feedbackWithoutUserInfo) {
-      let { nickname, userid } = await User.getUserInfo(reply.userId);
+      let { nickname, screenId } = await User.getUserInfo(reply.userId);
 
       feedbackData.push({
         _id: reply._id,
@@ -62,7 +62,7 @@ export const viewBoard = async (req, res, next) => {
         feedbackBody: reply.feedbackBody,
         writeDate: reply.writeDate,
         userInfo: {
-          userid,
+          screenId,
           nickname,
         },
       });
