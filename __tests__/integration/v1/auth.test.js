@@ -1,14 +1,13 @@
 'use strict'
-require('dotenv').config()
-
+import dotenv from 'dotenv'
 import randomString from 'random-string'
 import request from 'supertest'
 import jwt from 'jsonwebtoken'
 
-import User from '../../../models/users'
+import User from '../../../src/models/users'
+import app from '../../../app'
 
-const app = require('../../../app')
-
+dotenv.config()
 /* 
  * 토큰기반 인증 테스트
  * 1. 로그인

@@ -1,6 +1,5 @@
-import Database from '../../database'
+import Database from '../../src/lib/database'
 
 module.exports = async () => {
-  await Database.drop()
   await Database.disconnect()
 }

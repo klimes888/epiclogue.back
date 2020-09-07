@@ -1,12 +1,14 @@
 "use strict";
-require("dotenv").config();
 
+import dotenv from 'dotenv'
 import randomString from "random-string";
 import request from "supertest";
 import jwt from 'jsonwebtoken'
-import User from "../../../models/users";
 
-const app = require("../../../app");
+import User from "../../../src/models/users";
+import app from '../../../app'
+
+dotenv.config()
 
 let verifiedToken;
 let newUserId;
@@ -119,11 +121,7 @@ describe("유저 테스트", () => {
     test('성공 | 200', async() => {
       const res = await request(app).post('/users/changePass').set("x-access-token", verifiedToken).send({
         userPw: verifiedUserData.userPw, newUserPw: newPw, newUserPwRe: newPw
-      })
-
-      console.log(res)
-
-      expect(res.statusCode).toBe(200)
+      }).expect(200)
     })
 
     test('실패: 적절하지 않은 비밀번호 | 400', async() => {
