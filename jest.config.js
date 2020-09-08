@@ -11,9 +11,6 @@ module.exports = {
     // "./__tests__/integration/v1/auth.test.js",
   ],
 
-  // module directories
-  moduleDirectories: ['node_modules', '__tests__'],
-
   // Trigger before all test cases start
   globalSetup: "./__tests__/configs/globalSetup.js",
   setupFilesAfterEnv: ["./__tests__/configs/setTimeout.js"],

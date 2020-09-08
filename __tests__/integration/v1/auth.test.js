@@ -1,4 +1,5 @@
 'use strict'
+
 import dotenv from 'dotenv'
 import randomString from 'random-string'
 import request from 'supertest'
@@ -8,20 +9,6 @@ import User from '../../../src/models/users'
 import app from '../../../app'
 
 dotenv.config()
-/* 
- * 토큰기반 인증 테스트
- * 1. 로그인
- *   2.1 성공
- *   2.2 실패
- *     2.2.1 존재하지 않는 아이디
- *     2.2.2 이메일 미인증
- * 
- * 2. 권한검사 (수정 삭제)
- *   3.1 글
- *   3.2 피드백
- *   3.3 대댓글
- *   3.4 
-*/
 
 beforeAll(() => {})
 
