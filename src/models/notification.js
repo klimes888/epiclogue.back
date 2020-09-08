@@ -31,4 +31,4 @@ notification.statics.delete = function (notificationId) {
 };
 
 
-module.exports = mongoose.model("Notification", notification);
+export const Notification = mongoose.model("Notification", notification);

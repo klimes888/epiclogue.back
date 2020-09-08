@@ -1,5 +1,4 @@
-import user from "../../models/users";
-import board from "../../models/board";
+import {User, Board} from "../../models";
 
 /* 검색 전 미리보기 기능 */
 export const searchPreview = async (req, res, next) => {
@@ -13,10 +12,10 @@ export const searchPreview = async (req, res, next) => {
 
     } else if (queryString[0] === "@") { // user searching
       const _query = queryString.slice(1, queryString.length);
-      const userData = await user.getByQuery(_query);
+      const userData = await User.getByQuery(_query);
       res.status(200).json(userData);
     } else {  // title searching
-      const boardData = await board.getTitlesByQuery(queryString);
+      const boardData = await Board.getTitlesByQuery(queryString);
       res.status(200).json(boardData);
     }
   } catch (e) {
@@ -30,7 +29,7 @@ export const searchResult = async (req, res, next) => {
   const queryString = req.query.q;
 
   try {
-    const boardData = await board.getByQuery(queryString);
+    const boardData = await Board.getByQuery(queryString);
     res.status(200).json(boardData);
   } catch (e) {
     console.log(e);

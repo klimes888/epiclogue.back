@@ -1,6 +1,4 @@
-import Board from "../../models/board";
-import Feedback from "../../models/feedback";
-import User from "../../models/users"
+import {Board, User, Feedback} from "../../models";
 
 export const postBoard = async function (req, res, next) {
   const uid = res.locals.uid;
@@ -47,7 +45,7 @@ export const viewBoard = async (req, res, next) => {
     const boardData = await Board.getById(boardId);
     const writerData = await User.getUserInfo(boardData.uid, {
       nickname: 1,
-      userid: 1,
+      screenId: 1,
     });
     const feedbackWithoutUserInfo = await Feedback.getByBoardId(boardId);
     const feedbackData = [];

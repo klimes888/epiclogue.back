@@ -34,4 +34,4 @@ follow.statics.isFollowing = function (userId, targetUserId) {
   return this.findOne({ userId, targetUserId });
 };
 
-module.exports = mongoose.model("follow", follow);
+export const Follow = mongoose.model("follow", follow);

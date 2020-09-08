@@ -115,4 +115,4 @@ board.statics.countReact = function (boardId, flag) {
   return this.findOneAndUpdate({ _id: boardId }, { $inc: { reactCount: increment } })
 }
 
-module.exports = mongoose.model('Board', board);
+export const Board = mongoose.model('Board', board);

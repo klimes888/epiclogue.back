@@ -1,6 +1,6 @@
 import crypto from "crypto";
 import util from "util";
-import Users from "../../models/users";
+import {User} from "../../models";
 import dotenv from 'dotenv'
 const randomBytesPromise = util.promisify(crypto.randomBytes);
 const pbkdf2Promise = util.promisify(crypto.pbkdf2);
@@ -12,7 +12,7 @@ dotenv.config()
 export const getUserEditInfo = async function (req, res, next) {
   const uid = res.locals.uid;
   try {
-    const result = await Users.getUserInfo(uid);
+    const result = await User.getUserInfo(uid);
     return res.status(201).json({
       result: "ok",
       data: {
@@ -64,7 +64,7 @@ export const postUserEditInfo = async function (
   }
 
   try {
-    const checkId = await Users.isScreenIdUnique(userId);
+    const checkId = await User.isScreenIdUnique(userId);
     if (checkId) {
       const newerUserData = {
         uid,
@@ -77,7 +77,7 @@ export const postUserEditInfo = async function (
         prof
       }
       
-      await Users.updateProfile({
+      await User.updateProfile({
         uid,
         screenId: userId,
         nick,
@@ -121,7 +121,7 @@ export const changePass = async function (req, res, next) {
 
       if (check) {
         try {
-          const info = await Users.getUserInfo(uid);
+          const info = await User.getUserInfo(uid);
           const saltNew = await randomBytesPromise(64);
           const crypt_Pw = await pbkdf2Promise(
             userPw,
@@ -137,7 +137,7 @@ export const changePass = async function (req, res, next) {
             process.env.RESULT_LENGTH,
             "sha512"
           );
-          await Users.changePass(
+          await User.changePass(
             uid,
             crypt_Pw.toString("base64"),
             crypt_PwNew.toString("base64"),
@@ -179,7 +179,7 @@ export const deleteUser = async function (req, res, next) {
   const userPw = req.body["userPw"];
 
   try {
-    const info = await Users.getUserInfo(uid);
+    const info = await User.getUserInfo(uid);
     const crypt_Pw = await pbkdf2Promise(
       userPw,
       info["salt"],
@@ -188,7 +188,7 @@ export const deleteUser = async function (req, res, next) {
       "sha512"
     );
 
-    const deleteResult = await Users.deleteUser(
+    const deleteResult = await User.deleteUser(
       uid,
       crypt_Pw.toString("base64")
     );
