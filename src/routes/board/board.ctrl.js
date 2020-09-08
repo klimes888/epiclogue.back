@@ -3,6 +3,7 @@ import Feedback from "../../models/feedback";
 import User from "../../models/users"
 
 export const postBoard = async function (req, res, next) {
+  console.log(req.body)
   const uid = res.locals.uid;
   const boardTitle = req.body.boardTitle;
   const boardBody = req.body.boardBody;

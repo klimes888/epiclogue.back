@@ -32,6 +32,7 @@ describe("글 테스트", () => {
   };
   let writerAuthToken;
   let nonWriterDataToken;
+  let boardFormData = new FormData()
 
   // board dataset
   const boardData = {
@@ -42,6 +43,13 @@ describe("글 테스트", () => {
     language: "Korean",
   };
 
+  // if form-data
+  boardFormData.append('boardTitle', 'a board Title')
+  boardFormData.append('boardBody', 'a board Body ever')
+  boardFormData.append('category', 'Illust')
+  boardFormData.append('pub', 'true')
+  boardFormData.append('language', 'korean')
+  
   const imgFiles = [];
   const imgPath = path.join(__dirname + '/testImages');
     fs.readdir(imgPath, (err, files) => {
@@ -50,6 +58,7 @@ describe("글 테스트", () => {
       }
       files.forEach(name => {
         imgFiles.push(fs.readFileSync(imgPath + '/' + name))
+        boardFormData.append('boardImg', fs.readFileSync(imgPath + '/' + name))
       });
       // console.log(imgFiles) // Got image buffers
     })
@@ -71,13 +80,15 @@ describe("글 테스트", () => {
 
       await request(app)
         .post("/boards")
-        .set("x-access-token", writerAuthToken)
+        .set({"x-access-token": writerAuthToken})
         .field("boardTitle", boardData.boardTitle)
         .field("boardBody", boardData.boardBody)
         .field("category", boardData.category)
         .field("pub", boardData.pub)
         .field("language", boardData.language)
-        .attach('boardImg', fs.createReadStream(__dirname + '/testImages/node.png'))
+        .attach('boardImg', imgFiles[0])
+        .attach('boardImg', imgPath + '/node.png')
+        .attach('boardImg', fs.createReadStream(imgPath + '/node.png'))
         .expect(201);
     });
   });
