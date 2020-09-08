@@ -179,28 +179,19 @@ export const deleteUser = async function (req, res, next) {
       "sha512"
     );
 
-    const deleteResult = await Users.deleteUser(
-      uid,
-      crypt_Pw.toString("base64")
-    );
+    const deletion = await Users.deleteUser(uid, crypt_Pw.toString("base64"));
 
-    if (deleteResult.ok === 1) {
-      if (
-        deleteResult.n === 1 &&
-        deleteResult.n === deleteResult.deletedCount
-      ) {
+    if (deletion.ok === 1) {
+      if (deletion.n === 1 && deletion.n === deletion.deletedCount) {
         return res.status(200).json({
           result: "ok",
         });
-      } else if (
-        deleteResult.ok === 1 &&
-        deleteResult.n !== deleteResult.deletedCount
-      ) {
+      } else if (deletion.ok === 1 && deletion.n !== deletion.deletedCount) {
         return res.status(200).json({
           result: "ok",
           message: "질의에 성공했으나 데이터가 삭제되지 않았습니다.",
         });
-      } else if (deleteResult.n === 0) {
+      } else if (deletion.n === 0) {
         return res.status(404).json({
           result: "error",
           message: "존재하지 않는 데이터에 접근했습니다.",
