@@ -36,4 +36,4 @@ like.statics.getCount = function (likeData) {
   );
 };
 
-export const Like = mongoose.model("Like", like);
+export default mongoose.model("Like", like);

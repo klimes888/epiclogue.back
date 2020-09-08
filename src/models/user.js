@@ -131,4 +131,4 @@ user.statics.countFollowing = function (userId, flag) {
   return this.updateOne({ _id: userId }, { followingCount: increment })
 }
 
-export const User = mongoose.model('User', user);
+export default mongoose.model('User', user);

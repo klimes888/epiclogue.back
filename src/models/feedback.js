@@ -72,4 +72,4 @@ Feedback.statics.getHeartCount = function (feedbackId) {
   return this.findOne({ _id: feedbackId }, { heartCount: 1, _id: 0 })
 }
 
-export const Feedback = mongoose.model("Feedback", Feedback);
+export default mongoose.model("Feedback", Feedback);

@@ -22,4 +22,4 @@ Bookmark.statics.getByUserId = function (userId) {
   return this.find({ userId });
 };
 
-export const Bookmark = mongoose.model("Bookmark", Bookmark);
+export default mongoose.model("Bookmark", Bookmark);
