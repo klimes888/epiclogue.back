@@ -4,7 +4,6 @@ import dotenv from 'dotenv'
 import request from 'supertest'
 import fs from 'fs'
 import randomString from 'random-string'
-import FormData from 'form-data'
 import path from 'path'
 
 import User from '../../../src/models/users'
@@ -32,7 +31,6 @@ describe("글 테스트", () => {
   };
   let writerAuthToken;
   let nonWriterDataToken;
-  let boardFormData = new FormData()
 
   // board dataset
   const boardData = {
@@ -43,24 +41,15 @@ describe("글 테스트", () => {
     language: "Korean",
   };
 
-  // if form-data
-  boardFormData.append('boardTitle', 'a board Title')
-  boardFormData.append('boardBody', 'a board Body ever')
-  boardFormData.append('category', 'Illust')
-  boardFormData.append('pub', 'true')
-  boardFormData.append('language', 'korean')
-  
-  const imgFiles = [];
   const imgPath = path.join(__dirname + '/testImages');
+  const imagePathArray = [];
     fs.readdir(imgPath, (err, files) => {
       if (err) {
         console.error(err)
       }
       files.forEach(name => {
-        imgFiles.push(fs.readFileSync(imgPath + '/' + name))
-        boardFormData.append('boardImg', fs.readFileSync(imgPath + '/' + name))
+        imagePathArray.push(imgPath + '/' + name)
       });
-      // console.log(imgFiles) // Got image buffers
     })
 
   beforeAll(async () => {
@@ -78,18 +67,20 @@ describe("글 테스트", () => {
 
       writerAuthToken = writerLoginResponse.body.token;
 
-      await request(app)
+      const uploadInstance = request(app)
         .post("/boards")
-        .set({"x-access-token": writerAuthToken})
+        .set("x-access-token", writerAuthToken)
         .field("boardTitle", boardData.boardTitle)
         .field("boardBody", boardData.boardBody)
         .field("category", boardData.category)
         .field("pub", boardData.pub)
-        .field("language", boardData.language)
-        .attach('boardImg', imgFiles[0])
-        .attach('boardImg', imgPath + '/node.png')
-        .attach('boardImg', fs.createReadStream(imgPath + '/node.png'))
-        .expect(201);
+        .field("language", boardData.language);
+
+      for (let path of imagePathArray) {
+        uploadInstance.attach("boardImg", path);
+      }
+      
+      await uploadInstance.expect(201);
     });
   });
 
