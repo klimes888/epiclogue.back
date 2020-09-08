@@ -68,8 +68,8 @@ user.statics.getSalt = function (email) {
   return this.findOne({ email }, { _id: 0, salt: 1 });
 };
 
-user.statics.getUserInfo = function (uid, option) {
-  return this.findOne({ _id: uid }, option);
+user.statics.getUserInfo = function (userId, option) {
+  return this.findOne({ _id: userId }, option);
 };
 
 user.statics.getIdByScreenId = function(screenId) {
@@ -80,32 +80,32 @@ user.statics.getUserInfoByScreenId = function (screenId, option) {
   return this.findOne({ screenId: screenId }, option);
 };
 
-user.statics.deleteUser = function (uid, userpw) {
-  return this.deleteOne({ _id: uid, password: userpw });
+user.statics.deleteUser = function (userId, userpw) {
+  return this.deleteOne({ _id: userId, password: userpw });
 };
 
 user.statics.findAll = function () {
   return this.find({});
 };
 
-user.statics.changePass = function (uid, userPw, userPwNew, saltNew) {
+user.statics.changePass = function (userId, userPw, userPwNew, saltNew) {
   return this.updateOne(
-    { _id: uid, password: userPw },
+    { _id: userId, password: userPw },
     { password: userPwNew, salt: saltNew }
   );
 };
 
-user.statics.changeInfo = function (uid, userpw) {
-  return this.updateOne({ _id: uid }, { password: userpw });
+user.statics.changeInfo = function (userId, userpw) {
+  return this.updateOne({ _id: userId }, { password: userpw });
 };
 
-user.statics.checkPass = function (uid, userpw) {
-  return this.findOne({ _id: uid, password: userpw });
+user.statics.checkPass = function (userId, userpw) {
+  return this.findOne({ _id: userId, password: userpw });
 };
 
 user.statics.updateProfile = function (profile) {
   return this.updateOne(
-    { _id: profile.uid },
+    { _id: profile.userId },
     {
       nickname: profile.nick,
       screenId: profile.screenId,

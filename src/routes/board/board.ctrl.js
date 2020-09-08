@@ -2,30 +2,25 @@ import Board from "../../models/board";
 import Feedback from "../../models/feedback";
 import User from "../../models/users"
 
-export const postBoard = async function (req, res, next) {
-  const uid = res.locals.uid;
-  const boardTitle = req.body.boardTitle;
-  const boardBody = req.body.boardBody;
-  let boardImg = [];
+export const postBoard = async (req, res, next) => {
+  let _boardImg = [];
   for (let i = 0; i < req.files.length; i++) {
-    boardImg.push(req.files[i].location);
+    _boardImg.push(req.files[i].location);
   }
-  const category = req.body.category;
-  const pub = req.body.pub;
-  const language = req.body.language;
+
+  const boardData = {
+    writer: res.locals.uid,
+    boardTitle: req.body.boardTitle,
+    boardBody: req.body.boardBody,
+    category: req.body.category,
+    pub: req.body.pub,
+    lanuage: req.body.lanuage,
+    boardImg: _boardImg
+  }
 
   try {
-    const result = await Board.create({
-      uid,
-      boardTitle,
-      boardBody,
-      boardImg,
-      category,
-      pub,
-      language,
-      writer: uid
-    });
-    console.log(`[INFO] user ${uid}가 글 ${result._id}를 작성했습니다.`)
+    const result = await Board.create(boardData);
+    console.log(`[INFO] user ${boardData.writer}가 글 ${result._id}를 작성했습니다.`)
     return res.status(201).json({
       result: "ok",
       data: result,
@@ -42,7 +37,6 @@ export const postBoard = async function (req, res, next) {
 // 글 뷰
 export const viewBoard = async (req, res, next) => {
   const boardId = req.params.boardId;
-
   try {
     const boardData = await Board.getById(boardId);
     console.log(`[INFO] 유저 ${res.locals.uid}가 글 ${boardId}를 접근했습니다.`)
@@ -60,13 +54,9 @@ export const viewBoard = async (req, res, next) => {
 };
 
 // 삭제
-export const deleteBoard = async function (
-  req,
-  res,
-  next
-) {
+export const deleteBoard = async (req, res, next) => {
   const boardId = req.params.boardId;
-
+  
   try {
     const deletion = await Board.delete(boardId);
 
@@ -91,11 +81,7 @@ export const deleteBoard = async function (
 };
 
 // 수정 전 이전 데이터 불러오기
-export const getEditInfo = async function (
-  req,
-  res,
-  next
-) {
+export const getEditInfo = async (req, res, next) => {
   const boardId = req.params.boardId;
 
   try {
@@ -160,22 +146,23 @@ export const postEditInfo = async function (req, res, next) {
 
 /* 유저마다 다르게 받아야 함 */
 export const getBoards = async (req, res, next) => {
-  const result = new Array();
+  const result = [];
 
   try {
     const boardList = await Board.findAll();
-
     for (const data of boardList) {
-      let userInfo = await User.getUserInfo(data.uid);
-
-      result.push({
-        boardUid: data._id,
+      const dataSlot = {
+        boardId: data._id,
         boardTitle: data.boardTitle,
+        boardBody: data.boardBody,
         thumbPath: data.boardImg[0],
-        userNick: userInfo.nickname,
+        userNick: data.writer.nickname,
+        userNick: data.writer.nickname,
         pub: data.pub,
         category: data.category,
-      });
+        heartCount: data.heartCount
+      }
+      result.push(dataSlot);
     }
 
     return res.status(200).json({

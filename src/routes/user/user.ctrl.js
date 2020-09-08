@@ -40,11 +40,13 @@ export const postUserEditInfo = async function (
   next
 ) {
   const uid = res.locals.uid;
-  const screenId = req.body["screenId"];
-  const nickname = req.body["userNick"];
-  const country = parseInt(req.body["userCountry"]);
-  const availableLanguage = req.body["userLang"];
-  const intro = req.body["userIntro"];
+  const result = await Users.getUserInfo(uid);
+
+  const screenId = req.body["screenId"] || result.screenId;
+  const nickname = req.body["userNick"] || result.nickname;
+  const country = parseInt(req.body["userCountry"]) || result.country;
+  const availableLanguage = req.body["userLang"] || result.availableLanguage;
+  const intro = req.body["userIntro"] || result.intro;
   let bann;
   let prof;
   if (req.files.length > 1) {
