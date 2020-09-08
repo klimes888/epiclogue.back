@@ -7,10 +7,11 @@ const board = new mongoose.Schema({
   boardTitle: { type: String, default: "" },
   boardImg: { type: [String], required: true },
   boardBody: { type: String, default: "" },
-  category: { type: String, required: true },
-  pub: { type: String, required: true },
+  category: { type: Number, required: true, default: 0 }, // 0: Illust, 1: Comic
+  pub: { type: Number, required: true, default: 1 }, // 0: private, 1: public
   writeDate: { type: Date, default: Date.now },
-  language: { type: String, default: "Korean" },
+  language: { type: Number, default: 0 }, // 0: Korean, 1: Japanese, 2: US, 3: China, 4: Taiwan
+  allowSecondaryCreation: { type: Boolean, default: 1 }, // 0: not allow, 1: allow, 2: only allow on followers
   heartCount: { type: Number, default: 0 },
   feedbackCount: { type: Number, default: 0 },
   bookmarkCount: { type: Number, default: 0 },

@@ -34,7 +34,7 @@ export const login = async function (req, res, next) {
           },
           SECRET_KEY,
           {
-            expiresIn: "1h",
+            expiresIn: process.env.JWT_EXPIRES_IN,
           }
         );
   

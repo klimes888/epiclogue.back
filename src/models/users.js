@@ -7,9 +7,11 @@ const user = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   screenId: { type: String },
-  country: { type: String },
-  joinDate: { type: Date, required: true, default: Date.now },
+  country: { type: Number, default: 0 }, // 0: Korean, 1: Japanese, 2: English, 3: Chinese, 4: Taiwan
+  displayLanguage: { type: Number, default: 0 }, // 0: Korean, 1: Japanese, 2: English, 3: Chinese(Simplified), 4: Chinese(Traditional)
   language: { type: [String] },
+  joinDate: { type: Date, required: true, default: Date.now },
+  termsOfUseAcceptedAt: { type: Date, required: true, default: Date.now },
   intro: { type: String },
   banner: { type: String },
   profile: { type: String },
