@@ -1,5 +1,6 @@
 import Feedback from "../../../models/feedback";
 import User from '../../../models/users'
+import Board from '../../../models/board'
 
 /*
   This is reply router.
@@ -16,7 +17,8 @@ export const postFeedback = async (req, res, next) => {
   const newerData = []
 
   try {
-    await Feedback.create(feedbackData);
+    const postFeedbackResult = await Feedback.create(feedbackData);
+    await Board.getFeedback(req.params.boardId, postFeedbackResult._id)
     const newerFeedbackData = await Feedback.getByBoardId(req.params.boardId);
     for (let data of newerFeedbackData) {
       let userData = await User.getUserInfo(data.userId,   { _id: 0, nickname: 1, screenId: 1, profile: 1 })

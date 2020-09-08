@@ -23,7 +23,7 @@ export const postBoard = async function (req, res, next) {
       category,
       pub,
       language,
-      likeCount: 0,
+      writer: uid
     });
     console.log(`[INFO] user ${uid}가 글 ${result._id}를 작성했습니다.`)
     return res.status(201).json({
@@ -45,36 +45,10 @@ export const viewBoard = async (req, res, next) => {
 
   try {
     const boardData = await Board.getById(boardId);
-    const writerData = await User.getUserInfo(boardData.uid, {
-      nickname: 1,
-      userid: 1,
-    });
-    const feedbackWithoutUserInfo = await Feedback.getByBoardId(boardId);
-    const feedbackData = [];
-
-    for (const reply of feedbackWithoutUserInfo) {
-      let { nickname, screenId } = await User.getUserInfo(reply.userId);
-
-      feedbackData.push({
-        _id: reply._id,
-        buid: reply.buid,
-        edited: reply.edited,
-        feedbackBody: reply.feedbackBody,
-        writeDate: reply.writeDate,
-        userInfo: {
-          screenId,
-          nickname,
-        },
-      });
-    }
     console.log(`[INFO] 유저 ${res.locals.uid}가 글 ${boardId}를 접근했습니다.`)
     return res.status(200).json({
       result: "ok",
-      data: {
-        writer: writerData,
-        board: boardData,
-        feedback: feedbackData,
-      },
+      data: boardData
     });
   } catch (e) {
     console.error(`[ERROR] ${e}`);

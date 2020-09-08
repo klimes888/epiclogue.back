@@ -4,6 +4,7 @@ mongoose.set("useCreateIndex", true);
 
 const board = new mongoose.Schema({
   uid: { type: ObjectId, required: true },
+  writer: { type: ObjectId, ref: 'User' },
   boardTitle: { type: String, default: "" },
   boardImg: { type: [String], required: true },
   boardBody: { type: String, default: "" },
@@ -12,7 +13,8 @@ const board = new mongoose.Schema({
   writeDate: { type: Date, default: Date.now },
   language: { type: Number, default: 0 }, // 0: Korean, 1: Japanese, 2: US, 3: China, 4: Taiwan
   allowSecondaryCreation: { type: Number, default: 1 }, // 0: not allow, 1: allow, 2: only allow on followers
-  heartCount: { type: Number, default: 0 },
+  feedbacks: [{ type: ObjectId, ref: 'Feedback' }],
+  heartCount: { type: Number, default: 0 }, 
   feedbackCount: { type: Number, default: 0 },
   bookmarkCount: { type: Number, default: 0 },
   reactCount: { type: Number, default: 0 },
@@ -27,9 +29,8 @@ board.statics.create = function (data) {
   return boardData.save();
 };
 
-/* 수정, 삭제, 댓글에 필요한 boardId GET (미검증) */
 board.statics.getById = function (boardId) {
-  return this.findOne({ _id: boardId });
+  return this.findOne({ _id: boardId }, { _id: 0, __v: 0 }).populate('feedbacks').populate({path: 'writer', select: "screenId nickname"});
 };
 
 /* 특정 유저의 글 GET (미검증) */
@@ -69,6 +70,10 @@ board.statics.findAll = function () {
     { _id: 1, boardTitle: 1, uid: 1, pub: 1, category: 1, boardImg: 1 }
   );
 };
+
+board.statics.getFeedback = function (boardId, feedbackId) {
+  return this.updateOne({ _id: boardId }, { $push: { feedbacks: feedbackId } })
+}
 
 board.statics.getTitlesByQuery = function (query) {
   return this.find(
