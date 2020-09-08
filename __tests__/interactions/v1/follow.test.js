@@ -32,14 +32,14 @@ describe("팔로우 테스트", () => {
 
   beforeAll(async () => {
     // 임시유저 생성
-    await request(app).post("/users/join").send(userData);
+    await request(app).post("/auth/join").send(userData);
     const newUserData = await User.isExist(userData.email);
     newUserId = newUserData._id;
 
     // 이메일 인증된 사용자
-    await request(app).post("/users/join").send(verifiedUserData);
+    await request(app).post("/auth/join").send(verifiedUserData);
     await User.confirmUser(verifiedUserData.email);
-    const verifiedLoginReponse = await request(app).post("/users/login").send({
+    const verifiedLoginReponse = await request(app).post("/auth/login").send({
       email: verifiedUserData.email,
       userPw: verifiedUserData.userPw,
     });

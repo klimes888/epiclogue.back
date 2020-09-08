@@ -5,6 +5,7 @@ import request from 'supertest'
 import fs from 'fs'
 import randomString from 'random-string'
 import FormData from 'form-data'
+import path from 'path'
 
 import User from '../../../src/models/users'
 import Board from '../../../src/models/board'
@@ -41,9 +42,21 @@ describe("글 테스트", () => {
     language: "Korean",
   };
 
+  const imgFiles = [];
+  const imgPath = path.join(__dirname + '/testImages');
+    fs.readdir(imgPath, (err, files) => {
+      if (err) {
+        console.error(err)
+      }
+      files.forEach(name => {
+        imgFiles.push(fs.readFileSync(imgPath + '/' + name))
+      });
+      // console.log(imgFiles) // Got image buffers
+    })
+
   beforeAll(async () => {
-    await request(app).post("/users/join").send(writerData);
-    await request(app).post("/users/join").send(nonWriterData);
+    await request(app).post("/auth/join").send(writerData);
+    await request(app).post("/auth/join").send(nonWriterData);
     await User.confirmUser(writerData.email);
     await User.confirmUser(nonWriterData.email);
   });
@@ -51,22 +64,20 @@ describe("글 테스트", () => {
   describe("글 쓰기", () => {
     test("성공 | 200", async () => {
       const writerLoginResponse = await request(app)
-        .post("/users/login")
+        .post("/auth/login")
         .send(writerData);
 
       writerAuthToken = writerLoginResponse.body.token;
 
-      console.log(writerAuthToken)
-
       await request(app)
         .post("/boards")
         .set("x-access-token", writerAuthToken)
-        .attach('boardImg', fs.createReadStream(__dirname + '/images/node.png'))
         .field("boardTitle", boardData.boardTitle)
         .field("boardBody", boardData.boardBody)
         .field("category", boardData.category)
         .field("pub", boardData.pub)
         .field("language", boardData.language)
+        .attach('boardImg', fs.createReadStream(__dirname + '/testImages/node.png'))
         .expect(201);
     });
   });
