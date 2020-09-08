@@ -44,6 +44,10 @@ user.statics.confirmUser = function (email) {
   return this.updateOne({ email }, { isConfirmed: true, token: "" });
 };
 
+user.statics.getById = function (userId) {
+  return this.findOne({ _id: userId })
+}
+
 user.statics.isExist = function (email) {
   return this.findOne({ email });
 };

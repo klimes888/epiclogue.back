@@ -1,24 +1,27 @@
+// external modules
 import createError from 'http-errors';
 import express from 'express';
 import path from 'path';
 import cookieParser from 'cookie-parser';
 import logger from 'morgan';
-
 import cors from 'cors';
 import helmet from 'helmet';
-import mongoose from 'mongoose';
 import swaggerJSDoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
+import dotenv from 'dotenv'
+
+// routers
 import indexRouter from './src/routes';
 import usersRouter from './src/routes/user';
 import boardRouter from './src/routes/board'
 import searchRouter from './src/routes/search'
 import interactionRouter from './src/routes/interaction'
 import authRouter from './src/routes/auth'
-import dotenv from 'dotenv'
+
+// utils
+import Database from './src/lib/database'
 
 const app = express();
-
 dotenv.config();
 
 const swaggerDefinition = {
@@ -72,10 +75,6 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
-mongoose.Promise = global.Promise;
-
-mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false })
-  .then(() => console.log('데이터베이스 연결 성공'))
-  .catch(e => console.error(e));
+Database.connect()
 
 module.exports = app;

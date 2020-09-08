@@ -4,7 +4,7 @@ const router = express.Router({
 });
 
 router.get("/", (req, res, next) => {
-  res.status(201).json({
+  res.status(200).json({
     result: "ok",
     comment: "server is ok",
   });

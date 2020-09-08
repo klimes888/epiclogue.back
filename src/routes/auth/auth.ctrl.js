@@ -38,7 +38,7 @@ export const login = async function (req, res, next) {
           }
         );
   
-        return res.status(201).json({
+        return res.status(200).json({
           result: "ok",
           token,
           nick: result.nickname,
@@ -71,7 +71,7 @@ export const join = async function (req, res, next) {
       if (userPw == userPwRe) {
         /* 중복 가입 이메일 처리 */
         if ((await Users.isExist(email)) != null) {
-          return res.status(401).json({
+          return res.status(400).json({
             result: "error",
             message: "중복된 이메일입니다. 다른 이메일로 가입해주세요.",
           });
