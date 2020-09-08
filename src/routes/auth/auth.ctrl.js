@@ -19,8 +19,8 @@ export const login = async function (req, res, next) {
       const crypt_Pw = await pbkdf2Promise(
         userPw,
         user["salt"],
-        93782,
-        64,
+        process.env.EXEC_NUM,
+        process.env.RESULT_LENGTH,
         "sha512"
       );
   
@@ -85,8 +85,8 @@ export const join = async function (req, res, next) {
         const crypt_Pw = await pbkdf2Promise(
           userPw,
           salt.toString("base64"),
-          93782,
-          64,
+          process.env.EXEC_NUM,
+          process.env.RESULT_LENGTH,
           "sha512"
         );
         const auth_token = crypt_Pw.toString("base64").substr(0, 10);
