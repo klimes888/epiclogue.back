@@ -79,12 +79,12 @@ export const deleteFollow = async (req, res, next) => {
 };
 
 export const getFollowing = async (req, res, next) => {
-  const userId = req.params.userId;
+  const screenId = req.params.screenId;
+  const userId = await User.getIdByScreenId(screenId)
+  console.log(userId)
   const followingDataSet = [];
-
   try {
     const followingList = await Follow.getFollowingList(userId);
-
     for (let data of followingList) {
       let temp = await Users.getUserInfo(data.targetUserId, {
         nickname: 1,
@@ -92,7 +92,6 @@ export const getFollowing = async (req, res, next) => {
       });
       followingDataSet.push(temp);
     }
-
     return res.status(200).json({
       result: "ok",
       data: followingDataSet,
@@ -107,12 +106,11 @@ export const getFollowing = async (req, res, next) => {
 };
 
 export const getFollower = async (req, res, next) => {
-  const userId = req.params.userId;
+  const screenId = req.params.screenId;
+  const userId = await User.getIdByScreenId(screenId)
   const followerDataSet = [];
-
   try {
     const followerList = await Follow.getFollowerList(userId);
-
     for (let data of followerList) {
       let temp = await Users.getUserInfo(data.targetUserId, {
         nickname: 1,
@@ -120,7 +118,6 @@ export const getFollower = async (req, res, next) => {
       });
       followerDataSet.push(temp);
     }
-
     return res.status(200).json({
       result: "ok",
       data: followerDataSet,

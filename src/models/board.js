@@ -11,7 +11,7 @@ const board = new mongoose.Schema({
   pub: { type: Number, required: true, default: 1 }, // 0: private, 1: public
   writeDate: { type: Date, default: Date.now },
   language: { type: Number, default: 0 }, // 0: Korean, 1: Japanese, 2: US, 3: China, 4: Taiwan
-  allowSecondaryCreation: { type: Boolean, default: 1 }, // 0: not allow, 1: allow, 2: only allow on followers
+  allowSecondaryCreation: { type: Number, default: 1 }, // 0: not allow, 1: allow, 2: only allow on followers
   heartCount: { type: Number, default: 0 },
   feedbackCount: { type: Number, default: 0 },
   bookmarkCount: { type: Number, default: 0 },

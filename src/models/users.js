@@ -9,7 +9,7 @@ const user = new mongoose.Schema({
   screenId: { type: String },
   country: { type: Number, default: 0 }, // 0: Korean, 1: Japanese, 2: English, 3: Chinese, 4: Taiwan
   displayLanguage: { type: Number, default: 0 }, // 0: Korean, 1: Japanese, 2: English, 3: Chinese(Simplified), 4: Chinese(Traditional)
-  language: { type: [String] },
+  availableLanguage: { type: [String] },
   joinDate: { type: Date, required: true, default: Date.now },
   termsOfUseAcceptedAt: { type: Date, required: true, default: Date.now },
   intro: { type: String },
@@ -72,6 +72,10 @@ user.statics.getUserInfo = function (uid, option) {
   return this.findOne({ _id: uid }, option);
 };
 
+user.statics.getIdByScreenId = function(screenId) {
+  return this.findOne({ screenId }, { _id: 1 })
+}
+
 user.statics.getUserInfoByScreenId = function (screenId, option) {
   return this.findOne({ screenId: screenId }, option);
 };
@@ -106,7 +110,7 @@ user.statics.updateProfile = function (profile) {
       nickname: profile.nick,
       screenId: profile.screenId,
       country: profile.country,
-      language: profile.lang,
+      availableLanguage: profile.availableLanguage,
       intro: profile.intro,
       banner: profile.bann,
       profile: profile.prof,

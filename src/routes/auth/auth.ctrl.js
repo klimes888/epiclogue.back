@@ -19,8 +19,8 @@ export const login = async function (req, res, next) {
       const crypt_Pw = await pbkdf2Promise(
         userPw,
         user["salt"],
-        process.env.EXEC_NUM,
-        process.env.RESULT_LENGTH,
+        parseInt(process.env.EXEC_NUM),
+        parseInt(process.env.RESULT_LENGTH),
         "sha512"
       );
   
@@ -42,7 +42,7 @@ export const login = async function (req, res, next) {
           result: "ok",
           token,
           nick: result.nickname,
-          userId: result.userid,
+          screendId: result.screendId,
         });
       } else {
         return res.status(400).json({
@@ -85,8 +85,8 @@ export const join = async function (req, res, next) {
         const crypt_Pw = await pbkdf2Promise(
           userPw,
           salt.toString("base64"),
-          process.env.EXEC_NUM,
-          process.env.RESULT_LENGTH,
+          parseInt(process.env.EXEC_NUM),
+          parseInt(process.env.RESULT_LENGTH),
           "sha512"
         );
         const auth_token = crypt_Pw.toString("base64").substr(0, 10);

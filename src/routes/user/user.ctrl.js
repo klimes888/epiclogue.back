@@ -19,7 +19,7 @@ export const getUserEditInfo = async function (req, res, next) {
         userNick: result.nickname,
         userIntro: result.intro,
         userCountry: result.country,
-        userId: result.userid,
+        screenId: result.screenId,
         usersBannerImg: result.banner,
         userProfileImg: result.profile,
         email: result.email,
@@ -40,10 +40,10 @@ export const postUserEditInfo = async function (
   next
 ) {
   const uid = res.locals.uid;
-  const userId = req.body["userId"];
-  const nick = req.body["userNick"];
-  const country = req.body["userCountry"];
-  const lang = req.body["userLang"];
+  const screenId = req.body["screenId"];
+  const nickname = req.body["userNick"];
+  const country = parseInt(req.body["userCountry"]);
+  const availableLanguage = req.body["userLang"];
   const intro = req.body["userIntro"];
   let bann;
   let prof;
@@ -64,29 +64,20 @@ export const postUserEditInfo = async function (
   }
 
   try {
-    const checkId = await Users.isScreenIdUnique(userId);
+    const checkId = await Users.isScreenIdUnique(screenId);
     if (checkId) {
       const newerUserData = {
         uid,
-        userId,
-        nickname: nick,
-        language: lang,
+        screenId,
+        nickname,
+        availableLanguage,
         country,
         intro,
         bann,
         prof
       }
       
-      await Users.updateProfile({
-        uid,
-        screenId: userId,
-        nick,
-        country,
-        lang,
-        intro,
-        bann,
-        prof,
-      });
+      await Users.updateProfile(newerUserData);
 
       return res.status(200).json({
         result: "ok",
@@ -126,15 +117,15 @@ export const changePass = async function (req, res, next) {
           const crypt_Pw = await pbkdf2Promise(
             userPw,
             info["salt"],
-            process.env.EXEC_NUM,
-            process.env.RESULT_LENGTH,
+            parseInt(process.env.EXEC_NUM),
+            parseInt(process.env.RESULT_LENGTH),
             "sha512"
           );
           const crypt_PwNew = await pbkdf2Promise(
             userPwNew,
             saltNew.toString("base64"),
-            process.env.EXEC_NUM,
-            process.env.RESULT_LENGTH,
+            parseInt(process.env.EXEC_NUM),
+            parseInt(process.env.RESULT_LENGTH),
             "sha512"
           );
           await Users.changePass(
@@ -183,8 +174,8 @@ export const deleteUser = async function (req, res, next) {
     const crypt_Pw = await pbkdf2Promise(
       userPw,
       info["salt"],
-      process.env.EXEC_NUM,
-      process.env.RESULT_LENGTH,
+      parseInt(process.env.EXEC_NUM),
+      parseInt(process.env.RESULT_LENGTH),
       "sha512"
     );
 

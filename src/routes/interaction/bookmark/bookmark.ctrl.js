@@ -1,6 +1,7 @@
 import Bookmark from "../../../models/bookmark";
 import react from "../../../models/react";
-import Board from '../../../models/board'
+import Board from '../../../models/board';
+import User from '../../../models/users'
 
 /* 
   This is bookmark router.
@@ -11,8 +12,9 @@ export const getBookmarkList = async (req, res, next) => {
   const screenId = req.params.screenId;
 
   try {
-    const result = await Bookmark.getByUserId(screenId);
-    console.log(`[INFO] 유저 ${res.locals.uid}가 ${screenId}의 북마크 리스트를 확인했습니다.`)
+    const userId = await User.getIdByScreenId(screenId)
+    const result = await Bookmark.getByUserId(userId);
+    console.log(`[INFO] 유저 ${res.locals.uid}가 ${userId}의 북마크 리스트를 확인했습니다.`)
     return res.status(200).json(result);
   } catch (e) {
     console.log(`[Error] ${e}`);
