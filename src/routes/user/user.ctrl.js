@@ -126,15 +126,15 @@ export const changePass = async function (req, res, next) {
           const crypt_Pw = await pbkdf2Promise(
             userPw,
             info["salt"],
-            93782,
-            64,
+            process.env.EXEC_NUM,
+            process.env.RESULT_LENGTH,
             "sha512"
           );
           const crypt_PwNew = await pbkdf2Promise(
             userPwNew,
             saltNew.toString("base64"),
-            93782,
-            64,
+            process.env.EXEC_NUM,
+            process.env.RESULT_LENGTH,
             "sha512"
           );
           await Users.changePass(
@@ -183,8 +183,8 @@ export const deleteUser = async function (req, res, next) {
     const crypt_Pw = await pbkdf2Promise(
       userPw,
       info["salt"],
-      93782,
-      64,
+      process.env.EXEC_NUM,
+      process.env.RESULT_LENGTH,
       "sha512"
     );
 

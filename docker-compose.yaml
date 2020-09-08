@@ -21,12 +21,11 @@ services:
     image: mongo
     volumes:
       - data:/data/db
-    volumes:
       - ./dbinit.sh:/docker-entrypoint-initdb.d/dbinit.sh:ro
     environment:
-      MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: lunarcat1234!
-      MONGO_INITDB_DATABASE: lunarcat
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
     networks:
       - backend
 
