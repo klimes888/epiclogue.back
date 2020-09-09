@@ -1,6 +1,6 @@
 import crypto from "crypto";
 import util from "util";
-import {User} from "../../models";
+import User from "../../models";
 import dotenv from 'dotenv'
 const randomBytesPromise = util.promisify(crypto.randomBytes);
 const pbkdf2Promise = util.promisify(crypto.pbkdf2);
@@ -13,14 +13,14 @@ export const getUserEditInfo = async function (req, res, next) {
   const uid = res.locals.uid;
   try {
     const result = await User.getUserInfo(uid);
-    return res.status(201).json({
+    return res.status(200).json({
       result: "ok",
       data: {
         userNick: result.nickname,
         userIntro: result.intro,
         userCountry: result.country,
         screenId: result.screenId,
-        usersBannerImg: result.banner,
+        userBannerImg: result.banner,
         userProfileImg: result.profile,
         email: result.email,
       },
@@ -66,8 +66,9 @@ export const postUserEditInfo = async function (
   }
 
   try {
-    const checkId = await Users.isScreenIdUnique(screenId);
-    if (checkId) {
+    const checkId = await User.isScreenIdUnique(screenId);
+    const originalScreenId = await User.getUserInfo(res.locals.uid, { screendId: 1 })
+    if (checkId || originalScreenId === screenId) {
       const newerUserData = {
         uid,
         screenId,
@@ -79,7 +80,7 @@ export const postUserEditInfo = async function (
         prof
       }
       
-      await Users.updateProfile(newerUserData);
+      await User.updateProfile(newerUserData);
 
       return res.status(200).json({
         result: "ok",
@@ -181,7 +182,7 @@ export const deleteUser = async function (req, res, next) {
       "sha512"
     );
 
-    const deletion = await Users.deleteUser(uid, crypt_Pw.toString("base64"));
+    const deletion = await User.deleteUser(uid, crypt_Pw.toString("base64"));
 
     if (deletion.ok === 1) {
       if (deletion.n === 1 && deletion.n === deletion.deletedCount) {

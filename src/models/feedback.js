@@ -1,6 +1,5 @@
 import mongoose from "mongoose";
 const ObjectId = mongoose.ObjectId;
-mongoose.set("useCreateIndex", true);
 
 const Feedback = new mongoose.Schema({
   writer: { type: ObjectId, required: true, ref: 'User' },

@@ -1,7 +1,5 @@
 import mongoose from "mongoose";
 
-mongoose.set("useCreateIndex", true);
-
 const user = new mongoose.Schema({
   nickname: { type: String, required: true },
   email: { type: String, required: true, unique: true },

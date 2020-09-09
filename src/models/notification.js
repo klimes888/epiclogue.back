@@ -1,6 +1,5 @@
 import mongoose from "mongoose";
 const ObjectId = mongoose.ObjectId;
-mongoose.set("useCreateIndex", true);
 
 const notification = new mongoose.Schema({
   userId: { type: ObjectId, required: true },
