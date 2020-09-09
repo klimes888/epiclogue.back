@@ -19,7 +19,6 @@ Reply.statics.create = function (data) {
 
 // Auth
 Reply.statics.isWriter = function (userId, replyId) {
-  console.log(replyId, userId)
   return this.findOne({ _id: replyId, writer: userId })
 }
 

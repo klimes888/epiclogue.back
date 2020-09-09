@@ -44,7 +44,6 @@ board.statics.isWriter = function (userId, boardId) {
 }
 
 board.statics.update = function (articleData) {
-  console.log(`update calls`)
   return this.updateOne(
     { _id: articleData.boardId },
     {
