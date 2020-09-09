@@ -36,13 +36,13 @@ export const getUserEditInfo = async function (req, res, next) {
 
 export const postUserEditInfo = async function (req, res, next) {
   const originalData = await User.getUserInfo(res.locals.uid)
-  
+
   const screenId = req.body['screenId'] || originalData.screenId
   const nickname = req.body['userNick'] || originalData.nickname
   const country = parseInt(req.body['userCountry']) || originalData.country
   const availableLanguage = req.body['userLang'] || originalData.availableLanguage
   const intro = req.body['userIntro'] || originalData.intro
-  
+
   /* 이미지 length에 관련되어 에러가 발생하기 때문에 기본 이미지로 변경한다면 이에 대한 처리 필요 */
 
   let banner
@@ -68,7 +68,6 @@ export const postUserEditInfo = async function (req, res, next) {
     profile = originalData.profile
   }
 
-
   try {
     const checkId = await User.isScreenIdUnique(screenId)
     if (checkId || screenId === originalData.screenId) {
@@ -87,7 +86,7 @@ export const postUserEditInfo = async function (req, res, next) {
       console.log(`[INGO] 유저 ${res.locals.uid}가 프로필을 수정했습니다.`)
       return res.status(200).json({
         result: 'ok',
-        data: newerUserData
+        data: newerUserData,
       })
     } else {
       return res.status(400).json({

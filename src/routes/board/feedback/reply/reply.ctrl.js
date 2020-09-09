@@ -1,4 +1,4 @@
-import { Reply, User, Feedback } from '../../../../models'
+import { Reply, Feedback } from '../../../../models'
 /* 
   This is reply router.
   base url: /:userId/boards/:boardId/reply

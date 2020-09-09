@@ -1,4 +1,4 @@
-import { Bookmark, React, Board } from '../../../models'
+import { Bookmark, React, Board, User } from '../../../models'
 
 /* 
   This is bookmark router.
@@ -10,9 +10,12 @@ export const getBookmarkList = async (req, res, next) => {
 
   try {
     const userId = await User.getIdByScreenId(screenId)
-    const result = await Bookmark.getByUserId(userId)
+    const bookmarkSet = await Bookmark.getByUserId(userId)
     console.log(`[INFO] 유저 ${res.locals.uid}가 ${userId}의 북마크 리스트를 확인했습니다.`)
-    return res.status(200).json(result)
+    return res.status(200).json({
+      result: 'ok',
+      data: bookmarkSet,
+    })
   } catch (e) {
     console.log(`[Error] ${e}`)
     return res.status(500).json({

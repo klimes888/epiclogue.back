@@ -17,11 +17,11 @@ export const postBoard = async (req, res, next) => {
   }
 
   try {
-    const result = await Board.create(boardData)
-    console.log(`[INFO] user ${boardData.writer}가 글 ${result._id}를 작성했습니다.`)
+    const createdBoard = await Board.create(boardData)
+    console.log(`[INFO] user ${boardData.writer}가 글 ${createdBoard._id}를 작성했습니다.`)
     return res.status(201).json({
       result: 'ok',
-      data: result,
+      data: createdBoard,
     })
   } catch (e) {
     console.error(`[ERROR] ${e}`)
@@ -110,7 +110,7 @@ export const postEditInfo = async function (req, res, next) {
       boardImg.push(req.files[i].location)
     }
   }
-  
+
   const originalData = await Board.getById(req.params.boardId)
 
   const updateData = {
@@ -122,19 +122,21 @@ export const postEditInfo = async function (req, res, next) {
     pub: parseInt(req.body.pub || originalData.pub),
     language: parseInt(req.body.language || originalData.language),
   }
-  
+
   try {
     const patch = await Board.update(updateData)
     if (patch.ok === 1) {
       if (patch.n === 1) {
-        const newerData = await Board.getById(req.params.boardId);
+        const newerData = await Board.getById(req.params.boardId)
         console.log(`[INFO] 유저 ${res.locals.uid}가 글 ${req.params.boardId}을 수정했습니다.`)
         return res.status(200).json({
           result: 'ok',
-          data: newerData
+          data: newerData,
         })
       } else if (patch.n === 0) {
-        console.log(`[WARN] 유저 ${res.locals.uid}가 글 ${req.params.boardId}을 수정하려했으나 존재하지 않습니다.`)
+        console.log(
+          `[WARN] 유저 ${res.locals.uid}가 글 ${req.params.boardId}을 수정하려했으나 존재하지 않습니다.`
+        )
         return res.status(404).json({
           result: 'error',
           message: '존재하지 않는 데이터에 접근했습니다.',
