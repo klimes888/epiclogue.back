@@ -1,4 +1,4 @@
-import {Bookmark, React, Board} from "../../../models";
+import { Bookmark, React, Board } from '../../../models'
 
 /* 
   This is bookmark router.
@@ -6,63 +6,63 @@ import {Bookmark, React, Board} from "../../../models";
 */
 
 export const getBookmarkList = async (req, res, next) => {
-  const screenId = req.params.screenId;
+  const screenId = req.params.screenId
 
   try {
     const userId = await User.getIdByScreenId(screenId)
-    const result = await Bookmark.getByUserId(userId);
+    const result = await Bookmark.getByUserId(userId)
     console.log(`[INFO] 유저 ${res.locals.uid}가 ${userId}의 북마크 리스트를 확인했습니다.`)
-    return res.status(200).json(result);
+    return res.status(200).json(result)
   } catch (e) {
-    console.log(`[Error] ${e}`);
+    console.log(`[Error] ${e}`)
     return res.status(500).json({
-      result: "error",
-      message: e.message
+      result: 'error',
+      message: e.message,
     })
   }
-};
+}
 
 export const addBookmark = async function (req, res, next) {
   const bookmarkData = {
     userId: res.locals.uid,
     boardId: req.body.boardId,
-  };
+  }
 
   const reactData = {
     userId: res.locals.uid,
     boardId: req.body.boardId,
-    type: "bookmark"
+    type: 'bookmark',
   }
 
   try {
-    await Bookmark.create(bookmarkData);
-    await React.create(reactData);
+    await Bookmark.create(bookmarkData)
+    await React.create(reactData)
     await Board.countBookmark(req.body.boardId, 1)
     await Board.countReact(req.body.boardId, 1)
     const bookmarkCount = await Board.getBookmarkCount(req.body.boardId)
-    
+
     console.log(`[INFO] 유저 ${res.locals.uid}가 북마크에 ${req.body.boardId}를 추가했습니다.`)
-    
+
     return res.status(201).json({
       result: 'ok',
-      data: bookmarkCount
+      data: bookmarkCount,
     })
   } catch (e) {
-    console.log(`[Error] ${e}`);
+    console.log(`[Error] ${e}`)
     return res.status(500).json({
-      result: "error",
-      message: e.message
+      result: 'error',
+      message: e.message,
     })
   }
-};
+}
 
 export const deleteBookmark = async (req, res, next) => {
-  const userId = res.locals.uid;
-  const boardId = req.body.boardId;
+  const userId = res.locals.uid
+  const boardId = req.body.boardId
 
   try {
-    await Bookmark.delete(userId, boardId);
-    await React.delete(userId, boardId);
+    await Bookmark.delete(userId, boardId)
+    await React.delete(userId, boardId)
     await Board.countBookmark(req.body.boardId, 0)
     await Board.countReact(req.body.boardId, 0)
     const bookmarkCount = await Board.getBookmarkCount(req.body.boardId)
@@ -71,13 +71,13 @@ export const deleteBookmark = async (req, res, next) => {
 
     return res.status(200).json({
       result: 'ok',
-      data: bookmarkCount
+      data: bookmarkCount,
     })
   } catch (e) {
-    console.log(`[Error] ${e}`);
+    console.log(`[Error] ${e}`)
     return res.status(500).json({
-      result: "error",
-      message: e.message
+      result: 'error',
+      message: e.message,
     })
   }
-};
+}

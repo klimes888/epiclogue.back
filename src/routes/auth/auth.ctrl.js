@@ -1,110 +1,103 @@
-import {User} from "../../models";
-import jwt from "jsonwebtoken";
+import { User } from '../../models'
+import jwt from 'jsonwebtoken'
 import dotenv from 'dotenv'
 import util from 'util'
 import crypto from 'crypto'
-const SECRET_KEY = process.env.SECRET_KEY;
-const randomBytesPromise = util.promisify(crypto.randomBytes);
-const pbkdf2Promise = util.promisify(crypto.pbkdf2);
-import transporter from "../../lib/sendMail";
+const SECRET_KEY = process.env.SECRET_KEY
+const randomBytesPromise = util.promisify(crypto.randomBytes)
+const pbkdf2Promise = util.promisify(crypto.pbkdf2)
+import transporter from '../../lib/sendMail'
 
 dotenv.config()
 
 export const login = async function (req, res, next) {
-    const email = req.body["email"];
-    const userPw = req.body["userPw"];
-  
-    const user = await User.getSalt(email);
-    if (user) {
+  const email = req.body['email']
+  const userPw = req.body['userPw']
+
+  const user = await User.getSalt(email)
+  if (user) {
+    const crypt_Pw = await pbkdf2Promise(
+      userPw,
+      user['salt'],
+      parseInt(process.env.EXEC_NUM),
+      parseInt(process.env.RESULT_LENGTH),
+      'sha512'
+    )
+
+    const result = await User.findUser(email, crypt_Pw.toString('base64'))
+    if (result) {
+      const token = jwt.sign(
+        {
+          nick: result['nickname'],
+          uid: result['_id'],
+          isConfirmed: result['isConfirmed'],
+        },
+        SECRET_KEY,
+        {
+          expiresIn: process.env.JWT_EXPIRES_IN,
+        }
+      )
+
+      return res.status(200).json({
+        result: 'ok',
+        token,
+        nick: result.nickname,
+        screendId: result.screendId,
+      })
+    } else {
+      return res.status(400).json({
+        result: 'error',
+        message: '잘못된 비밀번호 입니다.',
+      })
+    }
+  } else {
+    return res.status(404).json({
+      result: 'error',
+      message: '유저를 찾을 수 없습니다.',
+    })
+  }
+}
+
+export const join = async function (req, res, next) {
+  const email = req.body['email']
+  const userPw = req.body['userPw']
+  const userPwRe = req.body['userPwRe']
+  const nick = req.body['userNick']
+  const check = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[$@$!%*#?&])[A-Za-z\d$@$!%*#?&]{8,}$/.test(userPw)
+  // 이메일 인증 추가필요
+  if (check) {
+    if (userPw == userPwRe) {
+      /* 중복 가입 이메일 처리 */
+      if ((await User.isExist(email)) != null) {
+        return res.status(400).json({
+          result: 'error',
+          message: '중복된 이메일입니다. 다른 이메일로 가입해주세요.',
+        })
+      }
+      const generatedId = await crypto.createHash('sha256').update(email).digest('hex').slice(0, 14)
+      const salt = await randomBytesPromise(64)
       const crypt_Pw = await pbkdf2Promise(
         userPw,
-        user["salt"],
+        salt.toString('base64'),
         parseInt(process.env.EXEC_NUM),
         parseInt(process.env.RESULT_LENGTH),
-        "sha512"
-      );
-  
-      const result = await User.findUser(email, crypt_Pw.toString("base64"));
+        'sha512'
+      )
+      const auth_token = crypt_Pw.toString('base64').substr(0, 10)
+      const result = await User.create({
+        email: email,
+        password: crypt_Pw.toString('base64'),
+        salt: salt.toString('base64'),
+        nickname: nick,
+        token: auth_token,
+        screenId: generatedId,
+      })
       if (result) {
-        const token = jwt.sign(
-          {
-            nick: result["nickname"],
-            uid: result["_id"],
-            isConfirmed: result["isConfirmed"],
-          },
-          SECRET_KEY,
-          {
-            expiresIn: process.env.JWT_EXPIRES_IN,
-          }
-        );
-  
-        return res.status(200).json({
-          result: "ok",
-          token,
-          nick: result.nickname,
-          screendId: result.screendId,
-        });
-      } else {
-        return res.status(400).json({
-          result: "error",
-          message: "잘못된 비밀번호 입니다.",
-        });
-      }
-    } else {
-      return res.status(404).json({
-        result: "error",
-        message: "유저를 찾을 수 없습니다.",
-      });
-    }
-  };
-  
-export const join = async function (req, res, next) {
-    const email = req.body["email"];
-    const userPw = req.body["userPw"];
-    const userPwRe = req.body["userPwRe"];
-    const nick = req.body["userNick"];
-    const check = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[$@$!%*#?&])[A-Za-z\d$@$!%*#?&]{8,}$/.test(
-      userPw
-    );
-    // 이메일 인증 추가필요
-    if (check) {
-      if (userPw == userPwRe) {
-        /* 중복 가입 이메일 처리 */
-        if ((await User.isExist(email)) != null) {
-          return res.status(400).json({
-            result: "error",
-            message: "중복된 이메일입니다. 다른 이메일로 가입해주세요.",
-          });
-        }
-        const generatedId = await crypto
-          .createHash("sha256")
-          .update(email)
-          .digest("hex")
-          .slice(0, 14);
-        const salt = await randomBytesPromise(64);
-        const crypt_Pw = await pbkdf2Promise(
-          userPw,
-          salt.toString("base64"),
-          parseInt(process.env.EXEC_NUM),
-          parseInt(process.env.RESULT_LENGTH),
-          "sha512"
-        );
-        const auth_token = crypt_Pw.toString("base64").substr(0, 10);
-        const result = await User.create({
-          email: email,
-          password: crypt_Pw.toString("base64"),
-          salt: salt.toString("base64"),
-          nickname: nick,
-          token: auth_token,
-          screenId: generatedId,
-        });
-        if (result) {
-          const option = {
-            from: process.env.MAIL_USER,
-            to: email,
-            subject: "이메일 인증을 완료해주세요.",
-            html:
-            `
+        const option = {
+          from: process.env.MAIL_USER,
+          to: email,
+          subject: '이메일 인증을 완료해주세요.',
+          html: `
             <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
             <html html="" xmlns="http://www.w3.org/1999/xhtml" style="margin: 0; padding: 0;">
             
@@ -179,65 +172,65 @@ export const join = async function (req, res, next) {
             </body>
             
             </html>
-          `
-          };
-  
-          transporter.sendMail(option, function (error, info) {
-            if (error) {
-              console.log(error);
-              res.status(401).json({
-                result: "error",
-                reason: error,
-              });
-            } else {
-              console.log(info.response);
-              return res.status(201).json({
-                result: "ok",
-                info: info.response,
-              });
-            }
-          });
-        } else {
-          return res.status(401).json({
-            result: "error",
-            message: "이미 존재하는 아이디 입니다. 다시 시도해주세요!",
-          });
+          `,
         }
+
+        transporter.sendMail(option, function (error, info) {
+          if (error) {
+            console.log(error)
+            res.status(401).json({
+              result: 'error',
+              reason: error,
+            })
+          } else {
+            console.log(info.response)
+            return res.status(201).json({
+              result: 'ok',
+              info: info.response,
+            })
+          }
+        })
       } else {
         return res.status(401).json({
-          result: "error",
-          message: "패스워드가 일치하지 않습니다!",
-        });
+          result: 'error',
+          message: '이미 존재하는 아이디 입니다. 다시 시도해주세요!',
+        })
       }
     } else {
       return res.status(401).json({
-        result: "error",
-        message: "비밀번호 규칙을 다시 확인해주세요.",
-      });
+        result: 'error',
+        message: '패스워드가 일치하지 않습니다!',
+      })
     }
-  };
-  
+  } else {
+    return res.status(401).json({
+      result: 'error',
+      message: '비밀번호 규칙을 다시 확인해주세요.',
+    })
+  }
+}
+
 export const mailAuth = async function (req, res, next) {
-    const email = req.query.email;
-    const token = req.query.token;
-    try {
-      const result = await User.isConfirmed(email, token);
-      if (result) {
-        await User.confirmUser(email);
-        return res.status(201).json({
-          result: "ok",
-        });
-      } else {
-        return res.status(401).json({
-          result: "error",
-          message: "인증실패",
-        });
-      }
-    } catch (e) {
-      console.error(`[Error] ${e}`);
-      return res.status(500).json({
-        result: "error",
-        message: e.message,
-      });
+  const email = req.query.email
+  const token = req.query.token
+  try {
+    const result = await User.isConfirmed(email, token)
+    if (result) {
+      await User.confirmUser(email)
+      return res.status(201).json({
+        result: 'ok',
+      })
+    } else {
+      return res.status(401).json({
+        result: 'error',
+        message: '인증실패',
+      })
     }
-  };
+  } catch (e) {
+    console.error(`[Error] ${e}`)
+    return res.status(500).json({
+      result: 'error',
+      message: e.message,
+    })
+  }
+}

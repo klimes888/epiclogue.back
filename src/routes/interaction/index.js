@@ -1,5 +1,5 @@
-import {Router} from 'express'
-const interaction = new Router({mergeParams: true});
+import { Router } from 'express'
+const interaction = new Router({ mergeParams: true })
 import bookmark from './bookmark'
 import like from './like'
 import follow from './follow'

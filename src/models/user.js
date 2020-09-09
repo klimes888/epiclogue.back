@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose'
 
 const user = new mongoose.Schema({
   nickname: { type: String, required: true },
@@ -18,39 +18,39 @@ const user = new mongoose.Schema({
   token: { type: String },
   followerCount: { type: Number },
   followingCount: { type: Number },
-});
+})
 
 user.statics.create = function (data) {
-  const userinfo = new this(data);
+  const userinfo = new this(data)
 
-  return userinfo.save();
-};
+  return userinfo.save()
+}
 
 user.statics.isScreenIdUnique = async function (screenId) {
-  const result = await this.findOne({ screenId });
+  const result = await this.findOne({ screenId })
 
   if (result === null) {
-    return true;
+    return true
   } else {
-    return false;
+    return false
   }
-};
+}
 
 user.statics.isConfirmed = function (email, token) {
-  return this.findOne({ email, token });
-};
+  return this.findOne({ email, token })
+}
 
 user.statics.confirmUser = function (email) {
-  return this.updateOne({ email }, { isConfirmed: true, token: "" });
-};
+  return this.updateOne({ email }, { isConfirmed: true, token: '' })
+}
 
 user.statics.getById = function (userId) {
   return this.findOne({ _id: userId })
 }
 
 user.statics.isExist = function (email) {
-  return this.findOne({ email });
-};
+  return this.findOne({ email })
+}
 
 /* 
     @2020-08-07
@@ -59,47 +59,44 @@ user.statics.isExist = function (email) {
 */
 user.statics.findUser = function (email, userpw) {
   // 특수기호 $는 쓰지못하게 해야 기초적인 인젝션 방어가 가능함
-  return this.findOne({ email: email, password: userpw });
-};
+  return this.findOne({ email: email, password: userpw })
+}
 
 user.statics.getSalt = function (email) {
-  return this.findOne({ email }, { _id: 0, salt: 1 });
-};
+  return this.findOne({ email }, { _id: 0, salt: 1 })
+}
 
 user.statics.getUserInfo = function (userId, option) {
-  return this.findOne({ _id: userId }, option);
-};
+  return this.findOne({ _id: userId }, option)
+}
 
-user.statics.getIdByScreenId = function(screenId) {
+user.statics.getIdByScreenId = function (screenId) {
   return this.findOne({ screenId }, { _id: 1 })
 }
 
 user.statics.getUserInfoByScreenId = function (screenId, option) {
-  return this.findOne({ screenId: screenId }, option);
-};
+  return this.findOne({ screenId: screenId }, option)
+}
 
 user.statics.deleteUser = function (userId, userpw) {
-  return this.deleteOne({ _id: userId, password: userpw });
-};
+  return this.deleteOne({ _id: userId, password: userpw })
+}
 
 user.statics.findAll = function () {
-  return this.find({});
-};
+  return this.find({})
+}
 
 user.statics.changePass = function (userId, userPw, userPwNew, saltNew) {
-  return this.updateOne(
-    { _id: userId, password: userPw },
-    { password: userPwNew, salt: saltNew }
-  );
-};
+  return this.updateOne({ _id: userId, password: userPw }, { password: userPwNew, salt: saltNew })
+}
 
 user.statics.changeInfo = function (userId, userpw) {
-  return this.updateOne({ _id: userId }, { password: userpw });
-};
+  return this.updateOne({ _id: userId }, { password: userpw })
+}
 
 user.statics.checkPass = function (userId, userpw) {
-  return this.findOne({ _id: userId, password: userpw });
-};
+  return this.findOne({ _id: userId, password: userpw })
+}
 
 user.statics.updateProfile = function (profile) {
   return this.updateOne(
@@ -113,16 +110,17 @@ user.statics.updateProfile = function (profile) {
       banner: profile.bann,
       profile: profile.prof,
     }
-  );
-};
+  )
+}
 
 user.statics.getProfile = function (screenId) {
-  return this.find({ _id: screenId }, { _id: 1, screenId: 1, nickname: 1 });
-};
+  return this.find({ _id: screenId }, { _id: 1, screenId: 1, nickname: 1 })
+}
 
 user.statics.getByQuery = function (query) {
-  return this.find({ screenId: { $regex: query } },
-    { screenId: 1, nickname: 1, profile: 1 }).sort({ screenId: 'asc' })
+  return this.find({ screenId: { $regex: query } }, { screenId: 1, nickname: 1, profile: 1 }).sort({
+    screenId: 'asc',
+  })
 }
 
 user.statics.countFollower = function (userId, flag) {
@@ -135,4 +133,4 @@ user.statics.countFollowing = function (userId, flag) {
   return this.updateOne({ _id: userId }, { followingCount: increment })
 }
 
-export default mongoose.model('User', user);
+export default mongoose.model('User', user)

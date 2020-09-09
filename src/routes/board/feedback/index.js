@@ -1,9 +1,9 @@
-import {Router} from 'express'
-const feedback = new Router({mergeParams: true});
+import { Router } from 'express'
+const feedback = new Router({ mergeParams: true })
 import * as feedbackCtrl from './feedback.ctrl'
 import reply from './reply'
-import {verifyToken} from '../../../lib/middleware/tokenAuth'
-import {checkWriter} from '../../../lib/middleware/checkPermission'
+import { verifyToken } from '../../../lib/middleware/tokenAuth'
+import { checkWriter } from '../../../lib/middleware/checkPermission'
 
 feedback.post('/', verifyToken, feedbackCtrl.postFeedback)
 feedback.patch('/:feedbackId', verifyToken, checkWriter, feedbackCtrl.editFeedback)

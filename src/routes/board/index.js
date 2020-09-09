@@ -1,9 +1,9 @@
-import {Router} from 'express'
-const board = new Router();
+import { Router } from 'express'
+const board = new Router()
 import * as boardCtrl from './board.ctrl'
 import feedback from './feedback'
-import {verifyToken} from '../../lib/middleware/tokenAuth'
-import {checkWriter} from '../../lib/middleware/checkPermission'
+import { verifyToken } from '../../lib/middleware/tokenAuth'
+import { checkWriter } from '../../lib/middleware/checkPermission'
 import upload from '../../lib/common/imageUpload'
 
 board.get('/', verifyToken, boardCtrl.getBoards)
