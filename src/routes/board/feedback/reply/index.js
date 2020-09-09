@@ -3,10 +3,11 @@ const reply = new Router({ mergeParams: true })
 import * as replyCtrl from './reply.ctrl'
 import { verifyToken } from '../../../../lib/middleware/tokenAuth'
 import { checkWriter } from '../../../../lib/middleware/checkPermission'
+import { checkExistence } from '../../../../lib/middleware/checkExistence'
 
-reply.get('/', verifyToken, replyCtrl.getReplys)
-reply.post('/', verifyToken, replyCtrl.postReply)
-reply.patch('/:replyId', verifyToken, checkWriter, replyCtrl.editReply)
-reply.delete('/:replyId', verifyToken, checkWriter, replyCtrl.deleteReply)
+reply.get('/', verifyToken, checkExistence, replyCtrl.getReplys)
+reply.post('/', verifyToken, checkExistence, replyCtrl.postReply)
+reply.patch('/:replyId', verifyToken, checkExistence, checkWriter, replyCtrl.editReply)
+reply.delete('/:replyId', verifyToken, checkExistence, checkWriter, replyCtrl.deleteReply)
 
 export default reply

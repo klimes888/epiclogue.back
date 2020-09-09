@@ -17,11 +17,11 @@ export const postBoard = async (req, res, next) => {
   }
 
   try {
-    const result = await Board.create(boardData)
-    console.log(`[INFO] user ${boardData.writer}가 글 ${result._id}를 작성했습니다.`)
+    const createdBoard = await Board.create(boardData)
+    console.log(`[INFO] user ${boardData.writer}가 글 ${createdBoard._id}를 작성했습니다.`)
     return res.status(201).json({
       result: 'ok',
-      data: result,
+      data: createdBoard
     })
   } catch (e) {
     console.error(`[ERROR] ${e}`)

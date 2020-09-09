@@ -36,6 +36,10 @@ user.statics.isScreenIdUnique = async function (screenId) {
   }
 }
 
+user.statics.getByScreenId = function (screenId) {
+  return this.findOne({ screenId })
+}
+
 user.statics.isConfirmed = function (email, token) {
   return this.findOne({ email, token })
 }
