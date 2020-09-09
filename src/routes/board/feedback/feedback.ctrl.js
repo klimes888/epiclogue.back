@@ -1,5 +1,4 @@
-import Feedback from "../../../models/feedback";
-import Board from '../../../models/board'
+import {Feedback, User}from "../../../models";
 
 /*
   This is reply router.

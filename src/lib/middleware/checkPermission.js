@@ -1,6 +1,4 @@
-import Board from "../../models/board";
-import Feedback from "../../models/feedback";
-import Reply from "../../models/reply";
+import {Board, Reply, Feedback} from "../../models";
 
 // 작성자에 대한 인증 미들웨어
 export const checkWriter = async (req, res, next) => {

@@ -1,6 +1,4 @@
-import Board from "../../models/board";
-import Feedback from "../../models/feedback";
-import User from "../../models/users"
+import {Board, User, Feedback} from "../../models";
 
 export const postBoard = async (req, res, next) => {
   let _boardImg = [];

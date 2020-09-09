@@ -75,4 +75,4 @@ Reply.statics.getHeartCount = function (replyId) {
   return this.findOne({ _id: replyId }, { heartCount: 1, _id: 0 })
 }
 
-module.exports = mongoose.model("Reply", Reply);
+export default mongoose.model("Reply", Reply);
