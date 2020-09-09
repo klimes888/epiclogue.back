@@ -102,35 +102,54 @@ export const getEditInfo = async (req, res, next) => {
 
 // 수정
 export const postEditInfo = async function (req, res, next) {
-  let boardImg = []
-  for (let i = 0; i < req.files.length; i++) {
-    boardImg.push(req.files[i].location)
+  let boardImg
+
+  if (req.files !== undefined) {
+    boardImg = []
+    for (let i = 0; i < req.files.length; i++) {
+      boardImg.push(req.files[i].location)
+    }
   }
+
+// 수정 필요
+
+  console.log(req.body)
+
+  const originalData = await Board.getById(req.params.boardId)
+
   const updateData = {
     boardId: req.params.boardId,
     boardTitle: req.body.boardTitle,
     boardBody: req.body.boardBody,
-    boardImg: boardImg,
-    category: req.body.category,
-    pub: req.body.pub,
-    language: req.body.language,
+    boardImg: boardImg || originalData.boardImg,
+    category: parseInt(req.body.category || originalData.category),
+    pub: parseInt(req.body.pub || originalData.pub),
+    language: parseInt(req.body.language || originalData.language),
   }
 
   try {
     const patch = await Board.update(updateData)
     if (patch.ok === 1) {
-      console.log(`[INFO] 유저 ${res.locals.uid}가 글 ${req.params.boardId}을 수정했습니다.`)
-      if (patch.n === 1 && patch.n === patch.nModified) {
-        return res.sendStatus(200)
-      } else if (patch.n === 1 && patch.n !== patch.nModified) {
+      if (patch.n === 1) {
+        const newerData = await Board.getById(req.params.boardId);
+        console.log(`[INFO] 유저 ${res.locals.uid}가 글 ${req.params.boardId}을 수정했습니다.`)
         return res.status(200).json({
-          msg: '질의에 성공했으나 데이터가 수정되지 않았습니다.',
+          result: 'ok',
+          data: newerData
         })
       } else if (patch.n === 0) {
+        console.log(`[WARN] 유저 ${res.locals.uid}가 글 ${req.params.boardId}을 수정하려했으나 존재하지 않습니다.`)
         return res.status(404).json({
-          msg: '존재하지 않는 데이터에 접근했습니다.',
+          result: 'error',
+          message: '존재하지 않는 데이터에 접근했습니다.',
         })
       }
+    } else {
+      console.error(`[ERROR] 글 ${req.params.boardId}의 수정이 실패했습니다.`)
+      return res.status(500).json({
+        result: 'ok',
+        message: '수정에 실패했습니다.',
+      })
     }
   } catch (e) {
     console.error(`[ERROR] ${e}`)

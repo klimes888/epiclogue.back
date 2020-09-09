@@ -40,7 +40,7 @@ board.statics.getUserArticleList = function (userId) {
 }
 
 board.statics.isWriter = function (userId, boardId) {
-  return this.findOne({ _id: boardId, uid: userId })
+  return this.findOne({ _id: boardId, writer: userId })
 }
 
 board.statics.update = function (articleData) {

@@ -1,6 +1,6 @@
 import crypto from 'crypto'
 import util from 'util'
-import User from '../../models'
+import { User } from '../../models'
 import dotenv from 'dotenv'
 const randomBytesPromise = util.promisify(crypto.randomBytes)
 const pbkdf2Promise = util.promisify(crypto.pbkdf2)
@@ -35,57 +35,64 @@ export const getUserEditInfo = async function (req, res, next) {
 }
 
 export const postUserEditInfo = async function (req, res, next) {
-  const uid = res.locals.uid
-  const result = await Users.getUserInfo(uid)
+  const originalData = await User.getUserInfo(res.locals.uid)
+  
+  const screenId = req.body['screenId'] || originalData.screenId
+  const nickname = req.body['userNick'] || originalData.nickname
+  const country = parseInt(req.body['userCountry']) || originalData.country
+  const availableLanguage = req.body['userLang'] || originalData.availableLanguage
+  const intro = req.body['userIntro'] || originalData.intro
+  
+  /* 이미지 length에 관련되어 에러가 발생하기 때문에 기본 이미지로 변경한다면 이에 대한 처리 필요 */
 
-  const screenId = req.body['screenId'] || result.screenId
-  const nickname = req.body['userNick'] || result.nickname
-  const country = parseInt(req.body['userCountry']) || result.country
-  const availableLanguage = req.body['userLang'] || result.availableLanguage
-  const intro = req.body['userIntro'] || result.intro
-  let bann
-  let prof
-  if (req.files.length > 1) {
-    if (req.files[0].fieldname == 'userBannerImg') {
-      bann = req.files[0].location
-      prof = req.files[1].location
-    } else {
-      bann = req.files[1].location
-      prof = req.files[0].location
+  let banner
+  let profile
+  if (req.files !== undefined) {
+    if (req.files.length > 1) {
+      if (req.files[0].fieldname == 'userBannerImg') {
+        banner = req.files[0].location
+        profile = req.files[1].location
+      } else {
+        banner = req.files[1].location
+        profile = req.files[0].location
+      }
+    } else if (req.files.length == 1) {
+      if (req.files[0].fieldname == 'userBannerImg') {
+        banner = req.files[0].location
+      } else {
+        profile = req.files[0].location
+      }
     }
-  } else if (req.files.length == 1) {
-    if (req.files[0].fieldname == 'userBannerImg') {
-      bann = req.files[0].location
-    } else {
-      prof = req.files[0].location
-    }
+  } else {
+    banner = originalData.banner
+    profile = originalData.profile
   }
+
 
   try {
     const checkId = await User.isScreenIdUnique(screenId)
-    const originalScreenId = await User.getUserInfo(res.locals.uid, { screendId: 1 })
-    if (checkId || originalScreenId === screenId) {
+    if (checkId || screenId === originalData.screenId) {
       const newerUserData = {
-        uid,
+        userId: res.locals.uid,
         screenId,
         nickname,
         availableLanguage,
         country,
         intro,
-        bann,
-        prof,
+        banner,
+        profile,
       }
 
       await User.updateProfile(newerUserData)
-
+      console.log(`[INGO] 유저 ${res.locals.uid}가 프로필을 수정했습니다.`)
       return res.status(200).json({
         result: 'ok',
-        data: newerUserData,
+        data: newerUserData
       })
     } else {
       return res.status(400).json({
         result: 'error',
-        message: 'ID가 중복됩니다.',
+        message: 'screenId가 중복됩니다.',
       })
     }
   } catch (e) {

@@ -10,14 +10,14 @@ const user = new mongoose.Schema({
   availableLanguage: { type: [String] },
   joinDate: { type: Date, required: true, default: Date.now },
   termsOfUseAcceptedAt: { type: Date, required: true, default: Date.now },
-  intro: { type: String },
-  banner: { type: String },
-  profile: { type: String },
+  intro: { type: String, default: null },
+  banner: { type: String, default: null },
+  profile: { type: String, default: null },
   salt: { type: String },
   isConfirmed: { type: Boolean, required: true, default: false },
   token: { type: String },
-  followerCount: { type: Number },
-  followingCount: { type: Number },
+  followerCount: { type: Number, default: 0 },
+  followingCount: { type: Number, default: 0 },
 })
 
 user.statics.create = function (data) {
@@ -102,13 +102,13 @@ user.statics.updateProfile = function (profile) {
   return this.updateOne(
     { _id: profile.userId },
     {
-      nickname: profile.nick,
+      nickname: profile.nickname,
       screenId: profile.screenId,
       country: profile.country,
       availableLanguage: profile.availableLanguage,
       intro: profile.intro,
-      banner: profile.bann,
-      profile: profile.prof,
+      banner: profile.banner,
+      profile: profile.profile,
     }
   )
 }
