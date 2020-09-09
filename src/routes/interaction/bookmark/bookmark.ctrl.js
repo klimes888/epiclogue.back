@@ -1,7 +1,4 @@
-import Bookmark from "../../../models/bookmark";
-import react from "../../../models/react";
-import Board from '../../../models/board';
-import User from '../../../models/users'
+import {Bookmark, React, Board} from "../../../models";
 
 /* 
   This is bookmark router.
@@ -39,7 +36,7 @@ export const addBookmark = async function (req, res, next) {
 
   try {
     await Bookmark.create(bookmarkData);
-    await react.create(reactData);
+    await React.create(reactData);
     await Board.countBookmark(req.body.boardId, 1)
     await Board.countReact(req.body.boardId, 1)
     const bookmarkCount = await Board.getBookmarkCount(req.body.boardId)
@@ -65,7 +62,7 @@ export const deleteBookmark = async (req, res, next) => {
 
   try {
     await Bookmark.delete(userId, boardId);
-    await react.delete(userId, boardId);
+    await React.delete(userId, boardId);
     await Board.countBookmark(req.body.boardId, 0)
     await Board.countReact(req.body.boardId, 0)
     const bookmarkCount = await Board.getBookmarkCount(req.body.boardId)

@@ -1,8 +1,4 @@
-import Like from "../../../models/like";
-import Feedback from "../../../models/feedback";
-import Board from "../../../models/board";
-import Reply from "../../../models/reply";
-import react from "../../../models/react";
+import {Like, React, Board, Feedback, Reply} from "../../../models";
 
 /*
   This is like router
@@ -27,7 +23,7 @@ export const addLike = async (req, res, next) => {
         boardId: req.body.targetId,
         type: "like",
       };
-      await react.create(reactData);
+      await React.create(reactData);
       await Board.countHeart(likeData.targetId, 1)
       await Board.countReact(likeData.targetId, 1)
       likeCount = await Board.getHeartCount(likeData.targetId)
@@ -65,7 +61,7 @@ export const deleteLike = async (req, res, next) => {
     let likeCount;
 
     if (likeData.targetType === "board") {
-      await react.delete(likeData.userId, likeData.targetId);
+      await React.delete(likeData.userId, likeData.targetId);
       await Board.countHeart(req.body.targetId, 0)
       await Board.countReact(req.body.targetId, 0)
       likeCount = await Board.getHeartCount(likeData.targetId)

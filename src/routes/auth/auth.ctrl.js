@@ -1,4 +1,4 @@
-import Users from "../../models/users";
+import {User} from "../../models";
 import jwt from "jsonwebtoken";
 import dotenv from 'dotenv'
 import util from 'util'
@@ -14,7 +14,7 @@ export const login = async function (req, res, next) {
     const email = req.body["email"];
     const userPw = req.body["userPw"];
   
-    const user = await Users.getSalt(email);
+    const user = await User.getSalt(email);
     if (user) {
       const crypt_Pw = await pbkdf2Promise(
         userPw,
@@ -24,7 +24,7 @@ export const login = async function (req, res, next) {
         "sha512"
       );
   
-      const result = await Users.findUser(email, crypt_Pw.toString("base64"));
+      const result = await User.findUser(email, crypt_Pw.toString("base64"));
       if (result) {
         const token = jwt.sign(
           {
@@ -70,7 +70,7 @@ export const join = async function (req, res, next) {
     if (check) {
       if (userPw == userPwRe) {
         /* 중복 가입 이메일 처리 */
-        if ((await Users.isExist(email)) != null) {
+        if ((await User.isExist(email)) != null) {
           return res.status(400).json({
             result: "error",
             message: "중복된 이메일입니다. 다른 이메일로 가입해주세요.",
@@ -90,7 +90,7 @@ export const join = async function (req, res, next) {
           "sha512"
         );
         const auth_token = crypt_Pw.toString("base64").substr(0, 10);
-        const result = await Users.create({
+        const result = await User.create({
           email: email,
           password: crypt_Pw.toString("base64"),
           salt: salt.toString("base64"),
@@ -221,9 +221,9 @@ export const mailAuth = async function (req, res, next) {
     const email = req.query.email;
     const token = req.query.token;
     try {
-      const result = await Users.isConfirmed(email, token);
+      const result = await User.isConfirmed(email, token);
       if (result) {
-        await Users.confirmUser(email);
+        await User.confirmUser(email);
         return res.status(201).json({
           result: "ok",
         });

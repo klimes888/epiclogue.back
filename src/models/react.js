@@ -24,4 +24,4 @@ react.statics.getByBoardId = function (boardId) {
   });
 };
 
-module.exports = mongoose.model("React", react);
+export default mongoose.model("React", react);

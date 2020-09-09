@@ -1,6 +1,6 @@
 {
     "verbose": true,
     "ignore":["node_modules/**/*", ".git"],
-    "watch":["app.js", "src/**"],
-    "ext":"js, css, hbs"
+    "watch":["bin/www, app.js", "src/**"],
+    "ext":"js"
 }

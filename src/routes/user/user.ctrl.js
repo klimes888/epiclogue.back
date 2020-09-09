@@ -1,6 +1,6 @@
 import crypto from "crypto";
 import util from "util";
-import Users from "../../models/users";
+import {User} from "../../models";
 import dotenv from 'dotenv'
 const randomBytesPromise = util.promisify(crypto.randomBytes);
 const pbkdf2Promise = util.promisify(crypto.pbkdf2);
@@ -12,7 +12,7 @@ dotenv.config()
 export const getUserEditInfo = async function (req, res, next) {
   const uid = res.locals.uid;
   try {
-    const result = await Users.getUserInfo(uid);
+    const result = await User.getUserInfo(uid);
     return res.status(201).json({
       result: "ok",
       data: {
@@ -114,7 +114,7 @@ export const changePass = async function (req, res, next) {
 
       if (check) {
         try {
-          const info = await Users.getUserInfo(uid);
+          const info = await User.getUserInfo(uid);
           const saltNew = await randomBytesPromise(64);
           const crypt_Pw = await pbkdf2Promise(
             userPw,
@@ -130,7 +130,7 @@ export const changePass = async function (req, res, next) {
             parseInt(process.env.RESULT_LENGTH),
             "sha512"
           );
-          await Users.changePass(
+          await User.changePass(
             uid,
             crypt_Pw.toString("base64"),
             crypt_PwNew.toString("base64"),
@@ -172,7 +172,7 @@ export const deleteUser = async function (req, res, next) {
   const userPw = req.body["userPw"];
 
   try {
-    const info = await Users.getUserInfo(uid);
+    const info = await User.getUserInfo(uid);
     const crypt_Pw = await pbkdf2Promise(
       userPw,
       info["salt"],

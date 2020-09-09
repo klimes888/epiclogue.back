@@ -1,5 +1,4 @@
-import Follow from "../../../models/follow";
-import User from '../../../models/users'
+import {User, Follow} from '../../../models'
 /* 
   This is follow router.
   base url: /:screenId/follow
