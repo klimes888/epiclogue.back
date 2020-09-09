@@ -6,7 +6,7 @@ import {checkWriter} from '../../../../lib/middleware/checkPermission'
 
 reply.get('/', verifyToken, replyCtrl.getReplys)
 reply.post('/', verifyToken, replyCtrl.postReply)
-reply.patch('/', verifyToken, checkWriter, replyCtrl.editReply)
-reply.delete('/', verifyToken, checkWriter, replyCtrl.deleteReply)
+reply.patch('/:replyId', verifyToken, checkWriter, replyCtrl.editReply)
+reply.delete('/:replyId', verifyToken, checkWriter, replyCtrl.deleteReply)
 
 export default reply

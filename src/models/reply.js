@@ -3,7 +3,7 @@ const ObjectId = mongoose.ObjectId;
 mongoose.set("useCreateIndex", true);
 
 const Reply = new mongoose.Schema({
-  userId: { type: ObjectId, required: true },
+  writer: { type: ObjectId, required: true, ref: 'User' },
   boardId: { type: ObjectId, required: true },
   parentId: { type: ObjectId, required: true },
   replyBody: { type: String, required: true },
@@ -20,12 +20,13 @@ Reply.statics.create = function (data) {
 
 // Auth
 Reply.statics.isWriter = function (userId, replyId) {
-  return this.findOne({ _id: replyId, userId: userId });
+  console.log(replyId, userId)
+  return this.findOne({ _id: replyId, writer: userId });
 };
 
 // Read
 Reply.statics.getByParentId = function (parentId) {
-  return this.find({ parentId });
+  return this.find({ parentId }, { __v: 0, boardId: 0, parentId: 0 }).populate({ path: 'writer', select: 'nickname screenId' });
 };
 
 Reply.statics.getBody = function (replyId) {

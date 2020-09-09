@@ -3,11 +3,12 @@ const ObjectId = mongoose.ObjectId;
 mongoose.set("useCreateIndex", true);
 
 const Feedback = new mongoose.Schema({
-  userId: { type: ObjectId, required: true },
+  writer: { type: ObjectId, required: true, ref: 'User' },
   boardId: { type: ObjectId, required: true },
   feedbackBody: { type: String, required: true },
   writeDate: { type: Date, default: Date.now },
   edited: { type: Boolean, default: false },
+  replies: [{ type: ObjectId, ref: 'Reply'}],
   childCount: { type: Number, default: 0 },
   heartCount: { type: Number, default: 0 },
 });
@@ -22,7 +23,7 @@ Feedback.statics.create = function (data) {
 Feedback.statics.getByBoardId = function (boardId) {
   return this.find({ boardId }, {
     __v: 0
-  });
+  }).populate({ path: 'writer', select: 'screenId nickname'});
 };
 
 Feedback.statics.getBody = function (feedbackId) {
@@ -31,7 +32,7 @@ Feedback.statics.getBody = function (feedbackId) {
 
 // Auth
 Feedback.statics.isWriter = function (userId, feedbackId) {
-  return this.findOne({ _id: feedbackId, userId });
+  return this.findOne({ _id: feedbackId, writer: userId });
 };
 
 // Update
@@ -56,6 +57,10 @@ Feedback.statics.deleteByBoardId = function (boardId) {
 
 Feedback.statics.getById = function (feedbackId) {
   return this.findOne({ _id: feedbackId })
+}
+
+Feedback.statics.getReply = function (feedbackId, replyId) {
+  return this.updateOne({ _id: feedbackId }, { $push: { replies: replyId } })
 }
 
 Feedback.statics.countReply = function (feedbackId, flag) {
