@@ -102,7 +102,7 @@ export const getEditInfo = async (req, res, next) => {
 
 // 수정
 export const postEditInfo = async function (req, res, next) {
-  let boardImg
+  let boardImg = null
 
   if (req.files !== undefined) {
     boardImg = []
@@ -110,23 +110,19 @@ export const postEditInfo = async function (req, res, next) {
       boardImg.push(req.files[i].location)
     }
   }
-
-// 수정 필요
-
-  console.log(req.body)
-
+  
   const originalData = await Board.getById(req.params.boardId)
 
   const updateData = {
     boardId: req.params.boardId,
-    boardTitle: req.body.boardTitle,
-    boardBody: req.body.boardBody,
+    boardTitle: req.body.boardTitle || originalData.boardTitle,
+    boardBody: req.body.boardBody || originalData.boardBody,
     boardImg: boardImg || originalData.boardImg,
     category: parseInt(req.body.category || originalData.category),
     pub: parseInt(req.body.pub || originalData.pub),
     language: parseInt(req.body.language || originalData.language),
   }
-
+  
   try {
     const patch = await Board.update(updateData)
     if (patch.ok === 1) {
