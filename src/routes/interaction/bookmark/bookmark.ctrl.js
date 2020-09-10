@@ -7,7 +7,7 @@ import { Bookmark, React, Board, User } from '../../../models'
 
 export const getBookmarkList = async (req, res, next) => {
   const screenId = req.params.screenId
-
+  
   try {
     const userId = await User.getIdByScreenId(screenId)
     const bookmarkSet = await Bookmark.getByUserId(userId)

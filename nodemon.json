@@ -1,6 +1,6 @@
 {
     "verbose": true,
     "ignore":["node_modules/**/*", ".git"],
-    "watch":["bin/www, app.js", "src/**"],
+    "watch":["bin/www, app.js", "src/**", "apidoc.yaml"],
     "ext":"js"
 }

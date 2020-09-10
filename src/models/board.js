@@ -6,10 +6,10 @@ const board = new mongoose.Schema({
   boardTitle: { type: String, default: '' },
   boardImg: { type: [String], required: true },
   boardBody: { type: String, default: '' },
-  category: { type: Number, required: true, default: 0 }, // 0: Illust, 1: Comic
+  category: { type: String, required: true, default: 0 }, // [on future] 0: Illust, 1: Comic 
   pub: { type: Number, required: true, default: 1 }, // 0: private, 1: public
   writeDate: { type: Date, default: Date.now },
-  language: { type: Number, default: 0 }, // 0: Korean, 1: Japanese, 2: US, 3: China, 4: Taiwan
+  language: { type: String, default: 0 }, // [on future] 0: Korean, 1: Japanese, 2: US, 3: China, 4: Taiwan
   allowSecondaryCreation: { type: Number, default: 1 }, // 0: not allow, 1: allow, 2: only allow on followers
   feedbacks: [{ type: ObjectId, ref: 'Feedback' }],
   heartCount: { type: Number, default: 0 },
@@ -27,10 +27,10 @@ board.statics.create = function (data) {
   return boardData.save()
 }
 
-board.statics.getById = function (boardId) {
-  return this.findOne({ _id: boardId }, { _id: 0, __v: 0 })
+board.statics.getById = function (boardId, option) {
+  return this.findOne({ _id: boardId }, option || { _id: 0, __v: 0 })
     .populate('feedbacks')
-    .populate({ path: 'writer', select: 'screenId nickname' })
+    .populate({ path: 'writer', select: 'screenId nickname profile' })
 }
 
 /* 특정 유저의 글 GET (미검증) */

@@ -337,20 +337,7 @@ paths:
                 example: "ok"
               data:
                 type: object
-                properties:
-                  writer:
-                    type: object
-                    properties:
-                      nickname:
-                        type: string
-                      userid:
-                        type: string
-                  board:
-                    $ref: '#/definitions/board_view'
-                  feedback:
-                    type: array
-                    items:
-                      $ref: '#/definitions/Feedback'
+                $ref: '#/definitions/board_view'
         500:
           description: ERROR
           schema:
@@ -1115,20 +1102,23 @@ definitions:
   board_view:
     type: "object"
     required: 
-    - "uid"
     - "boardImg"
     - "category"
     - "pub"
     properties:
-      uid:
-        type: string
       boardImg:
         type: array
         items:
           type: string
+          example: 
+            - "link1"
+            - "link2"
+      boardTitle:
+        type: string
+        example: 'WA!'
       boardBody:
         type: string
-        example: "wa!"
+        example: "SANS!"
       category:
         type: string
         example: "comic"
@@ -1159,6 +1149,25 @@ definitions:
       edited:
         type: boolean
         default: false
+      writer:
+        type: Object
+        $ref: '#/definitions/Writer'
+      feedbacks:
+        type: array
+        $ref: '#/definitions/Feedback'
+
+  Writer:
+    type: object
+    properties:
+      _id:
+        tpye: string
+      nickname:
+        type: string
+      userid:
+        type: string
+      profile:
+        type: string
+        
   Feedback:
     type: "object"
     required: 
@@ -1166,8 +1175,17 @@ definitions:
     - "boardId"
     - "feedbackBody"
     properties:
-      userId:
-        type: string
+      writer:
+        type: object
+        properties:
+          profile:
+            type: string
+          _id:
+            type: string
+          nickname:
+            type: string
+          screenId:
+            type: string
       boardId:
         type: string
       feedbackBody:
