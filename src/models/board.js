@@ -30,7 +30,7 @@ board.statics.create = function (data) {
 board.statics.getById = function (boardId, option) {
   return this.findOne({ _id: boardId }, option || { _id: 0, __v: 0 })
     .populate('feedbacks')
-    .populate({ path: 'writer', select: 'screenId nickname profile' })
+    .populate({ path: 'writer', select: '_id screenId nickname profile' })
 }
 
 /* 특정 유저의 글 GET (미검증) */
@@ -76,7 +76,7 @@ board.statics.findAll = function () {
       category: 1,
       boardImg: 1,
     }
-  ).populate({ path: 'writer', select: 'nickname' })
+  ).populate({ path: 'writer', select: '_id screenId nickname profile' })
 }
 
 board.statics.getFeedback = function (boardId, feedbackId) {
