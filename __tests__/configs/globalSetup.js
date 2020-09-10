@@ -1,6 +1,6 @@
-require('dotenv')
-import Database from '../../database'
+import Database from '../../src/lib/database'
 
 module.exports = async () => {
-  Database.connect()
+  await Database.connect()
+  await Database.drop()
 }

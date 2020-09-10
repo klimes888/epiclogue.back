@@ -9,7 +9,7 @@
     "babel": "babel-node ./bin/www",
     "docker": "yarn install && nodemon ./bin/www --exec babel-node",
     "test": "NODE_ENV=test && ./node_modules/.bin/jest tests --config jest.config.js",
-    "test:debug": "NODE_ENV=test &&./node_modules/.bin/jest tests --config --runInBand --detectOpenHandles jest.config.js"
+    "test:debug": "NODE_ENV=test &&./node_modules/.bin/jest tests --config jest.config.js --runInBand --detectOpenHandles "
   },
   "dependencies": {
     "@sentry/node": "5.19.0",
@@ -46,6 +46,7 @@
     "babel-jest": "^26.3.0",
     "eslint": "^7.5.0",
     "eslint-plugin-react": "^7.20.4",
+    "form-data": "^3.0.0",
     "jest": "^26.4.2",
     "random-string": "^0.2.0",
     "supertest": "^4.0.2"
