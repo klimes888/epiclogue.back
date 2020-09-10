@@ -4,7 +4,7 @@ import dotenv from 'dotenv'
 import randomString from 'random-string'
 import request from 'supertest'
 
-import User from '../../../src/models/users'
+import { User } from '../../../src/models'
 import app from '../../../app'
 
 dotenv.config()
