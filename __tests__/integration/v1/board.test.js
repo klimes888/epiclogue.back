@@ -6,8 +6,7 @@ import fs from 'fs'
 import randomString from 'random-string'
 import path from 'path'
 
-import User from '../../../src/models/users'
-import Board from '../../../src/models/board'
+import { User, Board } from '../../../src/models'
 import app from '../../../app'
 
 dotenv.config()

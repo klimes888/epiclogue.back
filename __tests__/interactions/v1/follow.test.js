@@ -4,7 +4,7 @@ import dotenv from 'dotenv'
 import randomString from 'random-string'
 import request from 'supertest'
 
-import User from '../../../src/models/users'
+import { User } from '../../../src/models'
 import app from '../../../app'
 
 dotenv.config()
@@ -64,7 +64,7 @@ describe('팔로우 테스트', () => {
         .expect(200)
     })
 
-    test('팔로우 실패: 없는 아이디에 접근 | 400', async () => {
+    test('팔로우 실패: 없는 아이디에 접근 | 404', async () => {
       await request(app)
         .post(`/interaction/SCREENID/follow`)
         .send({ targetUserId: invalidId })
