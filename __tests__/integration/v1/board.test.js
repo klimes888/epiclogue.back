@@ -82,13 +82,13 @@ describe('글 테스트', () => {
     })
   })
 
-  describe('글 읽기', async () => {})
+  describe('글 읽기', () => {})
 
-  // describe("글 수정", async() => {
+  // describe("글 수정", () => {
 
   // })
 
-  // describe("글 삭제", async() => {
+  // describe("글 삭제", () => {
 
   // })
 })
