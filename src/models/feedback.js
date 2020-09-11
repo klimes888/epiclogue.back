@@ -25,7 +25,7 @@ Feedback.statics.getByBoardId = function (boardId) {
     {
       __v: 0,
     }
-  ).populate({ path: 'writer', select: 'screenId nickname' })
+  ).populate({ path: 'writer', select: '_id screenId nickname profile' })
 }
 
 Feedback.statics.getBody = function (feedbackId) {

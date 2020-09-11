@@ -426,7 +426,7 @@ paths:
             category:
               type: string
             pub:
-              type: string
+              type: number
             language:
               type: string
       responses:
