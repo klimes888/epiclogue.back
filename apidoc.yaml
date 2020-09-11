@@ -360,7 +360,7 @@ paths:
     
     delete:
       tags:
-      - "board"
+      - "boards"
       summary: "delete board"
       description: ""
       parameters:
@@ -412,7 +412,7 @@ paths:
         - access_token: []
     post:
       tags:
-      - "board"
+      - "boards"
       summary: "post new board info"
       description: ""
       parameters:
@@ -541,7 +541,7 @@ paths:
 
     delete:
       tags:
-      - "board"
+      - "boards"
       summary: "delete feedback"
       description: ""
       parameters:
@@ -623,7 +623,7 @@ paths:
 
     get:
       tags:
-      - "board"
+      - "boards"
       summary: "get reply list"
       description: ""
       parameters:
@@ -714,7 +714,7 @@ paths:
 
     delete:
       tags:
-      - "board"
+      - "boards"
       summary: "delete reply"
       description: ""
       parameters:
