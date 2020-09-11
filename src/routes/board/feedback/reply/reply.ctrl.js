@@ -1,4 +1,4 @@
-import {Reply, User, Feedback} from "../../../../models"
+import { Reply, Feedback } from '../../../../models'
 /* 
   This is reply router.
   base url: /:userId/boards/:boardId/reply
@@ -7,158 +7,114 @@ import {Reply, User, Feedback} from "../../../../models"
 // 대댓글 생성
 export const postReply = async (req, res, next) => {
   const replyForm = {
-    userId: res.locals.uid,
+    writer: res.locals.uid,
     boardId: req.params.boardId,
-    parentId: req.body.parentId,
+    parentId: req.params.feedbackId,
     replyBody: req.body.replyBody,
-  };
-
-  const newerDataSet = []
+  }
 
   try {
-    await Reply.create(replyForm);
-    await Feedback.getChild(replyForm.parentId)
-    const newerReplyData = await Reply.getByParentId(replyForm.parentId);
-    for (let data of newerReplyData) {
-      let userData = await User.getUserInfo(data.userId, { _id: 0, nickname: 1, screenId: 1, profile: 1 })
-      
-      let resultData = {
-        _id: data._id,
-        boardId: data.boardId,
-        parentId: data.parentId,
-        replyBody: data.replyBody,
-        edited: data.edited,
-        heartCount: data.heartCount,
-        writeDate: data.writeDate,
-        userInfo: userData
-      }
-      newerDataSet.push(resultData)
-    }
+    const replyData = await Reply.create(replyForm)
+    await Feedback.getReply(req.params.feedbackId, replyData._id)
+    const newerReplyData = await Reply.getByParentId(replyForm.parentId)
     return res.status(200).json({
-      result: "ok",
-      data: newerDataSet,
-    });
+      result: 'ok',
+      data: newerReplyData,
+    })
   } catch (e) {
-    console.error(`[Error] ${e}`);
+    console.error(`[Error] ${e}`)
     return res.status(500).json({
-      result: "error",
+      result: 'error',
       message: e.message,
-    });
+    })
   }
-};
+}
 
 // 댓글 하위의 대댓글 뷰
 export const getReplys = async (req, res, next) => {
-  const parentId = req.params.parentId;
-  const resultDataSet = []
+  const feedbackId = req.params.feedbackId
 
   try {
-    const replyData = await Reply.getByParentId(parentId);
-    for (let data of replyData) {
-      let userData = await User.getUserInfo(data.userId, { _id: 0, nickname: 1, screenId: 1, profile: 1 })
-      let resultData = {
-        _id: data._id,
-        boardId: data.boardId,
-        parentId: data.parentId,
-        replyBody: data.replyBody,
-        edited: data.edited,
-        heartCount: data.heartCount,
-        writeDate: data.writeDate,
-        userInfo: userData
-      }
-      resultDataSet.push(resultData)
-    }
+    const replyData = await Reply.getByParentId(feedbackId)
     return res.status(200).json({
-      result: "ok",
-      data: resultDataSet,
-    });
+      result: 'ok',
+      data: replyData,
+    })
   } catch (e) {
-    console.error(`[Error] ${e}`);
+    console.error(`[Error] ${e}`)
     return res.status(500).json({
-      result: "error",
+      result: 'error',
       message: e.message,
-    });
+    })
   }
-};
+}
 
 export const editReply = async (req, res, next) => {
   const newForm = {
     replyId: req.params.replyId,
     newReplyBody: req.body.newReplyBody,
-  };
-  const resultDataSet = [];
-  const parentId = await Reply.getParentId(req.params.replyId);
-  
-  try {
-    const patch = await Reply.update(newForm);
+  }
 
+  try {
+    const patch = await Reply.update(newForm)
     if (patch.ok === 1) {
       if (patch.n === 1 && patch.n === patch.nModified) {
-        console.log(`Feedback ${parentId} 의 reply ${req.params.replyId} 수정 완료`)
+        console.log(`Feedback ${req.params.feedbackId} 의 reply ${req.params.replyId} 수정 완료`)
       } else if (patch.n === 1 && patch.n !== patch.nModified) {
-        console.warn(`Feedback ${parentId} 의 reply ${req.params.replyId} 의 수정이 질의에 성공했으나 데이터가 수정되지 않았습니다.`)
-        return res.status(200).json({
-          result: "ok",
-          message: "질의에 성공했으나 데이터가 수정되지 않았습니다.",
-        });
+        console.log(
+          `Feedback ${req.params.feedbackId} 의 reply ${req.params.replyId} 의 수정이 질의에 성공했으나 데이터가 수정되지 않았습니다.`
+        )
       } else if (patch.n === 0) {
         return res.status(404).json({
-          result: "error",
-          message: "존재하지 않는 데이터에 접근했습니다.",
-        });
+          result: 'error',
+          message: '존재하지 않는 데이터에 접근했습니다.',
+        })
       }
+      const newerData = await Reply.getByParentId(req.params.feedbackId)
+      return res.status(200).json({
+        result: 'ok',
+        data: newerData,
+      })
+    } else {
+      console.error(
+        `${res.locals.uid}가 reply ${req.params.replyId}의 수정을 시도했으나 실패했습니다.`
+      )
+      return res.status(500).json({
+        result: 'error',
+        message: '예기치 않은 오류가 발생했습니다.',
+      })
     }
   } catch (e) {
-    console.error(`[Error] ${e}`);
+    console.error(`[Error] ${e}`)
     return res.status(500).json({
-      result: "error",
+      result: 'error',
       message: e.message,
-    });
+    })
   }
-};
+}
 
 export const deleteReply = async (req, res, next) => {
-  const replyId = req.params.replyId;
-
   try {
-    const parentId = await Reply.getById(replyId);
-    const deleteResult = await Reply.delete(replyId, { parentId: 1 });
-    if (deleteResult.ok === 1) {
-      const newerReplyData = await Reply.getByParentId(parentId);
-
-      if (
-        deleteResult.n === 1 &&
-        deleteResult.n === deleteResult.deletedCount
-      ) {
-        return res.send(200).json({
-          result: "ok",
-          data: newerReplyData,
-        });
-      } else if (
-        deleteResult.ok === 1 &&
-        deleteResult.n !== deleteResult.deletedCount
-      ) {
-        return res.status(200).json({
-          result: "ok",
-          message: "질의에 성공했으나 데이터가 삭제되지 않았습니다.",
-        });
-      } else if (deleteResult.n === 0) {
+    const deletion = await Reply.delete(req.params.replyId, { parentId: 1 })
+    if (deletion.ok === 1) {
+      if (deletion.n !== 1) {
         return res.status(404).json({
-          result: "error",
-          message: "존재하지 않는 데이터에 접근했습니다.",
-        });
+          result: 'error',
+          message: '존재하지 않는 데이터에 접근하려 했습니다.',
+        })
       }
-    } else {
-      return res.status(500).json({
-        result: "error",
-        message: "데이터베이스 질의 실패",
-      });
+      const newerReplyData = await Reply.getByParentId(req.params.feedbackId)
+      console.log(`Feedback ${req.params.feedbackId} 의 reply ${req.params.replyId} 삭제 완료`)
+      return res.status(200).json({
+        result: 'ok',
+        data: newerReplyData,
+      })
     }
   } catch (e) {
-    console.error(`[Error] ${e}`);
+    console.error(`[Error] ${e}`)
     return res.status(500).json({
-      result: "error",
+      result: 'error',
       message: e.message,
-    });
+    })
   }
-};
+}
