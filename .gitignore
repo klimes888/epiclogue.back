@@ -3,12 +3,9 @@ node_modules
 
 # setting files
 .env
-yarn.lock
 .node-version
 
 # etc
-sessions
-public/uploads
 .DS_Store
 .eslintrc.js
 data

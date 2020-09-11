@@ -337,20 +337,7 @@ paths:
                 example: "ok"
               data:
                 type: object
-                properties:
-                  writer:
-                    type: object
-                    properties:
-                      nickname:
-                        type: string
-                      userid:
-                        type: string
-                  board:
-                    $ref: '#/definitions/board_view'
-                  feedback:
-                    type: array
-                    items:
-                      $ref: '#/definitions/Feedback'
+                $ref: '#/definitions/board_view'
         500:
           description: ERROR
           schema:
@@ -360,7 +347,7 @@ paths:
     
     delete:
       tags:
-      - "board"
+      - "boards"
       summary: "delete board"
       description: ""
       parameters:
@@ -412,7 +399,7 @@ paths:
         - access_token: []
     post:
       tags:
-      - "board"
+      - "boards"
       summary: "post new board info"
       description: ""
       parameters:
@@ -451,6 +438,8 @@ paths:
           description: ERROR
           schema:
             $ref: '#/definitions/API_response_error'
+      security:
+        - access_token: []
 
   /boards/{boardUid}/feedback:
     post:
@@ -541,7 +530,7 @@ paths:
 
     delete:
       tags:
-      - "board"
+      - "boards"
       summary: "delete feedback"
       description: ""
       parameters:
@@ -623,7 +612,7 @@ paths:
 
     get:
       tags:
-      - "board"
+      - "boards"
       summary: "get reply list"
       description: ""
       parameters:
@@ -714,7 +703,7 @@ paths:
 
     delete:
       tags:
-      - "board"
+      - "boards"
       summary: "delete reply"
       description: ""
       parameters:
@@ -756,18 +745,13 @@ paths:
             $ref: '#/definitions/API_response_error'
       security:
         - access_token: []
-    
-  /interaction/{screenId}/bookmark:
+  /interaction/bookmark:
     post:
       tags:
       - "interaction"
       summary: "add board into bookmark"
       description: ""
       parameters:
-      - name: "screenId"
-        in: "path"
-        required: true
-        type: string
       - name: "Body"
         in: "body"
         required: true
@@ -800,10 +784,6 @@ paths:
       summary: "delete bookmark"
       description: ""
       parameters:
-      - name: "screenId"
-        in: "path"
-        required: true
-        type: string
       - name: "Body"
         in: "body"
         required: true
@@ -830,6 +810,7 @@ paths:
       security:
         - access_token: []
 
+  /interaction/{screenId}/bookmark:
     get:
       tags:
       - "interaction"
@@ -860,17 +841,13 @@ paths:
       security:
         - access_token: []
     
-  /interaction/{screenId}/like:
+  /interaction/like:
     post:
       tags:
       - "interaction"
       summary: "add like"
       description: ""
       parameters:
-      - name: "screenId"
-        in: "path"
-        required: true
-        type: string
       - name: "Body"
         in: "body"
         required: true
@@ -905,10 +882,6 @@ paths:
       summary: "delete like"
       description: ""
       parameters:
-      - name: "screenId"
-        in: "path"
-        required: true
-        type: string
       - name: "Body"
         in: "body"
         required: true
@@ -936,7 +909,8 @@ paths:
             $ref: '#/definitions/API_response_error'
       security:
         - access_token: []
-
+  
+  /interaction/{screenId}/like:
     get:
       tags:
       - "interaction"
@@ -967,17 +941,13 @@ paths:
       security:
         - access_token: []
     
-  /interaction/{screenId}/follow:
+  /interaction/follow:
     post:
       tags:
       - "interaction"
       summary: "add follow"
       description: ""
       parameters:
-      - name: "screenId"
-        in: "path"
-        required: true
-        type: string
       - name: "Body"
         in: "body"
         required: true
@@ -1010,10 +980,6 @@ paths:
       summary: "delete follow"
       description: ""
       parameters:
-      - name: "screenId"
-        in: "path"
-        required: true
-        type: string
       - name: "Body"
         in: "body"
         required: true
@@ -1040,6 +1006,7 @@ paths:
       security:
         - access_token: []
 
+  /interaction/{screenId}/follow:
     get:
       tags:
       - "interaction"
@@ -1069,7 +1036,7 @@ paths:
             $ref: '#/definitions/API_response_error'
       security:
         - access_token: []
-    
+
   /search:
     get:
       tags:
@@ -1098,45 +1065,51 @@ definitions:
   board_thumb:
     type: "object"
     properties:
-      uid:
+      _id: 
         type: string
+        example: '1a4c6ea830e14ef67'
       boardTitle:
         type: string
-      thumbPath:
-        type: string
-      userNick:
-        type: string
+        example: 'latata'
+      boardImg:
+        type: array
+        example: ["link1", "link2"]
       category:
         type: string
-        example: "comic"
-      pub:
+        example: 'Comic'
+      pub: 
         type: number
+        example: 1 
+      writer:
+        type: object
+        $ref: '#/definitions/Writer'
 
   board_view:
     type: "object"
     required: 
-    - "uid"
     - "boardImg"
     - "category"
     - "pub"
     properties:
-      uid:
-        type: string
       boardImg:
         type: array
-        items:
-          type: string
+        example: ["link1", "link2"]
+      boardTitle:
+        type: string
+        example: 'WA!'
       boardBody:
         type: string
-        example: "wa!"
+        example: "SANS!"
       category:
         type: string
         example: "comic"
       pub:
         type: number
+        example: 1
       writeDate:
-        type: number
-        default: Date.now
+        type: string
+        format: date-time
+        default: "2018-03-20T09:12:28Z"
       language:
         type: string
         default: "korean"
@@ -1148,10 +1121,10 @@ definitions:
         default: 0
       bookmarkCount:
         type: number
-        default: 0
+        default: 5
       reactCount:
         type: number
-        default: 0
+        default: 10
       originUserId:
         type: string
       originBoardId:
@@ -1159,6 +1132,29 @@ definitions:
       edited:
         type: boolean
         default: false
+      writer:
+        type: Object
+        $ref: '#/definitions/Writer'
+      feedbacks:
+        type: array
+        $ref: '#/definitions/Feedback'
+
+  Writer:
+    type: object
+    properties:
+      _id:
+        type: string
+        example: '867cab2512312aed1f'
+      nickname:
+        type: string
+        example: 'swagger_awe'
+      screenId:
+        type: string
+        example: 'hippo'
+      profile:
+        type: string
+        example: 'a_link'
+        
   Feedback:
     type: "object"
     required: 
@@ -1166,15 +1162,15 @@ definitions:
     - "boardId"
     - "feedbackBody"
     properties:
-      userId:
-        type: string
-      boardId:
-        type: string
+      writer:
+        type: object
+        $ref: '#/definitions/Writer'
       feedbackBody:
         type: string
       writeDate:
-        type: number
-        default: Date.now
+        type: string
+        format: date-time
+        default: "2018-03-20T09:12:28Z"
       edited:
         type: boolean
         default: false
@@ -1184,6 +1180,7 @@ definitions:
       heartCount:
         type: number
         default: 0
+
   User:
     type: "object"
     required: 

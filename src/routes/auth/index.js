@@ -1,5 +1,5 @@
-import {Router} from 'express'
-const auth = new Router({mergeParams: true});
+import { Router } from 'express'
+const auth = new Router({ mergeParams: true })
 import * as authCtrl from './auth.ctrl'
 
 auth.get('/mailAuth', authCtrl.mailAuth)
