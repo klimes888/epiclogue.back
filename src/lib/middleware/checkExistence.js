@@ -45,7 +45,7 @@ export const checkUserExistence = async (req, res, next) => {
 
   try {
     const existence = await User.getById(userId)
-    console.log(existence._id, res.locals.uid)
+    
     if (existence !== null) {
       // left is Object, right is String.
       if (existence._id.toString() === res.locals.uid) {
