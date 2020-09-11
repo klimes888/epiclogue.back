@@ -438,6 +438,8 @@ paths:
           description: ERROR
           schema:
             $ref: '#/definitions/API_response_error'
+      security:
+        - access_token: []
 
   /boards/{boardUid}/feedback:
     post:
@@ -743,18 +745,13 @@ paths:
             $ref: '#/definitions/API_response_error'
       security:
         - access_token: []
-    
-  /interaction/{screenId}/bookmark:
+  /interaction/bookmark:
     post:
       tags:
       - "interaction"
       summary: "add board into bookmark"
       description: ""
       parameters:
-      - name: "screenId"
-        in: "path"
-        required: true
-        type: string
       - name: "Body"
         in: "body"
         required: true
@@ -787,10 +784,6 @@ paths:
       summary: "delete bookmark"
       description: ""
       parameters:
-      - name: "screenId"
-        in: "path"
-        required: true
-        type: string
       - name: "Body"
         in: "body"
         required: true
@@ -817,6 +810,7 @@ paths:
       security:
         - access_token: []
 
+  /interaction/{screenId}/bookmark:
     get:
       tags:
       - "interaction"
@@ -847,17 +841,13 @@ paths:
       security:
         - access_token: []
     
-  /interaction/{screenId}/like:
+  /interaction/like:
     post:
       tags:
       - "interaction"
       summary: "add like"
       description: ""
       parameters:
-      - name: "screenId"
-        in: "path"
-        required: true
-        type: string
       - name: "Body"
         in: "body"
         required: true
@@ -892,10 +882,6 @@ paths:
       summary: "delete like"
       description: ""
       parameters:
-      - name: "screenId"
-        in: "path"
-        required: true
-        type: string
       - name: "Body"
         in: "body"
         required: true
@@ -923,7 +909,8 @@ paths:
             $ref: '#/definitions/API_response_error'
       security:
         - access_token: []
-
+  
+  /interaction/{screenId}/like:
     get:
       tags:
       - "interaction"
@@ -954,17 +941,13 @@ paths:
       security:
         - access_token: []
     
-  /interaction/{screenId}/follow:
+  /interaction/follow:
     post:
       tags:
       - "interaction"
       summary: "add follow"
       description: ""
       parameters:
-      - name: "screenId"
-        in: "path"
-        required: true
-        type: string
       - name: "Body"
         in: "body"
         required: true
@@ -997,10 +980,6 @@ paths:
       summary: "delete follow"
       description: ""
       parameters:
-      - name: "screenId"
-        in: "path"
-        required: true
-        type: string
       - name: "Body"
         in: "body"
         required: true
@@ -1027,6 +1006,7 @@ paths:
       security:
         - access_token: []
 
+  /interaction/{screenId}/follow:
     get:
       tags:
       - "interaction"
@@ -1056,7 +1036,7 @@ paths:
             $ref: '#/definitions/API_response_error'
       security:
         - access_token: []
-    
+
   /search:
     get:
       tags:
