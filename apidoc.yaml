@@ -297,7 +297,7 @@ paths:
             category:
               type: string
             pub:
-              type: string
+              type: number
             language:
               type: string
             boardImg:
@@ -439,7 +439,7 @@ paths:
             category:
               type: string
             pub:
-              type: string
+              type: number
             language:
               type: string
       responses:
@@ -1110,7 +1110,7 @@ definitions:
         type: string
         example: "comic"
       pub:
-        type: string
+        type: number
 
   board_view:
     type: "object"
@@ -1133,7 +1133,7 @@ definitions:
         type: string
         example: "comic"
       pub:
-        type: string
+        type: number
       writeDate:
         type: number
         default: Date.now
