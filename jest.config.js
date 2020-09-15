@@ -7,6 +7,7 @@ module.exports = {
   modulePathIgnorePatterns: [
     "./__tests__/configs/*",
     // "./__tests__/interactions/*",
+    // "./__tests__/integration/v1/healthCheck.test.js",
     // "./__tests__/integration/v1/users.test.js",
     // "./__tests__/integration/v1/auth.test.js",
   ],
