@@ -6,7 +6,7 @@ import fs from 'fs'
 import randomString from 'random-string'
 import path from 'path'
 
-import  { User, Board } from '../../../src/models'
+import  { User } from '../../../src/models'
 
 import app from '../../../app'
 
@@ -36,7 +36,7 @@ describe('글 테스트', () => {
     language: 'Korean',
   }
 
-  const imgPath = path.join(__dirname + '/testImages')
+  const imgPath = path.join(__dirname + '/../../testImages')
   const imagePathArray = []
   fs.readdir(imgPath, (err, files) => {
     if (err) {

@@ -6,10 +6,11 @@ module.exports = {
   // Ignoring directories
   modulePathIgnorePatterns: [
     "./__tests__/configs/*",
-    // "./__tests__/interactions/*",
-    // "./__tests__/integration/v1/healthCheck.test.js",
-    // "./__tests__/integration/v1/users.test.js",
-    // "./__tests__/integration/v1/auth.test.js",
+    "./__tests__/interactions/*",
+    "./__tests__/integration/v1/healthCheck.test.js",
+    "./__tests__/integration/v1/auth.test.js",
+    "./__tests__/integration/v1/users.test.js",
+    "./__tests__/integration/v1/boards.test.js",
   ],
 
   // Trigger before all test cases start

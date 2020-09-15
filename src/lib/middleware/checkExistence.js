@@ -8,13 +8,16 @@ export const checkExistence = async (req, res, next) => {
   try {
     // 게시 타입에 따라 분류 후 처리
     if (req.params.replyId !== undefined || req.body.targetType === 'reply') {
+      type = 'reply'
       targetId = req.params.replyId || req.body.targetId
       existence = await Reply.getById(targetId)
     } else if (req.params.feedbackId !== undefined || req.body.targetType === 'feedback') {
+      type = 'feedback'
       targetId = req.params.feedbackId || req.body.targetId
       existence = await Feedback.getById(targetId)
     } else {
       // 글 수정 또는 북마크, 좋아요
+      type = 'board'
       targetId = req.params.boardId || req.body.boardId || req.body.targetId
       existence = await Board.getById(targetId)
     }
