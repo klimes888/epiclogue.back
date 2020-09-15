@@ -810,7 +810,6 @@ paths:
       security:
         - access_token: []
 
-  /interaction/{screenId}/bookmark:
     get:
       tags:
       - "interaction"
@@ -818,7 +817,7 @@ paths:
       description: ""
       parameters:
       - name: "screenId"
-        in: "path"
+        in: "query"
         required: true
         type: string
       responses:
@@ -910,7 +909,6 @@ paths:
       security:
         - access_token: []
   
-  /interaction/{screenId}/like:
     get:
       tags:
       - "interaction"
@@ -918,7 +916,7 @@ paths:
       description: ""
       parameters:
       - name: "screenId"
-        in: "path"
+        in: "query"
         required: true
         type: string
       responses:
@@ -1006,7 +1004,6 @@ paths:
       security:
         - access_token: []
 
-  /interaction/{screenId}/follow:
     get:
       tags:
       - "interaction"
@@ -1014,7 +1011,7 @@ paths:
       description: ""
       parameters:
       - name: "screenId"
-        in: "path"
+        in: "query"
         required: true
         type: string
       responses:

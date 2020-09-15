@@ -91,7 +91,7 @@ export const deleteLike = async (req, res, next) => {
 }
 
 export const getLikeList = async (req, res, next) => {
-  const screenId = req.params.screenId
+  const screenId = req.query.screenId
   
   try {
     const userId = await User.getIdByScreenId(screenId)
