@@ -160,28 +160,14 @@ export const postEditInfo = async function (req, res, next) {
 
 /* 유저마다 다르게 받아야 함 */
 export const getBoards = async (req, res, next) => {
-  const result = []
-
   try {
     const boardList = await Board.findAll()
-    for (const data of boardList) {
-      const dataSlot = {
-        boardId: data._id,
-        boardTitle: data.boardTitle,
-        boardBody: data.boardBody,
-        thumbPath: data.boardImg[0],
-        userNick: data.writer.nickname,
-        userNick: data.writer.nickname,
-        pub: data.pub,
-        category: data.category,
-        heartCount: data.heartCount,
-      }
-      result.push(dataSlot)
-    }
+
+    // 썸네일만 골라내는 작업 필요
 
     return res.status(200).json({
       result: 'ok',
-      data: result,
+      data: boardList,
     })
   } catch (e) {
     console.error(`[ERROR] ${e}`)

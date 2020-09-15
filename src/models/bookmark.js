@@ -3,7 +3,7 @@ const ObjectId = mongoose.ObjectId
 
 const Bookmark = new mongoose.Schema({
   userId: { type: ObjectId, required: true },
-  boardId: { type: ObjectId, required: true },
+  board: { type: ObjectId, required: true, ref: 'Board' },
   craeteAt: { type: Date, default: Date.now },
 })
 
@@ -18,7 +18,7 @@ Bookmark.statics.delete = function (userId, boardId) {
 
 // 유저의 북마크 목록
 Bookmark.statics.getByUserId = function (userId) {
-  return this.find({ userId })
+  return this.find({ userId }).populate({ path: 'board', select: '_id boardTitle boardImg. pub category' })
 }
 
 export default mongoose.model('Bookmark', Bookmark)

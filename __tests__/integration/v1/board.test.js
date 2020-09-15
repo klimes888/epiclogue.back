@@ -6,7 +6,8 @@ import fs from 'fs'
 import randomString from 'random-string'
 import path from 'path'
 
-import { User, Board } from '../../../src/models'
+import  { User, Board } from '../../../src/models'
+
 import app from '../../../app'
 
 dotenv.config()
@@ -36,7 +37,7 @@ describe('글 테스트', () => {
     boardTitle: 'a board Title',
     boardBody: 'a board Body',
     category: 'Illust',
-    pub: 'true',
+    pub: 1,
     language: 'Korean',
   }
 

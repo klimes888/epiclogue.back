@@ -337,20 +337,7 @@ paths:
                 example: "ok"
               data:
                 type: object
-                properties:
-                  writer:
-                    type: object
-                    properties:
-                      nickname:
-                        type: string
-                      userid:
-                        type: string
-                  board:
-                    $ref: '#/definitions/board_view'
-                  feedback:
-                    type: array
-                    items:
-                      $ref: '#/definitions/Feedback'
+                $ref: '#/definitions/board_view'
         500:
           description: ERROR
           schema:
@@ -1098,45 +1085,51 @@ definitions:
   board_thumb:
     type: "object"
     properties:
-      uid:
+      _id: 
         type: string
+        example: '1a4c6ea830e14ef67'
       boardTitle:
         type: string
-      thumbPath:
-        type: string
-      userNick:
-        type: string
+        example: 'latata'
+      boardImg:
+        type: array
+        example: ["link1", "link2"]
       category:
         type: string
-        example: "comic"
-      pub:
+        example: 'Comic'
+      pub: 
         type: string
+        example: 'public'
+      writer:
+        type: object
+        $ref: '#/definitions/Writer'
 
   board_view:
     type: "object"
     required: 
-    - "uid"
     - "boardImg"
     - "category"
     - "pub"
     properties:
-      uid:
-        type: string
       boardImg:
         type: array
-        items:
-          type: string
+        example: ["link1", "link2"]
+      boardTitle:
+        type: string
+        example: 'WA!'
       boardBody:
         type: string
-        example: "wa!"
+        example: "SANS!"
       category:
         type: string
         example: "comic"
       pub:
-        type: string
-      writeDate:
         type: number
-        default: Date.now
+        example: 1
+      writeDate:
+        type: string
+        format: date-time
+        default: "2018-03-20T09:12:28Z"
       language:
         type: string
         default: "korean"
@@ -1148,10 +1141,10 @@ definitions:
         default: 0
       bookmarkCount:
         type: number
-        default: 0
+        default: 5
       reactCount:
         type: number
-        default: 0
+        default: 10
       originUserId:
         type: string
       originBoardId:
@@ -1159,6 +1152,29 @@ definitions:
       edited:
         type: boolean
         default: false
+      writer:
+        type: Object
+        $ref: '#/definitions/Writer'
+      feedbacks:
+        type: array
+        $ref: '#/definitions/Feedback'
+
+  Writer:
+    type: object
+    properties:
+      _id:
+        type: string
+        example: '867cab2512312aed1f'
+      nickname:
+        type: string
+        example: 'swagger_awe'
+      screenId:
+        type: string
+        example: 'hippo'
+      profile:
+        type: string
+        example: 'a_link'
+        
   Feedback:
     type: "object"
     required: 
@@ -1166,15 +1182,15 @@ definitions:
     - "boardId"
     - "feedbackBody"
     properties:
-      userId:
-        type: string
-      boardId:
-        type: string
+      writer:
+        type: object
+        $ref: '#/definitions/Writer'
       feedbackBody:
         type: string
       writeDate:
-        type: number
-        default: Date.now
+        type: string
+        format: date-time
+        default: "2018-03-20T09:12:28Z"
       edited:
         type: boolean
         default: false
@@ -1184,6 +1200,7 @@ definitions:
       heartCount:
         type: number
         default: 0
+
   User:
     type: "object"
     required: 

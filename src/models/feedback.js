@@ -57,8 +57,8 @@ Feedback.statics.deleteByBoardId = function (boardId) {
   return this.deleteMany({ boardId })
 }
 
-Feedback.statics.getById = function (feedbackId) {
-  return this.findOne({ _id: feedbackId })
+Feedback.statics.getById = function (feedbackId, option) {
+  return this.findOne({ _id: feedbackId }, option)
 }
 
 Feedback.statics.getReply = function (feedbackId, replyId) {

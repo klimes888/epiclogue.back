@@ -1,4 +1,4 @@
-import { Like, React, Board, Feedback, Reply } from '../../../models'
+import { Like, React, Board, Feedback, Reply, User } from '../../../models'
 
 /*
   This is like router
@@ -91,27 +91,15 @@ export const deleteLike = async (req, res, next) => {
 }
 
 export const getLikeList = async (req, res, next) => {
-  const userId = req.params.screenId
-  const likeList = []
-
+  const screenId = req.params.screenId
+  
   try {
+    const userId = await User.getIdByScreenId(screenId)
     const likeObjectIdList = await Like.getByUserId(userId)
-    for (let data of likeObjectIdList) {
-      let result
-
-      if (data.targetType === 'board') {
-        result = await Board.getById(data.targetId)
-      } else if (data.targetType === 'feedback') {
-        result = await Feedback.getById(data.targetId)
-      } else if (data.targetType === 'reply') {
-        result = await Reply.getById(data.targetId)
-      }
-      likeList.push(result)
-    }
     console.log(`[INFO] 유저 ${res.locals.uid}가 유저 ${userId}의 좋아요 리스트를 확인했습니다.`)
     return res.status(200).json({
       result: 'ok',
-      data: likeList,
+      data: likeObjectIdList,
     })
   } catch (e) {
     console.error(`[Error] ${e}`)

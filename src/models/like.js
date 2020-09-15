@@ -1,10 +1,11 @@
 import mongoose from 'mongoose'
+import { Board, Feedback, Reply } from './'
 const ObjectId = mongoose.ObjectId
 
 const like = new mongoose.Schema({
-  userId: { type: ObjectId, required: true },
+  userId: { type: ObjectId, required: true, ref: 'User' },
   targetType: { type: String, required: true }, // 글(board), 댓글(feedback), 대댓글(reply)
-  targetId: { type: ObjectId, required: true },
+  targetId: { type: ObjectId, required: true, ref: 'Board Feedback Reply' },
   createdAt: { type: Date, default: Date.now },
 })
 
@@ -22,8 +23,48 @@ like.statics.unlike = function (data) {
 }
 
 // 유저의 좋아요 목록
-like.statics.getByUserId = function (userId) {
-  return this.find({ userId })
+like.statics.getByUserId = async function (userId) {
+  const resultData = [];
+  const likeDataSet = await this.find({ userId }, { userId: 0 })
+  
+  // filter(projection) options
+  const boardFilterOption = {
+    feedbacks: 0,
+    allowSecondaryCreation: 0,
+    __v: 0,
+  }
+
+  const feedbackFilterOption = {
+    replies: 0,
+    __v: 0
+  }
+
+  const replyFilterOption = {
+    boardId: 0,
+    __v: 0
+  }
+
+  // iteration for data
+  for (let data of likeDataSet) {
+    let eachBracket = {
+      _id: data._id,
+      createAt: data._createdAt,
+      type: data._targetType,
+    }
+    if (data.targetType === 'board') {
+      const frag = await Board.getById(data.targetId, boardFilterOption)
+      eachBracket.data = frag
+    } else if (data.targetType === 'feedback') {
+      const frag = await Feedback.getById(data.targetId, feedbackFilterOption)
+      eachBracket.data = frag
+    } else if (data.targetType === 'reply') {
+      const frag = await Reply.getById(data.targetId, replyFilterOption)
+      eachBracket.data = frag
+    }
+
+    resultData.push(eachBracket)
+  }
+  return resultData
 }
 
 like.statics.getCount = function (likeData) {

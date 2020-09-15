@@ -64,12 +64,11 @@ export const deleteFollow = async (req, res, next) => {
       })
     }
   } catch (e) {
-    next(e)
-    // console.error(`[Error] ${e}`);
-    // return res.status(500).json({
-    //   result: "error",
-    //   message: e,
-    // });
+    console.error(`[Error] ${e.message}`)
+    return res.status(500).json({
+      result: 'error',
+      message: '알 수 없는 오류가 발생했습니다.',
+    })
   }
 }
 

@@ -59,8 +59,8 @@ Reply.statics.deleteByParentId = function (parentId) {
   return this.deleteMany({ parentId })
 }
 
-Reply.statics.getById = function (replyId) {
-  return this.findOne({ _id: replyId })
+Reply.statics.getById = function (replyId, option) {
+  return this.findOne({ _id: replyId }, option)
 }
 
 Reply.statics.getParentId = function (replyId) {
