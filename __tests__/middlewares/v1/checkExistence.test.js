@@ -78,26 +78,45 @@ describe('데이터 유효성 테스트', () => {
   })
 
   describe('피드백 유효성', () => {
-    const feedbackBody = 'feedback body ever'
-
     test('존재 | 200', async () => {
       const loginResponse = await request(app).post('/auth/login').send({
         email: verifiedData.email,
         userPw: verifiedData.userPw,
-      })
+      }).expect(200)
+      
       userToken = loginResponse.body.token
-
+      
+      const feedbackBody = 'the feedback ever'
       const feedbackInstance = await request(app)
         .post(`/boards/${boardId}/feedback`)
         .set('x-access-token', userToken)
-        .send(feedbackBody)
-        .expect(201)
+        .send({ feedbackBody })
 
       const feedbackData = JSON.parse(feedbackInstance.res.text)
       console.log(feedbackData)
-      // feedbackId = feedbackData.data[feedbackData.size - 1]._id
+      // console.log(feedbackData.length)
+      // console.log(feedbackData.data[feedbackData.length - 1])
+      // feedbackId = feedbackData.data[feedbackData.length - 1]._id
+      // console.log(feedbackId)
+
+      expect(feedbackInstance.statusCode).toBe(201)
+
+      // await request(app).get(`/boards/${boardId}/feedback/${feedbackId}`).set('x-access-token', userToken).expect(200)
+    })
+
+    test('부재 | 404', async () => {
+      console.log(feedbackId)
+
+      await request(app)
+        .get(`/boards/${boardId}/feedback/${invalidId}`)
+        .set('x-access-token', userToken)
+        .expect(404)
     })
   })
 
-  // describe('댓글 유효성', () => {})
+  // describe('댓글 유효성', () => {
+  //   test('존재 | 200', async() => {
+      
+  //   })
+  // })
 })
