@@ -62,9 +62,9 @@ describe('데이터 유효성 테스트', () => {
       await uploadInstance.expect(201)
 
       const createdBoardData = JSON.parse(uploadInstance.res.text)
-      testBoardId = createdBoardData.data._id
+      boardId = createdBoardData.data._id
 
-      await request(app).get(`/boards/${boardId}`).expect(200)
+      await request(app).get(`/boards/${boardId}`).set('x-access-token', userToken).expect(200)
     })
 
     test('부재 | 404', async () => {
