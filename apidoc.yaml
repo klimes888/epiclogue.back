@@ -297,7 +297,7 @@ paths:
             category:
               type: string
             pub:
-              type: string
+              type: number
             language:
               type: string
             boardImg:
@@ -347,7 +347,7 @@ paths:
     
     delete:
       tags:
-      - "board"
+      - "boards"
       summary: "delete board"
       description: ""
       parameters:
@@ -399,7 +399,7 @@ paths:
         - access_token: []
     post:
       tags:
-      - "board"
+      - "boards"
       summary: "post new board info"
       description: ""
       parameters:
@@ -426,7 +426,7 @@ paths:
             category:
               type: string
             pub:
-              type: string
+              type: number
             language:
               type: string
       responses:
@@ -438,6 +438,8 @@ paths:
           description: ERROR
           schema:
             $ref: '#/definitions/API_response_error'
+      security:
+        - access_token: []
 
   /boards/{boardUid}/feedback:
     post:
@@ -528,7 +530,7 @@ paths:
 
     delete:
       tags:
-      - "board"
+      - "boards"
       summary: "delete feedback"
       description: ""
       parameters:
@@ -610,7 +612,7 @@ paths:
 
     get:
       tags:
-      - "board"
+      - "boards"
       summary: "get reply list"
       description: ""
       parameters:
@@ -701,7 +703,7 @@ paths:
 
     delete:
       tags:
-      - "board"
+      - "boards"
       summary: "delete reply"
       description: ""
       parameters:
@@ -743,18 +745,13 @@ paths:
             $ref: '#/definitions/API_response_error'
       security:
         - access_token: []
-    
-  /interaction/{screenId}/bookmark:
+  /interaction/bookmark:
     post:
       tags:
       - "interaction"
       summary: "add board into bookmark"
       description: ""
       parameters:
-      - name: "screenId"
-        in: "path"
-        required: true
-        type: string
       - name: "Body"
         in: "body"
         required: true
@@ -787,10 +784,6 @@ paths:
       summary: "delete bookmark"
       description: ""
       parameters:
-      - name: "screenId"
-        in: "path"
-        required: true
-        type: string
       - name: "Body"
         in: "body"
         required: true
@@ -824,7 +817,7 @@ paths:
       description: ""
       parameters:
       - name: "screenId"
-        in: "path"
+        in: "query"
         required: true
         type: string
       responses:
@@ -847,17 +840,13 @@ paths:
       security:
         - access_token: []
     
-  /interaction/{screenId}/like:
+  /interaction/like:
     post:
       tags:
       - "interaction"
       summary: "add like"
       description: ""
       parameters:
-      - name: "screenId"
-        in: "path"
-        required: true
-        type: string
       - name: "Body"
         in: "body"
         required: true
@@ -892,10 +881,6 @@ paths:
       summary: "delete like"
       description: ""
       parameters:
-      - name: "screenId"
-        in: "path"
-        required: true
-        type: string
       - name: "Body"
         in: "body"
         required: true
@@ -923,7 +908,7 @@ paths:
             $ref: '#/definitions/API_response_error'
       security:
         - access_token: []
-
+  
     get:
       tags:
       - "interaction"
@@ -931,7 +916,7 @@ paths:
       description: ""
       parameters:
       - name: "screenId"
-        in: "path"
+        in: "query"
         required: true
         type: string
       responses:
@@ -954,17 +939,13 @@ paths:
       security:
         - access_token: []
     
-  /interaction/{screenId}/follow:
+  /interaction/follow:
     post:
       tags:
       - "interaction"
       summary: "add follow"
       description: ""
       parameters:
-      - name: "screenId"
-        in: "path"
-        required: true
-        type: string
       - name: "Body"
         in: "body"
         required: true
@@ -997,10 +978,6 @@ paths:
       summary: "delete follow"
       description: ""
       parameters:
-      - name: "screenId"
-        in: "path"
-        required: true
-        type: string
       - name: "Body"
         in: "body"
         required: true
@@ -1034,7 +1011,7 @@ paths:
       description: ""
       parameters:
       - name: "screenId"
-        in: "path"
+        in: "query"
         required: true
         type: string
       responses:
@@ -1056,7 +1033,7 @@ paths:
             $ref: '#/definitions/API_response_error'
       security:
         - access_token: []
-    
+
   /search:
     get:
       tags:
@@ -1098,8 +1075,8 @@ definitions:
         type: string
         example: 'Comic'
       pub: 
-        type: string
-        example: 'public'
+        type: number
+        example: 1 
       writer:
         type: object
         $ref: '#/definitions/Writer'

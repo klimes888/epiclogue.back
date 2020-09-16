@@ -51,7 +51,7 @@ describe('팔로우 테스트', () => {
   describe('팔로우 테스트', () => {
     test('팔로우 성공 | 201', async () => {
       await request(app)
-        .post(`/interaction/SCREENID/follow`)
+        .post(`/interaction/follow`)
         .send({ targetUserId: newUserId })
         .set('x-access-token', verifiedToken)
         .expect(201)
@@ -59,7 +59,7 @@ describe('팔로우 테스트', () => {
 
     test('언팔로우 성공 | 200', async () => {
       await request(app)
-        .delete(`/interaction/SCREENID/follow`)
+        .delete(`/interaction/follow`)
         .send({ targetUserId: newUserId })
         .set('x-access-token', verifiedToken)
         .expect(200)
@@ -67,7 +67,7 @@ describe('팔로우 테스트', () => {
 
     test('팔로우 실패: 없는 아이디에 접근 | 404', async () => {
       await request(app)
-        .post(`/interaction/SCREENID/follow`)
+        .post(`/interaction/follow`)
         .send({ targetUserId: invalidId })
         .set('x-access-token', verifiedToken)
         .expect(404)

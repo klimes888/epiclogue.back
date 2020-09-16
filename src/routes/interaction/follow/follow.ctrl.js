@@ -72,49 +72,24 @@ export const deleteFollow = async (req, res, next) => {
   }
 }
 
-export const getFollowing = async (req, res, next) => {
-  const screenId = req.params.screenId
+export const getFollow = async (req, res, next) => {
+  const screenId = req.query.screenId
+  const type = req.query.type
   const userId = await User.getIdByScreenId(screenId)
   console.log(userId)
-  const followingDataSet = []
+  const dataSet = []
   try {
-    const followingList = await Follow.getFollowingList(userId)
-    for (let data of followingList) {
+    const followList = type === 'following' ? await Follow.getFollowingList(userId) : await Follow.getFollowerList(userId)
+    for (let data of followList) {
       let temp = await Users.getUserInfo(data.targetUserId, {
         nickname: 1,
         userid: 1,
       })
-      followingDataSet.push(temp)
+      dataSet.push(temp)
     }
     return res.status(200).json({
       result: 'ok',
-      data: followingDataSet,
-    })
-  } catch (e) {
-    console.error(`[Error] ${e}`)
-    return res.status(500).json({
-      result: 'error',
-      message: e.message,
-    })
-  }
-}
-
-export const getFollower = async (req, res, next) => {
-  const screenId = req.params.screenId
-  const userId = await User.getIdByScreenId(screenId)
-  const followerDataSet = []
-  try {
-    const followerList = await Follow.getFollowerList(userId)
-    for (let data of followerList) {
-      let temp = await Users.getUserInfo(data.targetUserId, {
-        nickname: 1,
-        userid: 1,
-      })
-      followerDataSet.push(temp)
-    }
-    return res.status(200).json({
-      result: 'ok',
-      data: followerDataSet,
+      data: dataSet,
     })
   } catch (e) {
     console.error(`[Error] ${e}`)
