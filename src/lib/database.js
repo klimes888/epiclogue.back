@@ -39,7 +39,7 @@ class Database {
         console.error(e)
       }
     } else {
-      console.warn('[WARN] Databased disconnection requested while there\'s no connection')
+      console.warn('[WARN] Disconnecting database requested while there\'s no connection')
     }
   }
 

@@ -48,7 +48,7 @@ export const checkUserExistence = async (req, res, next) => {
 
   try {
     const existence = await User.getById(userId)
-    
+
     if (existence !== null) {
       // left is Object, right is String.
       if (existence._id.toString() === res.locals.uid) {
@@ -60,9 +60,7 @@ export const checkUserExistence = async (req, res, next) => {
         next()
       }
     } else {
-      console.error(
-        `[WARN] 유저 ${res.locals.uid}가 존재하지 않는 유저 ${userId} 에게 접근하려 했습니다.`
-      )
+      console.warn(`[WARN] 유저 ${res.locals.uid}가 존재하지 않는 유저 ${userId} 에게 접근하려 했습니다.`)
       return res.status(404).json({
         result: 'error',
         message: '존재하지 않는 데이터입니다.',
