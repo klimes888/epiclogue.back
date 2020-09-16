@@ -14,7 +14,7 @@ export const postFeedback = async (req, res, next) => {
 
   try {
     const postFeedbackResult = await Feedback.create(feedbackData)
-    console.log(`[INFO] 유저 ${res.locals.uid} 가 글 ${req.params.boardId}에 피드백을 작성했습니다.`)
+    console.log(`[INFO] 유저 ${res.locals.uid} 가 피드백 ${postFeedbackResult._id} 을 작성했습니다.`)
     await Board.getFeedback(req.params.boardId, postFeedbackResult._id)
     const newerData = await Feedback.getByBoardId(req.params.boardId)
     return res.status(201).json({
@@ -114,8 +114,8 @@ export const deleteFeedback = async (req, res, next) => {
 
 export const getFeedback = async (req, res, next) => {
   try {
-    const feedbackData = Feedback.getById(req.params.feedbackId)
-    console.log(`[INFO] 유저 ${res.locals.uid} 가 피드백 ${feedbackData._id} 를 조회했습니다.`)
+    const feedbackData = await Feedback.getById(req.params.feedbackId)
+    console.log(`[INFO] 유저 ${feedbackData.writer} 가 피드백 ${feedbackData._id} 를 조회했습니다.`)
     return res.status(200).json({
       result: 'ok',
       data: feedbackData

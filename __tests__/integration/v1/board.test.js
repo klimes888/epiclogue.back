@@ -51,13 +51,13 @@ describe('글 테스트', () => {
   beforeAll(async () => {
     await request(app).post('/auth/join').send(writerData)
     await User.confirmUser(writerData.email)
+    const writerLoginResponse = await request(app).post('/auth/login').send(writerData)
+    userToken = writerLoginResponse.body.token
   })
 
   describe('글 쓰기', () => {
     test('성공 | 201', async () => {
-      const writerLoginResponse = await request(app).post('/auth/login').send(writerData)
 
-      userToken = writerLoginResponse.body.token
 
       const uploadInstance = request(app)
         .post('/boards')

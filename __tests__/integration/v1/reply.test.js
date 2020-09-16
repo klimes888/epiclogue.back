@@ -13,19 +13,20 @@ import app from '../../../app'
 
 dotenv.config()
 
-describe('피드백 테스트', () => {
+describe('댓글 테스트', () => {
   // user data
   const tempPw = randomString() + '1!2@3#4$'
   const userData = {
-    email: 'feedbacktest@lunarcat.com',
+    email: 'replytest@lunarcat.com',
     userPw: tempPw,
     userPwRe: tempPw,
-    userNick: 'boardWriter',
+    userNick: 'replywriter',
   }
   const invalidId = '012345678901234567890123'
   let userToken
   let testBoardId
   let testFeedbackId
+  let testReplyId
 
   // board data
   const boardData = {
@@ -56,7 +57,7 @@ describe('피드백 테스트', () => {
     // console.log(userToken) // ok
   })
 
-  describe('피드백 작성', () => {
+  describe('댓글 작성', () => {
     test('선수: 글 작성 | 201', async () => {
       const uploadInstance = await request(app)
         .post('/boards')
@@ -66,7 +67,7 @@ describe('피드백 테스트', () => {
         .field('category', boardData.category)
         .field('pub', boardData.pub)
         .field('language', boardData.language)
-        .attach('boardImg', imagePathArray[0])
+        .attach('boardImg', imagePathArray[1])
 
       const uploadRes = JSON.parse(uploadInstance.res.text)
       testBoardId = uploadRes.data._id
@@ -74,7 +75,7 @@ describe('피드백 테스트', () => {
       // console.log(testBoardId) // ok
     })
 
-    test('성공 | 201', async () => {
+    test('선수: 피드백 작성 | 201', async () => {
       const rawResponse = await request(app)
         .post(`/boards/${testBoardId}/feedback`)
         .set('x-access-token', userToken)
@@ -85,57 +86,50 @@ describe('피드백 테스트', () => {
       testFeedbackId = extractedResponse.data[0]._id
       // console.log(testFeedbackId) // ok
     })
+
+    test('성공 | 201', async () => {
+      const response = await request(app)
+        .post(`/boards/${testBoardId}/feedback/${testFeedbackId}/reply`)
+        .set('x-access-token', userToken)
+        .send({ replyBody: 'hi, it is reply body' })
+      
+      expect(response.statusCode).toBe(201)
+
+      testReplyId = response.body.data[0]._id
+    })
   })
 
-  describe('피드백 읽기', () => {
+  describe('댓글 수정', () => {
     test('성공 | 200', async () => {
       const response = await request(app)
-        .get(`/boards/${testBoardId}/feedback/${testFeedbackId}`)
+        .patch(`/boards/${testBoardId}/feedback/${testFeedbackId}/reply/${testReplyId}`)
         .set('x-access-token', userToken)
+        .send({ newReplyBody: 'it is new reply body'})
 
       expect(response.statusCode).toBe(200)
     })
 
-    test('실패: 존재하지 않는 피드백 | 404', async () => {
+    test('실패: 존재하지 않는 댓글 | 404', async () => {
       const response = await request(app)
-        .get(`/boards/${testBoardId}/feedback/${invalidId}`)
+        .patch(`/boards/${testBoardId}/feedback/${testFeedbackId}/reply/${invalidId}`)
         .set('x-access-token', userToken)
 
       expect(response.statusCode).toBe(404)
     })
   })
 
-  describe('피드백 수정', () => {
+  describe('댓글 삭제', () => {
     test('성공 | 200', async () => {
       const response = await request(app)
-        .patch(`/boards/${testBoardId}/feedback/${testFeedbackId}`)
-        .set('x-access-token', userToken)
-        .send({ newFeedbackBody: 'feedback has been changed? '})
-
-      expect(response.statusCode).toBe(200)
-    })
-
-    test('실패: 존재하지 않는 피드백 | 404', async () => {
-      const response = await request(app)
-        .patch(`/boards/${testBoardId}/feedback/${invalidId}`)
-        .set('x-access-token', userToken)
-
-      expect(response.statusCode).toBe(404)
-    })
-  })
-
-  describe('피드백 삭제', () => {
-    test('성공 | 200', async () => {
-      const response = await request(app)
-        .delete(`/boards/${testBoardId}/feedback/${testFeedbackId}`)
+        .delete(`/boards/${testBoardId}/feedback/${testFeedbackId}/reply/${testReplyId}`)
         .set('x-access-token', userToken)
 
       expect(response.statusCode).toBe(200)
     })
 
-    test('실패: 존재하지 않는 피드백 | 404', async () => {
+    test('실패: 존재하지 않는 댓글 | 404', async () => {
       const response = await request(app)
-        .delete(`/boards/${testBoardId}/feedback/${invalidId}`)
+        .delete(`/boards/${testBoardId}/feedback/${testFeedbackId}/reply/${invalidId}`)
         .set('x-access-token', userToken)
 
       expect(response.statusCode).toBe(404)

@@ -15,9 +15,10 @@ export const postReply = async (req, res, next) => {
 
   try {
     const replyData = await Reply.create(replyForm)
+    console.log(`[INFO] 유저 ${res.locals.uid} 가 댓글 ${replyData._id} 를 작성했습니다.`)
     await Feedback.getReply(req.params.feedbackId, replyData._id)
     const newerReplyData = await Reply.getByParentId(replyForm.parentId)
-    return res.status(200).json({
+    return res.status(201).json({
       result: 'ok',
       data: newerReplyData,
     })
@@ -36,6 +37,7 @@ export const getReplys = async (req, res, next) => {
 
   try {
     const replyData = await Reply.getByParentId(feedbackId)
+    console.log(`[INFO] 유저 ${res.locals.uid} 가 피드백 ${feedbackId} 하위의 댓글(들)을 열람합니다.`)
     return res.status(200).json({
       result: 'ok',
       data: replyData,
@@ -59,11 +61,7 @@ export const editReply = async (req, res, next) => {
     const patch = await Reply.update(newForm)
     if (patch.ok === 1) {
       if (patch.n === 1 && patch.n === patch.nModified) {
-        console.log(`Feedback ${req.params.feedbackId} 의 reply ${req.params.replyId} 수정 완료`)
-      } else if (patch.n === 1 && patch.n !== patch.nModified) {
-        console.log(
-          `Feedback ${req.params.feedbackId} 의 reply ${req.params.replyId} 의 수정이 질의에 성공했으나 데이터가 수정되지 않았습니다.`
-        )
+        console.log(`[INFO] 유저 ${res.locals.uid} 가 댓글 ${req.params.replyId} 을 수정했습니다.`)
       } else if (patch.n === 0) {
         return res.status(404).json({
           result: 'error',
@@ -76,9 +74,7 @@ export const editReply = async (req, res, next) => {
         data: newerData,
       })
     } else {
-      console.error(
-        `${res.locals.uid}가 reply ${req.params.replyId}의 수정을 시도했으나 실패했습니다.`
-      )
+      console.warn(`[WARN] 유저 ${res.locals.uid}가 댓글 ${req.params.replyId} 의 수정을 시도했으나 실패했습니다.`)
       return res.status(500).json({
         result: 'error',
         message: '예기치 않은 오류가 발생했습니다.',
@@ -97,6 +93,7 @@ export const deleteReply = async (req, res, next) => {
   try {
     const deletion = await Reply.delete(req.params.replyId, { parentId: 1 })
     if (deletion.ok === 1) {
+      console.log(`[INFO] 유저 ${res.locals.uid} 가 댓글 ${req.params.replyId} 을 삭제했습니다.`)  
       if (deletion.n !== 1) {
         return res.status(404).json({
           result: 'error',
@@ -104,7 +101,6 @@ export const deleteReply = async (req, res, next) => {
         })
       }
       const newerReplyData = await Reply.getByParentId(req.params.feedbackId)
-      console.log(`Feedback ${req.params.feedbackId} 의 reply ${req.params.replyId} 삭제 완료`)
       return res.status(200).json({
         result: 'ok',
         data: newerReplyData,
