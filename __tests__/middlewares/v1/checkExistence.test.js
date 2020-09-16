@@ -46,7 +46,7 @@ describe('데이터 유효성 테스트', () => {
       })
       userToken = loginResponse.body.token
 
-      const uploadInstance = await request(app)
+      const uploadInstance = request(app)
         .post('/boards')
         .set('x-access-token', userToken)
         .field('boardTitle', 'validation')
