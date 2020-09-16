@@ -57,8 +57,6 @@ describe('글 테스트', () => {
 
   describe('글 쓰기', () => {
     test('성공 | 201', async () => {
-
-
       const uploadInstance = request(app)
         .post('/boards')
         .set('x-access-token', userToken)
