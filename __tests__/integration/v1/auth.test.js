@@ -4,13 +4,14 @@ import dotenv from 'dotenv'
 import randomString from 'random-string'
 import request from 'supertest'
 import jwt from 'jsonwebtoken'
+import { describe, expect, test } from '@jest/globals'
 
 import { User } from '../../../src/models'
 import app from '../../../app'
 
 dotenv.config()
 
-beforeAll(() => {})
+beforeAll(() => { })
 
 describe('토큰기반 인증 테스트', () => {
   const tempPw = randomString(8) + '1234!@#$'

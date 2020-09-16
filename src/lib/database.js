@@ -22,29 +22,31 @@ class Database {
 
     try {
       await mongoose.connect(dbEnvironment, options)
-      console.log('데이터베이스 연결 성공')
+      console.log('[INFO] Database connected properly')
     } catch (e) {
       console.error(e)
     }
   }
 
   async disconnect() {
+    // mongoose ready state
+    // 0: diconnected, 1: connected, 2: connecting, 3: disconnecting
     if (mongoose.Connection.readyState !== 0) {
       try {
         await mongoose.disconnect()
-        console.log('데이터베이스 연결 해제 성공')
+        console.log('[INFO] Database disconnected properly')
       } catch (e) {
         console.error(e)
       }
     } else {
-      console.warn('데이터베이스 연결이 없어 연결 해제가 정상적으로 완료되지 않았습니다.')
+      console.warn('[WARN] Databased disconnection requested while there\'s no connection')
     }
   }
 
   async drop() {
     try {
       await mongoose.connection.db.dropDatabase()
-      console.log('Test DB dropped')
+      console.log('[INFO] Test DB dropped')
     } catch (e) {
       console.error(e)
     }

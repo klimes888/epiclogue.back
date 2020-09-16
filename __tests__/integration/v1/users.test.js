@@ -4,6 +4,7 @@ import dotenv from 'dotenv'
 import randomString from 'random-string'
 import request from 'supertest'
 import jwt from 'jsonwebtoken'
+import { describe, expect, test } from '@jest/globals'
 
 import { User } from '../../../src/models'
 import app from '../../../app'
@@ -101,7 +102,7 @@ describe('유저 테스트', () => {
         .post('/auth/login')
         .send({
           email: userData.email,
-          userPw: randomString(),
+          userPw: randomString() + '1!2@3#4$',
         })
         .expect(400)
     })
@@ -111,7 +112,7 @@ describe('유저 테스트', () => {
         .post('/auth/login')
         .send({
           email: randomString() + '@test.com',
-          userPw: randomString(),
+          userPw: randomString() + '1!2@3#4$',
         })
         .expect(404)
     })
