@@ -25,7 +25,7 @@ export const checkWriter = async (req, res, next) => {
     if (isWriter !== null) {
       next()
     } else {
-      console.log(`[Auth error] user: ${res.locals.uid}, ${type} id: ${id}`)
+      console.warn(`[WARN] 유저 ${res.locals.uid} 가 권한없이 ${type} ${id} 에 접근하려했습니다.`)
       return res.status(401).json({
         result: 'error',
         message: `${type} 작성자가 아닙니다.`,

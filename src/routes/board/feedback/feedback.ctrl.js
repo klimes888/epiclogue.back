@@ -14,9 +14,9 @@ export const postFeedback = async (req, res, next) => {
 
   try {
     const postFeedbackResult = await Feedback.create(feedbackData)
+    console.log(`[INFO] 유저 ${res.locals.uid} 가 글 ${req.params.boardId}에 피드백을 작성했습니다.`)
     await Board.getFeedback(req.params.boardId, postFeedbackResult._id)
     const newerData = await Feedback.getByBoardId(req.params.boardId)
-    console.log(`[INFO] 유저 ${res.locals.uid} 가 글 ${req.params.boardId}에 피드백을 달았습니다.`)
     return res.status(201).json({
       result: 'ok',
       data: newerData,
@@ -108,6 +108,23 @@ export const deleteFeedback = async (req, res, next) => {
     return res.status(500).json({
       result: 'error',
       message: e.message,
+    })
+  }
+}
+
+export const getFeedback = async (req, res, next) => {
+  try {
+    const feedbackData = Feedback.getById(req.params.feedbackId)
+    console.log(`[INFO] 유저 ${res.locals.uid} 가 피드백 ${feedbackData._id} 를 조회했습니다.`)
+    return res.status(200).json({
+      result: 'ok',
+      data: feedbackData
+    })
+  } catch (e) {
+    console.log(`[ERROR] ${e.message}`)
+    return res.status(500).json({
+      result: 'error',
+      message: 'Internal server error occured'
     })
   }
 }

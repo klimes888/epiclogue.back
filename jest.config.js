@@ -6,9 +6,12 @@ module.exports = {
   // Ignoring directories
   modulePathIgnorePatterns: [
     "./__tests__/configs/*",
+    "./__tests__/ignore/*",
     // "./__tests__/interactions/*",
-    // "./__tests__/integration/v1/users.test.js",
+    // "./__tests__/integration/v1/healthCheck.test.js",
     // "./__tests__/integration/v1/auth.test.js",
+    // "./__tests__/integration/v1/users.test.js",
+    // "./__tests__/integration/v1/board.test.js",
   ],
 
   // Trigger before all test cases start
@@ -17,4 +20,9 @@ module.exports = {
 
   // Trigger after all test cases start
   globalTeardown: "./__tests__/configs/globalTeardown.js",
+
+  // global variables
+  globals: {
+    
+  }
 }; 
