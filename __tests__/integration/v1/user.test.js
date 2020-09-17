@@ -4,6 +4,8 @@ import dotenv from 'dotenv'
 import randomString from 'random-string'
 import request from 'supertest'
 import jwt from 'jsonwebtoken'
+import fs from 'fs'
+import path from 'path'
 import { describe, expect, test } from '@jest/globals'
 
 import { User } from '../../../src/models'
@@ -15,6 +17,7 @@ let verifiedToken
 let newUserId
 
 describe('유저 테스트', () => {
+  // user data
   const tempPw = randomString() + '1!2@3#4$'
   const newPw = randomString() + '!!11@@22'
   const userData = {
@@ -35,6 +38,27 @@ describe('유저 테스트', () => {
     userPwRe: newPw,
     userNick: 'ByeBye',
   }
+
+  // profile data
+  newProfileData = {
+    screenId: 'screenidchanged',
+    userNick: 'computer2',
+    userCountry: 2,
+    userLang: [1, 2],
+    userIntro: `I'm the greatest writer ever`
+  }
+
+  // image data path
+  const imgPath = path.join(__dirname + '/../../testImages')
+  const imagePathArray = []
+  fs.readdir(imgPath, (err, files) => {
+    if (err) {
+      console.error(err)
+    }
+    files.forEach(name => {
+      imagePathArray.push(imgPath + '/' + name)
+    })
+  })
 
   beforeAll(async () => {
     // 임시유저 생성
@@ -166,6 +190,54 @@ describe('유저 테스트', () => {
         })
         .expect(400)
     })
+  })
+
+  describe('프로필 변경', () => {
+    test('성공: 이전 데이터 불러오기 | 200', async () => {
+      const response = await request(app)
+        .get('/user/editProfile')
+        .set('x-access-token', userToken)
+
+      expect(response.statusCode).toBe(200)
+    })
+
+    test('성공: 전체 변경 | 200', async () => {
+      const response = request(app)
+        .post('/user/editProfile')
+        .set('x-access-token', userToken)
+        .field('screenId', newProfileData.screenId)
+        .field('userNick', newProfileData.userNick)
+        .field('userCountry', newProfileData.userCountry)
+        .field('userLang', newProfileData.userLang)
+        .field('userIntro', newProfileData.userIntro)
+        .attach('userBannerImg', imagePathArray[0])
+        .attach('userProfileImg', imagePathArray[1])
+
+      await response
+
+      expect(response.statusCode).toBe(200)
+
+      console.log(response)
+    })
+
+    // test('일부 변경 | 200', async () => {
+    //   const response = request(app)
+    //     .post('/user/editProfile')
+    //     .set('x-access-token', userToken)
+    //     .field('screenId', newProfileData.screenId)
+    //     .field('userNick', newProfileData.userNick)
+    //     .field('userCountry', newProfileData.userCountry)
+    //     .field('userLang', newProfileData.userLang)
+    //     .field('userIntro', newProfileData.userIntro)
+    //     .attach('userBannerImg', imagePathArray[0])
+    //     .attach('userProfileImg', imagePathArray[1])
+
+    //   await response
+
+    //   expect(response.statusCode).toBe(200)
+      
+    //   console.log(response)
+    // })
   })
 
   describe('회원 탈퇴', () => {

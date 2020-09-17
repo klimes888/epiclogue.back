@@ -17,7 +17,7 @@ module.exports = {
 
     /* put more TCs if you want to ignore */
     "./__tests__/interactions/*",
-    "./__tests__/integration/v1/users.test.js",
+    // "./__tests__/integration/v1/user.test.js",
     "./__tests__/integration/v1/board.test.js",
     "./__tests__/integration/v1/feedback.test.js",
     "./__tests__/integration/v1/reply.test.js",
