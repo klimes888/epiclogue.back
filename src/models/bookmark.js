@@ -8,12 +8,16 @@ const Bookmark = new mongoose.Schema({
 })
 
 Bookmark.statics.create = function (data) {
-  const bookmarkData = new this(data)
+  const bookmarkData = new this({
+    userId: data.userId,
+    board: data.boardId,
+    createdAt: Date.now()
+  })
   return bookmarkData.save()
 }
 
 Bookmark.statics.delete = function (userId, boardId) {
-  return this.deleteOne({ userId, boardId })
+  return this.deleteOne({ userId, board: boardId })
 }
 
 // 유저의 북마크 목록

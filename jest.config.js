@@ -2,7 +2,7 @@ module.exports = {
   // Env settings
   testEnvironment: "node",
   preset: "@shelf/jest-mongodb",
-
+  verbose: true,
   // Ignoring directories
   modulePathIgnorePatterns: [
     /* default ignorance */
@@ -23,7 +23,8 @@ module.exports = {
 
     /* interactions */
     "./__tests__/interactions/v1/follow.test.js",
-    // "./__tests__/interactions/v1/like.test.js",
+    "./__tests__/interactions/v1/like.test.js",
+    // "./__tests__/interactions/v1/bookmark.test.js",
   ],
 
   // Trigger before all test cases start
