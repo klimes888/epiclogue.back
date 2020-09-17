@@ -13,7 +13,7 @@ import app from '../../../app'
 
 dotenv.config()
 
-let verifiedToken
+let userToken
 let newUserId
 
 describe('유저 테스트', () => {
@@ -40,7 +40,7 @@ describe('유저 테스트', () => {
   }
 
   // profile data
-  newProfileData = {
+  const newProfileData = {
     screenId: 'screenidchanged',
     userNick: 'computer2',
     userCountry: 2,
@@ -74,19 +74,18 @@ describe('유저 테스트', () => {
       userPw: verifiedUserData.userPw,
     })
 
-    verifiedToken = verifiedLoginReponse.body.token
+    userToken = verifiedLoginReponse.body.token
   })
 
   describe('회원가입 테스트', () => {
-    // node mailer 문제로 진행하지 않음
-    // test("성공 | 201", async () => {
-    //   await request(app).post("/auth/join").send({
-    //     email: randomString() + 'lunarcat.com',
-    //     userPw: '1q2w3e4r!!',
-    //     userPwRe: '1q2w3e4r!!',
-    //     userNick: randomString()
-    //   }).expect(201)
-    // })
+    test("성공 | 201", async () => {
+      await request(app).post("/auth/join").send({
+        email: randomString() + '@lunarcat.com',
+        userPw: '1q2w3e4r!!',
+        userPwRe: '1q2w3e4r!!',
+        userNick: randomString()
+      }).expect(201)
+    })
 
     test('실패: 중복 회원가입 시도 | 400', async () => {
       await request(app).post('/auth/join').send(userData)
@@ -146,7 +145,7 @@ describe('유저 테스트', () => {
     test('성공 | 200', async () => {
       await request(app)
         .patch('/user/changePass')
-        .set('x-access-token', verifiedToken)
+        .set('x-access-token', userToken)
         .send({
           userPw: verifiedUserData.userPw,
           newUserPw: newPw,
@@ -158,7 +157,7 @@ describe('유저 테스트', () => {
     test('실패: 적절하지 않은 비밀번호 | 400', async () => {
       await request(app)
         .patch('/user/changePass')
-        .set('x-access-token', verifiedToken)
+        .set('x-access-token', userToken)
         .send({
           userPw: verifiedUserData.userPw,
           userPwNew: '123',
@@ -170,7 +169,7 @@ describe('유저 테스트', () => {
     test('실패: 새로운 비밀번호가 이전 비밀번호와 동일 | 400', async () => {
       await request(app)
         .patch('/user/changePass')
-        .set('x-access-token', verifiedToken)
+        .set('x-access-token', userToken)
         .send({
           userPw: verifiedUserData.userPw,
           userPwNew: verifiedUserData.userPw,
@@ -182,7 +181,7 @@ describe('유저 테스트', () => {
     test('실패: 새로운 비밀번호와 재입력이 다름 | 400', async () => {
       await request(app)
         .patch('/user/changePass')
-        .set('x-access-token', verifiedToken)
+        .set('x-access-token', userToken)
         .send({
           userPw: verifiedUserData.userPw,
           userPwNew: verifiedUserData.userPw,
@@ -202,7 +201,7 @@ describe('유저 테스트', () => {
     })
 
     test('성공: 전체 변경 | 200', async () => {
-      const response = request(app)
+      const response = await request(app)
         .post('/user/editProfile')
         .set('x-access-token', userToken)
         .field('screenId', newProfileData.screenId)
@@ -213,31 +212,27 @@ describe('유저 테스트', () => {
         .attach('userBannerImg', imagePathArray[0])
         .attach('userProfileImg', imagePathArray[1])
 
-      await response
-
       expect(response.statusCode).toBe(200)
 
       console.log(response)
     })
 
-    // test('일부 변경 | 200', async () => {
-    //   const response = request(app)
-    //     .post('/user/editProfile')
-    //     .set('x-access-token', userToken)
-    //     .field('screenId', newProfileData.screenId)
-    //     .field('userNick', newProfileData.userNick)
-    //     .field('userCountry', newProfileData.userCountry)
-    //     .field('userLang', newProfileData.userLang)
-    //     .field('userIntro', newProfileData.userIntro)
-    //     .attach('userBannerImg', imagePathArray[0])
-    //     .attach('userProfileImg', imagePathArray[1])
+    test('성공: 일부 변경 | 200', async () => {
+      const response = await request(app)
+        .post('/user/editProfile')
+        .set('x-access-token', userToken)
+        .field('screenId', 'partialChange')
+        // .field('userNick', newProfileData.userNick)
+        // .field('userCountry', newProfileData.userCountry)
+        .field('userLang', newProfileData.userLang[0])
+        .field('userIntro', newProfileData.userIntro)
+        .attach('userBannerImg', imagePathArray[0])
+        // .attach('userProfileImg', imagePathArray[1])
 
-    //   await response
-
-    //   expect(response.statusCode).toBe(200)
+      expect(response.statusCode).toBe(200)
       
-    //   console.log(response)
-    // })
+      console.log(response)
+    })
   })
 
   describe('회원 탈퇴', () => {
