@@ -22,7 +22,8 @@ module.exports = {
     "./__tests__/integration/v1/reply.test.js",
 
     /* interactions */
-    "./__tests__/interactions/*",
+    "./__tests__/interactions/v1/follow.test.js",
+    // "./__tests__/interactions/v1/like.test.js",
   ],
 
   // Trigger before all test cases start
