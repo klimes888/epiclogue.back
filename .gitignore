@@ -1,11 +1,12 @@
+# modules
 node_modules
-sessions
+
+# setting files
 .env
-public/uploads
-TODO
+.node-version
+
+# etc
 .DS_Store
-yarn.lock
-package-lock.json
 .eslintrc.js
 data
 coverage

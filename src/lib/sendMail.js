@@ -1,14 +1,14 @@
-import mailer from 'nodemailer';
+import mailer from 'nodemailer'
 import dotenv from 'dotenv'
-dotenv.config();
+dotenv.config()
 
 const transporter = mailer.createTransport({
-    host: "smtp.gmail.com",
-    auth: {
-        type: "login",
-        user: process.env.MAIL_USER,
-        pass: process.env.MAIL_PASS
-    }
-});
+  host: 'smtp.gmail.com',
+  auth: {
+    type: 'login',
+    user: process.env.MAIL_USER,
+    pass: process.env.MAIL_PASS,
+  },
+})
 
-module.exports = transporter;
+export default transporter
