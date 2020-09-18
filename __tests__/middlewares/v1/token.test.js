@@ -1,30 +1,29 @@
 'use strict'
 
 import dotenv from 'dotenv'
-import randomString from 'random-string'
 import request from 'supertest'
 import jwt from 'jsonwebtoken'
+import { describe, expect, test } from '@jest/globals'
 
-import User from '../../../src/models/users'
+import { User } from '../../../src/models'
 import app from '../../../app'
 
 dotenv.config()
 
-beforeAll(() => {})
+// beforeAll(() => {})
 
 describe('토큰기반 인증 테스트', () => {
-  const tempPw = randomString(8) + '1234!@#$'
   const userData = {
-    email: randomString() + '@lunarcat.com',
-    userPw: tempPw,
-    userPwRe: tempPw,
-    userNick: randomString(),
+    email: 'token@lunarcat.com',
+    userPw: 'lunarcat1!2@3#4$',
+    userPwRe: 'lunarcat1!2@3#4$',
+    userNick: 'token',
   }
   const verifiedUserData = {
-    email: 'verify@lunarcat.com',
-    userPw: tempPw,
-    userPwRe: tempPw,
-    userNick: randomString(),
+    email: 'tokenverify@lunarcat.com',
+    userPw: 'lunarcat1!2@3#4$',
+    userPwRe: 'lunarcat1!2@3#4$',
+    userNick: 'tokenman',
   }
 
   beforeAll(async () => {

@@ -53,6 +53,8 @@ app.use(cookieParser())
 app.use(helmet())
 app.use(express.static(path.join(__dirname, 'public')))
 
+Database.connect()
+
 app.use('/', indexRouter)
 app.use('/auth', authRouter)
 app.use('/user', usersRouter)
@@ -77,6 +79,5 @@ app.use(function (err, req, res, next) {
   })
 })
 
-Database.connect()
 
 module.exports = app

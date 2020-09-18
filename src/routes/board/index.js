@@ -9,10 +9,10 @@ import upload from '../../lib/imageUpload'
 
 board.get('/', verifyToken, boardCtrl.getBoards)
 board.post('/', verifyToken, upload.any(), boardCtrl.postBoard)
-board.get('/:boardId', verifyToken, boardCtrl.viewBoard)
+board.get('/:boardId', verifyToken, checkExistence, boardCtrl.viewBoard)
 board.delete('/:boardId', verifyToken, checkExistence, checkWriter, boardCtrl.deleteBoard)
 board.get('/:boardId/edit', verifyToken, checkExistence, checkWriter, boardCtrl.getEditInfo)
-board.post('/:boardId/edit', verifyToken, checkExistence, checkWriter, boardCtrl.postEditInfo)
+board.post('/:boardId/edit', verifyToken, checkExistence, checkWriter, upload.any(), boardCtrl.postEditInfo)
 board.use('/:boardId/feedback', checkExistence, feedback)
 
 export default board

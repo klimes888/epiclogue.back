@@ -37,7 +37,7 @@ export const login = async function (req, res, next) {
           expiresIn: process.env.JWT_EXPIRES_IN,
         }
       )
-
+      console.log(`[INFO] 유저 ${result._id} 가 로그인했습니다.`)
       return res.status(200).json({
         result: 'ok',
         token,
@@ -45,6 +45,7 @@ export const login = async function (req, res, next) {
         screendId: result.screendId,
       })
     } else {
+      console.warn(`[INFO] 유저 ${email} 가 다른 비밀번호 ${userPw} 로 로그인을 시도했습니다.`)
       return res.status(400).json({
         result: 'error',
         message: '잘못된 비밀번호 입니다.',
@@ -69,6 +70,7 @@ export const join = async function (req, res, next) {
     if (userPw == userPwRe) {
       /* 중복 가입 이메일 처리 */
       if ((await User.isExist(email)) != null) {
+        console.warn(`[WARN] 중복된 이메일 ${email} 로 가입하려했습니다.`)
         return res.status(400).json({
           result: 'error',
           message: '중복된 이메일입니다. 다른 이메일로 가입해주세요.',
@@ -191,19 +193,22 @@ export const join = async function (req, res, next) {
           }
         })
       } else {
-        return res.status(401).json({
+        console.log(`[WARN] 이미 존재하는 이메일 ${email} 로 회원가입을 시도했습니다.`)
+        return res.status(400).json({
           result: 'error',
           message: '이미 존재하는 아이디 입니다. 다시 시도해주세요!',
         })
       }
     } else {
-      return res.status(401).json({
+      console.log(`[WARN] 일치하지 않는 패스워드로 가입하려했습니다.`)
+      return res.status(400).json({
         result: 'error',
         message: '패스워드가 일치하지 않습니다!',
       })
     }
   } else {
-    return res.status(401).json({
+    console.log(`[WARN] 회원가입 비밀번호 규칙이 맞지 않습니다.`)
+    return res.status(400).json({
       result: 'error',
       message: '비밀번호 규칙을 다시 확인해주세요.',
     })
@@ -217,10 +222,12 @@ export const mailAuth = async function (req, res, next) {
     const result = await User.isConfirmed(email, token)
     if (result) {
       await User.confirmUser(email)
-      return res.status(201).json({
+      console.log(`[INFO] 유저 ${res.locals.uid} 의 이메일 인증이 완료되었습니다.`)
+      return res.status(200).json({
         result: 'ok',
       })
     } else {
+      console.warn(`[WARN] 이메일 ${email} 의 이메일 인증이 실패했습니다.`)
       return res.status(401).json({
         result: 'error',
         message: '인증실패',

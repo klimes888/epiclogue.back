@@ -2,7 +2,7 @@ import { Bookmark, React, Board, User } from '../../../models'
 
 /* 
   This is bookmark router.
-  base url: /:screenId/bookmark
+  base url: /interaction/bookmark
 */
 
 export const getBookmarkList = async (req, res, next) => {
@@ -11,7 +11,7 @@ export const getBookmarkList = async (req, res, next) => {
   try {
     const userId = await User.getIdByScreenId(screenId)
     const bookmarkSet = await Bookmark.getByUserId(userId)
-    console.log(`[INFO] 유저 ${res.locals.uid}가 ${userId}의 북마크 리스트를 확인했습니다.`)
+    console.log(`[INFO] 유저 ${res.locals.uid}가 ${userId._id}의 북마크 리스트를 확인했습니다.`)
     return res.status(200).json({
       result: 'ok',
       data: bookmarkSet,
