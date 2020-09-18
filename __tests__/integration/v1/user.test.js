@@ -214,7 +214,7 @@ describe('유저 테스트', () => {
 
       expect(response.statusCode).toBe(200)
 
-      console.log(response)
+      // console.log(response)
     })
 
     test('성공: 일부 변경 | 200', async () => {
@@ -231,7 +231,7 @@ describe('유저 테스트', () => {
 
       expect(response.statusCode).toBe(200)
       
-      console.log(response)
+      // console.log(response)
     })
   })
 
