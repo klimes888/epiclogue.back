@@ -85,7 +85,7 @@ export const join = async function (req, res, next) {
         parseInt(process.env.RESULT_LENGTH),
         'sha512'
       )
-      const auth_token = crypt_Pw.toString('base64').substr(0, 10)
+      const auth_token = crypt_Pw.toString('hex').slice(0, 24)
       const result = await User.create({
         email: email,
         password: crypt_Pw.toString('base64'),
