@@ -141,7 +141,7 @@ describe('유저 테스트', () => {
     })
   })
 
-  describe('비밀번호 변경', () => {
+  describe.skip('비밀번호 변경', () => {
     test('성공 | 200', async () => {
       await request(app)
         .patch('/user/changePass')
@@ -192,7 +192,7 @@ describe('유저 테스트', () => {
   })
 
   describe('프로필 변경', () => {
-    test('성공: 이전 데이터 불러오기 | 200', async () => {
+    test.skip('성공: 이전 데이터 불러오기 | 200', async () => {
       const response = await request(app)
         .get('/user/editProfile')
         .set('x-access-token', userToken)
@@ -200,7 +200,7 @@ describe('유저 테스트', () => {
       expect(response.statusCode).toBe(200)
     })
 
-    test('성공: 전체 변경 | 200', async () => {
+    test.skip('성공: 전체 변경 | 200', async () => {
       const response = await request(app)
         .post('/user/editProfile')
         .set('x-access-token', userToken)
@@ -235,7 +235,7 @@ describe('유저 테스트', () => {
     })
   })
 
-  describe('회원 탈퇴', () => {
+  describe.skip('회원 탈퇴', () => {
     test('성공 | 200', async () => {
       await request(app).post('/auth/join').send(toBeDeletedData)
       await User.confirmUser(toBeDeletedData.email)

@@ -57,14 +57,14 @@ export const deleteBoard = async (req, res, next) => {
   const boardId = req.params.boardId
   const query = await Board.getById(boardId, { _id: 0, feedbacks: 0, writer: 0, boardImg: 1 })
   const images = query.boardImg
-  
+
   const beDeletedObject = []
 
   for (let each of images) {
     const texts = each.split('/') // get only object name
     let obj = {} // formatting
     obj.Key = texts[3]
-   beDeletedObject.push(obj)
+    beDeletedObject.push(obj)
   }
 
   // console.log(beDeletedObject)
@@ -138,19 +138,37 @@ export const postEditInfo = async function (req, res, next) {
     }
   }
 
-  const originalData = await Board.getById(req.params.boardId)
-
-  const updateData = {
-    boardId: req.params.boardId,
-    boardTitle: req.body.boardTitle || originalData.boardTitle,
-    boardBody: req.body.boardBody || originalData.boardBody,
-    boardImg: boardImg || originalData.boardImg,
-    category: parseInt(req.body.category || originalData.category),
-    pub: parseInt(req.body.pub || originalData.pub),
-    language: parseInt(req.body.language || originalData.language),
-  }
-
   try {
+    const originalData = await Board.getById(req.params.boardId)
+    const images = originalData.boardImg
+    const beDeletedObject = []
+
+    for (let each of images) {
+      const texts = each.split('/') // get only object name
+      let obj = {} // formatting
+      obj.Key = texts[3]
+      beDeletedObject.push(obj)
+    }
+
+    s3.deleteObjects({
+      Bucket: process.env.AWS_BUCKET_NAME,
+      Delete: {
+        Objects: beDeletedObject
+      }
+    }, (err, data) => {
+      if (err) console.error(err, err.stack)
+    })
+
+    const updateData = {
+      boardId: req.params.boardId,
+      boardTitle: req.body.boardTitle || originalData.boardTitle,
+      boardBody: req.body.boardBody || originalData.boardBody,
+      boardImg: boardImg || originalData.boardImg,
+      category: parseInt(req.body.category || originalData.category),
+      pub: parseInt(req.body.pub || originalData.pub),
+      language: parseInt(req.body.language || originalData.language),
+    }
+
     const patch = await Board.update(updateData)
     if (patch.ok === 1) {
       if (patch.n === 1) {

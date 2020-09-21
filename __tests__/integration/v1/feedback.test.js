@@ -110,7 +110,7 @@ describe('피드백 테스트', () => {
       const response = await request(app)
         .patch(`/boards/${testBoardId}/feedback/${testFeedbackId}`)
         .set('x-access-token', userToken)
-        .send({ newFeedbackBody: 'feedback has been changed? '})
+        .send({ newFeedbackBody: 'feedback has been changed? ' })
 
       expect(response.statusCode).toBe(200)
     })
@@ -139,6 +139,12 @@ describe('피드백 테스트', () => {
         .set('x-access-token', userToken)
 
       expect(response.statusCode).toBe(404)
+    })
+  })
+
+  describe('테스트 종료', () => {
+    test('S3 오브젝트 삭제 | 200', async () => {
+      await request(app).delete(`/boards/${testBoardId}`).set('x-access-token', userToken).expect(200)
     })
   })
 })

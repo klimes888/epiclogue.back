@@ -135,4 +135,10 @@ describe('댓글 테스트', () => {
       expect(response.statusCode).toBe(404)
     })
   })
+  
+  describe('테스트 종료', () => {
+    test('S3 오브젝트 삭제 | 200', async () => {
+      await request(app).delete(`/boards/${testBoardId}`).set('x-access-token', userToken).expect(200)
+    })
+  })
 })

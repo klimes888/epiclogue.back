@@ -17,7 +17,7 @@ let screenId
 const invalidId = '123456789012345678901234'
 let testBoardId
 
-describe('좋아요 테스트', () => {
+describe('북마크 테스트', () => {
   const tempPw = randomString() + '1!2@3#4$'
   const userData = {
     email: 'bookmark@lunarcat.com',
@@ -55,7 +55,7 @@ describe('좋아요 테스트', () => {
     userToken = verifiedLoginReponse.body.token
   })
 
-  describe('좋아요 테스트', () => {
+  describe('북마크 테스트', () => {
     describe('선수 작업', () => {
       test('글 작성 | 201', async () => {
         const uploadInstance = await request(app)
@@ -116,6 +116,12 @@ describe('좋아요 테스트', () => {
         .send({ boardId: invalidId })
         .set('x-access-token', userToken)
         .expect(404)
+    })
+  })
+
+  describe('테스트 종료', () => {
+    test('S3 오브젝트 삭제 | 200', async () => {
+      await request(app).delete(`/boards/${testBoardId}`).set('x-access-token', userToken).expect(200)
     })
   })
 })
