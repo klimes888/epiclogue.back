@@ -32,7 +32,8 @@ export const searchResult = async (req, res, next) => {
 
   try {
     const boardData = await Board.getByQuery(queryString)
-    res.status(200).json(boardData)
+    console.log(`[INFO] 유저 ${res.locals.uid} 가 ${queryString} 을 검색했습니다.`)
+    return res.status(200).json(boardData)
   } catch (e) {
     console.log(e)
     res.sendStatus(500)
