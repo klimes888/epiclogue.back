@@ -1,14 +1,15 @@
 import aws from 'aws-sdk'
 import multer from 'multer'
 import multerS3 from 'multer-s3'
-import moment from 'moment'
+// import moment from 'moment'
+import dayjs from 'dayjs'
 import crypto from 'crypto'
 import util from 'util'
 import dotenv from 'dotenv'
 const randomBytesPromise = util.promisify(crypto.randomBytes)
 dotenv.config()
 
-const s3 = new aws.S3({
+export const s3 = new aws.S3({
   accessKeyId: process.env.AWS_ACCESS_ID, // 생성한 s3의 accesskey
   secretAccessKey: process.env.AWS_SECRET_KEY, // 생성한 s3의 secret key
   region: process.env.AWS_REGION, // 지역설정
@@ -28,10 +29,10 @@ const storage = multerS3({
       .createHash('sha256')
       .update(file.originalname)
       .digest('hex')
-      .slice(0, 10)
+      .slice(0, 16)
     const random = await randomBytesPromise(64)
-    name += random.toString('base64').slice(0, 10)
-    cb(null, moment().format('YYYYMMDDHHmmss') + '_' + name)
+    name += random.toString('hex').slice(0, 32)
+    cb(null, dayjs().format('YYYYMMDDHHmmss') + '_' + name)
   },
 })
 

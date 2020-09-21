@@ -1,4 +1,5 @@
 import { Board } from '../../models'
+import { s3 } from '../../lib/imageUpload'
 
 export const postBoard = async (req, res, next) => {
   let _boardImg = []
@@ -54,8 +55,31 @@ export const viewBoard = async (req, res, next) => {
 // 삭제
 export const deleteBoard = async (req, res, next) => {
   const boardId = req.params.boardId
+  const query = await Board.getById(boardId, { _id: 0, feedbacks: 0, writer: 0, boardImg: 1 })
+  const images = query.boardImg
+  
+  const beDeletedObject = []
+
+  for (let each of images) {
+    const texts = each.split('/') // get only object name
+    let obj = {} // formatting
+    obj.Key = texts[3]
+   beDeletedObject.push(obj)
+  }
+
+  // console.log(beDeletedObject)
 
   try {
+    // for non blocking, didn't use async-await
+    s3.deleteObjects({
+      Bucket: process.env.AWS_BUCKET_NAME,
+      Delete: {
+        Objects: beDeletedObject
+      }
+    }, (err, data) => {
+      if (err) console.error(err, err.stack)
+    })
+
     const deletion = await Board.delete(boardId)
 
     if (deletion.ok === 1) {
