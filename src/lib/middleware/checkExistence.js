@@ -1,4 +1,5 @@
 import { User, Board, Reply, Feedback } from '../../models'
+import createError from 'http-errors'
 
 // to patch, delete, like, bookmark on board, feedback, reply
 export const checkExistence = async (req, res, next) => {
@@ -28,10 +29,11 @@ export const checkExistence = async (req, res, next) => {
       console.warn(
         `[WARN] 유저 ${res.locals.uid}가 존재하지 않는 ${type} ${targetId} 를 접근하려 했습니다.`
       )
-      return res.status(404).json({
-        result: 'error',
-        message: '존재하지 않는 데이터입니다.',
-      })
+      next(createError(404, '존재하지 않는 데이터입니다.'))
+      // return res.status(404).json({
+      //   result: 'error',
+      //   message: '존재하지 않는 데이터입니다.',
+      // })
     }
   } catch (e) {
     console.error(`[ERROR] 게시글 존재 여부를 확인하는 중에 문제가 발생 했습니다. ${e}`)
