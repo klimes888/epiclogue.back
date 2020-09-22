@@ -32,12 +32,6 @@ describe('유저 테스트', () => {
     userPwRe: tempPw,
     userNick: 'Verification',
   }
-  const toBeDeletedData = {
-    email: 'delete@lunarcat.com',
-    userPw: newPw,
-    userPwRe: newPw,
-    userNick: 'ByeBye',
-  }
 
   // profile data
   const newProfileData = {
@@ -240,13 +234,11 @@ describe('유저 테스트', () => {
       // await request(app).post('/auth/join').send(toBeDeletedData)
       // await User.confirmUser(toBeDeletedData.email)
 
-      const res = await request(app).post('/auth/login').send(verifiedUserData)
-
       await request(app)
         .delete('/user')
-        .set('x-access-token', res.body.token)
+        .set('x-access-token', userToken)
         .send({
-          userPw: tempPw,
+          userPw: newPw,
         })
         .expect(200)
     })

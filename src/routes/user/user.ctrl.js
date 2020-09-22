@@ -62,7 +62,6 @@ export const postUserEditInfo = async function (req, res, next) {
       }
     }, (err, data) => {
       if (err) console.log(err)
-      else console.log(data)
     })
   }
 
@@ -242,7 +241,6 @@ export const deleteUser = async function (req, res, next) {
         }
       }, (err, data) => {
         if (err) console.log(err)
-        else console.log(data)
       })
     }
 
