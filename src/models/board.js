@@ -108,12 +108,12 @@ board.statics.getByQuery = function (query) {
 
 board.statics.countFeedback = function (boardId, flag) {
   const increment = flag ? 1 : -1
-  return this.findOneAndUpdate({ _id: boardId }, { $inc: { feedbackCount: increment } })
+  return this.updateOne({ _id: boardId }, { $inc: { feedbackCount: increment } })
 }
 
 board.statics.countBookmark = function (boardId, flag) {
   const increment = flag ? 1 : -1
-  return this.findOneAndUpdate({ _id: boardId }, { $inc: { bookmarkCount: increment } })
+  return this.updateOne({ _id: boardId }, { $inc: { bookmarkCount: increment } })
 }
 
 board.statics.getBookmarkCount = function (boardId) {
@@ -122,7 +122,7 @@ board.statics.getBookmarkCount = function (boardId) {
 
 board.statics.countHeart = function (boardId, flag) {
   const increment = flag ? 1 : -1
-  return this.findOneAndUpdate({ _id: boardId }, { $inc: { heartCount: increment } })
+  return this.updateOne({ _id: boardId }, { $inc: { heartCount: increment } })
 }
 
 board.statics.getHeartCount = function (boardId) {
@@ -131,7 +131,7 @@ board.statics.getHeartCount = function (boardId) {
 
 board.statics.countReact = function (boardId, flag) {
   const increment = flag ? 1 : -1
-  return this.findOneAndUpdate({ _id: boardId }, { $inc: { reactCount: increment } })
+  return this.updateOne({ _id: boardId }, { $inc: { reactCount: increment } })
 }
 
 export default mongoose.model('Board', board)

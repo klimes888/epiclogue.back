@@ -1,26 +1,48 @@
 import { User, Board, Reply, Feedback } from '../../models'
 import createError from 'http-errors'
+import Joi from 'joi'
 
 // to patch, delete, like, bookmark on board, feedback, reply
 export const checkExistence = async (req, res, next) => {
   let type
   let targetId
   let existence
+
+  const checkSchema = Joi.object({
+    targetId: Joi.string().length(24).required(),
+    type: Joi.string().required()
+  })
+
   try {
     // 게시 타입에 따라 분류 후 처리
     if (req.params.replyId !== undefined || req.body.targetType === 'reply') {
       type = '댓글'
-      targetId = req.params.replyId || req.body.targetId
-      existence = await Reply.getById(targetId)
+      targetId = req.params.replyId || req.body.targetId      
     } else if (req.params.feedbackId !== undefined || req.body.targetType === 'feedback') {
       type = '피드백'
-      targetId = req.params.feedbackId || req.body.targetId
-      existence = await Feedback.getById(targetId)
+      targetId = req.params.feedbackId || req.body.targetId      
     } else {
       // 글 수정 또는 북마크, 좋아요
       type = '글'
       targetId = req.params.boardId || req.body.boardId || req.body.targetId
+    }
+
+    try {
+      await checkSchema.validateAsync({targetId, type})
+    } catch (e) {        
+      console.warn(`[WARN] 유저 ${res.locals.uid} 가 ${type} 의 ObjectId에 적절하지 않은 값 ${targetId} 길이(${targetId.length}) 를 입력했습니다.`)
+      return res.status(400).json({
+        result: 'error',
+        message: '입력값이 적절하지 않습니다.'
+      })
+    }
+
+    if (type === '글') {
       existence = await Board.getById(targetId)
+    } else if (type === '피드백') {
+      existence = await Feedback.getById(targetId)
+    } else if (type === '댓글') {
+      existence = await Reply.getById(targetId)
     }
 
     if (existence !== null) {

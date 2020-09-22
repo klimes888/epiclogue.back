@@ -2,7 +2,8 @@ import { Like, React, Board, Feedback, Reply, User } from '../../../models'
 
 /*
   This is like router
-  base url: /:screenId/like 
+  base url: /interaction/like[?screenId=lunarcat123]
+  OPTIONS: [GET / POST / DELETE]
 */
 
 export const addLike = async (req, res, next) => {
@@ -15,7 +16,7 @@ export const addLike = async (req, res, next) => {
   try {
     await Like.like(likeData)
     console.log(
-      `[INFO] 유저 ${res.locals.uid}가 ${likeData.targetType}: ${likeData.targetId}를 좋아합니다.`
+      `[INFO] 유저 ${res.locals.uid}가 ${likeData.targetType}: ${likeData.targetId} 를 좋아합니다.`
     )
     let likeCount
 
@@ -60,7 +61,7 @@ export const deleteLike = async (req, res, next) => {
   try {
     await Like.unlike(likeData)
     console.log(
-      `[INFO] 유저 ${res.locals.uid}가 ${likeData.targetType}: ${likeData.targetId}의 좋아요를 해제했습니다.`
+      `[INFO] 유저 ${res.locals.uid}가 ${likeData.targetType}: ${likeData.targetId} 의 좋아요를 해제했습니다.`
     )
     let likeCount
 
@@ -92,11 +93,11 @@ export const deleteLike = async (req, res, next) => {
 
 export const getLikeList = async (req, res, next) => {
   const screenId = req.query.screenId
-  
+
   try {
     const userId = await User.getIdByScreenId(screenId)
     const likeObjectIdList = await Like.getByUserId(userId)
-    console.log(`[INFO] 유저 ${res.locals.uid}가 유저 ${userId}의 좋아요 리스트를 확인했습니다.`)
+    console.log(`[INFO] 유저 ${res.locals.uid}가 유저 ${userId} 의 좋아요 리스트를 확인했습니다.`)
     return res.status(200).json({
       result: 'ok',
       data: likeObjectIdList,
