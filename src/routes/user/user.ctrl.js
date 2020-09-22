@@ -211,7 +211,6 @@ export const changePass = async function (req, res, next) {
         message: '기본 비밀번호와 동일한 비밀번호는 사용할 수 없습니다.',
       })
     }
-
   } catch (e) {
     console.warn(`[WARN] 유저 ${res.locals.uid} 의 비밀번호 변경 실패: ${e}`)
     return res.status(400).json({
@@ -226,6 +225,20 @@ export const deleteUser = async function (req, res, next) {
   const userPw = req.body['userPw']
 
   try {
+    const deleteSchema = Joi.object({
+      userPw: Joi.string().required()
+    })
+
+    try {
+      await deleteSchema.validateAsync({ userPw })
+    } catch (e) {
+      console.warn(`[WARN] 유저 ${uid} 가 탈퇴에 실패했습니다: 비밀번호 미입력`)
+      return res.status(400).json({
+        result: 'error',
+        message: '패스워드를 입력해주세요.'
+      })
+    }
+
     const info = await User.getUserInfo(uid)
     const crypt_Pw = await crypto.pbkdf2Sync(
       userPw,
