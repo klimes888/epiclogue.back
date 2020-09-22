@@ -36,7 +36,33 @@ export const getUserEditInfo = async function (req, res, next) {
 }
 
 export const postUserEditInfo = async function (req, res, next) {
+  // remove old images
   const originalData = await User.getUserInfo(res.locals.uid)
+  const originalImages = [originalData.banner, originalData.profile]
+  // console.log(originalImages)
+  const beDeletedImages = []
+  for (let each of originalImages) {
+    if (each) { // null check
+      const texts = each.split('/')
+      let obj = {
+        Key: texts[3]
+      }
+      beDeletedImages.push(obj)
+    }
+  }
+
+  // ok
+  if (beDeletedImages !== []) {
+    s3.deleteObjects({
+      Bucket: process.env.AWS_BUCKET_NAME,
+      Delete: {
+        Objects: beDeletedImages
+      }
+    }, (err, data) => {
+      if (err) console.log(err)
+      else console.log(data)
+    })
+  }
 
   const screenId = req.body['screenId'] || originalData.screenId
   const nickname = req.body['userNick'] || originalData.nickname
@@ -70,37 +96,6 @@ export const postUserEditInfo = async function (req, res, next) {
   }
 
   try {
-    const images = []
-
-    if (originalData.banner) {
-      images.push(originalData.banner)
-    }
-    if (originalData.profile) {
-      images.push(originalData.profile)
-    }
-
-    const beDeletedObject = []
-
-    for (let each of images) {
-      if (each !== null) {
-        const texts = each.split('/') // get only object name
-        let obj = {} // formatting
-        obj.Key = texts[3]
-        beDeletedObject.push(obj)
-      }
-    }
-
-    if (beDeletedObject !== []) {
-      s3.deleteObjects({
-        Bucket: process.env.AWS_BUCKET_NAME,
-        Delete: {
-          Objects: beDeletedObject
-        }
-      }, (err, data) => {
-        if (err) console.error(err, err.stack)
-      })
-    }
-
     const checkId = await User.isScreenIdUnique(screenId)
     if (checkId || screenId === originalData.screenId) {
       const newerUserData = {
@@ -220,54 +215,46 @@ export const deleteUser = async function (req, res, next) {
       'sha512'
     )
 
+    // remove old images
     const originalData = await User.getUserInfo(res.locals.uid)
-    const images = [originalData.banner, originalData.profile] 
-
-    if (originalData.banner) {
-      images.push(originalData.banner)
-    }
-    if (originalData.profile) {
-      images.push(originalData.profile)
-    }
-
-    const beDeletedObject = []
-
-    for (let each of images) {
-      if (each !== null) {
-        const texts = each.split('/') // get only object name
-        let obj = {} // formatting
-        obj.Key = texts[3]
-        beDeletedObject.push(obj)
+    const originalImages = [originalData.banner, originalData.profile]
+    // console.log(originalImages)
+    const beDeletedImages = []
+    for (let each of originalImages) {
+      if (each) { // null check
+        const texts = each.split('/')
+        let obj = {
+          Key: texts[3]
+        }
+        beDeletedImages.push(obj)
       }
     }
 
-    if (beDeletedObject !== []) {
+    // console.log(beDeletedImages)
+
+    if (beDeletedImages !== []) {
       s3.deleteObjects({
         Bucket: process.env.AWS_BUCKET_NAME,
         Delete: {
-          Objects: beDeletedObject
+          Objects: beDeletedImages
         }
       }, (err, data) => {
-        if (err) console.error(err, err.stack)
+        if (err) console.log(err)
+        else console.log(data)
       })
     }
 
     const deletion = await User.deleteUser(uid, crypt_Pw.toString('base64'))
 
     if (deletion.ok === 1) {
-      console.log(`[INFO] 유저 ${res.locals.uid} 가 탈퇴했습니다.`)
-      if (deletion.n === 1 && deletion.n === deletion.deletedCount) {
+      if (deletion.n === 1) {
+        console.log(`[INFO] 유저 ${res.locals.uid} 가 탈퇴했습니다.`)
         return res.status(200).json({
           result: 'ok',
-        })
-      } else if (deletion.ok === 1 && deletion.n !== deletion.deletedCount) {
-        return res.status(200).json({
-          result: 'ok',
-          message: '질의에 성공했으나 데이터가 삭제되지 않았습니다.',
         })
       } else if (deletion.n === 0) {
-        console.warn(`[WARN] 존재하지 않는 유저 ${res.locals.uid} 가 탈퇴를 시도했습니다.`)
-        return res.status(404).json({
+        console.warn(`[WARN] 탈퇴하려는 유저 ${res.locals.uid} 가 비밀번호를 다르게 입력했습니다.`)
+        return res.status(400).json({
           result: 'error',
           message: '존재하지 않는 데이터에 접근했습니다.',
         })

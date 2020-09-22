@@ -235,18 +235,18 @@ describe('유저 테스트', () => {
     })
   })
 
-  describe.skip('회원 탈퇴', () => {
+  describe('회원 탈퇴', () => {
     test('성공 | 200', async () => {
-      await request(app).post('/auth/join').send(toBeDeletedData)
-      await User.confirmUser(toBeDeletedData.email)
+      // await request(app).post('/auth/join').send(toBeDeletedData)
+      // await User.confirmUser(toBeDeletedData.email)
 
-      const res = await request(app).post('/auth/login').send(toBeDeletedData)
+      const res = await request(app).post('/auth/login').send(verifiedUserData)
 
       await request(app)
         .delete('/user')
         .set('x-access-token', res.body.token)
         .send({
-          userPw: newPw,
+          userPw: tempPw,
         })
         .expect(200)
     })
