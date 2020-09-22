@@ -3,17 +3,18 @@ import util from 'util'
 import { User } from '../../models'
 import { s3 } from '../../lib/imageUpload'
 import dotenv from 'dotenv'
+import Joi from 'joi'
 const randomBytesPromise = util.promisify(crypto.randomBytes)
-const pbkdf2Promise = util.promisify(crypto.pbkdf2)
+// const crypto.pbkdf2Sync = util.promisify(crypto.pbkdf2)
 
 dotenv.config()
 
 /* GET users listing. */
-
 export const getUserEditInfo = async function (req, res, next) {
   const uid = res.locals.uid
   try {
     const result = await User.getUserInfo(uid)
+    
     return res.status(200).json({
       result: 'ok',
       data: {
@@ -39,8 +40,15 @@ export const postUserEditInfo = async function (req, res, next) {
   // remove old images
   const originalData = await User.getUserInfo(res.locals.uid)
   const originalImages = [originalData.banner, originalData.profile]
-  // console.log(originalImages)
+  const screenId = req.body['screenId'] || originalData.screenId
+  const nickname = req.body['userNick'] || originalData.nickname
+  const country = parseInt(req.body['userCountry']) || originalData.country
+  const availableLanguage = req.body['userLang'] || originalData.availableLanguage
+  const intro = req.body['userIntro'] || originalData.intro
   const beDeletedImages = []
+  let banner
+  let profile
+
   for (let each of originalImages) {
     if (each) { // null check
       const texts = each.split('/')
@@ -50,8 +58,6 @@ export const postUserEditInfo = async function (req, res, next) {
       beDeletedImages.push(obj)
     }
   }
-
-  console.log('hello' + beDeletedImages)
 
   // ok
   if (beDeletedImages.length !== 0) {
@@ -65,16 +71,6 @@ export const postUserEditInfo = async function (req, res, next) {
     })
   }
 
-  const screenId = req.body['screenId'] || originalData.screenId
-  const nickname = req.body['userNick'] || originalData.nickname
-  const country = parseInt(req.body['userCountry']) || originalData.country
-  const availableLanguage = req.body['userLang'] || originalData.availableLanguage
-  const intro = req.body['userIntro'] || originalData.intro
-
-  /* 이미지 length에 관련되어 에러가 발생하기 때문에 기본 이미지로 변경한다면 이에 대한 처리 필요 */
-
-  let banner
-  let profile
   if (req.files !== undefined) {
     if (req.files.length > 1) {
       if (req.files[0].fieldname == 'userBannerImg') {
@@ -137,67 +133,90 @@ export const changePass = async function (req, res, next) {
   const userPwNew = req.body['newUserPw']
   const userPwNewRe = req.body['newUserPwRe']
 
-  if (userPw != userPwNew) {
-    if (userPwNew == userPwNewRe) {
-      const check = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[$@$!%*#?&])[A-Za-z\d$@$!%*#?&]{8,}$/.test(
-        userPwNew
-      )
+  try {
+    const changePassSchema = Joi.object({
+      userPw: Joi.string().required().min(8),
+      userPwNew: Joi.string().required().min(8),
+      userPwNewRe: Joi.string().required().min(8)
+    })
 
-      if (check) {
-        try {
-          const info = await User.getUserInfo(uid)
-          const saltNew = await randomBytesPromise(64)
-          const crypt_Pw = await pbkdf2Promise(
-            userPw,
-            info['salt'],
-            parseInt(process.env.EXEC_NUM),
-            parseInt(process.env.RESULT_LENGTH),
-            'sha512'
-          )
-          const crypt_PwNew = await pbkdf2Promise(
-            userPwNew,
-            saltNew.toString('base64'),
-            parseInt(process.env.EXEC_NUM),
-            parseInt(process.env.RESULT_LENGTH),
-            'sha512'
-          )
-          await User.changePass(
-            uid,
-            crypt_Pw.toString('base64'),
-            crypt_PwNew.toString('base64'),
-            saltNew.toString('base64')
-          )
-          console.log(`[INFO] 유저 ${res.locals.uid} 가 비밀번호를 변경했습니다.`)
-          return res.status(200).json({
-            result: 'ok',
-            message: '비밀번호 변경 완료',
-          })
-        } catch (e) {
-          console.error(`[Error] ${e}`)
-          return res.status(500).json({
+    await changePassSchema.validateAsync({ userPw, userPwNew, userPwNewRe })
+
+    if (userPw !== userPwNew) {
+      if (userPwNew === userPwNewRe) {
+        const check = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[$@$!%*#?&])[A-Za-z\d$@$!%*#?&]{8,}$/.test(userPwNew)
+
+        if (check) {
+          try {
+            const originalUserData = await User.getUserInfo(uid)
+            const salt = originalUserData.salt 
+            const newPassword = await crypto.pbkdf2Sync(userPwNew, salt, parseInt(process.env.EXEC_NUM), parseInt(process.env.RESULT_LENGTH), 'sha512')
+            if (originalUserData.password === newPassword) {
+              console.error(`[INFO] Same password detected`)
+              process.exit(1)
+            }
+
+            const info = await User.getUserInfo(uid)
+            const saltNew = await randomBytesPromise(64)
+            const crypt_Pw = await crypto.pbkdf2Sync(
+              userPw,
+              info['salt'],
+              parseInt(process.env.EXEC_NUM),
+              parseInt(process.env.RESULT_LENGTH),
+              'sha512'
+            )
+            const crypt_PwNew = await crypto.pbkdf2Sync(
+              userPwNew,
+              saltNew.toString('base64'),
+              parseInt(process.env.EXEC_NUM),
+              parseInt(process.env.RESULT_LENGTH),
+              'sha512'
+            )
+            await User.changePass(
+              uid,
+              crypt_Pw.toString('base64'),
+              crypt_PwNew.toString('base64'),
+              saltNew.toString('base64')
+            )
+            console.log(`[INFO] 유저 ${res.locals.uid} 가 비밀번호를 변경했습니다.`)
+            return res.status(200).json({
+              result: 'ok',
+              message: '비밀번호 변경 완료',
+            })
+          } catch (e) {
+            console.error(`[Error] ${e}`)
+            return res.status(500).json({
+              result: 'error',
+              message: e.message,
+            })
+          }
+        } else {
+          console.warn(`[WARN] 유저 ${res.locals.uid} 의 비밀번호 변경이 실패했습니다: 비밀번호 규칙 미준수`)
+          return res.status(400).json({
             result: 'error',
-            message: e.message,
+            message: '비밀번호 규칙을 다시 확인해주세요.',
           })
         }
       } else {
-        console.warn(`[WARN] 유저 ${res.locals.uid} 의 비밀번호 변경이 실패했습니다: 비밀번호 규칙 미준수`)
+        console.warn(`[WARN] 유저 ${res.locals.uid} 의 비밀번호 변경이 실패했습니다: 새로운 비밀번호 미일치`)
         return res.status(400).json({
           result: 'error',
-          message: '비밀번호 규칙을 다시 확인해주세요.',
+          message: '재입력된 비밀번호가 일치하지 않습니다.',
         })
       }
     } else {
-      console.warn(`[WARN] 유저 ${res.locals.uid} 의 비밀번호 변경이 실패했습니다: 비밀번호 미일치`)
-      return res.status(400).json({
+      console.warn(`[WARN] 유저 ${res.locals.uid} 의 비밀번호 변경이 실패했습니다: 기존 비밀번호와 동일`)
+      res.status(400).json({
         result: 'error',
-        message: '재입력된 비밀번호가 일치하지 않습니다.',
+        message: '기본 비밀번호와 동일한 비밀번호는 사용할 수 없습니다.',
       })
     }
-  } else {
-    console.warn(`[WARN] 유저 ${res.locals.uid} 의 비밀번호 변경이 실패했습니다: 기존 비밀번호와 동일`)
-    res.status(400).json({
+
+  } catch (e) {
+    console.warn(`[WARN] 유저 ${res.locals.uid} 의 비밀번호 변경 실패: ${e}`)
+    return res.status(400).json({
       result: 'error',
-      message: '기본 비밀번호와  동일한 비밀번호는 사용할 수 없습니다.',
+      message: '비밀번호 유효성 검사 미통과'
     })
   }
 }
@@ -208,7 +227,7 @@ export const deleteUser = async function (req, res, next) {
 
   try {
     const info = await User.getUserInfo(uid)
-    const crypt_Pw = await pbkdf2Promise(
+    const crypt_Pw = await crypto.pbkdf2Sync(
       userPw,
       info['salt'],
       parseInt(process.env.EXEC_NUM),

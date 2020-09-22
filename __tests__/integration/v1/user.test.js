@@ -154,8 +154,8 @@ describe('유저 테스트', () => {
         .set('x-access-token', userToken)
         .send({
           userPw: verifiedUserData.userPw,
-          userPwNew: '123',
-          userPwNewRe: '123',
+          newUserPw: '123',
+          newUserPwRe: '123',
         })
         .expect(400)
     })
@@ -166,20 +166,21 @@ describe('유저 테스트', () => {
         .set('x-access-token', userToken)
         .send({
           userPw: verifiedUserData.userPw,
-          userPwNew: verifiedUserData.userPw,
-          userPwNewRe: verifiedUserData.userPw,
+          newUserPw: verifiedUserData.userPw,
+          newUserPwRe: verifiedUserData.userPw,
         })
         .expect(400)
     })
 
     test('실패: 새로운 비밀번호와 재입력이 다름 | 400', async () => {
+      const differentPw = verifiedUserData.userPw + '1'
       await request(app)
         .patch('/user/changePass')
         .set('x-access-token', userToken)
         .send({
           userPw: verifiedUserData.userPw,
-          userPwNew: verifiedUserData.userPw,
-          userPwNewRe: verifiedUserData.userPw + '1',
+          newUserPw: differentPw,
+          newUserPwRe: differentPw + '1',
         })
         .expect(400)
     })
