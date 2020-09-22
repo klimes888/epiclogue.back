@@ -16,19 +16,21 @@ export const verifyToken = (req, res, next) => {
         res.locals.uid = decoded.uid
         next()
       } else {
+        console.warn(`[WARN] 유저 ${res.locals.uid} 가 로그인을 시도했으나 이메일 인증이 완료되지 않았습니다.`)
         return res.status(401).json({
           result: 'error',
           message: '이메일 인증이 완료되지 않았습니다!',
         })
       }
     } else {
+      console.warn(`[WARN] 유저 ${res.locals.uid} 가 로그인을 시도했으나 토큰의 유효기간이 만료되었거나 토큰이 없습니다.`)
       return res.status(401).json({
         result: 'error',
         message: 'token 유효기간 만료 또는 토큰이 전송되지 않았습니다.',
       })
     }
   } catch (e) {
-    console.error(`[Error!] ${e}`)
+    console.error(`[ERROR] ${e}`)
     return res.status(500).json({
       result: 'error',
       message: 'token 유효기간 만료 또는 토큰이 전송되지 않았습니다.',

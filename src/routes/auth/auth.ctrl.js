@@ -52,9 +52,10 @@ export const login = async function (req, res, next) {
       })
     }
   } else {
+    console.warn(`[INFO] 존재하지 않는 유저 ${email} 가 로그인을 시도했습니다.`)
     return res.status(404).json({
       result: 'error',
-      message: '유저를 찾을 수 없습니다.',
+      message: '존재하지 않는 유저입니다.',
     })
   }
 }
@@ -179,13 +180,13 @@ export const join = async function (req, res, next) {
 
         transporter.sendMail(option, function (error, info) {
           if (error) {
-            console.log(error)
-            res.status(401).json({
+            console.error(`[ERROR] ${email} 에게 메일을 보내는 도중 문제가 발생했습니다.`)
+            res.status(500).json({
               result: 'error',
-              reason: error,
+              message: error,
             })
           } else {
-            console.log(info.response)
+            console.log(`[INFO] ${email} 에게 성공적으로 메일을 보냈습니다: ${info.response}`)
             return res.status(201).json({
               result: 'ok',
               info: info.response,
