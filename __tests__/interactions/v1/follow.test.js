@@ -72,5 +72,13 @@ describe('팔로우 테스트', () => {
         .set('x-access-token', verifiedToken)
         .expect(404)
     })
+
+    test('팔로우 실패: 부적절한 아이디에 접근 | 400', async () => {
+      await request(app)
+        .post(`/interaction/follow`)
+        .send({ targetUserId: '123' })
+        .set('x-access-token', verifiedToken)
+        .expect(400)
+    })
   })
 })

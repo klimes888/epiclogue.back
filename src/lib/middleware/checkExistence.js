@@ -70,6 +70,18 @@ export const checkExistence = async (req, res, next) => {
 export const checkUserExistence = async (req, res, next) => {
   const userId = req.body.targetUserId || await User.getIdByScreenId(req.params.screenId)
 
+  const userSchema = Joi.object({ userId: Joi.string().length(24).required() })
+
+  try {
+    await userSchema.validateAsync({ userId })
+  } catch (e) {
+    console.warn(`[WARN] 유저 ${res.locals.uid} 가 유저 ObjectId에 적절하지 않은 값 ${userId} 길이(${userId.length}) 를 입력했습니다.`)
+    return res.status(400).json({
+      result: 'error',
+      message: '입력값이 적절하지 않습니다.'
+    })
+  }
+
   try {
     const existence = await User.getById(userId)
 
