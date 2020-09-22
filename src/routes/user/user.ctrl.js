@@ -51,8 +51,10 @@ export const postUserEditInfo = async function (req, res, next) {
     }
   }
 
+  console.log('hello' + beDeletedImages)
+
   // ok
-  if (beDeletedImages !== []) {
+  if (beDeletedImages.length !== 0) {
     s3.deleteObjects({
       Bucket: process.env.AWS_BUCKET_NAME,
       Delete: {
@@ -232,7 +234,7 @@ export const deleteUser = async function (req, res, next) {
 
     // console.log(beDeletedImages)
 
-    if (beDeletedImages !== []) {
+    if (beDeletedImages.length !== 0) {
       s3.deleteObjects({
         Bucket: process.env.AWS_BUCKET_NAME,
         Delete: {
