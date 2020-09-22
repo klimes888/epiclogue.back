@@ -367,7 +367,47 @@ paths:
             $ref: '#/definitions/API_response_error'
       security:
         - access_token: []
-    
+  
+  /boards/{boardUid}/react:
+    get:
+      tags:
+      - "boards"
+      summary: "get board react list"
+      description: ""
+      parameters:
+      - name: "boardUid"
+        in: "path"
+        description: "ID of board"
+        required: true
+        type: string
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            properties:
+              result:
+                type: string
+                example: "ok"
+              data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    userId:
+                      type: string
+                    userProfileImage:
+                      type: string
+                    nickname:
+                      type: string
+                    type:
+                      type: string
+                    createdAt:
+                      type: string
+        500:
+          description: ERROR
+          schema:
+            $ref: '#/definitions/API_response_error'
   /boards/{boardUid}/edit:
     get:
       tags:
