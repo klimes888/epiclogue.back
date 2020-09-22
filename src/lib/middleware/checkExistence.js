@@ -9,7 +9,7 @@ export const checkExistence = async (req, res, next) => {
   let existence
 
   const checkSchema = Joi.object({
-    targetId: Joi.string().length(24).required(),
+    targetId: Joi.string().regex(/^[A-Fa-f0-9]{24}$/).required(),
     type: Joi.string().required()
   })
 
@@ -52,10 +52,6 @@ export const checkExistence = async (req, res, next) => {
         `[WARN] 유저 ${res.locals.uid}가 존재하지 않는 ${type} ${targetId} 를 접근하려 했습니다.`
       )
       next(createError(404, '존재하지 않는 데이터입니다.'))
-      // return res.status(404).json({
-      //   result: 'error',
-      //   message: '존재하지 않는 데이터입니다.',
-      // })
     }
   } catch (e) {
     console.error(`[ERROR] 게시글 존재 여부를 확인하는 중에 문제가 발생 했습니다. ${e}`)
@@ -70,7 +66,7 @@ export const checkExistence = async (req, res, next) => {
 export const checkUserExistence = async (req, res, next) => {
   const userId = req.body.targetUserId || await User.getIdByScreenId(req.params.screenId)
 
-  const userSchema = Joi.object({ userId: Joi.string().length(24).required() })
+  const userSchema = Joi.object({ userId: Joi.string().regex(/^[A-Fa-f0-9]{24}$/).required() })
 
   try {
     await userSchema.validateAsync({ userId })
@@ -97,10 +93,7 @@ export const checkUserExistence = async (req, res, next) => {
       }
     } else {
       console.warn(`[WARN] 유저 ${res.locals.uid}가 존재하지 않는 유저 ${userId} 에게 접근하려 했습니다.`)
-      return res.status(404).json({
-        result: 'error',
-        message: '존재하지 않는 데이터입니다.',
-      })
+      next(createError(404, '존재하지 않는 데이터입니다.'))
     }
   } catch (e) {
     console.error(`[ERROR] 유저 존재 여부를 확인하는 중에 문제가 발생 했습니다. ${e}`)
