@@ -149,18 +149,10 @@ export const changePass = async function (req, res, next) {
         if (check) {
           try {
             const originalUserData = await User.getUserInfo(uid)
-            const salt = originalUserData.salt 
-            const newPassword = await crypto.pbkdf2Sync(userPwNew, salt, parseInt(process.env.EXEC_NUM), parseInt(process.env.RESULT_LENGTH), 'sha512')
-            if (originalUserData.password === newPassword) {
-              console.error(`[INFO] Same password detected`)
-              process.exit(1)
-            }
-
-            const info = await User.getUserInfo(uid)
             const saltNew = await randomBytesPromise(64)
             const crypt_Pw = await crypto.pbkdf2Sync(
               userPw,
-              info['salt'],
+              originalUserData['salt'],
               parseInt(process.env.EXEC_NUM),
               parseInt(process.env.RESULT_LENGTH),
               'sha512'
@@ -172,17 +164,34 @@ export const changePass = async function (req, res, next) {
               parseInt(process.env.RESULT_LENGTH),
               'sha512'
             )
-            await User.changePass(
+            const changeResult = await User.changePass(
               uid,
               crypt_Pw.toString('base64'),
               crypt_PwNew.toString('base64'),
               saltNew.toString('base64')
             )
-            console.log(`[INFO] 유저 ${res.locals.uid} 가 비밀번호를 변경했습니다.`)
-            return res.status(200).json({
-              result: 'ok',
-              message: '비밀번호 변경 완료',
-            })
+
+            if (changeResult.ok) {
+              if (changeResult.n === 1) {
+                console.log(`[INFO] 유저 ${res.locals.uid} 가 비밀번호를 변경했습니다.`)
+                return res.status(200).json({
+                  result: 'ok',
+                  message: '비밀번호 변경 완료',
+                })
+              } else {
+                console.warn(`[WARN] 유저 ${res.locals.uid} 의 비밀번호 변경이 실패했습니다: 기존 비밀번호가 다릅니다.`)
+                return res.status(400).json({
+                  result: 'error',
+                  message: '기존 비밀번호가 다릅니다.',
+                })
+              }
+            } else {
+              console.error(`[ERROR] 유저 ${res.locals.uid} 의 비밀번호 변경이 알 수 없는 오류로 실패했습니다.`)
+              return res.status(500).json({
+                result: 'error',
+                message: 'Unexpected error'
+              })
+            }            
           } catch (e) {
             console.error(`[Error] ${e}`)
             return res.status(500).json({
