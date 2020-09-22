@@ -1,4 +1,5 @@
 import { Board } from '../../models'
+import { s3 } from '../../lib/imageUpload'
 
 export const postBoard = async (req, res, next) => {
   let _boardImg = []
@@ -18,7 +19,7 @@ export const postBoard = async (req, res, next) => {
 
   try {
     const createdBoard = await Board.create(boardData)
-    console.log(`[INFO] user ${boardData.writer}가 글 ${createdBoard._id}를 작성했습니다.`)
+    console.log(`[INFO] 유저 ${boardData.writer}가 글 ${createdBoard._id}를 작성했습니다.`)
     return res.status(201).json({
       result: 'ok',
       data: createdBoard,
@@ -54,8 +55,31 @@ export const viewBoard = async (req, res, next) => {
 // 삭제
 export const deleteBoard = async (req, res, next) => {
   const boardId = req.params.boardId
+  const query = await Board.getById(boardId, { _id: 0, feedbacks: 0, writer: 0, boardImg: 1 })
+  const images = query.boardImg
+  
+  const beDeletedObject = []
+
+  for (let each of images) {
+    const texts = each.split('/') // get only object name
+    let obj = {} // formatting
+    obj.Key = texts[3]
+   beDeletedObject.push(obj)
+  }
+
+  // console.log(beDeletedObject)
 
   try {
+    // for non blocking, didn't use async-await
+    s3.deleteObjects({
+      Bucket: process.env.AWS_BUCKET_NAME,
+      Delete: {
+        Objects: beDeletedObject
+      }
+    }, (err, data) => {
+      if (err) console.error(err, err.stack)
+    })
+
     const deletion = await Board.delete(boardId)
 
     if (deletion.ok === 1) {
@@ -64,8 +88,11 @@ export const deleteBoard = async (req, res, next) => {
         result: 'ok',
       })
     } else {
-      console.warn(`[ERROR] 글 ${boardId}의 삭제가 실패하였습니다.`)
-      return res.status(400).json({})
+      console.warn(`[WARN] 유저 ${res.locals.uid} 가 존재하지 않는 글 ${boardId} 의 삭제를 시도했습니다.`)
+      return res.status(404).json({
+        result: 'error',
+        message: 'Not found'
+      })
     }
   } catch (e) {
     console.error(`[ERROR] ${e}`)
@@ -161,9 +188,9 @@ export const postEditInfo = async function (req, res, next) {
 /* 유저마다 다르게 받아야 함 */
 export const getBoards = async (req, res, next) => {
   try {
-    const boardList = await Board.findAll()
+    const boardList = await Board.findAll() // 썸네일만 골라내는 작업 필요
 
-    // 썸네일만 골라내는 작업 필요
+    console.log(`[INFO] 유저 ${res.locals.uid} 가 자신의 피드를 확인했습니다.`)
 
     return res.status(200).json({
       result: 'ok',

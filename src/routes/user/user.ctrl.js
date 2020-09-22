@@ -139,6 +139,7 @@ export const changePass = async function (req, res, next) {
             crypt_PwNew.toString('base64'),
             saltNew.toString('base64')
           )
+          console.log(`[INFO] 유저 ${res.locals} 가 비밀번호를 변경했습니다.`)
           return res.status(200).json({
             result: 'ok',
             message: '비밀번호 변경 완료',
@@ -151,18 +152,21 @@ export const changePass = async function (req, res, next) {
           })
         }
       } else {
+        console.warn(`[WARN] 유저 ${res.locals} 의 비밀번호 변경이 실패했습니다: 비밀번호 규칙 미준수`)
         return res.status(400).json({
           result: 'error',
           message: '비밀번호 규칙을 다시 확인해주세요.',
         })
       }
     } else {
+      console.warn(`[WARN] 유저 ${res.locals} 의 비밀번호 변경이 실패했습니다: 비밀번호 미일치`)
       return res.status(400).json({
         result: 'error',
         message: '재입력된 비밀번호가 일치하지 않습니다.',
       })
     }
   } else {
+    console.warn(`[WARN] 유저 ${res.locals} 의 비밀번호 변경이 실패했습니다: 기존 비밀번호와 동일`)
     res.status(400).json({
       result: 'error',
       message: '기본 비밀번호와  동일한 비밀번호는 사용할 수 없습니다.',
@@ -187,6 +191,7 @@ export const deleteUser = async function (req, res, next) {
     const deletion = await User.deleteUser(uid, crypt_Pw.toString('base64'))
 
     if (deletion.ok === 1) {
+      console.log(`[INFO] 유저 ${res.locals} 가 탈퇴했습니다.`)
       if (deletion.n === 1 && deletion.n === deletion.deletedCount) {
         return res.status(200).json({
           result: 'ok',
@@ -197,6 +202,7 @@ export const deleteUser = async function (req, res, next) {
           message: '질의에 성공했으나 데이터가 삭제되지 않았습니다.',
         })
       } else if (deletion.n === 0) {
+        console.warn(`[WARN] 존재하지 않는 유저 ${res.locals} 가 탈퇴를 시도했습니다.`)
         return res.status(404).json({
           result: 'error',
           message: '존재하지 않는 데이터에 접근했습니다.',
