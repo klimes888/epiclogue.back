@@ -1,5 +1,6 @@
 import { Board } from '../../models'
 import { s3 } from '../../lib/imageUpload'
+import Joi from 'joi'
 
 export const postBoard = async (req, res, next) => {
   let _boardImg = []
@@ -15,6 +16,28 @@ export const postBoard = async (req, res, next) => {
     pub: req.body.pub,
     lanuage: req.body.lanuage,
     boardImg: _boardImg,
+  }
+
+  const boardSchema = Joi.object({
+    writer: Joi.string().regex(/^[A-Fa-f0-9]{24}$/).required(),
+    boardImg: Joi.string().required(),
+    category: Joi.string(),
+    pub: Joi.number().length(1)
+  })
+
+  try {
+    await boardSchema.validateAsync({
+      writer: boardData.writer,
+      boardImg: boardData.boardTitle,
+      category: boardData.category,
+      pub: boardData.pub
+    })
+  } catch (e) {
+    console.warn(`[WARN] 유저 ${res.locals.uid} 가 적절하지 않은 데이터로 글을 작성하려 했습니다. ${e}`)
+    return res.status(400).json({
+      result: 'error',
+      message: '입력값이 적절하지 않습니다.'
+    })
   }
 
   try {
