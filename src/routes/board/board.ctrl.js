@@ -26,19 +26,40 @@ export const postBoard = async (req, res, next) => {
 
   const boardSchema = Joi.object({
     writer: Joi.string().regex(/^[A-Fa-f0-9]{24}$/).required(),
-    boardImg: Joi.string().required(),
-    category: Joi.string(),
-    pub: Joi.number().min(0).max(2)
+    boardImg: Joi.array().items(Joi.string().required()).required(),
+    // boardImg: Joi.array().items(Joi.string()).required(),
+    category: Joi.string().required(),
+    pub: Joi.number().min(0).max(2).required()
   })
 
   try {
     await boardSchema.validateAsync({
       writer: boardData.writer,
-      boardImg: boardData.boardTitle,
+      boardImg: boardData.boardImg,
       category: boardData.category,
       pub: boardData.pub
     })
   } catch (e) {
+    if (boardData.boardImg.length > 0) {
+      const garbageImage = []
+      for (let image of boardData.boardImg) {
+        const objectKey = image.split('/')
+        const deletionFormat = {
+          Key: objectKey[3]
+        }
+        garbageImage.push(deletionFormat)
+      }
+
+      s3.deleteObjects({
+        Bucket: process.env.AWS_BUCKET_NAME,
+        Delete: {
+          Objects: garbageImage
+        }
+      }, (err, data) => {
+        if (err) console.error(err, err.stack)
+      })
+    }
+
     console.warn(`[WARN] 유저 ${res.locals.uid} 가 적절하지 않은 데이터로 글을 작성하려 했습니다. ${e}`)
     return res.status(400).json({
       result: 'error',
@@ -91,9 +112,10 @@ export const deleteBoard = async (req, res, next) => {
 
   for (let each of images) {
     const texts = each.split('/') // get only object name
-    let obj = {} // formatting
-    obj.Key = texts[3]
-    beDeletedObject.push(obj)
+    let deletionFormat = {
+      Key: texts[3]
+    } 
+    beDeletedObject.push(deletionFormat)
   }
 
   // console.log(beDeletedObject)
@@ -174,9 +196,10 @@ export const postEditInfo = async function (req, res, next) {
 
     for (let each of images) {
       const texts = each.split('/') // get only object name
-      let obj = {} // formatting
-      obj.Key = texts[3]
-      beDeletedObject.push(obj)
+      let deletionFormat = {
+        Key: texts[3]
+      } 
+      beDeletedObject.push(deletionFormat)
     }
 
     s3.deleteObjects({

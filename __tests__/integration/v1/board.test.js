@@ -75,6 +75,40 @@ describe('글 테스트', () => {
       const createdBoardData = JSON.parse(uploadInstance.res.text)
       testBoardId = createdBoardData.data._id
     })
+
+    test('실패: 이미지 누락 | 400', async () => {
+      const uploadInstance = request(app)
+        .post('/boards')
+        .set('x-access-token', userToken)
+        .field('boardTitle', boardData.boardTitle)
+        .field('boardBody', boardData.boardBody)
+        .field('category', boardData.category)
+        .field('pub', boardData.pub)
+        .field('language', boardData.language)
+
+      // for (let path of imagePathArray) {
+      //   uploadInstance.attach('boardImg', path)
+      // }
+
+      await uploadInstance.expect(400)
+    })
+
+    test('실패: 필수 속성 누락 | 400', async () => {
+      const uploadInstance = request(app)
+        .post('/boards')
+        .set('x-access-token', userToken)
+        .field('boardTitle', boardData.boardTitle)
+        .field('boardBody', boardData.boardBody)
+        // .field('category', boardData.category)
+        // .field('pub', boardData.pub)
+        .field('language', boardData.language)
+
+      for (let path of imagePathArray) {
+        uploadInstance.attach('boardImg', path)
+      }
+
+      await uploadInstance.expect(400)
+    })
   })
 
   describe('글 읽기', () => {
@@ -94,14 +128,14 @@ describe('글 테스트', () => {
   })
 
   describe('글 수정', () => {
-    test('GET | 200', async () => {
+    test('성공: 이전 정보 불러오기 | 200', async () => {
       await request(app)
         .get(`/boards/${testBoardId}/edit`)
         .set('x-access-token', userToken)
         .expect(200)
     })
 
-    test('POST | 200', async () => {
+    test('성공: 정상적인 수정 | 200', async () => {
       const uploadInstance = request(app)
         .post(`/boards/${testBoardId}/edit`)
         .set('x-access-token', userToken)
@@ -117,6 +151,23 @@ describe('글 테스트', () => {
 
       await uploadInstance.expect(200)
     })
+
+    test('실패: 존재하지 않는 boardId | 200', async () => {
+      const uploadInstance = request(app)
+        .post(`/boards/${invalidBoardId}/edit`)
+        .set('x-access-token', userToken)
+        .field('boardTitle', 'edited')
+        .field('boardBody', 'edited')
+        .field('category', 'comic')
+        .field('pub', 0)
+        .field('language', 'Japanese')
+
+      for (let path of imagePathArray) {
+        uploadInstance.attach('boardImg', path)
+      }
+
+      await uploadInstance.expect(404)
+    })
   })
 
   describe('글 삭제', () => {
@@ -125,6 +176,20 @@ describe('글 테스트', () => {
         .delete(`/boards/${testBoardId}`)
         .set('x-access-token', userToken)
         .expect(200)
+    })
+
+    test('실패: 올바르지 않은 boardId | 400', async () => {
+      await request(app)
+        .delete(`/boards/123`)
+        .set('x-access-token', userToken)
+        .expect(400)
+    })
+
+    test('실패: 존재하지 않는 boardId | 400', async () => {
+      await request(app)
+        .delete(`/boards/${invalidBoardId}`)
+        .set('x-access-token', userToken)
+        .expect(404)
     })
   })
 })
