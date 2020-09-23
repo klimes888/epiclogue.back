@@ -10,6 +10,7 @@ node_modules
 .eslintrc.js
 data
 coverage
+test.js
 
 # logs
 logs
