@@ -22,7 +22,7 @@ export const postBoard = async (req, res, next) => {
     writer: Joi.string().regex(/^[A-Fa-f0-9]{24}$/).required(),
     boardImg: Joi.string().required(),
     category: Joi.string(),
-    pub: Joi.number().length(1)
+    pub: Joi.number().min(0).max(2)
   })
 
   try {

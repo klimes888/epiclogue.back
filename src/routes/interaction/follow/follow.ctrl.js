@@ -1,7 +1,8 @@
 import { User, Follow } from '../../../models'
 /* 
   This is follow router.
-  base url: /:screenId/follow
+  base url: /interaction/follow[?screenId=lunarcat123&type=following]
+  OPTIONS: [GET / POST / DELETE]
 */
 
 export const addFollow = async (req, res, next) => {

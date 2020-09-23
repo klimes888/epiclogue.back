@@ -7,7 +7,7 @@ export const searchPreview = async (req, res, next) => {
   try {
     if (queryString[0] === '#') {
       // tag searching
-      const _query = queryString.slice(1, queryString.length)
+      // const _query = queryString.slice(1, queryString.length)
 
       /* 태그 검색 쿼리 필요 */
     } else if (queryString[0] === '@') {

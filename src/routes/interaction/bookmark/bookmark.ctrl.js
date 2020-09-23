@@ -2,7 +2,8 @@ import { Bookmark, React, Board, User } from '../../../models'
 
 /* 
   This is bookmark router.
-  base url: /interaction/bookmark
+  base url: /interaction/bookmark[?screenId=lunarcat123]
+  OPTIONS: [GET / POST / DELETE]
 */
 
 export const getBookmarkList = async (req, res, next) => {

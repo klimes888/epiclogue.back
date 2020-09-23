@@ -5,7 +5,6 @@ import util from 'util'
 import crypto from 'crypto'
 const SECRET_KEY = process.env.SECRET_KEY
 const randomBytesPromise = util.promisify(crypto.randomBytes)
-const pbkdf2Promise = util.promisify(crypto.pbkdf2)
 import transporter from '../../lib/sendMail'
 
 dotenv.config()
@@ -16,7 +15,7 @@ export const login = async function (req, res, next) {
 
   const user = await User.getSalt(email)
   if (user) {
-    const crypt_Pw = await pbkdf2Promise(
+    const crypt_Pw = crypto.pbkdf2Sync(
       userPw,
       user['salt'],
       parseInt(process.env.EXEC_NUM),
@@ -77,9 +76,9 @@ export const join = async function (req, res, next) {
           message: '중복된 이메일입니다. 다른 이메일로 가입해주세요.',
         })
       }
-      const generatedId = await crypto.createHash('sha256').update(email).digest('hex').slice(0, 14)
+      const generatedId = crypto.createHash('sha256').update(email).digest('hex').slice(0, 14)
       const salt = await randomBytesPromise(64)
-      const crypt_Pw = await pbkdf2Promise(
+      const crypt_Pw = crypto.pbkdf2Sync(
         userPw,
         salt.toString('base64'),
         parseInt(process.env.EXEC_NUM),
