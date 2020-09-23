@@ -25,11 +25,14 @@ export const postBoard = async (req, res, next) => {
   }
 
   const boardSchema = Joi.object({
-    writer: Joi.string().regex(/^[A-Fa-f0-9]{24}$/).required(),
+    writer: Joi.string()
+      .regex(/^[a-fA-F0-9]{24}$/)
+      .required(),
+      // array() 안의 string().required() 도 작성해야합니다...
     boardImg: Joi.array().items(Joi.string().required()).required(),
     // boardImg: Joi.array().items(Joi.string()).required(),
     category: Joi.string().required(),
-    pub: Joi.number().min(0).max(2).required()
+    pub: Joi.number().min(0).max(2).required(),
   })
 
   try {
@@ -37,7 +40,7 @@ export const postBoard = async (req, res, next) => {
       writer: boardData.writer,
       boardImg: boardData.boardImg,
       category: boardData.category,
-      pub: boardData.pub
+      pub: boardData.pub,
     })
   } catch (e) {
     if (boardData.boardImg.length > 0) {
@@ -45,25 +48,30 @@ export const postBoard = async (req, res, next) => {
       for (let image of boardData.boardImg) {
         const objectKey = image.split('/')
         const deletionFormat = {
-          Key: objectKey[3]
+          Key: objectKey[3],
         }
         garbageImage.push(deletionFormat)
       }
 
-      s3.deleteObjects({
-        Bucket: process.env.AWS_BUCKET_NAME,
-        Delete: {
-          Objects: garbageImage
+      s3.deleteObjects(
+        {
+          Bucket: process.env.AWS_BUCKET_NAME,
+          Delete: {
+            Objects: garbageImage,
+          },
+        },
+        (err, data) => {
+          if (err) console.error(err, err.stack)
         }
-      }, (err, data) => {
-        if (err) console.error(err, err.stack)
-      })
+      )
     }
 
-    console.warn(`[WARN] 유저 ${res.locals.uid} 가 적절하지 않은 데이터로 글을 작성하려 했습니다. ${e}`)
+    console.warn(
+      `[WARN] 유저 ${res.locals.uid} 가 적절하지 않은 데이터로 글을 작성하려 했습니다. ${e}`
+    )
     return res.status(400).json({
       result: 'error',
-      message: '입력값이 적절하지 않습니다.'
+      message: '입력값이 적절하지 않습니다.',
     })
   }
 
@@ -113,23 +121,24 @@ export const deleteBoard = async (req, res, next) => {
   for (let each of images) {
     const texts = each.split('/') // get only object name
     let deletionFormat = {
-      Key: texts[3]
-    } 
+      Key: texts[3],
+    }
     beDeletedObject.push(deletionFormat)
   }
 
-  // console.log(beDeletedObject)
-
   try {
     // for non blocking, didn't use async-await
-    s3.deleteObjects({
-      Bucket: process.env.AWS_BUCKET_NAME,
-      Delete: {
-        Objects: beDeletedObject
+    s3.deleteObjects(
+      {
+        Bucket: process.env.AWS_BUCKET_NAME,
+        Delete: {
+          Objects: beDeletedObject,
+        },
+      },
+      (err, data) => {
+        if (err) console.error(err, err.stack)
       }
-    }, (err, data) => {
-      if (err) console.error(err, err.stack)
-    })
+    )
 
     const deletion = await Board.delete(boardId)
 
@@ -139,10 +148,12 @@ export const deleteBoard = async (req, res, next) => {
         result: 'ok',
       })
     } else {
-      console.warn(`[WARN] 유저 ${res.locals.uid} 가 존재하지 않는 글 ${boardId} 의 삭제를 시도했습니다.`)
+      console.warn(
+        `[WARN] 유저 ${res.locals.uid} 가 존재하지 않는 글 ${boardId} 의 삭제를 시도했습니다.`
+      )
       return res.status(404).json({
         result: 'error',
-        message: 'Not found'
+        message: 'Not found',
       })
     }
   } catch (e) {
@@ -197,19 +208,22 @@ export const postEditInfo = async function (req, res, next) {
     for (let each of images) {
       const texts = each.split('/') // get only object name
       let deletionFormat = {
-        Key: texts[3]
-      } 
+        Key: texts[3],
+      }
       beDeletedObject.push(deletionFormat)
     }
 
-    s3.deleteObjects({
-      Bucket: process.env.AWS_BUCKET_NAME,
-      Delete: {
-        Objects: beDeletedObject
+    s3.deleteObjects(
+      {
+        Bucket: process.env.AWS_BUCKET_NAME,
+        Delete: {
+          Objects: beDeletedObject,
+        },
+      },
+      (err, data) => {
+        if (err) console.error(err, err.stack)
       }
-    }, (err, data) => {
-      if (err) console.error(err, err.stack)
-    })
+    )
 
     const updateData = {
       boardId: req.params.boardId,

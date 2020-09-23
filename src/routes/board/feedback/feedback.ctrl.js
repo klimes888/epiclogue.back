@@ -1,5 +1,5 @@
 import { Board, Feedback } from '../../../models'
-
+import Joi from 'joi'
 /*
   This is reply router.
   base url: /boards/{boardId}/feedback/{feedbackId}
@@ -13,9 +13,29 @@ export const postFeedback = async (req, res, next) => {
     feedbackBody: req.body.feedbackBody,
   }
 
+  const feedbackSchema = Joi.object({
+    feedbackBody: Joi.string().trim().required(),
+  })
+
+  try {
+    await feedbackSchema.validateAsync({
+      feedbackBody: feedbackData.feedbackBody,
+    })
+  } catch (e) {
+    console.log(
+      `[WARN] 유저 ${res.locals.uid} 가 피드백 작성 중 적절하지 않은 데이터를 입력했습니다. ${e}`
+    )
+    return res.status(400).json({
+      result: 'error',
+      message: '입력값이 적절하지 않습니다.',
+    })
+  }
+
   try {
     const postFeedbackResult = await Feedback.create(feedbackData)
-    console.log(`[INFO] 유저 ${res.locals.uid} 가 피드백 ${postFeedbackResult._id} 을 작성했습니다.`)
+    console.log(
+      `[INFO] 유저 ${res.locals.uid} 가 피드백 ${postFeedbackResult._id} 을 작성했습니다.`
+    )
     await Board.getFeedback(req.params.boardId, postFeedbackResult._id)
     const newerData = await Feedback.getByBoardId(req.params.boardId)
     return res.status(201).json({
@@ -35,6 +55,24 @@ export const editFeedback = async (req, res, next) => {
   const newForm = {
     feedbackId: req.params.feedbackId,
     newFeedbackBody: req.body.newFeedbackBody,
+  }
+
+  const feedbackSchema = Joi.object({
+    newFeedbackBody: Joi.string().trim().required(),
+  })
+
+  try {
+    await feedbackSchema.validateAsync({
+      newFeedbackBody: newForm.newFeedbackBody,
+    })
+  } catch (e) {
+    console.log(
+      `[WARN] 유저 ${res.locals.uid} 가 피드백 작성 중 적절하지 않은 데이터를 입력했습니다. ${e}`
+    )
+    return res.status(400).json({
+      result: 'error',
+      message: '입력값이 적절하지 않습니다.',
+    })
   }
 
   try {
@@ -119,13 +157,13 @@ export const getFeedback = async (req, res, next) => {
     console.log(`[INFO] 유저 ${feedbackData.writer} 가 피드백 ${feedbackData._id} 를 조회했습니다.`)
     return res.status(200).json({
       result: 'ok',
-      data: feedbackData
+      data: feedbackData,
     })
   } catch (e) {
     console.log(`[ERROR] ${e.message}`)
     return res.status(500).json({
       result: 'error',
-      message: 'Internal server error occured'
+      message: 'Internal server error occured',
     })
   }
 }

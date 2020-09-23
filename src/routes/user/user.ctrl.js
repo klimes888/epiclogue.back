@@ -14,7 +14,7 @@ export const getUserEditInfo = async function (req, res, next) {
   const uid = res.locals.uid
   try {
     const result = await User.getUserInfo(uid)
-    
+
     return res.status(200).json({
       result: 'ok',
       data: {
@@ -50,10 +50,11 @@ export const postUserEditInfo = async function (req, res, next) {
   let profile
 
   for (let each of originalImages) {
-    if (each) { // null check
+    if (each) {
+      // null check
       const texts = each.split('/')
       let obj = {
-        Key: texts[3]
+        Key: texts[3],
       }
       beDeletedImages.push(obj)
     }
@@ -61,14 +62,17 @@ export const postUserEditInfo = async function (req, res, next) {
 
   // ok
   if (beDeletedImages.length !== 0) {
-    s3.deleteObjects({
-      Bucket: process.env.AWS_BUCKET_NAME,
-      Delete: {
-        Objects: beDeletedImages
+    s3.deleteObjects(
+      {
+        Bucket: process.env.AWS_BUCKET_NAME,
+        Delete: {
+          Objects: beDeletedImages,
+        },
+      },
+      (err, data) => {
+        if (err) console.log(err)
       }
-    }, (err, data) => {
-      if (err) console.log(err)
-    })
+    )
   }
 
   if (req.files !== undefined) {
@@ -137,14 +141,16 @@ export const changePass = async function (req, res, next) {
     const changePassSchema = Joi.object({
       userPw: Joi.string().required().min(8),
       userPwNew: Joi.string().required().min(8),
-      userPwNewRe: Joi.string().required().min(8)
+      userPwNewRe: Joi.string().required().min(8),
     })
 
     await changePassSchema.validateAsync({ userPw, userPwNew, userPwNewRe })
 
     if (userPw !== userPwNew) {
       if (userPwNew === userPwNewRe) {
-        const check = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[$@$!%*#?&])[A-Za-z\d$@$!%*#?&]{8,}$/.test(userPwNew)
+        const check = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[$@$!%*#?&])[A-Za-z\d$@$!%*#?&]{8,}$/.test(
+          userPwNew
+        )
 
         if (check) {
           try {
@@ -179,19 +185,23 @@ export const changePass = async function (req, res, next) {
                   message: '비밀번호 변경 완료',
                 })
               } else {
-                console.warn(`[WARN] 유저 ${res.locals.uid} 의 비밀번호 변경이 실패했습니다: 기존 비밀번호가 다릅니다.`)
+                console.warn(
+                  `[WARN] 유저 ${res.locals.uid} 의 비밀번호 변경이 실패했습니다: 기존 비밀번호가 다릅니다.`
+                )
                 return res.status(400).json({
                   result: 'error',
                   message: '기존 비밀번호가 다릅니다.',
                 })
               }
             } else {
-              console.error(`[ERROR] 유저 ${res.locals.uid} 의 비밀번호 변경이 알 수 없는 오류로 실패했습니다.`)
+              console.error(
+                `[ERROR] 유저 ${res.locals.uid} 의 비밀번호 변경이 알 수 없는 오류로 실패했습니다.`
+              )
               return res.status(500).json({
                 result: 'error',
-                message: 'Unexpected error'
+                message: 'Unexpected error',
               })
-            }            
+            }
           } catch (e) {
             console.error(`[Error] ${e}`)
             return res.status(500).json({
@@ -200,21 +210,27 @@ export const changePass = async function (req, res, next) {
             })
           }
         } else {
-          console.warn(`[WARN] 유저 ${res.locals.uid} 의 비밀번호 변경이 실패했습니다: 비밀번호 규칙 미준수`)
+          console.warn(
+            `[WARN] 유저 ${res.locals.uid} 의 비밀번호 변경이 실패했습니다: 비밀번호 규칙 미준수`
+          )
           return res.status(400).json({
             result: 'error',
             message: '비밀번호 규칙을 다시 확인해주세요.',
           })
         }
       } else {
-        console.warn(`[WARN] 유저 ${res.locals.uid} 의 비밀번호 변경이 실패했습니다: 새로운 비밀번호 미일치`)
+        console.warn(
+          `[WARN] 유저 ${res.locals.uid} 의 비밀번호 변경이 실패했습니다: 새로운 비밀번호 미일치`
+        )
         return res.status(400).json({
           result: 'error',
           message: '재입력된 비밀번호가 일치하지 않습니다.',
         })
       }
     } else {
-      console.warn(`[WARN] 유저 ${res.locals.uid} 의 비밀번호 변경이 실패했습니다: 기존 비밀번호와 동일`)
+      console.warn(
+        `[WARN] 유저 ${res.locals.uid} 의 비밀번호 변경이 실패했습니다: 기존 비밀번호와 동일`
+      )
       res.status(400).json({
         result: 'error',
         message: '기본 비밀번호와 동일한 비밀번호는 사용할 수 없습니다.',
@@ -224,7 +240,7 @@ export const changePass = async function (req, res, next) {
     console.warn(`[WARN] 유저 ${res.locals.uid} 의 비밀번호 변경 실패: ${e}`)
     return res.status(400).json({
       result: 'error',
-      message: '비밀번호 유효성 검사 미통과'
+      message: '비밀번호 유효성 검사 미통과',
     })
   }
 }
@@ -233,21 +249,21 @@ export const deleteUser = async function (req, res, next) {
   const uid = res.locals.uid
   const userPw = req.body['userPw']
 
+  const deleteSchema = Joi.object({
+    userPw: Joi.string().required(),
+  })
+
   try {
-    const deleteSchema = Joi.object({
-      userPw: Joi.string().required()
+    await deleteSchema.validateAsync({ userPw })
+  } catch (e) {
+    console.warn(`[WARN] 유저 ${uid} 가 탈퇴에 실패했습니다: 비밀번호 미입력`)
+    return res.status(400).json({
+      result: 'error',
+      message: '패스워드를 입력해주세요.',
     })
+  }
 
-    try {
-      await deleteSchema.validateAsync({ userPw })
-    } catch (e) {
-      console.warn(`[WARN] 유저 ${uid} 가 탈퇴에 실패했습니다: 비밀번호 미입력`)
-      return res.status(400).json({
-        result: 'error',
-        message: '패스워드를 입력해주세요.'
-      })
-    }
-
+  try {
     const info = await User.getUserInfo(uid)
     const crypt_Pw = await crypto.pbkdf2Sync(
       userPw,
@@ -263,10 +279,11 @@ export const deleteUser = async function (req, res, next) {
     // console.log(originalImages)
     const beDeletedImages = []
     for (let each of originalImages) {
-      if (each) { // null check
+      if (each) {
+        // null check
         const texts = each.split('/')
         let obj = {
-          Key: texts[3]
+          Key: texts[3],
         }
         beDeletedImages.push(obj)
       }
@@ -275,14 +292,17 @@ export const deleteUser = async function (req, res, next) {
     // console.log(beDeletedImages)
 
     if (beDeletedImages.length !== 0) {
-      s3.deleteObjects({
-        Bucket: process.env.AWS_BUCKET_NAME,
-        Delete: {
-          Objects: beDeletedImages
+      s3.deleteObjects(
+        {
+          Bucket: process.env.AWS_BUCKET_NAME,
+          Delete: {
+            Objects: beDeletedImages,
+          },
+        },
+        (err, data) => {
+          if (err) console.log(err)
         }
-      }, (err, data) => {
-        if (err) console.log(err)
-      })
+      )
     }
 
     const deletion = await User.deleteUser(uid, crypt_Pw.toString('base64'))

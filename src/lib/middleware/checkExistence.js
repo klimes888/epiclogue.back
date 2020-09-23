@@ -9,18 +9,20 @@ export const checkExistence = async (req, res, next) => {
   let existence
 
   const checkSchema = Joi.object({
-    targetId: Joi.string().regex(/^[A-Fa-f0-9]{24}$/).required(),
-    type: Joi.string().required()
+    targetId: Joi.string()
+      .regex(/^[a-fA-F0-9]{24}$/)
+      .required(),
+    type: Joi.string().required(),
   })
 
   try {
     // 게시 타입에 따라 분류 후 처리
     if (req.params.replyId !== undefined || req.body.targetType === 'reply') {
       type = '댓글'
-      targetId = req.params.replyId || req.body.targetId      
+      targetId = req.params.replyId || req.body.targetId
     } else if (req.params.feedbackId !== undefined || req.body.targetType === 'feedback') {
       type = '피드백'
-      targetId = req.params.feedbackId || req.body.targetId      
+      targetId = req.params.feedbackId || req.body.targetId
     } else {
       // 글 수정 또는 북마크, 좋아요
       type = '글'
@@ -28,12 +30,14 @@ export const checkExistence = async (req, res, next) => {
     }
 
     try {
-      await checkSchema.validateAsync({targetId, type})
-    } catch (e) {        
-      console.warn(`[WARN] 유저 ${res.locals.uid} 가 ${type} 의 ObjectId에 적절하지 않은 값 ${targetId} 길이(${targetId.length}) 를 입력했습니다.`)
+      await checkSchema.validateAsync({ targetId, type })
+    } catch (e) {
+      console.warn(
+        `[WARN] 유저 ${res.locals.uid} 가 ${type} ObjectId에 적절하지 않은 값 ${targetId} 길이(${targetId.length}) 를 입력했습니다. ${e}`
+      )
       return res.status(400).json({
         result: 'error',
-        message: '입력값이 적절하지 않습니다.'
+        message: '입력값이 적절하지 않습니다.',
       })
     }
 
@@ -64,17 +68,23 @@ export const checkExistence = async (req, res, next) => {
 
 // for follow, DM, mute, block
 export const checkUserExistence = async (req, res, next) => {
-  const userId = req.body.targetUserId || await User.getIdByScreenId(req.params.screenId)
+  const userId = req.body.targetUserId || (await User.getIdByScreenId(req.params.screenId))
 
-  const userSchema = Joi.object({ userId: Joi.string().regex(/^[A-Fa-f0-9]{24}$/).required() })
+  const userSchema = Joi.object({
+    userId: Joi.string()
+      .regex(/^[a-fA-F0-9]{24}$/)
+      .required(),
+  })
 
   try {
     await userSchema.validateAsync({ userId })
   } catch (e) {
-    console.warn(`[WARN] 유저 ${res.locals.uid} 가 유저 ObjectId에 적절하지 않은 값 ${userId} 길이(${userId.length}) 를 입력했습니다.`)
+    console.warn(
+      `[WARN] 유저 ${res.locals.uid} 가 유저 ObjectId에 적절하지 않은 값 ${userId} 길이(${userId.length}) 를 입력했습니다.`
+    )
     return res.status(400).json({
       result: 'error',
-      message: '입력값이 적절하지 않습니다.'
+      message: '입력값이 적절하지 않습니다.',
     })
   }
 
@@ -92,7 +102,9 @@ export const checkUserExistence = async (req, res, next) => {
         next()
       }
     } else {
-      console.warn(`[WARN] 유저 ${res.locals.uid}가 존재하지 않는 유저 ${userId} 에게 접근하려 했습니다.`)
+      console.warn(
+        `[WARN] 유저 ${res.locals.uid}가 존재하지 않는 유저 ${userId} 에게 접근하려 했습니다.`
+      )
       next(createError(404, '존재하지 않는 데이터입니다.'))
     }
   } catch (e) {

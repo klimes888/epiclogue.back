@@ -1,4 +1,5 @@
 import { User, Follow } from '../../../models'
+
 /* 
   This is follow router.
   base url: /interaction/follow[?screenId=lunarcat123&type=following]
@@ -78,9 +79,12 @@ export const getFollow = async (req, res, next) => {
   const type = req.query.type
   const userId = await User.getIdByScreenId(screenId)
   const dataSet = []
-  
+
   try {
-    const followList = type === 'following' ? await Follow.getFollowingList(userId) : await Follow.getFollowerList(userId)
+    const followList =
+      type === 'following'
+        ? await Follow.getFollowingList(userId)
+        : await Follow.getFollowerList(userId)
     for (let data of followList) {
       let temp = await Users.getUserInfo(data.targetUserId, {
         nickname: 1,

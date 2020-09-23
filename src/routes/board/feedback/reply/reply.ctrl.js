@@ -1,16 +1,35 @@
 import { Reply, Feedback } from '../../../../models'
+import Joi from 'joi'
 /* 
   This is reply router.
-  base url: /:userId/boards/:boardId/reply
+  base url: /boards/{boardId}/feedback
+  OPTIONS: [ GET / POST / PATCH / DELETE ]
 */
 
-// 대댓글 생성
 export const postReply = async (req, res, next) => {
   const replyForm = {
     writer: res.locals.uid,
     boardId: req.params.boardId,
     parentId: req.params.feedbackId,
     replyBody: req.body.replyBody,
+  }
+
+  const replySchema = Joi.object({
+    replyBody: Joi.string().trim().required()
+  })
+
+  try {
+    await replySchema.validateAsync({
+      replyBody: replyForm.replyBody
+    }) 
+  } catch (e) {
+    console.warn(
+      `[WARN] 유저 ${res.locals.uid} 가 적절하지 않은 데이터로 댓글을 작성하려 했습니다. ${e}`
+    )
+    return res.status(400).json({
+      result: 'error',
+      message: '입력값이 적절하지 않습니다.',
+    })
   }
 
   try {
@@ -37,7 +56,9 @@ export const getReplys = async (req, res, next) => {
 
   try {
     const replyData = await Reply.getByParentId(feedbackId)
-    console.log(`[INFO] 유저 ${res.locals.uid} 가 피드백 ${feedbackId} 하위의 댓글(들)을 열람합니다.`)
+    console.log(
+      `[INFO] 유저 ${res.locals.uid} 가 피드백 ${feedbackId} 하위의 댓글(들)을 열람합니다.`
+    )
     return res.status(200).json({
       result: 'ok',
       data: replyData,
@@ -57,6 +78,24 @@ export const editReply = async (req, res, next) => {
     newReplyBody: req.body.newReplyBody,
   }
 
+  const replySchema = Joi.object({
+    newReplyBody: Joi.string().trim().required()
+  })
+
+  try {
+    await replySchema.validateAsync({
+      newReplyBody: newForm.newReplyBody
+    }) 
+  } catch (e) {
+    console.warn(
+      `[WARN] 유저 ${res.locals.uid} 가 적절하지 않은 데이터로 댓글을 작성하려 했습니다. ${e}`
+    )
+    return res.status(400).json({
+      result: 'error',
+      message: '입력값이 적절하지 않습니다.',
+    })
+  }
+
   try {
     const patch = await Reply.update(newForm)
     if (patch.ok === 1) {
@@ -74,7 +113,9 @@ export const editReply = async (req, res, next) => {
         data: newerData,
       })
     } else {
-      console.warn(`[WARN] 유저 ${res.locals.uid}가 댓글 ${req.params.replyId} 의 수정을 시도했으나 실패했습니다.`)
+      console.warn(
+        `[WARN] 유저 ${res.locals.uid}가 댓글 ${req.params.replyId} 의 수정을 시도했으나 실패했습니다.`
+      )
       return res.status(500).json({
         result: 'error',
         message: '예기치 않은 오류가 발생했습니다.',
@@ -93,7 +134,7 @@ export const deleteReply = async (req, res, next) => {
   try {
     const deletion = await Reply.delete(req.params.replyId, { parentId: 1 })
     if (deletion.ok === 1) {
-      console.log(`[INFO] 유저 ${res.locals.uid} 가 댓글 ${req.params.replyId} 을 삭제했습니다.`)  
+      console.log(`[INFO] 유저 ${res.locals.uid} 가 댓글 ${req.params.replyId} 을 삭제했습니다.`)
       if (deletion.n !== 1) {
         return res.status(404).json({
           result: 'error',
