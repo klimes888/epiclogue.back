@@ -2,7 +2,8 @@ import { Board, Feedback } from '../../../models'
 
 /*
   This is reply router.
-  Base url: /boards/{board-id}/feedback
+  base url: /boards/{boardId}/feedback/{feedbackId}
+  OPTIONS: [ GET / POST / PATCH / DELETE ]
 */
 
 export const postFeedback = async (req, res, next) => {

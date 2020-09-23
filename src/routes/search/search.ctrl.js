@@ -1,5 +1,11 @@
 import { User, Board } from '../../models'
 
+/* 
+  This is search router.
+  base url: /search
+  OPTIONS: [ GET ]
+*/
+
 /* 검색 전 미리보기 기능 */
 export const searchPreview = async (req, res, next) => {
   const queryString = req.query.q

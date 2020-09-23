@@ -2,6 +2,12 @@ import { Board } from '../../models'
 import { s3 } from '../../lib/imageUpload'
 import Joi from 'joi'
 
+/* 
+  This is board router.
+  base url: /boards/[boardId]
+  OPTIONS: [ GET / POST / DELETE ]
+*/
+
 export const postBoard = async (req, res, next) => {
   let _boardImg = []
   for (let i = 0; i < req.files.length; i++) {

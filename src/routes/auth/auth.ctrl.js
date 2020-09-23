@@ -7,6 +7,12 @@ const SECRET_KEY = process.env.SECRET_KEY
 const randomBytesPromise = util.promisify(crypto.randomBytes)
 import transporter from '../../lib/sendMail'
 
+/* 
+  This is auth router. 
+  base url: /auth
+  OPTIONS: [ GET / POST ]
+*/
+
 dotenv.config()
 
 export const login = async function (req, res, next) {
