@@ -32,6 +32,13 @@ describe('유저 테스트', () => {
     userPwRe: tempPw,
     userNick: 'Verification',
   }
+  const toBeDeletedUserData = {
+    email: 'deletion@lunarcat.com',
+    userPw: tempPw,
+    userPwRe: tempPw,
+    userNick: 'Verification',
+  }
+
 
   // profile data
   const newProfileData = {
@@ -79,6 +86,33 @@ describe('유저 테스트', () => {
         userPwRe: '1q2w3e4r!!',
         userNick: randomString()
       }).expect(201)
+    })
+
+    test("실패: 이메일 형식이 아님 | 400", async () => {
+      await request(app).post("/auth/join").send({
+        email: randomString(),
+        userPw: '1q2w3e4r!!',
+        userPwRe: '1q2w3e4r!!',
+        userNick: randomString()
+      }).expect(400)
+    })
+
+    test("실패: 비밀번호 형식이 적절하지 않음 | 400", async () => {
+      await request(app).post("/auth/join").send({
+        email: randomString() + '@lunarcat.com',
+        userPw: '1q2w3e4r',
+        userPwRe: '1q2w3e4r',
+        userNick: randomString()
+      }).expect(400)
+    })
+
+    test("실패: 필수 입력 누락 | 400", async () => {
+      await request(app).post("/auth/join").send({
+        email: randomString() + '@lunarcat.com',
+        userPw: '1q2w3e4r',
+        userPwRe: '1q2w3e4r',
+        // userNick: randomString()
+      }).expect(400)
     })
 
     test('실패: 중복 회원가입 시도 | 400', async () => {
@@ -231,16 +265,27 @@ describe('유저 테스트', () => {
   })
 
   describe('회원 탈퇴', () => {
-    test('성공 | 200', async () => {
-      // await request(app).post('/auth/join').send(toBeDeletedData)
-      // await User.confirmUser(toBeDeletedData.email)
-
+    test('실패: 비밀번호 누락 | 400', async () => {
       await request(app)
         .delete('/user')
         .set('x-access-token', userToken)
-        .send({
-          userPw: newPw,
-        })
+        // .send({ userPw: newPw })
+        .expect(400)
+    })
+
+    test('실패: 잘못된 비밀번호 | 400', async () => {
+      await request(app)
+        .delete('/user')
+        .set('x-access-token', userToken)
+        .send({ userPw: randomString() })
+        .expect(400)
+    })
+    
+    test('성공 | 200', async () => {
+      await request(app)
+        .delete('/user')
+        .set('x-access-token', userToken)
+        .send({ userPw: newPw })
         .expect(200)
     })
   })
