@@ -32,13 +32,6 @@ describe('유저 테스트', () => {
     userPwRe: tempPw,
     userNick: 'Verification',
   }
-  const toBeDeletedUserData = {
-    email: 'deletion@lunarcat.com',
-    userPw: tempPw,
-    userPwRe: tempPw,
-    userNick: 'Verification',
-  }
-
 
   // profile data
   const newProfileData = {
