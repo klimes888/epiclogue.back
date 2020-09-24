@@ -1,6 +1,12 @@
 version: "3"
+
+networks: 
+  backend:
+    driver: bridge
+
 services:
-  server:                          
+  server:
+    container_name: server
     build:
       context: ./
       dockerfile: Dockerfile.dev
@@ -20,8 +26,7 @@ services:
     container_name: mongo
     image: mongo
     volumes:
-      - data:/data/db
-    volumes:
+      - ./data:/data/db
       - ./dbinit.sh:/docker-entrypoint-initdb.d/dbinit.sh:ro
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
@@ -31,6 +36,7 @@ services:
       - backend
 
   nginx:
+    container_name: nginx
     restart: always
     image: nginx:latest
     volumes: 
@@ -41,11 +47,5 @@ services:
       - 80:80
     networks:
       - backend
-
-volumes:
-  data:
-    driver: local
-
-networks: 
-  backend:
-    driver: bridge
+    depends_on:
+      - server
