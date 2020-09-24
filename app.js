@@ -64,7 +64,7 @@ app.use('/search', searchRouter)
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec))
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
-  next(createError(404))
+  next(createError(404, '올바른 접근이 아닙니다.'))
 })
 
 // error handler
