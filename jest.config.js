@@ -10,7 +10,7 @@ module.exports = {
     "./__tests__/ignore/*",
 
     /* healthChecking */
-    "./__tests__/integration/v1/healthCheck.test.js",
+    // "./__tests__/integration/v1/healthCheck.test.js",
 
     /* middleswares */
     "./__tests__/middlewares/v1/token.test.js",
