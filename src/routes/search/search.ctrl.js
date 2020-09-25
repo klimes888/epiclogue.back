@@ -19,15 +19,15 @@ export const searchPreview = async (req, res, next) => {
       // user searching
       const _query = queryString.slice(1, queryString.length)
       const userData = await User.getByQuery(_query)
-      res.status(200).json(userData)
+      return res.status(200).json(userData)
     } else {
       // title searching
       const boardData = await Board.getTitlesByQuery(queryString)
-      res.status(200).json(boardData)
+      return res.status(200).json(boardData)
     }
   } catch (e) {
-    console.log(e)
-    res.sendStatus(500)
+    console.error(`[ERROR] ${e}`)
+    return next(createError(500, '알 수 없는 에러가 발생했습니다.'))
   }
 }
 
@@ -37,10 +37,11 @@ export const searchResult = async (req, res, next) => {
 
   try {
     const boardData = await Board.getByQuery(queryString)
+
     console.log(`[INFO] 유저 ${res.locals.uid} 가 ${queryString} 을 검색했습니다.`)
     return res.status(200).json(boardData)
   } catch (e) {
-    console.log(e)
-    res.sendStatus(500)
+    console.error(`[ERROR] ${e}`)
+    return next(createError(500, '알 수 없는 에러가 발생했습니다.'))
   }
 }
