@@ -19,7 +19,7 @@ follow.statics.unfollow = function (unFollowData) {
   })
 }
 
-follow.statics.didFollow = function (userId, targetUserId) {
+follow.statics.didFollow = function ({userId, targetUserId}) {
   return this.findOne({ userId, targetUserId })
 }
 

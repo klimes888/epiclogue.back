@@ -1,5 +1,6 @@
 import { Bookmark, React, Board, User } from '../../../models'
 import createError from 'http-errors'
+
 /* 
   This is bookmark router.
   base url: /interaction/bookmark[?screenId=lunarcat123]
@@ -36,7 +37,15 @@ export const addBookmark = async function (req, res, next) {
     type: 'bookmark',
   }
 
+  
   try {
+    const didBookmark = await Bookmark.didBookmark(res.locals.uid, req.body.boardId)
+    
+    if (didBookmark) {
+      console.warn(`[WARN] 유저 ${res.locals.uid} 가 이미 북마크한 글 ${req.body.boardId} 에 북마크를 시도했습니다.`)
+      return next(createError(400, '입력값이 적절하지 않습니다.'))
+    }
+
     await Bookmark.create(bookmarkData)
     await React.create(reactData)
     await Board.countBookmark(req.body.boardId, 1)
@@ -60,6 +69,13 @@ export const deleteBookmark = async (req, res, next) => {
   const boardId = req.body.boardId
 
   try {
+    const didBookmark = await Bookmark.didBookmark(res.locals.uid, req.body.boardId)
+    
+    if (!didBookmark) {
+      console.warn(`[WARN] 유저 ${res.locals.uid} 가 북마크 하지 않은 글 ${req.body.boardId} 에 북마크 해제를 시도했습니다.`)
+      return next(createError(400, '입력값이 적절하지 않습니다.'))
+    }
+
     await Bookmark.delete(userId, boardId)
     await React.delete(userId, boardId)
     await Board.countBookmark(req.body.boardId, 0)

@@ -14,6 +14,13 @@ export const addFollow = async (req, res, next) => {
   }
 
   try {
+    const didFollow = await Follow.didFollow(followData)
+    
+    if(didFollow) {
+        console.warn(`[WARN] 유저 ${res.locals.uid} 가 이미 팔로우 한 ${followData.targetUserId} 에 팔로우를 요청했습니다.`)
+        return next(createError(400, '이미 처리된 데이터입니다.'))
+    }
+
     await Follow.follow(followData)
     await User.countFollowing(followData.userId, 1)
     await User.countFollower(followData.targetUserId, 1)
@@ -34,9 +41,14 @@ export const deleteFollow = async (req, res, next) => {
     targetUserId: req.body.targetUserId,
   }
 
-  /* 유저 검증 필요(존재 유무, 플텍 계정의 경우 팔로우 승인 과정 필요) */
-
   try {
+    const didFollow = await Follow.didFollow(followData)
+    
+    if(!didFollow) {
+        console.warn(`[WARN] 유저 ${res.locals.uid} 가 팔로우 하지않은 ${followData.targetUserId} 에 팔로우를 요청했습니다.`)
+        return next(createError(400, '이미 처리된 데이터입니다.'))
+    }
+
     const unfollow = await Follow.unfollow(followData)
 
     await User.countFollowing(followData.userId, 0)
