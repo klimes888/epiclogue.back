@@ -1,7 +1,9 @@
 import { Board, Feedback } from '../../../models'
 import Joi from 'joi'
+import createError from 'http-errors'
+
 /*
-  This is reply router.
+  This is feedback router.
   base url: /boards/{boardId}/feedback/{feedbackId}
   OPTIONS: [ GET / POST / PATCH / DELETE ]
 */
@@ -25,10 +27,7 @@ export const postFeedback = async (req, res, next) => {
     console.log(
       `[WARN] 유저 ${res.locals.uid} 가 피드백 작성 중 적절하지 않은 데이터를 입력했습니다. ${e}`
     )
-    return res.status(400).json({
-      result: 'error',
-      message: '입력값이 적절하지 않습니다.',
-    })
+    return next(createError(400, '입력값이 적절하지 않습니다.'))
   }
 
   try {
@@ -44,10 +43,7 @@ export const postFeedback = async (req, res, next) => {
     })
   } catch (e) {
     console.error(`[Error] ${e}`)
-    return res.status(500).json({
-      result: 'error',
-      message: e.message,
-    })
+    return next(createError(500, '알 수 없는 에러가 발생했습니다.'))
   }
 }
 
@@ -69,10 +65,7 @@ export const editFeedback = async (req, res, next) => {
     console.log(
       `[WARN] 유저 ${res.locals.uid} 가 피드백 작성 중 적절하지 않은 데이터를 입력했습니다. ${e}`
     )
-    return res.status(400).json({
-      result: 'error',
-      message: '입력값이 적절하지 않습니다.',
-    })
+    return next(createError(400, '입력값이 적절하지 않습니다.'))
   }
 
   try {
@@ -80,37 +73,21 @@ export const editFeedback = async (req, res, next) => {
 
     if (patch.ok === 1) {
       const newerData = await Feedback.getByBoardId(req.params.boardId)
-      if (patch.n === 1) {
-        console.log(`[INFO] 피드백 ${req.params.feedbackId} 가 정상적으로 수정되었습니다.`)
-        return res.status(200).json({
-          result: 'ok',
-          data: newerData,
-        })
-      } else if (patch.n === 0) {
-        console.error(
-          `[ERROR] 피드백 ${req.params.feedbackId} 가 존재하지않아 수정되지 않았습니다.`
-        )
-        return res.status(404).json({
-          result: 'error',
-          data: newerData,
-          message: '존재하지 않는 데이터에 접근했습니다.',
-        })
-      }
+
+      console.log(`[INFO] 피드백 ${req.params.feedbackId} 가 정상적으로 수정되었습니다.`)
+      return res.status(200).json({
+        result: 'ok',
+        data: newerData,
+      })
     } else {
       console.error(
-        `[ERROR] 피드백 ${req.params.feedbackId} 의 수정이 정상적으로 처리되지 않았습니다.`
+        `[ERROR] 피드백 ${req.params.feedbackId} 의 수정이 정상적으로 처리되지 않았습니다: 데이터베이스 질의에 실패했습니다.`
       )
-      return res.status(500).json({
-        result: 'error',
-        message: '예기치 않은 문제가 발생했습니다.',
-      })
+      return next(createError(500, '알 수 없는 에러가 발생했습니다.'))
     }
   } catch (e) {
     console.error(`[Error] ${e}`)
-    return res.status(500).json({
-      result: 'error',
-      message: e.message,
-    })
+    return next(createError(500, '알 수 없는 에러가 발생했습니다.'))
   }
 }
 
@@ -119,35 +96,21 @@ export const deleteFeedback = async (req, res, next) => {
     const deletion = await Feedback.delete(req.params.feedbackId)
     if (deletion.ok === 1) {
       const newerData = await Feedback.getByBoardId(req.params.boardId)
-      if (deletion.n === 1) {
-        console.log(`[INFO] 피드백 ${req.params.feedbackId} 가 정상적으로 삭제되었습니다.`)
-        return res.status(200).json({
-          result: 'ok',
-          data: newerData,
-        })
-      } else if (result.n === 0) {
-        console.log(`[ERROR] 피드백 ${req.params.feedbackId} 가 존재하지 않아 삭제되지 않았습니다.`)
-        return res.status(404).json({
-          result: 'error',
-          data: newerData,
-          message: '존재하지 않는 데이터에 접근했습니다.',
-        })
-      }
+
+      console.log(`[INFO] 피드백 ${req.params.feedbackId} 가 정상적으로 삭제되었습니다.`)
+      return res.status(200).json({
+        result: 'ok',
+        data: newerData,
+      })
     } else if (result.ok === 0) {
       console.error(
-        `[ERROR] 피드백 ${req.params.feedbackId} 의 삭제가 정상적으로 처리되지 않았습니다.`
+        `[ERROR] 피드백 ${req.params.feedbackId} 의 삭제가 정상적으로 처리되지 않았습니다: 데이터베이스 질의에 실패했습니다.`
       )
-      res.status(500).json({
-        result: 'error',
-        message: '예기치 않은 문제가 발생했습니다.',
-      })
+      return next(createError(500, '알 수 없는 에러가 발생했습니다.'))
     }
   } catch (e) {
     console.error(`[Error] ${e}`)
-    return res.status(500).json({
-      result: 'error',
-      message: e.message,
-    })
+    return next(createError(500, '알 수 없는 에러가 발생했습니다.'))
   }
 }
 
@@ -161,9 +124,6 @@ export const getFeedback = async (req, res, next) => {
     })
   } catch (e) {
     console.log(`[ERROR] ${e.message}`)
-    return res.status(500).json({
-      result: 'error',
-      message: 'Internal server error occured',
-    })
+    return next(createError(500, '알 수 없는 에러가 발생했습니다.'))
   }
 }

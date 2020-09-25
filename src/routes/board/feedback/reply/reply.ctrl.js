@@ -114,11 +114,12 @@ export const editReply = async (req, res, next) => {
 export const deleteReply = async (req, res, next) => {
   try {
     const deletion = await Reply.delete(req.params.replyId, { parentId: 1 })
-    
+
     if (deletion.ok === 1) {
       if (deletion.n !== 1) {
         return next(createError(404, '존재하지 않는 데이터에 접근했습니다.'))
       }
+      
       console.log(`[INFO] 유저 ${res.locals.uid} 가 댓글 ${req.params.replyId} 을 삭제했습니다.`)
       const newerReplyData = await Reply.getByParentId(req.params.feedbackId)
       return res.status(200).json({
