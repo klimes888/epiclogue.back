@@ -42,7 +42,7 @@ export const login = async function (req, res, next) {
         result: 'ok',
         token,
         nick: result.nickname,
-        screendId: result.screendId,
+        screenId: result.screendId,
       })
     } else {
       console.warn(`[INFO] 유저 ${email} 가 다른 비밀번호 ${userPw} 로 로그인을 시도했습니다.`)

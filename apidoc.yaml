@@ -184,7 +184,7 @@ paths:
                 type: string
               nick:
                 type: string
-              userId:
+              screenId:
                 type: string
         400:
           description: "incorrect password"
