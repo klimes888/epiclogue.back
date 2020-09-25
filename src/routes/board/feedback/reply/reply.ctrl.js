@@ -17,13 +17,13 @@ export const postReply = async (req, res, next) => {
   }
 
   const replySchema = Joi.object({
-    replyBody: Joi.string().trim().required()
+    replyBody: Joi.string().trim().required(),
   })
 
   try {
     await replySchema.validateAsync({
-      replyBody: replyForm.replyBody
-    }) 
+      replyBody: replyForm.replyBody,
+    })
   } catch (e) {
     console.warn(
       `[WARN] 유저 ${res.locals.uid} 가 적절하지 않은 데이터로 댓글을 작성하려 했습니다. ${e}`
@@ -72,13 +72,13 @@ export const editReply = async (req, res, next) => {
   }
 
   const replySchema = Joi.object({
-    newReplyBody: Joi.string().trim().required()
+    newReplyBody: Joi.string().trim().required(),
   })
 
   try {
     await replySchema.validateAsync({
-      newReplyBody: newForm.newReplyBody
-    }) 
+      newReplyBody: newForm.newReplyBody,
+    })
   } catch (e) {
     console.warn(
       `[WARN] 유저 ${res.locals.uid} 가 적절하지 않은 데이터로 댓글을 작성하려 했습니다. ${e}`

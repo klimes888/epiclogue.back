@@ -8,9 +8,9 @@ import { Like, React, Board, Feedback, Reply, User } from '../../../models'
 
 export const addLike = async (req, res, next) => {
   let likeData = { userId: res.locals.uid, targetType: req.body.targetType }
-  
+
   const { targetId, targetType } = req.body
-  
+
   if (targetType === 'board') {
     likeData.board = targetId
   } else if (targetType === 'feedback') {
@@ -59,9 +59,9 @@ export const addLike = async (req, res, next) => {
 
 export const deleteLike = async (req, res, next) => {
   let likeData = { userId: res.locals.uid, targetType: req.body.targetType }
-  
+
   const { targetId, targetType } = req.body
-  
+
   if (targetType === 'board') {
     likeData.board = targetId
   } else if (targetType === 'feedback') {
@@ -73,11 +73,7 @@ export const deleteLike = async (req, res, next) => {
   try {
     await Like.unlike(likeData)
     console.log(
-<<<<<<< HEAD
-      `[INFO] 유저 ${res.locals.uid}가 ${likeData.targetType}: ${likeData.targetId} 의 좋아요를 해제했습니다.`
-=======
       `[INFO] 유저 ${res.locals.uid}가 ${targetType}: ${targetId}의 좋아요를 해제했습니다.`
->>>>>>> 2aecc57477c91038956ab3d45a79d90853a43176
     )
     let likeCount
 

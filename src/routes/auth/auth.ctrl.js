@@ -31,7 +31,11 @@ export const login = async function (req, res, next) {
   try {
     await loginValidationSchema.validateAsync({ email, userPw })
   } catch (e) {
-    console.warn(`[WARN] ${req.headers['x-forwarded-for'] ||  req.connection.remoteAddress} 에서 적절하지 않은 로그인 데이터를 입력했습니다: email: ${email}, password: ${userPw}`)
+    console.warn(
+      `[WARN] ${
+        req.headers['x-forwarded-for'] || req.connection.remoteAddress
+      } 에서 적절하지 않은 로그인 데이터를 입력했습니다: email: ${email}, password: ${userPw}`
+    )
     return next(createError(400, '적절하지 않은 값을 입력했습니다.'))
   }
 
