@@ -67,12 +67,12 @@ Feedback.statics.getReply = function (feedbackId, replyId) {
 
 Feedback.statics.countReply = function (feedbackId, flag) {
   const increment = flag ? 1 : -1
-  return this.findOneAndUpdate({ _id: feedbackId }, { $inc: { childCount: increment } })
+  return this.updateOne({ _id: feedbackId }, { $inc: { childCount: increment } })
 }
 
 Feedback.statics.countHeart = function (feedbackId, flag) {
   const increment = flag ? 1 : -1
-  return this.findOneAndUpdate({ _id: feedbackId }, { $inc: { heartCount: increment } })
+  return this.updateOne({ _id: feedbackId }, { $inc: { heartCount: increment } })
 }
 
 Feedback.statics.getHeartCount = function (feedbackId) {

@@ -4,6 +4,7 @@ node_modules
 # setting files
 .env
 .node-version
+logs
 
 # etc
 .DS_Store

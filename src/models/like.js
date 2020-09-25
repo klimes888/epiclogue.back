@@ -5,7 +5,10 @@ const ObjectId = mongoose.ObjectId
 const like = new mongoose.Schema({
   userId: { type: ObjectId, required: true, ref: 'User' },
   targetType: { type: String, required: true }, // 글(board), 댓글(feedback), 대댓글(reply)
-  targetId: { type: ObjectId, required: true, ref: 'Board Feedback Reply' },
+  /* required가 없으면 각 데이터는 컬럼에 나타나지 않으므로 아래와 같이 모델링 */
+  board: { type: ObjectId, ref: 'Board' },
+  feedback: { type: ObjectId, ref: 'Feedback' },
+  reply: { type: ObjectId, ref: 'Reply' },
   createdAt: { type: Date, default: Date.now },
 })
 
@@ -15,61 +18,28 @@ like.statics.like = function (data) {
 }
 
 like.statics.unlike = function (data) {
+  if (data.targetType)
   return this.deleteOne({
     userId: data.userId,
     targetType: data.targetType,
-    targetId: data.targetId,
+    board: data.board,
+    feedback: data.feedback,
+    reply: data.reply,
+    // targetId: data.targetId,
   })
 }
 
-// 유저의 좋아요 목록
 like.statics.getByUserId = async function (userId) {
-  const resultData = [];
-  const likeDataSet = await this.find({ userId }, { userId: 0 })
-  
-  // filter(projection) options
-  const boardFilterOption = {
-    feedbacks: 0,
-    allowSecondaryCreation: 0,
-    __v: 0,
-  }
-
-  const feedbackFilterOption = {
-    replies: 0,
-    __v: 0
-  }
-
-  const replyFilterOption = {
-    boardId: 0,
-    __v: 0
-  }
-
-  // iteration for data
-  for (let data of likeDataSet) {
-    let eachBracket = {
-      _id: data._id,
-      createAt: data._createdAt,
-      type: data._targetType,
-    }
-    if (data.targetType === 'board') {
-      const frag = await Board.getById(data.targetId, boardFilterOption)
-      eachBracket.data = frag
-    } else if (data.targetType === 'feedback') {
-      const frag = await Feedback.getById(data.targetId, feedbackFilterOption)
-      eachBracket.data = frag
-    } else if (data.targetType === 'reply') {
-      const frag = await Reply.getById(data.targetId, replyFilterOption)
-      eachBracket.data = frag
-    }
-
-    resultData.push(eachBracket)
-  }
-  return resultData
+  return this.find({ userId }, { userId: 0 })
+    .populate({ path: 'userId', select: '_id screenId nickname profile' })
+    .populate({ path: 'board', populate: { path: 'writer', select: '_id screenId nickname profile '} })
+    .populate({ path: 'feedback' })
+    .populate({ path: 'reply' })
 }
 
 like.statics.getCount = function (likeData) {
   return this.find(
-    { targetType: likeData.targetType, targetId: likeData.targetId },
+    { targetType: likeData.targetType, targetId: likeData.targetId, board: likeData.board, feedback: likeData.feedback, reply: likeData.reply },
     {
       _id: 0,
       createAt: 1,

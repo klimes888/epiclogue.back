@@ -3,6 +3,7 @@ import { Bookmark, React, Board, User } from '../../../models'
 /* 
   This is bookmark router.
   base url: /interaction/bookmark
+  OPTIONS: [ GET / POST / DELETE ]
 */
 
 export const getBookmarkList = async (req, res, next) => {
@@ -27,12 +28,12 @@ export const getBookmarkList = async (req, res, next) => {
 
 export const addBookmark = async function (req, res, next) {
   const bookmarkData = {
-    userId: res.locals.uid,
+    user: res.locals.uid,
     boardId: req.body.boardId,
   }
 
   const reactData = {
-    userId: res.locals.uid,
+    user: res.locals.uid,
     boardId: req.body.boardId,
     type: 'bookmark',
   }
