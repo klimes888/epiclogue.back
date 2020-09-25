@@ -1,5 +1,4 @@
 import mongoose from 'mongoose'
-import { Board, Feedback, Reply } from './'
 const ObjectId = mongoose.ObjectId
 
 const like = new mongoose.Schema({
@@ -18,15 +17,23 @@ like.statics.like = function (data) {
 }
 
 like.statics.unlike = function (data) {
-  if (data.targetType)
   return this.deleteOne({
     userId: data.userId,
     targetType: data.targetType,
     board: data.board,
     feedback: data.feedback,
     reply: data.reply,
-    // targetId: data.targetId,
   })
+}
+
+like.statics.didLike = function (data) {
+  if (data.targetType === 'board') {
+    return this.findOne({ userId: data.userId, board: data.board })
+  } else if (data.targetType === 'feedback') {
+    return this.findOne({ userId: data.userId, feedback: data.feedback })
+  } else if (data.targetType === 'reply') {
+    return this.findOne({ userId: data.userId, reply: data.reply })
+  }
 }
 
 like.statics.getByUserId = async function (userId) {
