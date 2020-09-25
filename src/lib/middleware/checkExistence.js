@@ -35,10 +35,7 @@ export const checkExistence = async (req, res, next) => {
       console.warn(
         `[WARN] 유저 ${res.locals.uid} 가 ${type} ObjectId에 적절하지 않은 값 ${targetId} 길이(${targetId.length}) 를 입력했습니다. ${e}`
       )
-      return res.status(400).json({
-        result: 'error',
-        message: '입력값이 적절하지 않습니다.',
-      })
+      return next(createError(400, '입력값이 적절하지 않습니다.'))
     }
 
     if (type === '글') {
@@ -55,14 +52,11 @@ export const checkExistence = async (req, res, next) => {
       console.warn(
         `[WARN] 유저 ${res.locals.uid}가 존재하지 않는 ${type} ${targetId} 를 접근하려 했습니다.`
       )
-      next(createError(404, '존재하지 않는 데이터입니다.'))
+      return next(createError(404, '존재하지 않는 데이터입니다.'))
     }
   } catch (e) {
     console.error(`[ERROR] 게시글 존재 여부를 확인하는 중에 문제가 발생 했습니다. ${e}`)
-    return res.status(500).json({
-      result: 'error',
-      message: '알 수 없는 오류가 발생했습니다.',
-    })
+    return next(createError(500, '알 수 없는 오류가 발생했습니다.'))
   }
 }
 
@@ -82,10 +76,7 @@ export const checkUserExistence = async (req, res, next) => {
     console.warn(
       `[WARN] 유저 ${res.locals.uid} 가 유저 ObjectId에 적절하지 않은 값 ${userId} 길이(${userId.length}) 를 입력했습니다.`
     )
-    return res.status(400).json({
-      result: 'error',
-      message: '입력값이 적절하지 않습니다.',
-    })
+    return next(createError(400, '입력값이 적절하지 않습니다.'))
   }
 
   try {
@@ -94,10 +85,7 @@ export const checkUserExistence = async (req, res, next) => {
     if (existence !== null) {
       // left is Object, right is String.
       if (existence._id.toString() === res.locals.uid) {
-        return res.status(400).json({
-          result: 'error',
-          message: '적절하지 않은 접근입니다.',
-        })
+        return next(createError(400, '적절하지 않은 접근입니다.'))
       } else {
         next()
       }
@@ -105,14 +93,11 @@ export const checkUserExistence = async (req, res, next) => {
       console.warn(
         `[WARN] 유저 ${res.locals.uid}가 존재하지 않는 유저 ${userId} 에게 접근하려 했습니다.`
       )
-      next(createError(404, '존재하지 않는 데이터입니다.'))
+      return next(createError(404, '존재하지 않는 데이터입니다.'))
     }
   } catch (e) {
     console.error(`[ERROR] 유저 존재 여부를 확인하는 중에 문제가 발생 했습니다. ${e}`)
-    return res.status(500).json({
-      result: 'error',
-      message: '알 수 없는 오류가 발생했습니다.',
-    })
+    return next(createError(500, '알 수 없는 오류가 발생했습니다.'))
   }
 }
 
@@ -125,9 +110,6 @@ export const checkUnique = async (req, res, next) => {
   try {
   } catch (e) {
     console.error(`[ERROR] 데이터 유일성을 확인하는 중에 문제가 발생 했습니다. ${e}`)
-    return res.status(500).json({
-      result: 'error',
-      message: '알 수 없는 오류가 발생했습니다.',
-    })
+    return next(createError(500, '알 수 없는 오류가 발생했습니다.'))
   }
 }
