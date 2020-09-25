@@ -7,35 +7,41 @@ import { Like, React, Board, Feedback, Reply, User } from '../../../models'
 */
 
 export const addLike = async (req, res, next) => {
-  const likeData = {
-    userId: res.locals.uid,
-    targetType: req.body.targetType,
-    targetId: req.body.targetId,
+  let likeData = { userId: res.locals.uid, targetType: req.body.targetType }
+  
+  const { targetId, targetType } = req.body
+  
+  if (targetType === 'board') {
+    likeData.board = targetId
+  } else if (targetType === 'feedback') {
+    likeData.feedback = targetId
+  } else if (targetType === 'reply') {
+    likeData.reply = targetId
   }
 
   try {
     await Like.like(likeData)
-    console.log(
-      `[INFO] 유저 ${res.locals.uid}가 ${likeData.targetType}: ${likeData.targetId} 를 좋아합니다.`
-    )
+
+    console.log(`[INFO] 유저 ${res.locals.uid}가 ${targetType}: ${targetId}를 좋아합니다.`)
+
     let likeCount
 
-    if (likeData.targetType === 'board') {
+    if (targetType === 'board') {
       const reactData = {
-        userId: res.locals.uid,
+        user: res.locals.uid,
         boardId: req.body.targetId,
         type: 'like',
       }
       await React.create(reactData)
-      await Board.countHeart(likeData.targetId, 1)
-      await Board.countReact(likeData.targetId, 1)
-      likeCount = await Board.getHeartCount(likeData.targetId)
-    } else if (likeData.targetType === 'feedback') {
-      await Feedback.countHeart(likeData.targetId, 1)
-      likeCount = await Feedback.getHeartCount(likeData.targetId)
-    } else if (likeData.targetType === 'reply') {
+      await Board.countHeart(targetId, 1)
+      await Board.countReact(targetId, 1)
+      likeCount = await Board.getHeartCount(targetId)
+    } else if (targetType === 'feedback') {
+      await Feedback.countHeart(targetId, 1)
+      likeCount = await Feedback.getHeartCount(targetId)
+    } else if (targetType === 'reply') {
       await Reply.countHeart(req.body.targetId, 1)
-      likeCount = await Reply.getHeartCount(likeData.targetId)
+      likeCount = await Reply.getHeartCount(targetId)
     }
 
     return res.status(201).json({
@@ -52,30 +58,40 @@ export const addLike = async (req, res, next) => {
 }
 
 export const deleteLike = async (req, res, next) => {
-  const likeData = {
-    userId: res.locals.uid,
-    targetType: req.body.targetType,
-    targetId: req.body.targetId,
+  let likeData = { userId: res.locals.uid, targetType: req.body.targetType }
+  
+  const { targetId, targetType } = req.body
+  
+  if (targetType === 'board') {
+    likeData.board = targetId
+  } else if (targetType === 'feedback') {
+    likeData.feedback = targetId
+  } else if (targetType === 'reply') {
+    likeData.reply = targetId
   }
 
   try {
     await Like.unlike(likeData)
     console.log(
+<<<<<<< HEAD
       `[INFO] 유저 ${res.locals.uid}가 ${likeData.targetType}: ${likeData.targetId} 의 좋아요를 해제했습니다.`
+=======
+      `[INFO] 유저 ${res.locals.uid}가 ${targetType}: ${targetId}의 좋아요를 해제했습니다.`
+>>>>>>> 2aecc57477c91038956ab3d45a79d90853a43176
     )
     let likeCount
 
-    if (likeData.targetType === 'board') {
-      await React.delete(likeData.userId, likeData.targetId)
+    if (targetType === 'board') {
+      await React.delete(likeData.userId, targetId)
       await Board.countHeart(req.body.targetId, 0)
       await Board.countReact(req.body.targetId, 0)
-      likeCount = await Board.getHeartCount(likeData.targetId)
-    } else if (likeData.targetType === 'feedback') {
+      likeCount = await Board.getHeartCount(targetId)
+    } else if (targetType === 'feedback') {
       await Feedback.countHeart(req.body.targetId, 0)
-      likeCount = await Feedback.getHeartCount(likeData.targetId)
-    } else if (likeData.targetType === 'reply') {
+      likeCount = await Feedback.getHeartCount(targetId)
+    } else if (targetType === 'reply') {
       await Reply.countHeart(req.body.targetId, 0)
-      likeCount = await Reply.getHeartCount(likeData.targetId)
+      likeCount = await Reply.getHeartCount(targetId)
     }
 
     return res.status(200).json({

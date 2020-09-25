@@ -69,7 +69,7 @@ Reply.statics.getParentId = function (replyId) {
 
 Reply.statics.countHeart = function (replyId, flag) {
   const increment = flag ? 1 : -1
-  return this.findOneAndUpdate({ _id: replyId }, { $inc: { heartCount: increment } })
+  return this.updateOne({ _id: replyId }, { $inc: { heartCount: increment } })
 }
 
 Reply.statics.getHeartCount = function (replyId) {
