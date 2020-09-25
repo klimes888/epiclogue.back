@@ -15,6 +15,6 @@ board.delete('/:boardId', verifyToken, checkExistence, checkWriter, boardCtrl.de
 board.get('/:boardId/edit', verifyToken, checkExistence, checkWriter, boardCtrl.getEditInfo)
 board.post('/:boardId/edit', verifyToken, checkExistence, checkWriter, upload.any(), boardCtrl.postEditInfo)
 board.use('/:boardId/feedback', checkExistence, feedback)
-board.use('/:boardId', verifyToken, react)
+board.use('/:boardId/react', verifyToken, react)
 
 export default board
