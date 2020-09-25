@@ -1,15 +1,17 @@
 import { Like, React, Board, Feedback, Reply, User } from '../../../models'
+import createError from 'http-errors'
 
 /*
   This is like router
-  base url: /:screenId/like 
+  base url: /interaction/like[?screenId=lunarcat123]
+  OPTIONS: [GET / POST / DELETE]
 */
 
 export const addLike = async (req, res, next) => {
   let likeData = { userId: res.locals.uid, targetType: req.body.targetType }
-  
+
   const { targetId, targetType } = req.body
-  
+
   if (targetType === 'board') {
     likeData.board = targetId
   } else if (targetType === 'feedback') {
@@ -31,6 +33,7 @@ export const addLike = async (req, res, next) => {
         boardId: req.body.targetId,
         type: 'like',
       }
+
       await React.create(reactData)
       await Board.countHeart(targetId, 1)
       await Board.countReact(targetId, 1)
@@ -49,18 +52,15 @@ export const addLike = async (req, res, next) => {
     })
   } catch (e) {
     console.error(`[Error] ${e}`)
-    return res.status(500).json({
-      result: 'error',
-      message: e.message,
-    })
+    return next(createError(500, '알 수 없는 에러가 발생했습니다.'))
   }
 }
 
 export const deleteLike = async (req, res, next) => {
   let likeData = { userId: res.locals.uid, targetType: req.body.targetType }
-  
+
   const { targetId, targetType } = req.body
-  
+
   if (targetType === 'board') {
     likeData.board = targetId
   } else if (targetType === 'feedback') {
@@ -71,9 +71,11 @@ export const deleteLike = async (req, res, next) => {
 
   try {
     await Like.unlike(likeData)
+
     console.log(
       `[INFO] 유저 ${res.locals.uid}가 ${targetType}: ${targetId}의 좋아요를 해제했습니다.`
     )
+
     let likeCount
 
     if (targetType === 'board') {
@@ -95,29 +97,24 @@ export const deleteLike = async (req, res, next) => {
     })
   } catch (e) {
     console.error(`[Error] ${e}`)
-    return res.status(500).json({
-      result: 'error',
-      message: e.message,
-    })
+    return next(createError(500, '알 수 없는 에러가 발생했습니다.'))
   }
 }
 
 export const getLikeList = async (req, res, next) => {
   const screenId = req.query.screenId
-  
+
   try {
     const userId = await User.getIdByScreenId(screenId)
     const likeObjectIdList = await Like.getByUserId(userId)
-    console.log(`[INFO] 유저 ${res.locals.uid}가 유저 ${userId}의 좋아요 리스트를 확인했습니다.`)
+
+    console.log(`[INFO] 유저 ${res.locals.uid}가 유저 ${userId} 의 좋아요 리스트를 확인했습니다.`)
     return res.status(200).json({
       result: 'ok',
       data: likeObjectIdList,
     })
   } catch (e) {
     console.error(`[Error] ${e}`)
-    return res.status(500).json({
-      result: 'error',
-      message: e.message,
-    })
+    return next(createError(500, '알 수 없는 에러가 발생했습니다.'))
   }
 }

@@ -1,4 +1,5 @@
 import { Board, Reply, Feedback } from '../../models'
+import createError from 'http-errors'
 
 // 작성자에 대한 인증 미들웨어
 export const checkWriter = async (req, res, next) => {
@@ -26,16 +27,10 @@ export const checkWriter = async (req, res, next) => {
       next()
     } else {
       console.warn(`[WARN] 유저 ${res.locals.uid} 가 권한없이 ${type} ${id} 에 접근하려했습니다.`)
-      return res.status(401).json({
-        result: 'error',
-        message: `${type} 작성자가 아닙니다.`,
-      })
+      return next(createError(401, `${type} 작성자가 아닙니다.`))
     }
   } catch (e) {
     console.error(`[Error!] ${e}`)
-    return res.status(500).json({
-      result: 'error',
-      message: e.message,
-    })
+    return next(createError(500, `알 수 없는 에러가 발생했습니다.`))
   }
 }

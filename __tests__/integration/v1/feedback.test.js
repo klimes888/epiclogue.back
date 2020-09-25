@@ -79,72 +79,93 @@ describe('피드백 테스트', () => {
         .post(`/boards/${testBoardId}/feedback`)
         .set('x-access-token', userToken)
         .send({ feedbackBody: 'feedback body ever seen!' })
+        .expect(201)
 
       // extract feedbackId
       const extractedResponse = JSON.parse(rawResponse.res.text)
       testFeedbackId = extractedResponse.data[0]._id
       // console.log(testFeedbackId) // ok
     })
-  })
 
-  describe('피드백 읽기', () => {
-    test('성공 | 200', async () => {
+    test('실패: feedbackBody 누락 | 400', async () => {
       const response = await request(app)
-        .get(`/boards/${testBoardId}/feedback/${testFeedbackId}`)
+        .post(`/boards/${testBoardId}/feedback`)
         .set('x-access-token', userToken)
 
-      expect(response.statusCode).toBe(200)
+      expect(response.statusCode).toBe(400)
     })
 
-    test('실패: 존재하지 않는 피드백 | 404', async () => {
+    test('실패: feedbackBody가 공백 | 400', async () => {
       const response = await request(app)
-        .get(`/boards/${testBoardId}/feedback/${invalidId}`)
+        .post(`/boards/${testBoardId}/feedback`)
         .set('x-access-token', userToken)
+        .send({ feedbackBody: '   ' })
 
-      expect(response.statusCode).toBe(404)
-    })
-  })
-
-  describe('피드백 수정', () => {
-    test('성공 | 200', async () => {
-      const response = await request(app)
-        .patch(`/boards/${testBoardId}/feedback/${testFeedbackId}`)
-        .set('x-access-token', userToken)
-        .send({ newFeedbackBody: 'feedback has been changed? ' })
-
-      expect(response.statusCode).toBe(200)
+      expect(response.statusCode).toBe(400)
     })
 
-    test('실패: 존재하지 않는 피드백 | 404', async () => {
-      const response = await request(app)
-        .patch(`/boards/${testBoardId}/feedback/${invalidId}`)
-        .set('x-access-token', userToken)
+    describe('피드백 읽기', () => {
+      test('성공 | 200', async () => {
+        const response = await request(app)
+          .get(`/boards/${testBoardId}/feedback/${testFeedbackId}`)
+          .set('x-access-token', userToken)
 
-      expect(response.statusCode).toBe(404)
+        expect(response.statusCode).toBe(200)
+      })
+
+      test('실패: 존재하지 않는 피드백 | 404', async () => {
+        const response = await request(app)
+          .get(`/boards/${testBoardId}/feedback/${invalidId}`)
+          .set('x-access-token', userToken)
+
+        expect(response.statusCode).toBe(404)
+      })
     })
-  })
 
-  describe('피드백 삭제', () => {
-    test('성공 | 200', async () => {
-      const response = await request(app)
-        .delete(`/boards/${testBoardId}/feedback/${testFeedbackId}`)
-        .set('x-access-token', userToken)
+    describe('피드백 수정', () => {
+      test('성공 | 200', async () => {
+        const response = await request(app)
+          .patch(`/boards/${testBoardId}/feedback/${testFeedbackId}`)
+          .set('x-access-token', userToken)
+          .send({ newFeedbackBody: 'feedback has been changed? ' })
 
-      expect(response.statusCode).toBe(200)
+        expect(response.statusCode).toBe(200)
+      })
+
+      test('실패: 존재하지 않는 피드백 | 404', async () => {
+        const response = await request(app)
+          .patch(`/boards/${testBoardId}/feedback/${invalidId}`)
+          .set('x-access-token', userToken)
+
+        expect(response.statusCode).toBe(404)
+      })
     })
 
-    test('실패: 존재하지 않는 피드백 | 404', async () => {
-      const response = await request(app)
-        .delete(`/boards/${testBoardId}/feedback/${invalidId}`)
-        .set('x-access-token', userToken)
+    describe('피드백 삭제', () => {
+      test('성공 | 200', async () => {
+        const response = await request(app)
+          .delete(`/boards/${testBoardId}/feedback/${testFeedbackId}`)
+          .set('x-access-token', userToken)
 
-      expect(response.statusCode).toBe(404)
+        expect(response.statusCode).toBe(200)
+      })
+
+      test('실패: 존재하지 않는 피드백 | 404', async () => {
+        const response = await request(app)
+          .delete(`/boards/${testBoardId}/feedback/${invalidId}`)
+          .set('x-access-token', userToken)
+
+        expect(response.statusCode).toBe(404)
+      })
     })
-  })
 
-  describe('테스트 종료', () => {
-    test('S3 오브젝트 삭제 | 200', async () => {
-      await request(app).delete(`/boards/${testBoardId}`).set('x-access-token', userToken).expect(200)
+    describe('테스트 종료', () => {
+      test('S3 오브젝트 삭제 | 200', async () => {
+        await request(app)
+          .delete(`/boards/${testBoardId}`)
+          .set('x-access-token', userToken)
+          .expect(200)
+      })
     })
   })
 })

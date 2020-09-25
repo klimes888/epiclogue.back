@@ -1,5 +1,13 @@
 import { Board } from '../../models'
 import { s3 } from '../../lib/imageUpload'
+import Joi from 'joi'
+import createError from 'http-errors'
+
+/* 
+  This is board router.
+  base url: /boards/[boardId]
+  OPTIONS: [ GET / POST / DELETE ]
+*/
 
 export const postBoard = async (req, res, next) => {
   let _boardImg = []
@@ -17,38 +25,85 @@ export const postBoard = async (req, res, next) => {
     boardImg: _boardImg,
   }
 
+  const boardSchema = Joi.object({
+    writer: Joi.string()
+      .regex(/^[a-fA-F0-9]{24}$/)
+      .required(),
+    // array() 안의 string().required() 도 작성해야합니다...
+    boardImg: Joi.array().items(Joi.string().required()).required(),
+    category: Joi.string().required(),
+    pub: Joi.number().min(0).max(2).required(),
+  })
+
+  try {
+    await boardSchema.validateAsync({
+      writer: boardData.writer,
+      boardImg: boardData.boardImg,
+      category: boardData.category,
+      pub: boardData.pub,
+    })
+  } catch (e) {
+    if (boardData.boardImg.length > 0) {
+      const garbageImage = []
+
+      for (let image of boardData.boardImg) {
+        const objectKey = image.split('/')
+        const deletionFormat = {
+          Key: objectKey[3],
+        }
+        garbageImage.push(deletionFormat)
+      }
+
+      s3.deleteObjects(
+        {
+          Bucket: process.env.AWS_BUCKET_NAME,
+          Delete: {
+            Objects: garbageImage,
+          },
+        },
+        (err, data) => {
+          if (err) console.error(err, err.stack)
+        }
+      )
+    }
+
+    console.warn(
+      `[WARN] 유저 ${res.locals.uid} 가 적절하지 않은 데이터로 글을 작성하려 했습니다. ${e}`
+    )
+    return next(createError(400, '입력값이 적절하지 않습니다.'))
+  }
+
   try {
     const createdBoard = await Board.create(boardData)
+
     console.log(`[INFO] 유저 ${boardData.writer}가 글 ${createdBoard._id}를 작성했습니다.`)
+
     return res.status(201).json({
       result: 'ok',
       data: createdBoard,
     })
   } catch (e) {
     console.error(`[ERROR] ${e}`)
-    return res.status(500).json({
-      result: 'error',
-      message: e.message,
-    })
+    return next(createError(500, '알 수 없는 에러가 발생했습니다.'))
   }
 }
 
 // 글 뷰
 export const viewBoard = async (req, res, next) => {
   const boardId = req.params.boardId
+
   try {
     const boardData = await Board.getById(boardId)
+
     console.log(`[INFO] 유저 ${res.locals.uid}가 글 ${boardId}를 접근했습니다.`)
+    
     return res.status(200).json({
       result: 'ok',
       data: boardData,
     })
   } catch (e) {
     console.error(`[ERROR] ${e}`)
-    return res.status(500).json({
-      result: 'error',
-      message: e.message,
-    })
+    return next(createError(500, '알 수 없는 에러가 발생했습니다.'))
   }
 }
 
@@ -62,23 +117,25 @@ export const deleteBoard = async (req, res, next) => {
 
   for (let each of images) {
     const texts = each.split('/') // get only object name
-    let obj = {} // formatting
-    obj.Key = texts[3]
-    beDeletedObject.push(obj)
+    let deletionFormat = {
+      Key: texts[3],
+    }
+    beDeletedObject.push(deletionFormat)
   }
-
-  // console.log(beDeletedObject)
 
   try {
     // for non blocking, didn't use async-await
-    s3.deleteObjects({
-      Bucket: process.env.AWS_BUCKET_NAME,
-      Delete: {
-        Objects: beDeletedObject
+    s3.deleteObjects(
+      {
+        Bucket: process.env.AWS_BUCKET_NAME,
+        Delete: {
+          Objects: beDeletedObject,
+        },
+      },
+      (err, data) => {
+        if (err) console.error(err, err.stack)
       }
-    }, (err, data) => {
-      if (err) console.error(err, err.stack)
-    })
+    )
 
     const deletion = await Board.delete(boardId)
 
@@ -88,18 +145,14 @@ export const deleteBoard = async (req, res, next) => {
         result: 'ok',
       })
     } else {
-      console.warn(`[WARN] 유저 ${res.locals.uid} 가 존재하지 않는 글 ${boardId} 의 삭제를 시도했습니다.`)
-      return res.status(404).json({
-        result: 'error',
-        message: 'Not found'
-      })
+      console.error(
+        `[ERROR] 글 ${boardId} 의 삭제가 실패했습니다: 데이터베이스 질의에 실패했습니다.`
+      )
+      return next(createError(500, '알 수 없는 에러가 발생했습니다.'))
     }
   } catch (e) {
     console.error(`[ERROR] ${e}`)
-    return res.status(500).json({
-      result: 'error',
-      message: e.message,
-    })
+    return next(createError(500, '알 수 없는 에러가 발생했습니다.'))
   }
 }
 
@@ -120,10 +173,7 @@ export const getEditInfo = async (req, res, next) => {
     })
   } catch (e) {
     console.error(`[ERROR] ${e}`)
-    return res.status(500).json({
-      result: 'error',
-      message: e.message,
-    })
+    return next(createError(500, '알 수 없는 에러가 발생했습니다.'))
   }
 }
 
@@ -145,19 +195,25 @@ export const postEditInfo = async function (req, res, next) {
 
     for (let each of images) {
       const texts = each.split('/') // get only object name
-      let obj = {} // formatting
-      obj.Key = texts[3]
-      beDeletedObject.push(obj)
+
+      let deletionFormat = {
+        Key: texts[3],
+      }
+
+      beDeletedObject.push(deletionFormat)
     }
 
-    s3.deleteObjects({
-      Bucket: process.env.AWS_BUCKET_NAME,
-      Delete: {
-        Objects: beDeletedObject
+    s3.deleteObjects(
+      {
+        Bucket: process.env.AWS_BUCKET_NAME,
+        Delete: {
+          Objects: beDeletedObject,
+        },
+      },
+      (err, data) => {
+        if (err) console.error(err, err.stack)
       }
-    }, (err, data) => {
-      if (err) console.error(err, err.stack)
-    })
+    )
 
     const updateData = {
       boardId: req.params.boardId,
@@ -170,36 +226,24 @@ export const postEditInfo = async function (req, res, next) {
     }
 
     const patch = await Board.update(updateData)
+
     if (patch.ok === 1) {
-      if (patch.n === 1) {
-        const newerData = await Board.getById(req.params.boardId)
-        console.log(`[INFO] 유저 ${res.locals.uid}가 글 ${req.params.boardId}을 수정했습니다.`)
-        return res.status(200).json({
-          result: 'ok',
-          data: newerData,
-        })
-      } else if (patch.n === 0) {
-        console.log(
-          `[WARN] 유저 ${res.locals.uid}가 글 ${req.params.boardId}을 수정하려했으나 존재하지 않습니다.`
-        )
-        return res.status(404).json({
-          result: 'error',
-          message: '존재하지 않는 데이터에 접근했습니다.',
-        })
-      }
-    } else {
-      console.error(`[ERROR] 글 ${req.params.boardId}의 수정이 실패했습니다.`)
-      return res.status(500).json({
+      const newerData = await Board.getById(req.params.boardId)
+
+      console.log(`[INFO] 유저 ${res.locals.uid}가 글 ${req.params.boardId}을 수정했습니다.`)
+      return res.status(200).json({
         result: 'ok',
-        message: '수정에 실패했습니다.',
+        data: newerData,
       })
+    } else {
+      console.error(
+        `[ERROR] 글 ${req.params.boardId}의 수정이 실패했습니다: 데이터베이스 질의에 실패했습니다.`
+      )
+      return next(createError(500, '알 수 없는 에러가 발생했습니다.'))
     }
   } catch (e) {
     console.error(`[ERROR] ${e}`)
-    return res.status(500).json({
-      result: 'ok',
-      message: e.message,
-    })
+    return next(createError(500, '알 수 없는 에러가 발생했습니다.'))
   }
 }
 
@@ -209,16 +253,12 @@ export const getBoards = async (req, res, next) => {
     const boardList = await Board.findAll() // 썸네일만 골라내는 작업 필요
 
     console.log(`[INFO] 유저 ${res.locals.uid} 가 자신의 피드를 확인했습니다.`)
-
     return res.status(200).json({
       result: 'ok',
       data: boardList,
     })
   } catch (e) {
     console.error(`[ERROR] ${e}`)
-    return res.status(500).json({
-      result: 'error',
-      message: e.message,
-    })
+    return next(createError(500, '알 수 없는 에러가 발생했습니다.'))
   }
 }

@@ -97,6 +97,23 @@ describe('댓글 테스트', () => {
 
       testReplyId = response.body.data[0]._id
     })
+
+    test('실패: replyBody 누락 | 400', async () => {
+      const response = await request(app)
+        .post(`/boards/${testBoardId}/feedback/${testFeedbackId}/reply`)
+        .set('x-access-token', userToken)
+      
+      expect(response.statusCode).toBe(400)
+    })
+
+    test('실패: replyBody가 공백 | 400', async () => {
+      const response = await request(app)
+        .post(`/boards/${testBoardId}/feedback/${testFeedbackId}/reply`)
+        .set('x-access-token', userToken)
+        .send({ replyBody: '   ' })
+      
+      expect(response.statusCode).toBe(400)
+    })
   })
 
   describe('댓글 수정', () => {
@@ -109,10 +126,28 @@ describe('댓글 테스트', () => {
       expect(response.statusCode).toBe(200)
     })
 
+    test('실패: replyBody 누락 | 400', async () => {
+      const response = await request(app)
+        .patch(`/boards/${testBoardId}/feedback/${testFeedbackId}/reply/${testReplyId}`)
+        .set('x-access-token', userToken)
+        
+      expect(response.statusCode).toBe(400)
+    })
+    
+    test('실패: replyBody가 공백 | 400', async () => {
+      const response = await request(app)
+        .patch(`/boards/${testBoardId}/feedback/${testFeedbackId}/reply/${testReplyId}`)
+        .set('x-access-token', userToken)
+        .send({ newReplyBody: '    ' })
+
+      expect(response.statusCode).toBe(400)
+    })
+
     test('실패: 존재하지 않는 댓글 | 404', async () => {
       const response = await request(app)
         .patch(`/boards/${testBoardId}/feedback/${testFeedbackId}/reply/${invalidId}`)
         .set('x-access-token', userToken)
+        .send({ newReplyBody: 'ASDBDFA' })
 
       expect(response.statusCode).toBe(404)
     })

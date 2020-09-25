@@ -6,7 +6,7 @@ const board = new mongoose.Schema({
   boardTitle: { type: String, default: '' },
   boardImg: { type: [String], required: true },
   boardBody: { type: String, default: '' },
-  category: { type: String, required: true, default: 0 }, // [on future] 0: Illust, 1: Comic 
+  category: { type: String, required: true, default: 'Illust' }, // [on future] 0: Illust, 1: Comic 
   pub: { type: Number, required: true, default: 1 }, // 0: private, 1: public
   writeDate: { type: Date, default: Date.now },
   language: { type: String, default: 0 }, // [on future] 0: Korean, 1: Japanese, 2: US, 3: China, 4: Taiwan

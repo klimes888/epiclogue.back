@@ -1,14 +1,15 @@
 // external modules
 import createError from 'http-errors'
 import express from 'express'
-import path from 'path'
 import cookieParser from 'cookie-parser'
-import logger from 'morgan'
+import morgan from 'morgan'
 import cors from 'cors'
 import helmet from 'helmet'
 import swaggerJSDoc from 'swagger-jsdoc'
 import swaggerUi from 'swagger-ui-express'
 import dotenv from 'dotenv'
+import dayjs from 'dayjs'
+import dayjsPluginUTC from 'dayjs-plugin-utc'
 
 // routers
 import indexRouter from './src/routes'
@@ -20,9 +21,11 @@ import authRouter from './src/routes/auth'
 
 // utils
 import Database from './src/lib/database'
+import { logger, stream } from './src/configs/winston'
 
 const app = express()
 dotenv.config()
+dayjs.extend(dayjsPluginUTC)
 
 const swaggerDefinition = {
   info: {
@@ -46,12 +49,14 @@ const options = {
 const swaggerSpec = swaggerJSDoc(options)
 
 app.use(cors({ credentials: true, origin: true }))
-app.use(logger('dev'))
+app.use(morgan('combined', {
+  stream,
+  skip: (req, res) => { return res.statusCode > 399 }
+}))
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(cookieParser())
 app.use(helmet())
-app.use(express.static(path.join(__dirname, 'public')))
 
 Database.connect()
 
@@ -62,22 +67,29 @@ app.use('/boards', boardRouter)
 app.use('/interaction', interactionRouter)
 app.use('/search', searchRouter)
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec))
+
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
   next(createError(404, '올바른 접근이 아닙니다.'))
 })
 
 // error handler
-app.use(function (err, req, res, next) {
-  // set locals, only providing error in development
-  res.locals.message = err.message
-  res.locals.error = req.app.get('env') === 'development' ? err : {}
+app.use((err, req, res, next) => {
+  // if (process.env.NODE_ENV !== 'production') { }
+  const errObject = {
+    req: { route: req.route, url: req.url, method: req.method, headers: req.headers }, err: { message: err.message, stack: err.stack, status: err.status },
+    user: res.locals.uid
+  }
 
-  res.status(err.status || 500).json({
+  logger.error(`${dayjs().local().format('YYYY-MM-DD HH:mm:ss')}`, errObject)
+
+  res.locals.message = err.message
+  res.locals.error = err
+  return res.status(err.status || 500).json({
     result: 'error',
-    message: err.message,
+    message: err.message || "Internal server error",
+    data: err.properties
   })
 })
-
 
 module.exports = app

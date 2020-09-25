@@ -157,6 +157,14 @@ describe('좋아요 테스트', () => {
         .set('x-access-token', userToken)
         .expect(404)
     })
+
+    test('실패: 부적절한 아이디에 접근 | 400', async () => {
+      await request(app)
+        .post(`/interaction/like`)
+        .send({ targetType: 'board', targetId: '123' })
+        .set('x-access-token', userToken)
+        .expect(400)
+    })
   })
 
   describe('테스트 종료', () => {
