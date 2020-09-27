@@ -893,7 +893,7 @@ paths:
         schema:
           type: object
           properties:
-            targetId:
+            targetInfo:
               type: string
             targetType:
               type: string
@@ -927,7 +927,7 @@ paths:
         schema:
           type: object
           properties:
-            targetId:
+            targetInfo:
               type: string
             targetType:
               type: string
@@ -959,6 +959,15 @@ paths:
         in: "query"
         required: true
         type: string
+      - name: "targetType"
+        in: "query"
+        required: true
+        type: string
+        enum:
+        - "Board"
+        - "Feedback"
+        - "Reply"
+        - "all"
       responses:
         200:
           description: OK

@@ -3,11 +3,8 @@ const ObjectId = mongoose.ObjectId
 
 const like = new mongoose.Schema({
   userId: { type: ObjectId, required: true, ref: 'User' },
-  targetType: { type: String, required: true }, // 글(board), 댓글(feedback), 대댓글(reply)
-  /* required가 없으면 각 데이터는 컬럼에 나타나지 않으므로 아래와 같이 모델링 */
-  board: { type: ObjectId, ref: 'Board' },
-  feedback: { type: ObjectId, ref: 'Feedback' },
-  reply: { type: ObjectId, ref: 'Reply' },
+  targetType: {type: String, required: true},
+  targetInfo: {type: ObjectId, required: true , refPath: 'targetType'},
   createdAt: { type: Date, default: Date.now },
 })
 
@@ -19,10 +16,8 @@ like.statics.like = function (data) {
 like.statics.unlike = function (data) {
   return this.deleteOne({
     userId: data.userId,
-    targetType: data.targetType,
-    board: data.board,
-    feedback: data.feedback,
-    reply: data.reply,
+    targetInfo: data.targetInfo,
+    targetType: data.targetType
   })
 }
 
@@ -36,12 +31,10 @@ like.statics.didLike = function (data) {
   }
 }
 
-like.statics.getByUserId = async function (userId) {
-  return this.find({ userId }, { userId: 0 })
-    .populate({ path: 'userId', select: '_id screenId nickname profile' })
-    .populate({ path: 'board', populate: { path: 'writer', select: '_id screenId nickname profile '} })
-    .populate({ path: 'feedback' })
-    .populate({ path: 'reply' })
+like.statics.getByUserId = async function (userId, targetType) {
+  return this.find(targetType === 'all' ? { userId } : { userId, targetType })
+  .populate({ path: 'userId', select: '_id screenId nickname profile' })
+  .populate({path: 'targetInfo'})
 }
 
 like.statics.getCount = function (likeData) {
