@@ -8,42 +8,34 @@ import createError from 'http-errors'
 */
 
 export const addLike = async (req, res, next) => {
-  let likeData = { userId: res.locals.uid, targetType: req.body.targetType }
+  let likeData = { userId: res.locals.uid, targetInfo: req.body.targetInfo, targetType: req.body.targetType}
 
-  const { targetId, targetType } = req.body
-
-  if (targetType === 'board') {
-    likeData.board = targetId
-  } else if (targetType === 'feedback') {
-    likeData.feedback = targetId
-  } else if (targetType === 'reply') {
-    likeData.reply = targetId
-  }
+  const { targetInfo, targetType } = req.body
 
   try {
     await Like.like(likeData)
 
-    console.log(`[INFO] 유저 ${res.locals.uid}가 ${targetType}: ${targetId}를 좋아합니다.`)
+    console.log(`[INFO] 유저 ${res.locals.uid}가 ${targetType}: ${targetInfo}를 좋아합니다.`)
 
     let likeCount
 
     if (targetType === 'board') {
       const reactData = {
         user: res.locals.uid,
-        boardId: req.body.targetId,
+        boardId: req.body.targetInfo,
         type: 'like',
       }
 
       await React.create(reactData)
-      await Board.countHeart(targetId, 1)
-      await Board.countReact(targetId, 1)
-      likeCount = await Board.getHeartCount(targetId)
+      await Board.countHeart(targetInfo, 1)
+      await Board.countReact(targetInfo, 1)
+      likeCount = await Board.getHeartCount(targetInfo)
     } else if (targetType === 'feedback') {
-      await Feedback.countHeart(targetId, 1)
-      likeCount = await Feedback.getHeartCount(targetId)
+      await Feedback.countHeart(targetInfo, 1)
+      likeCount = await Feedback.getHeartCount(targetInfo)
     } else if (targetType === 'reply') {
-      await Reply.countHeart(req.body.targetId, 1)
-      likeCount = await Reply.getHeartCount(targetId)
+      await Reply.countHeart(req.body.targetInfo, 1)
+      likeCount = await Reply.getHeartCount(targetInfo)
     }
 
     return res.status(201).json({
@@ -57,38 +49,30 @@ export const addLike = async (req, res, next) => {
 }
 
 export const deleteLike = async (req, res, next) => {
-  let likeData = { userId: res.locals.uid, targetType: req.body.targetType }
+  let likeData = { userId: res.locals.uid, targetInfo: req.body.targetInfo , targetType: req.body.targetType}
 
-  const { targetId, targetType } = req.body
-
-  if (targetType === 'board') {
-    likeData.board = targetId
-  } else if (targetType === 'feedback') {
-    likeData.feedback = targetId
-  } else if (targetType === 'reply') {
-    likeData.reply = targetId
-  }
+  const { targetInfo, targetType } = req.body
 
   try {
     await Like.unlike(likeData)
 
     console.log(
-      `[INFO] 유저 ${res.locals.uid}가 ${targetType}: ${targetId}의 좋아요를 해제했습니다.`
+      `[INFO] 유저 ${res.locals.uid}가 ${targetType}: ${targetInfo}의 좋아요를 해제했습니다.`
     )
 
     let likeCount
 
     if (targetType === 'board') {
-      await React.delete(likeData.userId, targetId)
-      await Board.countHeart(req.body.targetId, 0)
-      await Board.countReact(req.body.targetId, 0)
-      likeCount = await Board.getHeartCount(targetId)
+      await React.delete(likeData.userId, targetInfo)
+      await Board.countHeart(req.body.targetInfo, 0)
+      await Board.countReact(req.body.targetInfo, 0)
+      likeCount = await Board.getHeartCount(targetInfo)
     } else if (targetType === 'feedback') {
-      await Feedback.countHeart(req.body.targetId, 0)
-      likeCount = await Feedback.getHeartCount(targetId)
+      await Feedback.countHeart(req.body.targetInfo, 0)
+      likeCount = await Feedback.getHeartCount(targetInfo)
     } else if (targetType === 'reply') {
-      await Reply.countHeart(req.body.targetId, 0)
-      likeCount = await Reply.getHeartCount(targetId)
+      await Reply.countHeart(req.body.targetInfo, 0)
+      likeCount = await Reply.getHeartCount(targetInfo)
     }
 
     return res.status(200).json({
@@ -103,10 +87,11 @@ export const deleteLike = async (req, res, next) => {
 
 export const getLikeList = async (req, res, next) => {
   const screenId = req.query.screenId
+  const targetType = req.query.targetType
 
   try {
     const userId = await User.getIdByScreenId(screenId)
-    const likeObjectIdList = await Like.getByUserId(userId)
+    const likeObjectIdList = await Like.getByUserId(userId, targetType)
 
     console.log(`[INFO] 유저 ${res.locals.uid}가 유저 ${userId} 의 좋아요 리스트를 확인했습니다.`)
     return res.status(200).json({
