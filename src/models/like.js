@@ -22,13 +22,7 @@ like.statics.unlike = function (data) {
 }
 
 like.statics.didLike = function (data) {
-  if (data.targetType === 'board') {
-    return this.findOne({ userId: data.userId, board: data.board })
-  } else if (data.targetType === 'feedback') {
-    return this.findOne({ userId: data.userId, feedback: data.feedback })
-  } else if (data.targetType === 'reply') {
-    return this.findOne({ userId: data.userId, reply: data.reply })
-  }
+  return this.findOne(data)
 }
 
 like.statics.getByUserId = async function (userId, targetType) {
