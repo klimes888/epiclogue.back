@@ -24,7 +24,7 @@ like.statics.didLike = function (data) {
 like.statics.getByUserId = async function (userId, targetType) {
   return this.find(targetType === 'all' ? { userId } : { userId, targetType })
   .populate({ path: 'userId', select: '_id screenId nickname profile' })
-  .populate({path: 'targetInfo'})
+  .populate({path: 'targetInfo', populate: { path: 'writer', select: '_id screenId nickname profile' }})
 }
 
 like.statics.getCount = function (likeData) {
