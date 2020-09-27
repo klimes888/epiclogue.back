@@ -25,4 +25,8 @@ Bookmark.statics.getByUserId = function (user) {
   return this.find({ user }).populate({ path: 'board', select: '_id boardTitle boardImg. pub category' })
 }
 
+Bookmark.statics.didBookmark = function (user, board) {
+  return this.findOne({ user, board })
+}
+
 export default mongoose.model('Bookmark', Bookmark)

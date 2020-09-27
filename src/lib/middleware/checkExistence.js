@@ -33,7 +33,7 @@ export const checkExistence = async (req, res, next) => {
       await checkSchema.validateAsync({ targetId, type })
     } catch (e) {
       console.warn(
-        `[WARN] 유저 ${res.locals.uid} 가 ${type} ObjectId에 적절하지 않은 값 ${targetId} 길이(${targetId.length}) 를 입력했습니다. ${e}`
+        `[WARN] 유저 ${res.locals.uid} 가 ${type} ObjectId에 적절하지 않은 값 ${targetId} 를 입력했습니다. ${e}`
       )
       return next(createError(400, '입력값이 적절하지 않습니다.'))
     }
@@ -85,7 +85,8 @@ export const checkUserExistence = async (req, res, next) => {
     if (existence !== null) {
       // left is Object, right is String.
       if (existence._id.toString() === res.locals.uid) {
-        return next(createError(400, '적절하지 않은 접근입니다.'))
+        console.warn(`[WARN] 유저 ${res.locals.uid} 가 자신에게 데이터를 요청했습니다.`)
+        return next(createError(400, '입력값이 적절하지 않습니다.'))
       } else {
         next()
       }
@@ -97,19 +98,6 @@ export const checkUserExistence = async (req, res, next) => {
     }
   } catch (e) {
     console.error(`[ERROR] 유저 존재 여부를 확인하는 중에 문제가 발생 했습니다. ${e}`)
-    return next(createError(500, '알 수 없는 오류가 발생했습니다.'))
-  }
-}
-
-/* guarantee to have 0 or 1 (bookmark, like, follow, mute, block)
- * 0. check type
- * 1. check DB
- * 2. return result
- * */
-export const checkUnique = async (req, res, next) => {
-  try {
-  } catch (e) {
-    console.error(`[ERROR] 데이터 유일성을 확인하는 중에 문제가 발생 했습니다. ${e}`)
     return next(createError(500, '알 수 없는 오류가 발생했습니다.'))
   }
 }

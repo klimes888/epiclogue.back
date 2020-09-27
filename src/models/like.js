@@ -14,19 +14,17 @@ like.statics.like = function (data) {
 }
 
 like.statics.unlike = function (data) {
-  if (data.targetInfo)
-  return this.deleteOne({
-    userId: data.userId,
-    targetInfo: data.targetInfo,
-    targetType: data.targetType
-  })
+  return this.deleteOne(data)
+}
+
+like.statics.didLike = function (data) {
+  return this.findOne(data)
 }
 
 like.statics.getByUserId = async function (userId, targetType) {
-  
   return this.find(targetType === 'all' ? { userId } : { userId, targetType })
   .populate({ path: 'userId', select: '_id screenId nickname profile' })
-  .populate({path: 'targetInfo'})
+  .populate({path: 'targetInfo', populate: { path: 'writer', select: '_id screenId nickname profile' }})
 }
 
 like.statics.getCount = function (likeData) {

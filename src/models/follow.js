@@ -19,6 +19,10 @@ follow.statics.unfollow = function (unFollowData) {
   })
 }
 
+follow.statics.didFollow = function ({userId, targetUserId}) {
+  return this.findOne({ userId, targetUserId })
+}
+
 // 유저의 팔로잉 목록
 follow.statics.getFollowingList = function (userId) {
   return this.find({ userId })
