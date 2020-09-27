@@ -14,11 +14,7 @@ like.statics.like = function (data) {
 }
 
 like.statics.unlike = function (data) {
-  return this.deleteOne({
-    userId: data.userId,
-    targetInfo: data.targetInfo,
-    targetType: data.targetType
-  })
+  return this.deleteOne(data)
 }
 
 like.statics.didLike = function (data) {
