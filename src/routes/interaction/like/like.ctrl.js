@@ -16,7 +16,7 @@ export const addLike = async (req, res, next) => {
     const didLike = await Like.didLike(likeData)
 
     if (didLike) {
-      console.warn(`[WARN] 유저 ${res.locals.uid} 가 이미 좋아요 한 ${likeData.targetType}:${targetId} 에 좋아요를 요청했습니다.`)
+      console.warn(`[WARN] 유저 ${res.locals.uid} 가 이미 좋아요 한 ${likeData.targetType}:${targetInfo} 에 좋아요를 요청했습니다.`)
       return next(createError(400, '이미 처리된 데이터입니다.'))
     }
 
@@ -26,7 +26,7 @@ export const addLike = async (req, res, next) => {
 
     let likeCount
 
-    if (targetType === 'board') {
+    if (targetType === 'Board') {
       const reactData = {
         user: res.locals.uid,
         boardId: req.body.targetInfo,
@@ -37,10 +37,10 @@ export const addLike = async (req, res, next) => {
       await Board.countHeart(targetInfo, 1)
       await Board.countReact(targetInfo, 1)
       likeCount = await Board.getHeartCount(targetInfo)
-    } else if (targetType === 'feedback') {
+    } else if (targetType === 'Feedback') {
       await Feedback.countHeart(targetInfo, 1)
       likeCount = await Feedback.getHeartCount(targetInfo)
-    } else if (targetType === 'reply') {
+    } else if (targetType === 'Reply') {
       await Reply.countHeart(req.body.targetInfo, 1)
       likeCount = await Reply.getHeartCount(targetInfo)
     }
@@ -64,7 +64,7 @@ export const deleteLike = async (req, res, next) => {
     const didLike = await Like.didLike(likeData)
     
     if (!didLike) {
-      console.warn(`[WARN] 유저 ${res.locals.uid} 가 좋아요 하지 않은 ${targetType}:${targetId}에 대해 좋아요를 해제하려 했습니다.`)
+      console.warn(`[WARN] 유저 ${res.locals.uid} 가 좋아요 하지 않은 ${targetType}:${targetInfo}에 대해 좋아요를 해제하려 했습니다.`)
       return next(createError(400, '이미 처리된 데이터입니다.'))
     }
 
@@ -76,15 +76,15 @@ export const deleteLike = async (req, res, next) => {
 
     let likeCount
 
-    if (targetType === 'board') {
+    if (targetType === 'Board') {
       await React.delete(likeData.userId, targetInfo)
       await Board.countHeart(req.body.targetInfo, 0)
       await Board.countReact(req.body.targetInfo, 0)
       likeCount = await Board.getHeartCount(targetInfo)
-    } else if (targetType === 'feedback') {
+    } else if (targetType === 'Feedback') {
       await Feedback.countHeart(req.body.targetInfo, 0)
       likeCount = await Feedback.getHeartCount(targetInfo)
-    } else if (targetType === 'reply') {
+    } else if (targetType === 'Reply') {
       await Reply.countHeart(req.body.targetInfo, 0)
       likeCount = await Reply.getHeartCount(targetInfo)
     }
