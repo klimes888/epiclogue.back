@@ -962,6 +962,7 @@ paths:
       - name: "targetType"
         in: "query"
         required: true
+        description: 'all is get all like data, not save db data'
         type: string
         enum:
         - "Board"

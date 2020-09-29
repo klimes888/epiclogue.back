@@ -3,7 +3,7 @@ const ObjectId = mongoose.ObjectId
 
 const like = new mongoose.Schema({
   userId: { type: ObjectId, required: true, ref: 'User' },
-  targetType: {type: String, required: true},
+  targetType: {type: String, required: true, enum: ['Board', 'Feedback', 'Reply']},
   targetInfo: {type: ObjectId, required: true , refPath: 'targetType'},
   createdAt: { type: Date, default: Date.now },
 })
