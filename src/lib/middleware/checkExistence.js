@@ -17,10 +17,10 @@ export const checkExistence = async (req, res, next) => {
 
   try {
     // 게시 타입에 따라 분류 후 처리
-    if (req.params.replyId !== undefined || req.body.targetType === 'reply') {
+    if (req.params.replyId !== undefined || req.body.targetType === 'Reply') {
       type = '댓글'
       targetId = req.params.replyId || req.body.targetInfo
-    } else if (req.params.feedbackId !== undefined || req.body.targetType === 'feedback') {
+    } else if (req.params.feedbackId !== undefined || req.body.targetType === 'Feedback') {
       type = '피드백'
       targetId = req.params.feedbackId || req.body.targetInfo
     } else {
