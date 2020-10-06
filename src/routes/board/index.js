@@ -6,7 +6,7 @@ import react from './react'
 import { verifyToken } from '../../lib/middleware/tokenAuth'
 import { checkWriter } from '../../lib/middleware/checkPermission'
 import { checkExistence } from '../../lib/middleware/checkExistence'
-import upload from '../../lib/imageUpload'
+import upload from '../../lib/imageCtrl'
 
 board.get('/', verifyToken, boardCtrl.getBoards)
 board.post('/', verifyToken, upload.any(), boardCtrl.postBoard)

@@ -1,7 +1,7 @@
 import crypto from 'crypto'
 import util from 'util'
 import { User } from '../../models'
-import { s3 } from '../../lib/imageUpload'
+import { deleteImage } from '../../lib/imageCtrl'
 import dotenv from 'dotenv'
 import Joi from 'joi'
 import createError from 'http-errors'
@@ -46,34 +46,10 @@ export const postUserEditInfo = async function (req, res, next) {
   const country = parseInt(req.body['userCountry']) || originalData.country
   const availableLanguage = req.body['userLang'] || originalData.availableLanguage
   const intro = req.body['userIntro'] || originalData.intro
-  const beDeletedImages = []
   let banner
   let profile
 
-  for (let each of originalImages) {
-    if (each) {
-      // null check
-      const texts = each.split('/')
-      let obj = {
-        Key: texts[3],
-      }
-      beDeletedImages.push(obj)
-    }
-  }
-
-  if (beDeletedImages.length !== 0) {
-    s3.deleteObjects(
-      {
-        Bucket: process.env.AWS_BUCKET_NAME,
-        Delete: {
-          Objects: beDeletedImages,
-        },
-      },
-      (err, data) => {
-        if (err) console.log(err)
-      }
-    )
-  }
+  deleteImage(originalImages)
 
   if (req.files !== undefined) {
     if (req.files.length > 1) {

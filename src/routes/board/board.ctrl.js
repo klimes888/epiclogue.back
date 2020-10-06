@@ -1,5 +1,5 @@
 import { Board } from '../../models'
-import { s3 } from '../../lib/imageUpload'
+import { deleteImage } from '../../lib/imageCtrl'
 import Joi from 'joi'
 import createError from 'http-errors'
 
@@ -44,27 +44,7 @@ export const postBoard = async (req, res, next) => {
     })
   } catch (e) {
     if (boardData.boardImg.length > 0) {
-      const garbageImage = []
-
-      for (let image of boardData.boardImg) {
-        const objectKey = image.split('/')
-        const deletionFormat = {
-          Key: objectKey[3],
-        }
-        garbageImage.push(deletionFormat)
-      }
-
-      s3.deleteObjects(
-        {
-          Bucket: process.env.AWS_BUCKET_NAME,
-          Delete: {
-            Objects: garbageImage,
-          },
-        },
-        (err, data) => {
-          if (err) console.error(err, err.stack)
-        }
-      )
+      deleteImage(boardData.boardImg)
     }
 
     console.warn(
@@ -111,31 +91,10 @@ export const viewBoard = async (req, res, next) => {
 export const deleteBoard = async (req, res, next) => {
   const boardId = req.params.boardId
   const query = await Board.getById(boardId, { _id: 0, feedbacks: 0, writer: 0, boardImg: 1 })
-  const images = query.boardImg
-
-  const beDeletedObject = []
-
-  for (let each of images) {
-    const texts = each.split('/') // get only object name
-    let deletionFormat = {
-      Key: texts[3],
-    }
-    beDeletedObject.push(deletionFormat)
-  }
 
   try {
     // for non blocking, didn't use async-await
-    s3.deleteObjects(
-      {
-        Bucket: process.env.AWS_BUCKET_NAME,
-        Delete: {
-          Objects: beDeletedObject,
-        },
-      },
-      (err, data) => {
-        if (err) console.error(err, err.stack)
-      }
-    )
+    deleteImage(query.boardImg)
 
     const deletion = await Board.delete(boardId)
 
@@ -190,30 +149,8 @@ export const postEditInfo = async function (req, res, next) {
 
   try {
     const originalData = await Board.getById(req.params.boardId)
-    const images = originalData.boardImg
-    const beDeletedObject = []
 
-    for (let each of images) {
-      const texts = each.split('/') // get only object name
-
-      let deletionFormat = {
-        Key: texts[3],
-      }
-
-      beDeletedObject.push(deletionFormat)
-    }
-
-    s3.deleteObjects(
-      {
-        Bucket: process.env.AWS_BUCKET_NAME,
-        Delete: {
-          Objects: beDeletedObject,
-        },
-      },
-      (err, data) => {
-        if (err) console.error(err, err.stack)
-      }
-    )
+    deleteImage(originalData.boardImg)
 
     const updateData = {
       boardId: req.params.boardId,

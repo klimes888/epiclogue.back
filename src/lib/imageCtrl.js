@@ -9,11 +9,37 @@ import dotenv from 'dotenv'
 const randomBytesPromise = util.promisify(crypto.randomBytes)
 dotenv.config()
 
-export const s3 = new aws.S3({
+const s3 = new aws.S3({
   accessKeyId: process.env.AWS_ACCESS_ID, // 생성한 s3의 accesskey
   secretAccessKey: process.env.AWS_SECRET_KEY, // 생성한 s3의 secret key
   region: process.env.AWS_REGION, // 지역설정
 })
+
+// 이미지 삭제 함수 여기다 추가해서 export 필요
+
+export const deleteImage = (images) => {
+  const garbageImage = []
+
+  for (let image of images) {
+    const objectKey = image.split('/')
+    const deletionFormat = {
+      Key: objectKey[3],
+    }
+    garbageImage.push(deletionFormat)
+  }
+  if(garbageImage.length !== 0)
+    s3.deleteObjects(
+      {
+        Bucket: process.env.AWS_BUCKET_NAME,
+        Delete: {
+          Objects: garbageImage,
+        },
+      },
+      (err, data) => {
+        if (err) console.error(err, err.stack)
+      }
+    )
+}
 
 const storage = multerS3({
   s3: s3,
@@ -36,4 +62,4 @@ const storage = multerS3({
   },
 })
 
-export default multer({ storage: storage })
+export const uploadImage = multer({ storage: storage });

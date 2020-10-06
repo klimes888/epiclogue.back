@@ -16,6 +16,7 @@ const board = new mongoose.Schema({
   feedbackCount: { type: Number, default: 0 },
   bookmarkCount: { type: Number, default: 0 },
   reactCount: { type: Number, default: 0 },
+  tags: { type: [String] },
   originUserId: { type: ObjectId },
   originBoardId: { type: ObjectId },
   edited: { type: Boolean, default: false },
