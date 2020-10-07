@@ -18,6 +18,8 @@ tags:
   description: "interaction functions"
 - name: "search"
   description: "search functions"
+- name: "suggest"
+  description: "suggest functions"
 schemes:
 - "https"
 paths:
@@ -1101,7 +1103,25 @@ paths:
           description: OK
       security:
         - access_token: []
-    
+
+  /suggest:
+    get:
+      tags:
+      - "suggest"
+      summary: "suggest search keyword"
+      description: ""
+      parameters:
+      - name: "q"
+        in: "query"
+        description: "for search suggest string"
+        required: true
+        type: string
+      responses:
+        200:
+          description: OK
+      security:
+        - access_token: []
+        
 securityDefinitions:
   access_token:
     description: "insert your accessToken in login response."

@@ -12,6 +12,7 @@ logs
 data
 coverage
 test.js
+.vscode
 
 # logs
 logs

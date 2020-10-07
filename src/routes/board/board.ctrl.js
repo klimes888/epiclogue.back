@@ -23,6 +23,7 @@ export const postBoard = async (req, res, next) => {
     pub: req.body.pub,
     lanuage: req.body.lanuage,
     boardImg: _boardImg,
+    tags: req.body.boardBody.match(/#[^\{\}\[\]\/?.,;:|\)*~`!^\-+<>@\#$%&\\\=\(\'\"\s]+/gi)
   }
 
   const boardSchema = Joi.object({
