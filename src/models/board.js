@@ -95,7 +95,7 @@ board.statics.getTitlesByQuery = function (query) {
 
 board.statics.getByQuery = function (query) {
   return this.find(
-    { boardTitle: { $regex: query } },
+    {$or: [{ boardTitle: { $regex: query } }, { tags: query }]},
     {
       _id: 1,
       boardTitle: 1,
