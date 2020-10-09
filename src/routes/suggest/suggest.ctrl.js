@@ -5,11 +5,7 @@ export const getSearchSuggest = async (req, res, next) => {
   const queryString = req.query.q
 
   try {
-    if (queryString[0] === '#') {
-      // tag searching
-      // const _query = queryString.slice(1, queryString.length)
-      /* 태그 검색 쿼리 필요 */
-    } else if (queryString[0] === '@') {
+    if (queryString[0] === '@') {
       // user searching
       const _query = queryString.slice(1, queryString.length)
       const userData = await User.getByQuery(_query)

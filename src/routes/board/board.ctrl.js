@@ -14,7 +14,11 @@ export const postBoard = async (req, res, next) => {
   for (let i = 0; i < req.files.length; i++) {
     _boardImg.push(req.files[i].location)
   }
-
+  let tags = []
+  const tagsWithHash = req.body.boardBody.match(/#[^\{\}\[\]\/?.,;:|\)*~`!^\-+<>@\#$%&\\\=\(\'\"\s]+/g)
+  for(const tag of tagsWithHash) {
+    tags.push(tag.substring(1))
+  }
   const boardData = {
     writer: res.locals.uid,
     boardTitle: req.body.boardTitle,
@@ -23,7 +27,7 @@ export const postBoard = async (req, res, next) => {
     pub: req.body.pub,
     lanuage: req.body.lanuage,
     boardImg: _boardImg,
-    tags: req.body.boardBody.match(/#[^\{\}\[\]\/?.,;:|\)*~`!^\-+<>@\#$%&\\\=\(\'\"\s]+/gi)
+    tags
   }
 
   const boardSchema = Joi.object({
