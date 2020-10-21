@@ -14,11 +14,17 @@ export const postBoard = async (req, res, next) => {
   for (let i = 0; i < req.files.length; i++) {
     _boardImg.push(req.files[i].location)
   }
+
   let tags = []
-  const tagsWithHash = req.body.boardBody.match(/#[^\{\}\[\]\/?.,;:|\)*~`!^\-+<>@\#$%&\\\=\(\'\"\s]+/g)
-  for(const tag of tagsWithHash) {
-    tags.push(tag.substring(1))
+  const tagsWithHash = req.body.boardBody.match(
+    /#[^\{\}\[\]\/?.,;:|\)*~`!^\-+<>@\#$%&\\\=\(\'\"\s]+/g
+  )
+  if (tagsWithHash) {
+    for (const tag of tagsWithHash) {
+      tags.push(tag.substring(1))
+    }
   }
+
   const boardData = {
     writer: res.locals.uid,
     boardTitle: req.body.boardTitle,
@@ -81,7 +87,7 @@ export const viewBoard = async (req, res, next) => {
     const boardData = await Board.getById(boardId)
 
     console.log(`[INFO] 유저 ${res.locals.uid}가 글 ${boardId}를 접근했습니다.`)
-    
+
     return res.status(200).json({
       result: 'ok',
       data: boardData,
