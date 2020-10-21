@@ -5,6 +5,7 @@ import { deleteImage } from '../../lib/imageCtrl'
 import dotenv from 'dotenv'
 import Joi from 'joi'
 import createError from 'http-errors'
+import { s3 } from '../../lib/imageCtrl'
 const randomBytesPromise = util.promisify(crypto.randomBytes)
 // const crypto.pbkdf2Sync = util.promisify(crypto.pbkdf2)
 

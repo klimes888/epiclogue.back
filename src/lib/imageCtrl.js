@@ -9,7 +9,7 @@ import dotenv from 'dotenv'
 const randomBytesPromise = util.promisify(crypto.randomBytes)
 dotenv.config()
 
-const s3 = new aws.S3({
+export const s3 = new aws.S3({
   accessKeyId: process.env.AWS_ACCESS_ID, // 생성한 s3의 accesskey
   secretAccessKey: process.env.AWS_SECRET_KEY, // 생성한 s3의 secret key
   region: process.env.AWS_REGION, // 지역설정
@@ -21,12 +21,15 @@ export const deleteImage = (images) => {
   const garbageImage = []
 
   for (let image of images) {
-    const objectKey = image.split('/')
-    const deletionFormat = {
-      Key: objectKey[3],
+    if (image) {
+      const objectKey = image.split('/')
+      const deletionFormat = {
+        Key: objectKey[3],
+      }
+      garbageImage.push(deletionFormat)
     }
-    garbageImage.push(deletionFormat)
   }
+
   if(garbageImage.length !== 0)
     s3.deleteObjects(
       {
