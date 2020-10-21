@@ -58,8 +58,8 @@ export const postBoard = async (req, res, next) => {
       deleteImage(boardData.boardImg)
     }
 
-    console.warn(
-      `[WARN] 유저 ${res.locals.uid} 가 적절하지 않은 데이터로 글을 작성하려 했습니다. ${e}`
+    console.log(
+      `[INFO] 유저 ${res.locals.uid} 가 적절하지 않은 데이터로 글을 작성하려 했습니다. ${e}`
     )
     return next(createError(400, '입력값이 적절하지 않습니다.'))
   }

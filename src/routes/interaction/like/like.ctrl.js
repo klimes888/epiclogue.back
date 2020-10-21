@@ -16,7 +16,7 @@ export const addLike = async (req, res, next) => {
     const didLike = await Like.didLike(likeData)
 
     if (didLike) {
-      console.warn(`[WARN] 유저 ${res.locals.uid} 가 이미 좋아요 한 ${likeData.targetType}:${targetInfo} 에 좋아요를 요청했습니다.`)
+      console.log(`[INFO] 유저 ${res.locals.uid} 가 이미 좋아요 한 ${likeData.targetType}:${targetInfo} 에 좋아요를 요청했습니다.`)
       return next(createError(400, '이미 처리된 데이터입니다.'))
     }
 
@@ -64,7 +64,7 @@ export const deleteLike = async (req, res, next) => {
     const didLike = await Like.didLike(likeData)
     
     if (!didLike) {
-      console.warn(`[WARN] 유저 ${res.locals.uid} 가 좋아요 하지 않은 ${targetType}:${targetInfo}에 대해 좋아요를 해제하려 했습니다.`)
+      console.log(`[INFO] 유저 ${res.locals.uid} 가 좋아요 하지 않은 ${targetType}:${targetInfo}에 대해 좋아요를 해제하려 했습니다.`)
       return next(createError(400, '이미 처리된 데이터입니다.'))
     }
 

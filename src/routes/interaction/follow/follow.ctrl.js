@@ -17,7 +17,7 @@ export const addFollow = async (req, res, next) => {
     const didFollow = await Follow.didFollow(followData)
     
     if(didFollow) {
-        console.warn(`[WARN] 유저 ${res.locals.uid} 가 이미 팔로우 한 ${followData.targetUserId} 에 팔로우를 요청했습니다.`)
+        console.log(`[INFO] 유저 ${res.locals.uid} 가 이미 팔로우 한 ${followData.targetUserId} 에 팔로우를 요청했습니다.`)
         return next(createError(400, '이미 처리된 데이터입니다.'))
     }
 
@@ -45,7 +45,7 @@ export const deleteFollow = async (req, res, next) => {
     const didFollow = await Follow.didFollow(followData)
     
     if(!didFollow) {
-        console.warn(`[WARN] 유저 ${res.locals.uid} 가 팔로우 하지않은 ${followData.targetUserId} 에 팔로우를 요청했습니다.`)
+        console.log(`[INFO] 유저 ${res.locals.uid} 가 팔로우 하지않은 ${followData.targetUserId} 에 팔로우를 요청했습니다.`)
         return next(createError(400, '이미 처리된 데이터입니다.'))
     }
 
