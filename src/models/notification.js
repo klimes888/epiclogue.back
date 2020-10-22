@@ -15,12 +15,12 @@ notification.statics.create = function (data) {
 }
 
 // 알림목록
-notification.statics.getLikeList = function (userId) {
+notification.statics.getNotiList = function (userId) {
   return this.find({ userId })
 }
 
 // 읽음처리
-notification.statics.read = function (notificationId) {
+notification.statics.setRead = function (notificationId) {
   return this.updateOne({ _id: notificationId }, { read: true })
 }
 
