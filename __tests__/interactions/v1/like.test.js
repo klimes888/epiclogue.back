@@ -100,7 +100,7 @@ describe('좋아요 테스트', () => {
       test('성공: 좋아요 | 201', async () => {
         await request(app)
           .post(`/interaction/like`)
-          .send({ targetType: 'board', targetId: testBoardId })
+          .send({ targetType: 'Board', targetInfo: testBoardId })
           .set('x-access-token', userToken)
           .expect(201)
       })
@@ -108,7 +108,7 @@ describe('좋아요 테스트', () => {
       test('성공: 좋아요 해제 | 200', async () => {
         await request(app)
           .delete(`/interaction/like`)
-          .send({ targetType: 'board', targetId: testBoardId })
+          .send({ targetType: 'Board', targetInfo: testBoardId })
           .set('x-access-token', userToken)
           .expect(200)
       })
@@ -118,7 +118,7 @@ describe('좋아요 테스트', () => {
       test('성공: 좋아요 | 201', async () => {
         await request(app)
           .post(`/interaction/like`)
-          .send({ targetType: 'feedback', targetId: testFeedbackId })
+          .send({ targetType: 'Feedback', targetInfo: testFeedbackId })
           .set('x-access-token', userToken)
           .expect(201)
       })
@@ -126,7 +126,7 @@ describe('좋아요 테스트', () => {
       test('성공: 좋아요 해제 | 200', async () => {
         await request(app)
           .delete(`/interaction/like`)
-          .send({ targetType: 'feedback', targetId: testFeedbackId })
+          .send({ targetType: 'Feedback', targetInfo: testFeedbackId })
           .set('x-access-token', userToken)
           .expect(200)
       })
@@ -136,7 +136,7 @@ describe('좋아요 테스트', () => {
       test('성공: 좋아요 | 201', async () => {
         await request(app)
           .post(`/interaction/like`)
-          .send({ targetType: 'reply', targetId: testReplyId })
+          .send({ targetType: 'Reply', targetInfo: testReplyId })
           .set('x-access-token', userToken)
           .expect(201)
       })
@@ -144,7 +144,7 @@ describe('좋아요 테스트', () => {
       test('성공: 좋아요 해제 | 201', async () => {
         await request(app)
           .delete(`/interaction/like`)
-          .send({ targetType: 'reply', targetId: testReplyId })
+          .send({ targetType: 'Reply', targetInfo: testReplyId })
           .set('x-access-token', userToken)
           .expect(200)
       })
@@ -153,7 +153,7 @@ describe('좋아요 테스트', () => {
     test('실패: 존재하지 않는 데이터에 접근 | 404', async () => {
       await request(app)
         .post(`/interaction/like`)
-        .send({ targetType: 'board', targetId: invalidId })
+        .send({ targetType: 'Board', targetInfo: invalidId })
         .set('x-access-token', userToken)
         .expect(404)
     })
@@ -161,7 +161,7 @@ describe('좋아요 테스트', () => {
     test('실패: 부적절한 아이디에 접근 | 400', async () => {
       await request(app)
         .post(`/interaction/like`)
-        .send({ targetType: 'board', targetId: '123' })
+        .send({ targetType: 'Board', targetInfo: '123' })
         .set('x-access-token', userToken)
         .expect(400)
     })
