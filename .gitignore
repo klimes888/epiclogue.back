@@ -13,6 +13,7 @@ data
 coverage
 test.js
 .vscode
+yarn-error.log
 
 # logs
 logs
