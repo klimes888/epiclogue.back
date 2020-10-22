@@ -5,7 +5,6 @@ import { deleteImage } from '../../lib/imageCtrl'
 import dotenv from 'dotenv'
 import Joi from 'joi'
 import createError from 'http-errors'
-import { s3 } from '../../lib/imageCtrl'
 const randomBytesPromise = util.promisify(crypto.randomBytes)
 // const crypto.pbkdf2Sync = util.promisify(crypto.pbkdf2)
 
@@ -216,31 +215,7 @@ export const deleteUser = async function (req, res, next) {
     const originalData = await User.getUserInfo(res.locals.uid)
     const originalImages = [originalData.banner, originalData.profile]
     // console.log(originalImages)
-    const beDeletedImages = []
-    for (let each of originalImages) {
-      if (each) {
-        // null check
-        const texts = each.split('/')
-        let obj = {
-          Key: texts[3],
-        }
-        beDeletedImages.push(obj)
-      }
-    }
-
-    if (beDeletedImages.length !== 0) {
-      s3.deleteObjects(
-        {
-          Bucket: process.env.AWS_BUCKET_NAME,
-          Delete: {
-            Objects: beDeletedImages,
-          },
-        },
-        (err, data) => {
-          if (err) console.log(err)
-        }
-      )
-    }
+    deleteImage(originalImages)
 
     const deletion = await User.deleteUser(uid, crypt_Pw.toString('base64'))
 
