@@ -15,15 +15,9 @@ export const postBoard = async (req, res, next) => {
     _boardImg.push(req.files[i].location)
   }
 
-  let tags = []
-  const tagsWithHash = req.body.boardBody.match(
+  const tags = req.body.boardBody.match(
     /#[^\{\}\[\]\/?.,;:|\)*~`!^\-+<>@\#$%&\\\=\(\'\"\s]+/g
   )
-  if (tagsWithHash) {
-    for (const tag of tagsWithHash) {
-      tags.push(tag.substring(1))
-    }
-  }
 
   const boardData = {
     writer: res.locals.uid,
