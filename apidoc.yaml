@@ -73,7 +73,7 @@ paths:
                 type: string
               userCountry:
                 type: string
-              userId:
+              screenId:
                 type: string
               usersBannerImg:
                 type: string
@@ -101,7 +101,7 @@ paths:
         schema:
           type: object
           properties:
-            userId:
+            screenId:
               type: string
             userNick:
               type: string
@@ -410,6 +410,8 @@ paths:
           description: ERROR
           schema:
             $ref: '#/definitions/API_response_error'
+      security:
+        - access_token: []
   /boards/{boardUid}/edit:
     get:
       tags:
