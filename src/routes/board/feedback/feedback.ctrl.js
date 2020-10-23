@@ -25,7 +25,7 @@ export const postFeedback = async (req, res, next) => {
     })
   } catch (e) {
     console.log(
-      `[WARN] 유저 ${res.locals.uid} 가 피드백 작성 중 적절하지 않은 데이터를 입력했습니다. ${e}`
+      `[INFO] 유저 ${res.locals.uid} 가 피드백 작성 중 적절하지 않은 데이터를 입력했습니다. ${e}`
     )
     return next(createError(400, '입력값이 적절하지 않습니다.'))
   }
@@ -63,7 +63,7 @@ export const editFeedback = async (req, res, next) => {
     })
   } catch (e) {
     console.log(
-      `[WARN] 유저 ${res.locals.uid} 가 피드백 작성 중 적절하지 않은 데이터를 입력했습니다. ${e}`
+      `[INFO] 유저 ${res.locals.uid} 가 피드백 작성 중 적절하지 않은 데이터를 입력했습니다. ${e}`
     )
     return next(createError(400, '입력값이 적절하지 않습니다.'))
   }

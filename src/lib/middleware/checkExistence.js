@@ -32,8 +32,8 @@ export const checkExistence = async (req, res, next) => {
     try {
       await checkSchema.validateAsync({ targetId, type })
     } catch (e) {
-      console.warn(
-        `[WARN] 유저 ${res.locals.uid} 가 ${type} ObjectId에 적절하지 않은 값 ${targetId} 를 입력했습니다. ${e}`
+      console.log(
+        `[INFO] 유저 ${res.locals.uid} 가 ${type} ObjectId에 적절하지 않은 값 ${targetId} 를 입력했습니다. ${e}`
       )
       return next(createError(400, '입력값이 적절하지 않습니다.'))
     }
@@ -49,8 +49,8 @@ export const checkExistence = async (req, res, next) => {
     if (existence !== null) {
       next()
     } else {
-      console.warn(
-        `[WARN] 유저 ${res.locals.uid}가 존재하지 않는 ${type} ${targetId} 를 접근하려 했습니다.`
+      console.log(
+        `[INFO] 유저 ${res.locals.uid}가 존재하지 않는 ${type} ${targetId} 를 접근하려 했습니다.`
       )
       return next(createError(404, '존재하지 않는 데이터입니다.'))
     }
@@ -73,8 +73,8 @@ export const checkUserExistence = async (req, res, next) => {
   try {
     await userSchema.validateAsync({ userId })
   } catch (e) {
-    console.warn(
-      `[WARN] 유저 ${res.locals.uid} 가 유저 ObjectId에 적절하지 않은 값 ${userId} 길이(${userId.length}) 를 입력했습니다.`
+    console.log(
+      `[INFO] 유저 ${res.locals.uid} 가 유저 ObjectId에 적절하지 않은 값 ${userId} 길이(${userId.length}) 를 입력했습니다.`
     )
     return next(createError(400, '입력값이 적절하지 않습니다.'))
   }
@@ -85,14 +85,14 @@ export const checkUserExistence = async (req, res, next) => {
     if (existence !== null) {
       // left is Object, right is String.
       if (existence._id.toString() === res.locals.uid) {
-        console.warn(`[WARN] 유저 ${res.locals.uid} 가 자신에게 데이터를 요청했습니다.`)
+        console.log(`[INFO] 유저 ${res.locals.uid} 가 자신에게 데이터를 요청했습니다.`)
         return next(createError(400, '입력값이 적절하지 않습니다.'))
       } else {
         next()
       }
     } else {
-      console.warn(
-        `[WARN] 유저 ${res.locals.uid}가 존재하지 않는 유저 ${userId} 에게 접근하려 했습니다.`
+      console.log(
+        `[INFO] 유저 ${res.locals.uid}가 존재하지 않는 유저 ${userId} 에게 접근하려 했습니다.`
       )
       return next(createError(404, '존재하지 않는 데이터입니다.'))
     }

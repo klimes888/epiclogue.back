@@ -42,7 +42,7 @@ export const addBookmark = async function (req, res, next) {
     const didBookmark = await Bookmark.didBookmark(res.locals.uid, req.body.boardId)
     
     if (didBookmark) {
-      console.warn(`[WARN] 유저 ${res.locals.uid} 가 이미 북마크한 글 ${req.body.boardId} 에 북마크를 시도했습니다.`)
+      console.log(`[INFO] 유저 ${res.locals.uid} 가 이미 북마크한 글 ${req.body.boardId} 에 북마크를 시도했습니다.`)
       return next(createError(400, '입력값이 적절하지 않습니다.'))
     }
 
@@ -72,7 +72,7 @@ export const deleteBookmark = async (req, res, next) => {
     const didBookmark = await Bookmark.didBookmark(res.locals.uid, req.body.boardId)
     
     if (!didBookmark) {
-      console.warn(`[WARN] 유저 ${res.locals.uid} 가 북마크 하지 않은 글 ${req.body.boardId} 에 북마크 해제를 시도했습니다.`)
+      console.log(`[INFO] 유저 ${res.locals.uid} 가 북마크 하지 않은 글 ${req.body.boardId} 에 북마크 해제를 시도했습니다.`)
       return next(createError(400, '입력값이 적절하지 않습니다.'))
     }
 

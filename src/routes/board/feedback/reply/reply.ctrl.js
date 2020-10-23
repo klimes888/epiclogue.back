@@ -25,8 +25,8 @@ export const postReply = async (req, res, next) => {
       replyBody: replyForm.replyBody,
     })
   } catch (e) {
-    console.warn(
-      `[WARN] 유저 ${res.locals.uid} 가 적절하지 않은 데이터로 댓글을 작성하려 했습니다. ${e}`
+    console.log(
+      `[INFO] 유저 ${res.locals.uid} 가 적절하지 않은 데이터로 댓글을 작성하려 했습니다. ${e}`
     )
     return next(createError(400, '입력값이 적절하지 않습니다.'))
   }
@@ -80,8 +80,8 @@ export const editReply = async (req, res, next) => {
       newReplyBody: newForm.newReplyBody,
     })
   } catch (e) {
-    console.warn(
-      `[WARN] 유저 ${res.locals.uid} 가 적절하지 않은 데이터로 댓글을 작성하려 했습니다. ${e}`
+    console.log(
+      `[INFO] 유저 ${res.locals.uid} 가 적절하지 않은 데이터로 댓글을 작성하려 했습니다. ${e}`
     )
     return next(createError(400, '입력값이 적절하지 않습니다.'))
   }
@@ -96,8 +96,8 @@ export const editReply = async (req, res, next) => {
         data: newerData,
       })
     } else {
-      console.warn(
-        `[WARN] 유저 ${res.locals.uid}가 댓글 ${req.params.replyId} 의 수정을 시도했으나 실패했습니다.`
+      console.log(
+        `[INFO] 유저 ${res.locals.uid}가 댓글 ${req.params.replyId} 의 수정을 시도했으나 실패했습니다.`
       )
       return next(createError(500, '알 수 없는 에러가 발생했습니다.'))
     }

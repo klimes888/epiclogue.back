@@ -94,8 +94,8 @@ export const postUserEditInfo = async function (req, res, next) {
         data: newerUserData,
       })
     } else {
-      console.warn(
-        `[WARN] 유저 ${res.locals.uid} 가 프로필 변경에 실패했습니다: 중복된 screenId를 입력했습니다.`
+      console.log(
+        `[INFO] 유저 ${res.locals.uid} 가 프로필 변경에 실패했습니다: 중복된 screenId를 입력했습니다.`
       )
       return next(createError(400, '중복된 screenId 입니다.'))
     }
@@ -126,7 +126,7 @@ export const changePass = async function (req, res, next) {
 
     await changePassSchema.validateAsync({ userPw, userPwNew, userPwNewRe })
   } catch (e) {
-    console.warn(`[WARN] 유저 ${res.locals.uid} 의 비밀번호 변경 실패: ${e}`)
+    console.log(`[INFO] 유저 ${res.locals.uid} 의 비밀번호 변경 실패: ${e}`)
     return next(createError(400, '비밀번호 규칙을 확인해주세요.'))
   }
 
@@ -173,14 +173,14 @@ export const changePass = async function (req, res, next) {
         return next(createError(500, '알 수 없는 에러가 발생했습니다.'))
       }
     } else {
-      console.warn(
-        `[WARN] 유저 ${res.locals.uid} 의 비밀번호 변경이 실패했습니다: 새로운 비밀번호 미일치`
+      console.log(
+        `[INFO] 유저 ${res.locals.uid} 의 비밀번호 변경이 실패했습니다: 새로운 비밀번호 미일치`
       )
       return next(createError(400, '비밀번호과 재입력이 다릅니다.'))
     }
   } else {
-    console.warn(
-      `[WARN] 유저 ${res.locals.uid} 의 비밀번호 변경이 실패했습니다: 기존 비밀번호와 동일`
+    console.log(
+      `[INFO] 유저 ${res.locals.uid} 의 비밀번호 변경이 실패했습니다: 기존 비밀번호와 동일`
     )
     return next(createError(400, '기존 비밀번호과 같은 비밀번호는 사용할 수 없습니다.'))
   }
@@ -197,7 +197,7 @@ export const deleteUser = async function (req, res, next) {
   try {
     await deleteSchema.validateAsync({ userPw })
   } catch (e) {
-    console.warn(`[WARN] 유저 ${uid} 가 탈퇴에 실패했습니다: 비밀번호 미입력`)
+    console.log(`[INFO] 유저 ${uid} 가 탈퇴에 실패했습니다: 비밀번호 미입력`)
     return next(createError(400, '비밀번호를 입력해주세요.'))
   }
 
@@ -226,7 +226,7 @@ export const deleteUser = async function (req, res, next) {
           result: 'ok',
         })
       } else {
-        console.warn(`[WARN] 유저 ${res.locals.uid} 가 탈퇴에 실패했습니다: 비밀번호가 다릅니다.`)
+        console.log(`[INFO] 유저 ${res.locals.uid} 가 탈퇴에 실패했습니다: 비밀번호가 다릅니다.`)
         return next(createError(400, '비밀번호를 확인해주세요.'))
       }
     } else {

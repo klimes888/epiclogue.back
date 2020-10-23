@@ -31,8 +31,8 @@ export const login = async function (req, res, next) {
   try {
     await loginValidationSchema.validateAsync({ email, userPw })
   } catch (e) {
-    console.warn(
-      `[WARN] ${
+    console.log(
+      `[INFO] ${
         req.headers['x-forwarded-for'] || req.connection.remoteAddress
       } 에서 적절하지 않은 로그인 데이터를 입력했습니다: email: ${email}, password: ${userPw}`
     )
@@ -70,11 +70,11 @@ export const login = async function (req, res, next) {
         screenId: result.screenId,
       })
     } else {
-      console.warn(`[WARN] 유저 ${email} 가 다른 비밀번호 ${userPw} 로 로그인을 시도했습니다.`)
+      console.log(`[INFO] 유저 ${email} 가 다른 비밀번호 ${userPw} 로 로그인을 시도했습니다.`)
       return next(createError(400, '잘못된 비밀번호입니다.'))
     }
   } else {
-    console.warn(`[INFO] 존재하지 않는 유저 ${email} 가 로그인을 시도했습니다.`)
+    console.log(`[INFO] 존재하지 않는 유저 ${email} 가 로그인을 시도했습니다.`)
     return next(createError(404, '존재하지 않는 유저입니다.'))
   }
 }
@@ -102,7 +102,7 @@ export const join = async function (req, res, next) {
     */
     await joinValidationSchema.validateAsync({ email, userPw, userPwRe, nick })
   } catch (e) {
-    console.warn(`[WARN] 유저 ${email} 가 적절하지 않은 데이터로 가입하려 했습니다. ${e}`)
+    console.log(`[INFO] 유저 ${email} 가 적절하지 않은 데이터로 가입하려 했습니다. ${e}`)
     return next(createError(400, '적절하지 않은 값을 입력했습니다.'))
   }
 
@@ -111,7 +111,7 @@ export const join = async function (req, res, next) {
     if (userPw == userPwRe) {
       /* 중복 가입 이메일 처리 */
       if ((await User.isExist(email)) != null) {
-        console.warn(`[WARN] 중복된 이메일 ${email} 로 가입하려했습니다.`)
+        console.log(`[INFO] 중복된 이메일 ${email} 로 가입하려했습니다.`)
         return next(createError(400, '중복된 이메일입니다. 다른 이메일로 가입해주세요.'))
       }
       const generatedId = crypto.createHash('sha256').update(email).digest('hex').slice(0, 14)
@@ -228,15 +228,15 @@ export const join = async function (req, res, next) {
           }
         })
       } else {
-        console.warn(`[WARN] 이미 존재하는 이메일 ${email} 로 회원가입을 시도했습니다.`)
+        console.log(`[INFO] 이미 존재하는 이메일 ${email} 로 회원가입을 시도했습니다.`)
         return next(createError(400, '이미 존재하는 아이디입니다. 확인 후 시도해주세요.'))
       }
     } else {
-      console.warn(`[WARN] 일치하지 않는 패스워드로 가입하려했습니다.`)
+      console.log(`[INFO] 일치하지 않는 패스워드로 가입하려했습니다.`)
       return next(createError(400, '비밀번호가 일치하지 않습니다.'))
     }
   } else {
-    console.warn(`[WARN] 회원가입 비밀번호 규칙이 맞지 않습니다.`)
+    console.log(`[INFO] 회원가입 비밀번호 규칙이 맞지 않습니다.`)
     return next(createError(400, '비밀번호 규칙을 다시 확인해주세요.'))
   }
 }
@@ -253,7 +253,7 @@ export const mailAuth = async function (req, res, next) {
         result: 'ok',
       })
     } else {
-      console.warn(`[WARN] 이메일 ${email} 의 이메일 인증이 실패했습니다.`)
+      console.log(`[INFO] 이메일 ${email} 의 이메일 인증이 실패했습니다.`)
       return next(createError(401, '이메일 인증에 실패했습니다.'))
     }
   } catch (e) {
