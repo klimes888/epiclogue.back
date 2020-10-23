@@ -23,7 +23,7 @@ module.exports = {
 
     /* interactions */
     // "./__tests__/interactions/v1/follow.test.js",
-    "./__tests__/interactions/v1/like.test.js",
+    // "./__tests__/interactions/v1/like.test.js",
     // "./__tests__/interactions/v1/bookmark.test.js",
   ],
 
