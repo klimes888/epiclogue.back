@@ -84,7 +84,7 @@ export const getFollow = async (req, res, next) => {
         : await Follow.getFollowerList(userId._id)
 
     for (let data of followList) {
-      let temp = await Users.getUserInfo(data.targetUserId, {
+      let temp = await User.getUserInfo(data.targetUserId, {
         nickname: 1,
         screenId: 1,
         intro: 1,
