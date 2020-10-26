@@ -13,7 +13,7 @@ dotenv.config()
 /* GET users listing. */
 export const getUserEditInfo = async function (req, res, next) {
   const uid = res.locals.uid
-  try {
+  try {    
     const result = await User.getUserInfo(uid)
 
     return res.status(200).json({
