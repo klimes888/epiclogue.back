@@ -11,8 +11,8 @@ export const getBookmarkList = async (req, res, next) => {
   const screenId = req.query.screenId
 
   try {
-    const userId = await User.getIdByScreenId(screenId)
-    const bookmarkSet = await Bookmark.getByUserId(userId)
+    const userInfo = await User.getIdByScreenId(screenId)
+    const bookmarkSet = await Bookmark.getByUserId(userInfo.screenId)
 
     console.log(`[INFO] 유저 ${res.locals.uid}가 ${userId._id}의 북마크 리스트를 확인했습니다.`)
     return res.status(200).json({
