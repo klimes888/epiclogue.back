@@ -88,7 +88,8 @@ export const getFollow = async (req, res, next) => {
         nickname: 1,
         screenId: 1,
         intro: 1,
-        profile: 1
+        profile: 1,
+        _id: 0
       })
 
       dataSet.push(temp)
