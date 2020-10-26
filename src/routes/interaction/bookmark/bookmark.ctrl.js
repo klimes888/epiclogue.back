@@ -12,6 +12,7 @@ export const getBookmarkList = async (req, res, next) => {
 
   try {
     const userInfo = await User.getIdByScreenId(screenId)
+
     const bookmarkSet = await Bookmark.getByUserId(userInfo._id)
 
     console.log(`[INFO] 유저 ${res.locals.uid}가 ${userInfo._id}의 북마크 리스트를 확인했습니다.`)
@@ -20,7 +21,7 @@ export const getBookmarkList = async (req, res, next) => {
       data: bookmarkSet,
     })
   } catch (e) {
-    console.log(`[Error] ${e}`)
+    console.error(`[Error] ${e}`)
     return next(createError(500, '알 수 없는 에러가 발생했습니다.'))
   }
 }
@@ -59,7 +60,7 @@ export const addBookmark = async function (req, res, next) {
       data: bookmarkCount,
     })
   } catch (e) {
-    console.log(`[Error] ${e}`)
+    console.error(`[Error] ${e}`)
     return next(createError(500, '알 수 없는 에러가 발생했습니다.'))
   }
 }
@@ -89,7 +90,7 @@ export const deleteBookmark = async (req, res, next) => {
       data: bookmarkCount,
     })
   } catch (e) {
-    console.log(`[Error] ${e}`)
+    console.error(`[Error] ${e}`)
     return next(createError(500, '알 수 없는 에러가 발생했습니다.'))
   }
 }
