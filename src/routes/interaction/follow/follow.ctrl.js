@@ -80,18 +80,21 @@ export const getFollow = async (req, res, next) => {
   try {
     const followList =
       type === 'following'
-        ? await Follow.getFollowingList(userId)
-        : await Follow.getFollowerList(userId)
+        ? await Follow.getFollowingList(userId._id)
+        : await Follow.getFollowerList(userId._id)
 
     for (let data of followList) {
-      let temp = await Users.getUserInfo(data.targetUserId, {
+      let temp = await User.getUserInfo(data.targetUserId, {
         nickname: 1,
-        userid: 1,
+        screenId: 1,
+        intro: 1,
+        profile: 1,
+        _id: 0
       })
 
       dataSet.push(temp)
     }
-    console.log(`[INFO] 유저 ${res.locals.uid} 가 ${userId} 의 ${type} 리스트를 확인합니다.`)
+    console.log(`[INFO] 유저 ${res.locals.uid} 가 ${userId._id} 의 ${type} 리스트를 확인합니다.`)
     return res.status(200).json({
       result: 'ok',
       data: dataSet,

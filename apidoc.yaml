@@ -47,6 +47,16 @@ paths:
       - "user"
       summary: "user delete"
       description: ""
+      parameters:
+      - name: "Body"
+        in: "body"
+        description: "user auth info"
+        required: true
+        schema:
+          type: object
+          properties:
+            userPw:
+              type: string
       responses:
         200:
           description: OK

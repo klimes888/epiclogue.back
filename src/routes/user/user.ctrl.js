@@ -13,20 +13,12 @@ dotenv.config()
 /* GET users listing. */
 export const getUserEditInfo = async function (req, res, next) {
   const uid = res.locals.uid
-  try {    
-    const result = await User.getUserInfo(uid)
+  try {
+    const result = await User.getUserInfo(uid, {nickname:1, intro:1, country:1, screenId:1, banner:1, profile:1, email:1})
 
     return res.status(200).json({
       result: 'ok',
-      data: {
-        userNick: result.nickname,
-        userIntro: result.intro,
-        userCountry: result.country,
-        screenId: result.screenId,
-        userBannerImg: result.banner,
-        userProfileImg: result.profile,
-        email: result.email,
-      },
+      data: result
     })
   } catch (e) {
     console.error(`[Error] ${e}`)
