@@ -12,9 +12,9 @@ export const getBookmarkList = async (req, res, next) => {
 
   try {
     const userInfo = await User.getIdByScreenId(screenId)
-    const bookmarkSet = await Bookmark.getByUserId(userInfo.screenId)
+    const bookmarkSet = await Bookmark.getByUserId(userInfo._id)
 
-    console.log(`[INFO] 유저 ${res.locals.uid}가 ${userId._id}의 북마크 리스트를 확인했습니다.`)
+    console.log(`[INFO] 유저 ${res.locals.uid}가 ${userInfo._id}의 북마크 리스트를 확인했습니다.`)
     return res.status(200).json({
       result: 'ok',
       data: bookmarkSet,
