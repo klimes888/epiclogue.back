@@ -298,34 +298,21 @@ export const test = async (req, res, next) => {
   }
 
   const session = await startSession()
-  // session.startTransaction()
 
   try {
     await session.withTransaction(async () => {
       const userSchema = new User(userData);
       await userSchema.save({ session })
-      throw new Error(`tx error`)
-      // return res.sendStatus(201)
+      throw createError(500)
+      
+      // if error thrown, return statement below will be ignored and transaction will be aborted.
+      return res.status(201).json({
+        result: 'ok'
+      })
     })
   } catch (e) {
-    next(createError(500, e))
+    next(createError(500, e))    
   } finally {
     await session.endSession()
-    const failureData = await User.findOne({ email: userData.email }, { email: 1, _id: 0})
-    console.log(failureData)
   }
-  
-
-  // try {
-  //   await User.create(userData)
-  //   await session.abortTransaction()
-  //   return res.status(201).json({
-  //     result: 'ok'
-  //   })
-  // } catch (e) {
-  //   await session.abortTransaction()
-  //   next(createError(500, e))
-  // } finally {
-  //   session.endSession()
-  // }
 }
