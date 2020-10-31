@@ -1,6 +1,7 @@
 import { Board, Feedback } from '../../../models'
 import Joi from 'joi'
 import createError from 'http-errors'
+import { startSession } from 'mongoose'
 
 /*
   This is feedback router.
@@ -19,6 +20,8 @@ export const postFeedback = async (req, res, next) => {
     feedbackBody: Joi.string().trim().required(),
   })
 
+  const session = await startSession();
+
   try {
     await feedbackSchema.validateAsync({
       feedbackBody: feedbackData.feedbackBody,
@@ -31,19 +34,25 @@ export const postFeedback = async (req, res, next) => {
   }
 
   try {
-    const postFeedbackResult = await Feedback.create(feedbackData)
-    console.log(
-      `[INFO] 유저 ${res.locals.uid} 가 피드백 ${postFeedbackResult._id} 을 작성했습니다.`
-    )
-    await Board.getFeedback(req.params.boardId, postFeedbackResult._id)
-    const newerData = await Feedback.getByBoardId(req.params.boardId)
-    return res.status(201).json({
-      result: 'ok',
-      data: newerData,
+    await session.withTransaction(async () => {
+      const feedbackSchema = new Feedback(feedbackData)
+      const postFeedbackResult = await feedbackSchema.save({ session })
+
+      console.log(
+        `[INFO] 유저 ${res.locals.uid} 가 피드백 ${postFeedbackResult._id} 을 작성했습니다.`
+      )
+      await Board.getFeedback(req.params.boardId, postFeedbackResult._id).session(session)
+      const newerData = await Feedback.getByBoardId(req.params.boardId).session(session)
+      return res.status(201).json({
+        result: 'ok',
+        data: newerData,
+      })
     })
   } catch (e) {
     console.error(`[Error] ${e}`)
     return next(createError(500, '알 수 없는 에러가 발생했습니다.'))
+  } finally {
+    session.endSession()
   }
 }
 
@@ -68,49 +77,62 @@ export const editFeedback = async (req, res, next) => {
     return next(createError(400, '입력값이 적절하지 않습니다.'))
   }
 
+  const session = await startSession()
+
   try {
-    const patch = await Feedback.update(newForm)
-
-    if (patch.ok === 1) {
-      const newerData = await Feedback.getByBoardId(req.params.boardId)
-
-      console.log(`[INFO] 피드백 ${req.params.feedbackId} 가 정상적으로 수정되었습니다.`)
-      return res.status(200).json({
-        result: 'ok',
-        data: newerData,
-      })
-    } else {
-      console.error(
-        `[ERROR] 피드백 ${req.params.feedbackId} 의 수정이 정상적으로 처리되지 않았습니다: 데이터베이스 질의에 실패했습니다.`
-      )
-      return next(createError(500, '알 수 없는 에러가 발생했습니다.'))
-    }
+    await session.withTransaction(async() => {
+      // 얘는 왜 .session(session)을 하면 models.Feedbacks.update.session is not a function이 뜰까...
+      const patch = await Feedback.update(newForm, session)
+      // throw new Error("응애")
+      if (patch.ok === 1) {
+        const newerData = await Feedback.getByBoardId(req.params.boardId).session(session)
+  
+        console.log(`[INFO] 피드백 ${req.params.feedbackId} 가 정상적으로 수정되었습니다.`)
+        return res.status(200).json({
+          result: 'ok',
+          data: newerData,
+        })
+      } else {
+        console.error(
+          `[ERROR] 피드백 ${req.params.feedbackId} 의 수정이 정상적으로 처리되지 않았습니다: 데이터베이스 질의에 실패했습니다.`
+        )
+        return next(createError(500, '알 수 없는 에러가 발생했습니다.'))
+      }
+    })
   } catch (e) {
     console.error(`[Error] ${e}`)
     return next(createError(500, '알 수 없는 에러가 발생했습니다.'))
+  } finally {
+    session.endSession()
   }
 }
 
 export const deleteFeedback = async (req, res, next) => {
-  try {
-    const deletion = await Feedback.delete(req.params.feedbackId)
-    if (deletion.ok === 1) {
-      const newerData = await Feedback.getByBoardId(req.params.boardId)
+  const session = await startSession()
 
-      console.log(`[INFO] 피드백 ${req.params.feedbackId} 가 정상적으로 삭제되었습니다.`)
-      return res.status(200).json({
-        result: 'ok',
-        data: newerData,
-      })
-    } else if (result.ok === 0) {
-      console.error(
-        `[ERROR] 피드백 ${req.params.feedbackId} 의 삭제가 정상적으로 처리되지 않았습니다: 데이터베이스 질의에 실패했습니다.`
-      )
-      return next(createError(500, '알 수 없는 에러가 발생했습니다.'))
-    }
+  try {
+    await session.withTransaction(async() => {
+      const deletion = await Feedback.delete(req.params.feedbackId).session(session)
+      if (deletion.ok === 1) {
+        const newerData = await Feedback.getByBoardId(req.params.boardId).session(session)
+  
+        console.log(`[INFO] 피드백 ${req.params.feedbackId} 가 정상적으로 삭제되었습니다.`)
+        return res.status(200).json({
+          result: 'ok',
+          data: newerData,
+        })
+      } else if (result.ok === 0) {
+        console.error(
+          `[ERROR] 피드백 ${req.params.feedbackId} 의 삭제가 정상적으로 처리되지 않았습니다: 데이터베이스 질의에 실패했습니다.`
+        )
+        return next(createError(500, '알 수 없는 에러가 발생했습니다.'))
+      }
+    })
   } catch (e) {
     console.error(`[Error] ${e}`)
     return next(createError(500, '알 수 없는 에러가 발생했습니다.'))
+  } finally {
+    session.endSession()
   }
 }
 

@@ -15,9 +15,13 @@ export const postBoard = async (req, res, next) => {
     _boardImg.push(req.files[i].location)
   }
 
-  const tags = req.body.boardBody.match(
-    /#[^\{\}\[\]\/?.,;:|\)*~`!^\-+<>@\#$%&\\\=\(\'\"\s]+/g
-  )
+  let tags = "";
+  if (req.body.boardBody) {
+    tags = req.body.boardBody.match(
+      /#[^\{\}\[\]\/?.,;:|\)*~`!^\-+<>@\#$%&\\\=\(\'\"\s]+/g
+    )
+  }
+  
 
   const boardData = {
     writer: res.locals.uid,
@@ -34,7 +38,6 @@ export const postBoard = async (req, res, next) => {
     writer: Joi.string()
       .regex(/^[a-fA-F0-9]{24}$/)
       .required(),
-    // array() 안의 string().required() 도 작성해야합니다...
     boardImg: Joi.array().items(Joi.string().required()).required(),
     category: Joi.string().required(),
     pub: Joi.number().min(0).max(2).required(),
@@ -48,6 +51,7 @@ export const postBoard = async (req, res, next) => {
       pub: boardData.pub,
     })
   } catch (e) {
+    // 이미지를 S3에 올린 이후에 DB에 저장하므로 이를 삭제합니다.
     if (boardData.boardImg.length > 0) {
       deleteImage(boardData.boardImg)
     }

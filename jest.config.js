@@ -10,25 +10,21 @@ module.exports = {
     "./__tests__/ignore/*",
 
     /* server healthChecking (for proper runtime checking) */
-    "./__tests__/integration/v1/healthCheck.test.js",
+    // "./__tests__/integration/v1/healthCheck.test.js",
 
     /* middleswares */
-    // "./__tests__/middlewares/v1/token.test.js",
+    "./__tests__/middlewares/v1/token.test.js",
 
     /* integration */
-<<<<<<< HEAD
     "./__tests__/integration/v1/user.test.js",
-=======
-    // "./__tests__/integration/v1/user.test.js",
->>>>>>> fd8d037340811723304484a64b17fb9075d423ae
-    // "./__tests__/integration/v1/board.test.js",
+    "./__tests__/integration/v1/board.test.js",
     // "./__tests__/integration/v1/feedback.test.js",
-    // "./__tests__/integration/v1/reply.test.js",
+    "./__tests__/integration/v1/reply.test.js",
 
     /* interactions */
-    // "./__tests__/interactions/v1/follow.test.js",
-    // "./__tests__/interactions/v1/like.test.js",
-    // "./__tests__/interactions/v1/bookmark.test.js",
+    "./__tests__/interactions/v1/follow.test.js",
+    "./__tests__/interactions/v1/like.test.js",
+    "./__tests__/interactions/v1/bookmark.test.js",
   ],
 
   // Trigger before all test cases start
