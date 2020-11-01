@@ -121,17 +121,17 @@ services:
   #   networks:
   #     - backend
 
-  # nginx:
-  #   container_name: nginx
-  #   restart: always
-  #   image: nginx:latest
-  #   volumes: 
-  #     - ./epiclogue.ssl/cert:/ssl
-  #     - ./epiclogue.ssl/conf/server.conf:/etc/nginx/nginx.conf
-  #   ports:
-  #     - 443:443
-  #     - 80:80
-  #   networks:
-  #     - backend
-  #   depends_on:
-  #     - server
+  nginx:
+    container_name: nginx
+    restart: always
+    image: nginx:latest
+    volumes: 
+      - ./epiclogue.ssl/cert:/ssl
+      - ./epiclogue.ssl/conf/server.conf:/etc/nginx/nginx.conf
+    ports:
+      - 443:443
+      - 80:80
+    networks:
+      - backend
+    depends_on:
+      - server
