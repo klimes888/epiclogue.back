@@ -18,34 +18,120 @@ services:
     networks:
       - backend  
     depends_on:
-      - mongo
+      - mongodb1
     ports:
       - 3000:3000
 
-  mongo:
-    container_name: mongo
+  mongodb1:
+    container_name: mongodb1
     image: mongo
+    networks:
+      - backend
     volumes:
-      - ./data:/data/db
-      - ./dbinit.sh:/docker-entrypoint-initdb.d/dbinit.sh:ro
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
-      MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
-    networks:
-      - backend
-
-  nginx:
-    container_name: nginx
-    restart: always
-    image: nginx:latest
-    volumes: 
-      - ./epiclogue.ssl/cert:/ssl
-      - ./epiclogue.ssl/conf/server.conf:/etc/nginx/nginx.conf
+      - ./data/db-01:/data/db
     ports:
-      - 443:443
-      - 80:80
+      - 27017:27017
+    expose:
+      - 27017
+    depends_on:
+      - mongodb2
+      - mongodb3
+      - mongodb4
+      - mongodb5
+    command: mongod --bind_ip_all --replSet rs0
+    restart: unless-stopped
+
+  mongodb2:
+    container_name: mongodb2
+    image: mongo
     networks:
       - backend
+    volumes:
+      - ./data/db-02:/data/db
+    ports:
+      - 27018:27017
     depends_on:
-      - server
+      - mongodb3
+      - mongodb4
+      - mongodb5
+    command: mongod --bind_ip_all --replSet rs0
+    restart: unless-stopped
+
+  mongodb3:
+    container_name: mongodb3
+    image: mongo
+    networks:
+      - backend
+    volumes:
+      - ./data/db-03:/data/db
+    ports:
+      - 27019:27017
+    depends_on:
+      - mongodb4
+      - mongodb5
+    command: mongod --bind_ip_all --replSet rs0
+    restart: unless-stopped
+
+  mongodb4:
+    container_name: mongodb4
+    image: mongo
+    networks:
+      - backend
+    volumes:
+      - ./data/db-04:/data/db
+    ports:
+      - 27020:27017
+    depends_on: 
+      - mongodb5
+    command: mongod --bind_ip_all --replSet rs0
+    restart: unless-stopped
+
+  mongodb5:
+    container_name: mongodb5
+    image: mongo
+    networks:
+      - backend
+    volumes:
+      - ./data/db-05:/data/db
+    ports:
+      - 27021:27017
+    command: mongod --bind_ip_all --replSet rs0
+    restart: unless-stopped
+
+  repl-helper:
+    container_name: repl-helper
+    build:
+      context: ./
+      dockerfile: Dockerfile.repl
+    networks:
+      - backend
+    depends_on: 
+      - mongodb1
+
+  # mongo:
+  #   container_name: mongo
+  #   image: mongo
+  #   volumes:
+  #     - ./data:/data/db
+  #     - ./dbinit.sh:/docker-entrypoint-initdb.d/dbinit.sh:ro
+    # environment:
+    #   MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+    #   MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+    #   MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
+  #   networks:
+  #     - backend
+
+  # nginx:
+  #   container_name: nginx
+  #   restart: always
+  #   image: nginx:latest
+  #   volumes: 
+  #     - ./epiclogue.ssl/cert:/ssl
+  #     - ./epiclogue.ssl/conf/server.conf:/etc/nginx/nginx.conf
+  #   ports:
+  #     - 443:443
+  #     - 80:80
+  #   networks:
+  #     - backend
+  #   depends_on:
+  #     - server
