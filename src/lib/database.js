@@ -2,8 +2,8 @@
 
 import dotenv from 'dotenv'
 import mongoose from 'mongoose'
-
-dotenv.config()
+import dotenvExpand from 'dotenv-expand'
+dotenvExpand(dotenv.config())
 
 mongoose.Promise = global.Promise
 
