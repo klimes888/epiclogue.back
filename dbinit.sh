@@ -1,8 +1,14 @@
 #!/bin/bash
 set -e
 
-mongo <<EOF
-use $MONGO_INITDB_DATABASE
+echo "
+***************************************
+dbinits.sh
+***************************************
+"
+
+mongo admin<<EOF
+
 db.createUser({
   user:  '$MONGO_INITDB_ROOT_USERNAME',
   pwd: '$MONGO_INITDB_ROOT_PASSWORD',

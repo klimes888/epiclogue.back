@@ -13,8 +13,8 @@ services:
     volumes:
       - ./:/usr/src/app  
       - /usr/src/app/node_modules      
-    environment:
-      - PORT=3000
+    env_file:
+      - ./.env
     networks:
       - backend  
     depends_on:
@@ -29,10 +29,13 @@ services:
       - backend
     volumes:
       - ./data/db-01:/data/db
+      - ./dbinit.sh:/docker-entrypoint-initdb.d/dbinit.sh:ro
     ports:
       - 27017:27017
-    expose:
-      - 27017
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
     depends_on:
       - mongodb2
       - mongodb3
@@ -48,8 +51,13 @@ services:
       - backend
     volumes:
       - ./data/db-02:/data/db
+      - ./dbinit.sh:/docker-entrypoint-initdb.d/dbinit.sh:ro
     ports:
       - 27018:27017
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
     depends_on:
       - mongodb3
       - mongodb4
@@ -64,8 +72,13 @@ services:
       - backend
     volumes:
       - ./data/db-03:/data/db
+      - ./dbinit.sh:/docker-entrypoint-initdb.d/dbinit.sh:ro
     ports:
       - 27019:27017
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
     depends_on:
       - mongodb4
       - mongodb5
@@ -79,8 +92,13 @@ services:
       - backend
     volumes:
       - ./data/db-04:/data/db
+      - ./dbinit.sh:/docker-entrypoint-initdb.d/dbinit.sh:ro
     ports:
       - 27020:27017
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
     depends_on: 
       - mongodb5
     command: mongod --bind_ip_all --replSet rs0
@@ -93,8 +111,13 @@ services:
       - backend
     volumes:
       - ./data/db-05:/data/db
+      - ./dbinit.sh:/docker-entrypoint-initdb.d/dbinit.sh:ro
     ports:
       - 27021:27017
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
     command: mongod --bind_ip_all --replSet rs0
     restart: unless-stopped
 

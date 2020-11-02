@@ -1,3 +1,5 @@
+db.auth('$MONGO_INIIDB_ROOT_USERNAME', '$MONGO_INIIDB_ROOT_PASSWORD')
+
 cfg = {
   _id: "rs0",
   members: [
