@@ -20,6 +20,13 @@ class Database {
     const dbEnvironment =
       process.env.NODE_ENV === 'test' ? process.env.MONGO_TEST_URI : process.env.MONGO_URI
 
+    console.log(`
+    ********************************
+      Database.connect() called: 
+      ${process.env.MONGO_URI}
+      ${process.env.MONGO_TEST_URI}
+    ********************************`)
+
     try {
       await mongoose.connect(dbEnvironment, options)
       console.log('[INFO] Database connected properly')

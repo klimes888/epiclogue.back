@@ -1,7 +1,8 @@
 FROM mongo
 
-WORKDIR /usr/src/
-RUN mkdir configs  
+# directory already exists err.
+# WORKDIR /usr/src/
+# RUN mkdir configs  
 WORKDIR /usr/src/configs
 
 COPY replicaInit.js .

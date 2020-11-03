@@ -41,7 +41,7 @@ services:
       - mongodb3
       - mongodb4
       - mongodb5
-    command: mongod --bind_ip_all --replSet rs0
+    command: sh /docker-entrypoint-initdb.d/dbinit.sh
     restart: unless-stopped
 
   mongodb2:
@@ -62,7 +62,7 @@ services:
       - mongodb3
       - mongodb4
       - mongodb5
-    command: mongod --bind_ip_all --replSet rs0
+    command: sh /docker-entrypoint-initdb.d/dbinit.sh
     restart: unless-stopped
 
   mongodb3:
@@ -82,7 +82,7 @@ services:
     depends_on:
       - mongodb4
       - mongodb5
-    command: mongod --bind_ip_all --replSet rs0
+    command: sh /docker-entrypoint-initdb.d/dbinit.sh
     restart: unless-stopped
 
   mongodb4:
@@ -101,7 +101,7 @@ services:
       MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
     depends_on: 
       - mongodb5
-    command: mongod --bind_ip_all --replSet rs0
+    command: sh /docker-entrypoint-initdb.d/dbinit.sh
     restart: unless-stopped
 
   mongodb5:
@@ -118,7 +118,7 @@ services:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
       MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
-    command: mongod --bind_ip_all --replSet rs0
+    command: sh /docker-entrypoint-initdb.d/dbinit.sh
     restart: unless-stopped
 
   repl-helper:

@@ -8,6 +8,7 @@ import helmet from 'helmet'
 import swaggerJSDoc from 'swagger-jsdoc'
 import swaggerUi from 'swagger-ui-express'
 import dotenv from 'dotenv'
+import dotenvExpand from 'dotenv-expand'
 import dayjs from 'dayjs'
 import dayjsPluginUTC from 'dayjs-plugin-utc'
 
@@ -25,7 +26,7 @@ import Database from './src/lib/database'
 import { logger, stream } from './src/configs/winston'
 
 const app = express()
-dotenv.config()
+dotenvExpand(dotenv.config())
 dayjs.extend(dayjsPluginUTC)
 
 const swaggerDefinition = {
