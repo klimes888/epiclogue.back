@@ -3,12 +3,21 @@ set -e
 
 echo "
 ***************************************
-dbinits.sh
+dbinits.sh on shell
+***************************************
+"
+
+mongod --bind_ip_all --replSet rs0
+
+# after execute mongod, instruction below may ignore
+
+echo "
+***************************************
+db.createUser
 ***************************************
 "
 
 mongo admin<<EOF
-
 db.createUser({
   user:  '$MONGO_INITDB_ROOT_USERNAME',
   pwd: '$MONGO_INITDB_ROOT_PASSWORD',
@@ -18,3 +27,9 @@ db.createUser({
   }]
 })
 EOF
+
+echo "
+***************************************
+end!
+***************************************
+"

@@ -1,5 +1,3 @@
-db.auth('$MONGO_INIIDB_ROOT_USERNAME', '$MONGO_INIIDB_ROOT_PASSWORD')
-
 cfg = {
   _id: "rs0",
   members: [
@@ -13,4 +11,17 @@ cfg = {
 
 rs.initiate(cfg);
 
-rs.conf();
+rs.status();
+
+db.runCommand({ isMaster: 1 })
+
+db = db.getSiblingDB('admin')
+
+db.createUser({
+  user:  '$MONGO_INITDB_ROOT_USERNAME',
+  pwd: '$MONGO_INITDB_ROOT_PASSWORD',
+  roles: [{
+    role: 'readWrite',
+    db: '$MONGO_INITDB_DATABASE'
+  }]
+})
