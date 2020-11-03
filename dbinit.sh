@@ -26,6 +26,11 @@ db.createUser({
     db: '$MONGO_INITDB_DATABASE'
   }]
 })
+
+db.grantRolesToUser(
+   "admin",
+   [{ role: "clusterManager", db: "lunarcat" }]
+)
 EOF
 
 echo "
