@@ -9,7 +9,7 @@
     "docker": "yarn install && nodemon ./bin/www --exec babel-node",
     "test": "NODE_ENV=test && ./node_modules/.bin/jest tests --config jest.config.js",
     "test:debug": "NODE_ENV=test &&./node_modules/.bin/jest tests --config jest.config.js --runInBand --detectOpenHandles ",
-    "test:docker": "yarn install && yarn test"
+    "test:docker": "docker exec -it server yarn test"
   },
   "dependencies": {
     "@sentry/node": "5.19.0",
