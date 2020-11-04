@@ -138,7 +138,7 @@ paths:
         - access_token: []
   
   /user/changePass:
-    post:
+    fetch:
       tags:
       - "user"
       summary: "for change user password"
