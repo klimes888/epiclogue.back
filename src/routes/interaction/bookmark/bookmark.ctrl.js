@@ -1,5 +1,6 @@
 import { Bookmark, React, Board, User } from '../../../models'
 import createError from 'http-errors'
+import { startSession } from 'mongoose'
 
 /* 
   This is bookmark router.
@@ -29,7 +30,7 @@ export const getBookmarkList = async (req, res, next) => {
 export const addBookmark = async function (req, res, next) {
   const bookmarkData = {
     user: res.locals.uid,
-    boardId: req.body.boardId,
+    board: req.body.boardId,
   }
 
   const reactData = {
@@ -37,8 +38,10 @@ export const addBookmark = async function (req, res, next) {
     boardId: req.body.boardId,
     type: 'bookmark',
   }
-
   
+  const bookmarkSchema = new Bookmark(bookmarkData)
+  const reactSchema = new React(reactData)
+
   try {
     const didBookmark = await Bookmark.didBookmark(res.locals.uid, req.body.boardId)
     
@@ -47,17 +50,21 @@ export const addBookmark = async function (req, res, next) {
       return next(createError(400, '입력값이 적절하지 않습니다.'))
     }
 
-    await Bookmark.create(bookmarkData)
-    await React.create(reactData)
-    await Board.countBookmark(req.body.boardId, 1)
-    await Board.countReact(req.body.boardId, 1)
+    const session = await startSession()
+    await session.withTransaction(async() => {      
+      await bookmarkSchema.save({ session })
+      await reactSchema.save({ session })
 
-    const bookmarkCount = await Board.getBookmarkCount(req.body.boardId)
-
-    console.log(`[INFO] 유저 ${res.locals.uid}가 북마크에 ${req.body.boardId}를 추가했습니다.`)
-    return res.status(201).json({
-      result: 'ok',
-      data: bookmarkCount,
+      await Board.countBookmark(req.body.boardId, 1).session(session)
+      await Board.countReact(req.body.boardId, 1).session(session)
+  
+      const bookmarkCount = await Board.getBookmarkCount(req.body.boardId).session(session)
+  
+      console.log(`[INFO] 유저 ${res.locals.uid}가 북마크에 ${req.body.boardId}를 추가했습니다.`)
+      return res.status(201).json({
+        result: 'ok',
+        data: bookmarkCount,
+      })
     })
   } catch (e) {
     console.error(`[Error] ${e}`)
@@ -77,18 +84,21 @@ export const deleteBookmark = async (req, res, next) => {
       return next(createError(400, '입력값이 적절하지 않습니다.'))
     }
 
-    await Bookmark.delete(userId, boardId)
-    await React.delete(userId, boardId)
-    await Board.countBookmark(req.body.boardId, 0)
-    await Board.countReact(req.body.boardId, 0)
-
-    const bookmarkCount = await Board.getBookmarkCount(req.body.boardId)
-
-    console.log(`[INFO] 유저 ${res.locals.uid}가 북마크에 ${req.body.boardId}를 해제했습니다.`)
-    return res.status(200).json({
-      result: 'ok',
-      data: bookmarkCount,
-    })
+    const session = await startSession()
+    await session.withTransaction(async() => {
+      await Bookmark.delete(userId, boardId).session(session)
+      await React.delete(userId, boardId).session(session)
+      await Board.countBookmark(req.body.boardId, 0).session(session)
+      await Board.countReact(req.body.boardId, 0).session(session)
+  
+      const bookmarkCount = await Board.getBookmarkCount(req.body.boardId).session(session)
+  
+      console.log(`[INFO] 유저 ${res.locals.uid}가 북마크에 ${req.body.boardId}를 해제했습니다.`)
+      return res.status(200).json({
+        result: 'ok',
+        data: bookmarkCount,
+      })
+    })  
   } catch (e) {
     console.error(`[Error] ${e}`)
     return next(createError(500, '알 수 없는 에러가 발생했습니다.'))
