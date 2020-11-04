@@ -2,6 +2,7 @@ import { Board } from '../../models'
 import { deleteImage } from '../../lib/imageCtrl'
 import Joi from 'joi'
 import createError from 'http-errors'
+import { createSession, startSession } from 'mongoose'
 
 /* 
   This is board router.
@@ -99,9 +100,9 @@ export const viewBoard = async (req, res, next) => {
 // 삭제
 export const deleteBoard = async (req, res, next) => {
   const boardId = req.params.boardId
-  const query = await Board.getById(boardId, { _id: 0, feedbacks: 0, writer: 0, boardImg: 1 })
 
   try {
+    const query = await Board.getById(boardId, { _id: 0, feedbacks: 0, writer: 0, boardImg: 1 })
     // for non blocking, didn't use async-await
     deleteImage(query.boardImg)
 
@@ -171,22 +172,24 @@ export const postEditInfo = async function (req, res, next) {
       language: parseInt(req.body.language || originalData.language),
     }
 
-    const patch = await Board.update(updateData)
-
-    if (patch.ok === 1) {
-      const newerData = await Board.getById(req.params.boardId)
-
-      console.log(`[INFO] 유저 ${res.locals.uid}가 글 ${req.params.boardId}을 수정했습니다.`)
-      return res.status(200).json({
-        result: 'ok',
-        data: newerData,
-      })
-    } else {
-      console.error(
-        `[ERROR] 글 ${req.params.boardId}의 수정이 실패했습니다: 데이터베이스 질의에 실패했습니다.`
-      )
-      return next(createError(500, '알 수 없는 에러가 발생했습니다.'))
-    }
+    const session = await startSession()
+    await session.withTransaction(async() => {
+      const patch = await Board.update(updateData).session(session)
+      if (patch.ok === 1) {
+        const newerData = await Board.getById(req.params.boardId).session(session)
+  
+        console.log(`[INFO] 유저 ${res.locals.uid}가 글 ${req.params.boardId}을 수정했습니다.`)
+        return res.status(200).json({
+          result: 'ok',
+          data: newerData,
+        })
+      } else {
+        console.error(
+          `[ERROR] 글 ${req.params.boardId}의 수정이 실패했습니다: 데이터베이스 질의에 실패했습니다.`
+        )
+        return next(createError(500, '알 수 없는 에러가 발생했습니다.'))
+      }
+    })
   } catch (e) {
     console.error(`[ERROR] ${e}`)
     return next(createError(500, '알 수 없는 에러가 발생했습니다.'))

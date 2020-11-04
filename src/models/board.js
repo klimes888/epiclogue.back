@@ -6,8 +6,8 @@ const board = new mongoose.Schema({
   boardTitle: { type: String, default: '' },
   boardImg: { type: [String], required: true },
   boardBody: { type: String, default: '' },
-  category: { type: String, required: true, default: 'Illust' }, // [on future] 0: Illust, 1: Comic 
-  pub: { type: Number, required: true, default: 1 }, // 0: private, 1: public
+  category: { type: String, enum: ['Illust', 'Comic'], default: 'Illust' }, // [on future] 0: Illust, 1: Comic 
+  pub: { type: Number, enum: [0, 1], default: 1 }, // 0: private, 1: public
   writeDate: { type: Date, default: Date.now },
   language: { type: String, default: 0 }, // [on future] 0: Korean, 1: Japanese, 2: US, 3: China, 4: Taiwan
   allowSecondaryCreation: { type: Number, default: 1 }, // 0: not allow, 1: allow, 2: only allow on followers
@@ -44,7 +44,7 @@ board.statics.isWriter = function (userId, boardId) {
   return this.findOne({ _id: boardId, writer: userId })
 }
 
-board.statics.update = function (articleData) {
+board.statics.update = function (articleData, session) {
   return this.updateOne(
     { _id: articleData.boardId },
     {
@@ -55,7 +55,8 @@ board.statics.update = function (articleData) {
       pub: articleData.pub,
       language: articleData.language,
       edited: true,
-    }
+    },
+    { session }
   )
 }
 
