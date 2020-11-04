@@ -100,8 +100,8 @@ export const postUserEditInfo = async function (req, res, next) {
 export const changePass = async function (req, res, next) {
   const uid = res.locals.uid
   const userPw = req.body['userPw']
-  const userPwNew = req.body['newUserPw']
-  const userPwNewRe = req.body['newUserPwRe']
+  const userPwNew = req.body['userPwNew']
+  const userPwNewRe = req.body['userPwNewRe']
 
   try {
     const changePassSchema = Joi.object({
