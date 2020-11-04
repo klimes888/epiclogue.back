@@ -26,8 +26,8 @@ user.statics.create = function (data) {
   return userinfo.save()
 }
 
-user.statics.isScreenIdUnique = async function (screenId) {
-  const result = await this.findOne({ screenId })
+user.statics.isScreenIdUnique = async function (screenId, session) {
+  const result = await this.findOne({ screenId }, {}, { session })
 
   if (result === null) {
     return true
@@ -102,7 +102,7 @@ user.statics.checkPass = function (userId, userpw) {
   return this.findOne({ _id: userId, password: userpw })
 }
 
-user.statics.updateProfile = function (profile) {
+user.statics.updateProfile = function (profile, session) {
   return this.updateOne(
     { _id: profile.userId },
     {
@@ -113,7 +113,8 @@ user.statics.updateProfile = function (profile) {
       intro: profile.intro,
       banner: profile.banner,
       profile: profile.profile,
-    }
+    },
+    { session }
   )
 }
 

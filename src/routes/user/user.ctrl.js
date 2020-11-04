@@ -5,6 +5,7 @@ import { deleteImage } from '../../lib/imageCtrl'
 import dotenv from 'dotenv'
 import Joi from 'joi'
 import createError from 'http-errors'
+import { startSession } from 'mongoose'
 const randomBytesPromise = util.promisify(crypto.randomBytes)
 // const crypto.pbkdf2Sync = util.promisify(crypto.pbkdf2)
 
@@ -65,32 +66,35 @@ export const postUserEditInfo = async function (req, res, next) {
   }
 
   try {
-    const checkId = await User.isScreenIdUnique(screenId)
-    if (checkId || screenId === originalData.screenId) {
-      const newerUserData = {
-        userId: res.locals.uid,
-        screenId,
-        nickname,
-        availableLanguage,
-        country,
-        intro,
-        banner,
-        profile,
+    const session = await startSession()
+    await session.withTransaction(async() => {
+      const checkIdUnique = await User.isScreenIdUnique(screenId, session)
+      if (checkIdUnique || screenId === originalData.screenId) {
+        const newerUserData = {
+          userId: res.locals.uid,
+          screenId,
+          nickname,
+          availableLanguage,
+          country,
+          intro,
+          banner,
+          profile,
+        }
+  
+        await User.updateProfile(newerUserData, session)
+  
+        console.log(`[INGO] 유저 ${res.locals.uid}가 프로필을 수정했습니다.`)
+        return res.status(200).json({
+          result: 'ok',
+          data: newerUserData,
+        })
+      } else {
+        console.log(
+          `[INFO] 유저 ${res.locals.uid} 가 프로필 변경에 실패했습니다: 중복된 screenId를 입력했습니다.`
+        )
+        return next(createError(400, '중복된 screenId 입니다.'))
       }
-
-      await User.updateProfile(newerUserData)
-
-      console.log(`[INGO] 유저 ${res.locals.uid}가 프로필을 수정했습니다.`)
-      return res.status(200).json({
-        result: 'ok',
-        data: newerUserData,
-      })
-    } else {
-      console.log(
-        `[INFO] 유저 ${res.locals.uid} 가 프로필 변경에 실패했습니다: 중복된 screenId를 입력했습니다.`
-      )
-      return next(createError(400, '중복된 screenId 입니다.'))
-    }
+    }) 
   } catch (e) {
     console.error(`[Error] ${e}`)
     return next(createError(500, '알 수 없는 에러가 발생했습니다.'))
