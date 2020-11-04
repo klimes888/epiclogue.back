@@ -30,13 +30,15 @@ services:
     volumes:
       - ./data/db-01:/data/db
       - ./dbinit.sh:/docker-entrypoint-initdb.d/dbinit.sh:ro
+      - ./mongodb.key:/keys/mongodb.key:ro
     ports:
       - 27017:27017
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
       MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
-    command: sh /docker-entrypoint-initdb.d/dbinit.sh
+      MONGO_TEST_DATABASE: ${MONGO_TEST_DB}
+    command: ["mongod", "--bind_ip_all", "--replSet", "rs0", "--keyFile", "/keys/mongodb.key"]
     restart: unless-stopped
 
   mongodb2:
@@ -47,13 +49,15 @@ services:
     volumes:
       - ./data/db-02:/data/db
       - ./dbinit.sh:/docker-entrypoint-initdb.d/dbinit.sh:ro
+      - ./mongodb.key:/keys/mongodb.key:ro
     ports:
       - 27018:27017
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
       MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
-    command: sh /docker-entrypoint-initdb.d/dbinit.sh
+      MONGO_TEST_DATABASE: ${MONGO_TEST_DB}
+    command: ["mongod", "--bind_ip_all", "--replSet", "rs0", "--keyFile", "/keys/mongodb.key"]
     restart: unless-stopped
 
   mongodb3:
@@ -64,23 +68,30 @@ services:
     volumes:
       - ./data/db-03:/data/db
       - ./dbinit.sh:/docker-entrypoint-initdb.d/dbinit.sh:ro
+      - ./mongodb.key:/keys/mongodb.key:ro
     ports:
       - 27019:27017
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
       MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
-    command: sh /docker-entrypoint-initdb.d/dbinit.sh
+      MONGO_TEST_DATABASE: ${MONGO_TEST_DB}
+    command: ["mongod", "--bind_ip_all", "--replSet", "rs0", "--keyFile", "/keys/mongodb.key"]
     restart: unless-stopped
 
   repl-helper:
     container_name: repl-helper
+    image: repl-helper
     build:
       context: ./
       dockerfile: Dockerfile.repl
     networks:
       - backend
-    depends_on: 
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
+    depends_on:
       - mongodb1
 
   nginx:

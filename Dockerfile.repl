@@ -1,11 +1,9 @@
 FROM mongo
 
 # directory already exists err.
-# WORKDIR /usr/src/
-# RUN mkdir configs  
+RUN mkdir -p /usr/src/configs
 WORKDIR /usr/src/configs
 
-COPY replicaInit.js .
 COPY innerSetup.sh .
 
 RUN chmod +x ./innerSetup.sh

@@ -2,39 +2,49 @@
 set -e
 
 echo "
-***************************************
-dbinits.sh on shell
-***************************************
+*********************************
+dbinit.sh
+*********************************
 "
 
-mongod --bind_ip_all --replSet rs0
-
-# after execute mongod, instruction below may ignore
-
-echo "
-***************************************
-db.createUser
-***************************************
-"
-
-mongo admin<<EOF
+mongo -u $MONGO_INITDB_ROOT_USERNAME -p $MONGO_INITDB_ROOT_PASSWORD <<EOF
+use $MONGO_INITDB_DATABASE
 db.createUser({
   user:  '$MONGO_INITDB_ROOT_USERNAME',
   pwd: '$MONGO_INITDB_ROOT_PASSWORD',
-  roles: [{
-    role: 'readWrite',
-    db: '$MONGO_INITDB_DATABASE'
-  }]
+  roles: [
+    {
+      role: 'readWrite',
+      db: '$MONGO_INITDB_DATABASE'
+    },
+    {
+      role: 'userAdminAnyDatabase',
+      db: 'admin'
+    },
+    {
+      role: 'clusterAdmin',
+      db: 'admin'
+    }
+  ]
 })
 
-db.grantRolesToUser(
-   "admin",
-   [{ role: "clusterManager", db: "lunarcat" }]
-)
+use $MONGO_TEST_DATABASE
+db.createUser({
+  user:  '$MONGO_INITDB_ROOT_USERNAME',
+  pwd: '$MONGO_INITDB_ROOT_PASSWORD',
+  roles: [
+    {
+      role: 'readWrite',
+      db: '$MONGO_TEST_DATABASE'
+    },
+    {
+      role: 'userAdminAnyDatabase',
+      db: 'admin'
+    },
+    {
+      role: 'clusterAdmin',
+      db: 'admin'
+    }
+  ]
+})
 EOF
-
-echo "
-***************************************
-end!
-***************************************
-"
