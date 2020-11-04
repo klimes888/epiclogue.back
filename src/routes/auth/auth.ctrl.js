@@ -203,34 +203,3 @@ export const mailAuth = async function (req, res, next) {
     return next(createError(500, '알 수 없는 에러가 발생했습니다.'))
   }
 }
-
-export const test = async (req, res, next) => {
-  const email = req.body['email']
-  const userPw = req.body['userPw']
-  const nick = req.body['userNick']
-
-  const userData = {
-    email,
-    password: userPw,
-    nickname: nick,
-  }
-
-  const session = await startSession()
-
-  try {
-    await session.withTransaction(async () => {
-      const userSchema = new User(userData)
-      await userSchema.save({ session })
-      throw createError(500)
-      
-      // if error thrown, return statement below will be ignored and transaction will be aborted.
-      return res.status(201).json({
-        result: 'ok'
-      })
-    })
-  } catch (e) {
-    next(createError(500, e))    
-  } finally {
-    await session.endSession()
-  }
-}
