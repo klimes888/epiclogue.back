@@ -23,15 +23,15 @@ export const getNoti = async (req, res, next) => {
 }
 
 export const setRead = async (req, res, next) => {
-    try{
-        await Notification.setRead(req.params.targetId)
-        return res.status(200).json({
-            result: 'ok',
-        })
-    } catch (e) {
-        return res.status(500).json({
-            result: 'error',
-            message: e.message,
-          })
-    }
+  try {
+    await Notification.setRead(req.params.targetId)
+    return res.status(200).json({
+      result: 'ok',
+    })
+  } catch (e) {
+    return res.status(500).json({
+      result: 'error',
+      message: e.message,
+    })
+  }
 }

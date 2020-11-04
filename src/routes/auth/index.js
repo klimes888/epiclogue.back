@@ -5,6 +5,5 @@ import * as authCtrl from './auth.ctrl'
 auth.get('/mailAuth', authCtrl.mailAuth)
 auth.post('/login', authCtrl.login)
 auth.post('/join', authCtrl.join)
-auth.post('/', authCtrl.test)
 
 export default auth

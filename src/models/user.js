@@ -90,8 +90,8 @@ user.statics.findAll = function () {
   return this.find({})
 }
 
-user.statics.changePass = function (userId, userPw, userPwNew, saltNew) {
-  return this.updateOne({ _id: userId, password: userPw }, { password: userPwNew, salt: saltNew })
+user.statics.changePass = function (userId, userPw, userPwNew, saltNew, session) {
+  return this.updateOne({ _id: userId, password: userPw }, { password: userPwNew, salt: saltNew }, { session })
 }
 
 user.statics.changeInfo = function (userId, userpw) {

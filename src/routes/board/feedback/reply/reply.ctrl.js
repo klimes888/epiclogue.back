@@ -34,9 +34,10 @@ export const postReply = async (req, res, next) => {
 
   const replySchema = new Reply(replyForm)
 
+  const session = await startSession()
+
   try {
-    const session = await startSession()
-    await session.withTransaction(async() => {
+    await session.withTransaction(async () => {
       const replyData = await replySchema.save({ session })
       await Feedback.getReply(req.params.feedbackId, replyData._id).session(session)
       const newerReplyData = await Reply.getByParentId(replyForm.parentId).session(session)
@@ -49,6 +50,8 @@ export const postReply = async (req, res, next) => {
   } catch (e) {
     console.error(`[Error] ${e}`)
     return next(createError(500, '알 수 없는 에러가 발생했습니다.'))
+  } finally {
+    session.endSession()
   }
 }
 
@@ -92,9 +95,10 @@ export const editReply = async (req, res, next) => {
     return next(createError(400, '입력값이 적절하지 않습니다.'))
   }
 
+  const session = await startSession()
+
   try {
-    const session = await startSession()
-    await session.withTransaction(async() => {
+    await session.withTransaction(async () => {
       const patch = await Reply.update(newForm, session)
 
       if (patch.ok === 1) {
@@ -114,6 +118,8 @@ export const editReply = async (req, res, next) => {
   } catch (e) {
     console.error(`[Error] ${e}`)
     return next(createError(500, '알 수 없는 에러가 발생했습니다.'))
+  } finally {
+    session.endSession()
   }
 }
 
@@ -129,7 +135,9 @@ export const deleteReply = async (req, res, next) => {
         data: newerReplyData,
       })
     } else {
-      console.error(`[Error] 데이터베이스 질의에 실패했습니다: ${req.params.replyId} 의 삭제를 시도했으나 존재하지 않습니다.`)
+      console.error(
+        `[Error] 데이터베이스 질의에 실패했습니다: ${req.params.replyId} 의 삭제를 시도했으나 존재하지 않습니다.`
+      )
       return next(createError(500, '알 수 없는 에러가 발생했습니다.'))
     }
   } catch (e) {

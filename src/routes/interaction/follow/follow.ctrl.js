@@ -14,6 +14,8 @@ export const addFollow = async (req, res, next) => {
     targetUserId: req.body.targetUserId,
   }
 
+  const session = await startSession()
+
   try {
     const didFollow = await Follow.didFollow(followData)
 
@@ -23,7 +25,6 @@ export const addFollow = async (req, res, next) => {
       )
       return next(createError(400, '이미 처리된 데이터입니다.'))
     }
-    const session = await startSession()
     await session.withTransaction(async () => {
       const followSchema = new Follow(followData)
       await followSchema.save({ session })
@@ -38,6 +39,8 @@ export const addFollow = async (req, res, next) => {
   } catch (e) {
     console.error(`[Error] ${e}`)
     return next(createError(500, '알 수 없는 에러가 발생했습니다.'))
+  } finally {
+    session.endSession()
   }
 }
 
@@ -46,6 +49,8 @@ export const deleteFollow = async (req, res, next) => {
     userId: res.locals.uid,
     targetUserId: req.body.targetUserId,
   }
+
+  const session = await startSession()
 
   try {
     const didFollow = await Follow.didFollow(followData)
@@ -57,7 +62,6 @@ export const deleteFollow = async (req, res, next) => {
       return next(createError(400, '이미 처리된 데이터입니다.'))
     }
 
-    const session = await startSession()
     await session.withTransaction(async () => {
       const unfollow = await Follow.unfollow(followData).session(session)
 
@@ -81,6 +85,8 @@ export const deleteFollow = async (req, res, next) => {
   } catch (e) {
     console.error(`[Error] ${e}`)
     return next(createError(500, '알 수 없는 에러가 발생했습니다.'))
+  } finally {
+    session.endSession()
   }
 }
 

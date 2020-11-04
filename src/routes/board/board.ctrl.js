@@ -2,7 +2,7 @@ import { Board } from '../../models'
 import { deleteImage } from '../../lib/imageCtrl'
 import Joi from 'joi'
 import createError from 'http-errors'
-import { createSession, startSession } from 'mongoose'
+import { startSession } from 'mongoose'
 
 /* 
   This is board router.
@@ -16,13 +16,10 @@ export const postBoard = async (req, res, next) => {
     _boardImg.push(req.files[i].location)
   }
 
-  let tags = "";
+  let tags = ''
   if (req.body.boardBody) {
-    tags = req.body.boardBody.match(
-      /#[^\{\}\[\]\/?.,;:|\)*~`!^\-+<>@\#$%&\\\=\(\'\"\s]+/g
-    )
+    tags = req.body.boardBody.match(/#[^\{\}\[\]\/?.,;:|\)*~`!^\-+<>@\#$%&\\\=\(\'\"\s]+/g)
   }
-  
 
   const boardData = {
     writer: res.locals.uid,
@@ -32,7 +29,7 @@ export const postBoard = async (req, res, next) => {
     pub: req.body.pub,
     lanuage: req.body.lanuage,
     boardImg: _boardImg,
-    tags
+    tags,
   }
 
   const boardSchema = Joi.object({
@@ -157,6 +154,8 @@ export const postEditInfo = async function (req, res, next) {
     }
   }
 
+  const session = await startSession()
+
   try {
     const originalData = await Board.getById(req.params.boardId)
 
@@ -172,12 +171,11 @@ export const postEditInfo = async function (req, res, next) {
       language: parseInt(req.body.language || originalData.language),
     }
 
-    const session = await startSession()
-    await session.withTransaction(async() => {
+    await session.withTransaction(async () => {
       const patch = await Board.update(updateData).session(session)
       if (patch.ok === 1) {
         const newerData = await Board.getById(req.params.boardId).session(session)
-  
+
         console.log(`[INFO] 유저 ${res.locals.uid}가 글 ${req.params.boardId}을 수정했습니다.`)
         return res.status(200).json({
           result: 'ok',
@@ -193,6 +191,8 @@ export const postEditInfo = async function (req, res, next) {
   } catch (e) {
     console.error(`[ERROR] ${e}`)
     return next(createError(500, '알 수 없는 에러가 발생했습니다.'))
+  } finally {
+    session.endSession()
   }
 }
 

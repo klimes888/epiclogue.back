@@ -20,8 +20,6 @@ export const postFeedback = async (req, res, next) => {
     feedbackBody: Joi.string().trim().required(),
   })
 
-  const session = await startSession();
-
   try {
     await feedbackSchema.validateAsync({
       feedbackBody: feedbackData.feedbackBody,
@@ -32,6 +30,8 @@ export const postFeedback = async (req, res, next) => {
     )
     return next(createError(400, '입력값이 적절하지 않습니다.'))
   }
+
+  const session = await startSession()
 
   try {
     await session.withTransaction(async () => {
@@ -80,13 +80,13 @@ export const editFeedback = async (req, res, next) => {
   const session = await startSession()
 
   try {
-    await session.withTransaction(async() => {
+    await session.withTransaction(async () => {
       // 얘는 왜 .session(session)을 하면 models.Feedbacks.update.session is not a function이 뜰까...
       const patch = await Feedback.update(newForm, session)
       // throw new Error("응애")
       if (patch.ok === 1) {
         const newerData = await Feedback.getByBoardId(req.params.boardId).session(session)
-  
+
         console.log(`[INFO] 피드백 ${req.params.feedbackId} 가 정상적으로 수정되었습니다.`)
         return res.status(200).json({
           result: 'ok',
@@ -111,11 +111,11 @@ export const deleteFeedback = async (req, res, next) => {
   const session = await startSession()
 
   try {
-    await session.withTransaction(async() => {
+    await session.withTransaction(async () => {
       const deletion = await Feedback.delete(req.params.feedbackId).session(session)
       if (deletion.ok === 1) {
         const newerData = await Feedback.getByBoardId(req.params.boardId).session(session)
-  
+
         console.log(`[INFO] 피드백 ${req.params.feedbackId} 가 정상적으로 삭제되었습니다.`)
         return res.status(200).json({
           result: 'ok',

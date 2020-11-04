@@ -16,6 +16,7 @@ export const addLike = async (req, res, next) => {
   }
 
   const { targetInfo, targetType } = req.body
+  const session = await startSession()
 
   try {
     const didLike = await Like.didLike(likeData)
@@ -27,7 +28,6 @@ export const addLike = async (req, res, next) => {
       return next(createError(400, '이미 처리된 데이터입니다.'))
     }
 
-    const session = await startSession()
     await session.withTransaction(async () => {
       await Like.like(likeData)
 
@@ -62,6 +62,8 @@ export const addLike = async (req, res, next) => {
   } catch (e) {
     console.error(`[Error] ${e}`)
     return next(createError(500, '알 수 없는 에러가 발생했습니다.'))
+  } finally {
+    session.endSession()
   }
 }
 
@@ -73,6 +75,7 @@ export const deleteLike = async (req, res, next) => {
   }
 
   const { targetInfo, targetType } = req.body
+  const session = await startSession()
 
   try {
     const didLike = await Like.didLike(likeData)
@@ -84,7 +87,6 @@ export const deleteLike = async (req, res, next) => {
       return next(createError(400, '이미 처리된 데이터입니다.'))
     }
 
-    const session = await startSession()
     await session.withTransaction(async () => {
       await Like.unlike(likeData).session(session)
 
@@ -113,15 +115,17 @@ export const deleteLike = async (req, res, next) => {
   } catch (e) {
     console.error(`[Error] ${e}`)
     return next(createError(500, '알 수 없는 에러가 발생했습니다.'))
+  } finally {
+    session.endSession()
   }
 }
 
 export const getLikeList = async (req, res, next) => {
   const screenId = req.query.screenId
   const targetType = req.query.targetType
+  const session = await startSession()
 
   try {
-    const session = await startSession()
     await session.withTransaction(async () => {
       const userId = await User.getIdByScreenId(screenId)
       const likeObjectIdList = await Like.getByUserId(userId, targetType)
@@ -135,5 +139,7 @@ export const getLikeList = async (req, res, next) => {
   } catch (e) {
     console.error(`[Error] ${e}`)
     return next(createError(500, '알 수 없는 에러가 발생했습니다.'))
+  } finally {
+    session.endSession()
   }
 }
