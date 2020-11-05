@@ -3,7 +3,7 @@ const ObjectId = mongoose.ObjectId
 
 const follow = new mongoose.Schema({
   userId: { type: ObjectId, required: true },
-  targetUserId: { type: ObjectId, required: true },
+  targetUserId: { type: ObjectId, required: true, ref: 'User' },
   createdAt: { type: Date, default: Date.now },
 })
 
@@ -25,12 +25,12 @@ follow.statics.didFollow = function ({userId, targetUserId}) {
 
 // 유저의 팔로잉 목록
 follow.statics.getFollowingList = function (userId) {
-  return this.find({ userId })
+  return this.find({ userId }).populate({ path: 'users', select: '_id screenId nickname profile'})
 }
 
 // 유저의 팔로워 목록
 follow.statics.getFollowerList = function (targetUserId) {
-  return this.find({ targetUserId })
+  return this.find({ targetUserId }).populate({ path: 'users', select: '_id screenId nickname profile'})
 }
 
 follow.statics.isFollowing = function (userId, targetUserId) {
