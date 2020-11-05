@@ -103,16 +103,19 @@ export const getFollow = async (req, res, next) => {
           ? await Follow.getFollowingList(userId._id).session(session)
           : await Follow.getFollowerList(userId._id).session(session)
 
-      for (let data of followList) {
-        
+      const projectionOption = {
+        nickname: 1,
+        screenId: 1,
+        intro: 1,
+        profile: 1,
+        _id: 0,
+      }
 
-        let temp = await User.getUserInfo(data.targetUserId, {
-          nickname: 1,
-          screenId: 1,
-          intro: 1,
-          profile: 1,
-          _id: 0,
-        }).session(session)
+      for (let data of followList) {
+        let temp =
+          type === 'following'
+            ? await User.getUserInfo(data.targetUserId, projectionOption).session(session)
+            : await User.getUserInfo(data.userId, projectionOption).session(session)
 
         temp.isFollowing = await Follow.didFollow({ userId: res.locals.uid })
 
