@@ -169,8 +169,8 @@ describe('유저 테스트', () => {
         .set('x-access-token', userToken)
         .send({
           userPw: verifiedUserData.userPw,
-          newUserPw: newPw,
-          newUserPwRe: newPw,
+          userPwNew: newPw,
+          userPwNewRe: newPw,
         })
         .expect(200)
     })
@@ -181,8 +181,8 @@ describe('유저 테스트', () => {
         .set('x-access-token', userToken)
         .send({
           userPw: verifiedUserData.userPw,
-          newUserPw: '123',
-          newUserPwRe: '123',
+          userPwNew: '123',
+          userPwNewRe: '123',
         })
         .expect(400)
     })
@@ -193,8 +193,8 @@ describe('유저 테스트', () => {
         .set('x-access-token', userToken)
         .send({
           userPw: verifiedUserData.userPw,
-          newUserPw: verifiedUserData.userPw,
-          newUserPwRe: verifiedUserData.userPw,
+          userPwNew: verifiedUserData.userPw,
+          userPwNewRe: verifiedUserData.userPw,
         })
         .expect(400)
     })
@@ -206,8 +206,8 @@ describe('유저 테스트', () => {
         .set('x-access-token', userToken)
         .send({
           userPw: verifiedUserData.userPw,
-          newUserPw: differentPw,
-          newUserPwRe: differentPw + '1',
+          userPwNew: differentPw,
+          userPwNewRe: differentPw + '1',
         })
         .expect(400)
     })

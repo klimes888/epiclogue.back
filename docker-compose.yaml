@@ -37,7 +37,7 @@ services:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
       MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
-      MONGO_TEST_DATABASE: ${MONGO_TEST_DB}
+      MONGO_TEST_DATABASE: ${MONGO_TEST_DATABASE}
     command: ["mongod", "--bind_ip_all", "--replSet", "rs0", "--keyFile", "/keys/mongodb.key"]
     restart: unless-stopped
 
@@ -56,7 +56,7 @@ services:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
       MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
-      MONGO_TEST_DATABASE: ${MONGO_TEST_DB}
+      MONGO_TEST_DATABASE: ${MONGO_TEST_DATABASE}
     command: ["mongod", "--bind_ip_all", "--replSet", "rs0", "--keyFile", "/keys/mongodb.key"]
     restart: unless-stopped
 
@@ -75,7 +75,7 @@ services:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
       MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
-      MONGO_TEST_DATABASE: ${MONGO_TEST_DB}
+      MONGO_TEST_DATABASE: ${MONGO_TEST_DATABASE}
     command: ["mongod", "--bind_ip_all", "--replSet", "rs0", "--keyFile", "/keys/mongodb.key"]
     restart: unless-stopped
 
