@@ -1,0 +1,15 @@
+{
+  "verbose": true,
+  "ignore": [
+      "node_modules/**/*",
+      ".git"
+  ],
+  "watch": [
+      ".env", 
+      "bin/www",
+      "app.js",
+      "src/**",
+      "apidoc.yaml"
+  ],
+  "ext": "js"
+} 
