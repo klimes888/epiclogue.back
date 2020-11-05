@@ -19,8 +19,13 @@ follow.statics.unfollow = function (unFollowData) {
   })
 }
 
-follow.statics.didFollow = function ({userId, targetUserId}) {
-  return this.findOne({ userId, targetUserId })
+follow.statics.didFollow = async function ({userId, targetUserId}) {
+  const isFollowing = await this.findOne({ userId, targetUserId })
+  if (isFollowing) {
+    return true
+  } else {
+    return false
+  }
 }
 
 // 유저의 팔로잉 목록
