@@ -116,8 +116,8 @@ export const getFollow = async (req, res, next) => {
           type === 'following'
             ? await User.getUserInfo(data.targetUserId, projectionOption).session(session)
             : await User.getUserInfo(data.userId, projectionOption).session(session)
-
-        const isFollowing = await Follow.didFollow({ userId: res.locals.uid, targetUserId: rawUserData._id })
+        const followData = { userId: res.locals.uid, targetUserId: rawUserData._id }
+        const isFollowing = await Follow.didFollow(followData, session)
         const transformedUserData = {
           nickname: rawUserData.nickname, 
           screenId: rawUserData.screenId,

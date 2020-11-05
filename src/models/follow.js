@@ -19,8 +19,8 @@ follow.statics.unfollow = function (unFollowData) {
   })
 }
 
-follow.statics.didFollow = async function ({userId, targetUserId}) {
-  const isFollowing = await this.findOne({ userId, targetUserId })
+follow.statics.didFollow = async function ({userId, targetUserId}, session) {
+  const isFollowing = await this.findOne({ userId, targetUserId }, {}, { session })
   if (isFollowing) {
     return true
   } else {
