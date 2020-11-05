@@ -116,14 +116,18 @@ export const getFollow = async (req, res, next) => {
           type === 'following'
             ? await User.getUserInfo(data.targetUserId, projectionOption).session(session)
             : await User.getUserInfo(data.userId, projectionOption).session(session)
-        const followData = { userId: res.locals.uid, targetUserId: rawUserData._id }
-        const isFollowing = await Follow.didFollow(followData, session)
+        const followingData = { userId: res.locals.uid, targetUserId: rawUserData._id }
+        const followerData = { userId: rawUserData._id, targetUserId: res.locals.uid }
+        const isFollowing = await Follow.didFollow(followingData, session)
+        const isFollower = await Follow.didFollow(followerData, session)
+        
         const transformedUserData = {
           nickname: rawUserData.nickname, 
           screenId: rawUserData.screenId,
           intro: rawUserData.intro,
           profile: rawUserData.profile,
-          isFollowing
+          isFollowing,
+          isFollower
         }
 
         dataSet.push(transformedUserData)
