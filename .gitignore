@@ -18,5 +18,5 @@ yarn-error.log
 # logs
 logs
 
-# keys
+# mongodb key
 mongodb.key

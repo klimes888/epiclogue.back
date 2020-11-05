@@ -104,6 +104,8 @@ export const getFollow = async (req, res, next) => {
           : await Follow.getFollowerList(userId._id).session(session)
 
       for (let data of followList) {
+        
+
         let temp = await User.getUserInfo(data.targetUserId, {
           nickname: 1,
           screenId: 1,
@@ -111,6 +113,8 @@ export const getFollow = async (req, res, next) => {
           profile: 1,
           _id: 0,
         }).session(session)
+
+        temp.isFollowing = await Follow.didFollow({ userId: res.locals.uid })
 
         dataSet.push(temp)
       }
