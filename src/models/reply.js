@@ -35,13 +35,14 @@ Reply.statics.getBody = function (replyId) {
 }
 
 // Update
-Reply.statics.update = async function (updateForm) {
+Reply.statics.update = async function (updateForm, session) {
   return this.updateOne(
     { _id: updateForm.replyId },
     {
       replyBody: updateForm.newReplyBody,
       edited: true,
-    }
+    },
+    { session }
   )
 }
 

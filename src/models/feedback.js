@@ -38,13 +38,14 @@ Feedback.statics.isWriter = function (userId, feedbackId) {
 }
 
 // Update
-Feedback.statics.update = async function (newFeedbackData) {
+Feedback.statics.update = async function (newFeedbackData, session) {
   return this.updateOne(
     { _id: newFeedbackData.feedbackId },
     {
       feedbackBody: newFeedbackData.newFeedbackBody,
       edited: true,
-    }
+    },
+    { session }
   )
 }
 

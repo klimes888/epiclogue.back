@@ -2,6 +2,7 @@ import { Board } from '../../models'
 import { deleteImage } from '../../lib/imageCtrl'
 import Joi from 'joi'
 import createError from 'http-errors'
+import { startSession } from 'mongoose'
 
 /* 
   This is board router.
@@ -15,9 +16,10 @@ export const postBoard = async (req, res, next) => {
     _boardImg.push(req.files[i].location)
   }
 
-  const tags = req.body.boardBody.match(
-    /#[^\{\}\[\]\/?.,;:|\)*~`!^\-+<>@\#$%&\\\=\(\'\"\s]+/g
-  )
+  let tags = ''
+  if (req.body.boardBody) {
+    tags = req.body.boardBody.match(/#[^\{\}\[\]\/?.,;:|\)*~`!^\-+<>@\#$%&\\\=\(\'\"\s]+/g)
+  }
 
   const boardData = {
     writer: res.locals.uid,
@@ -27,14 +29,13 @@ export const postBoard = async (req, res, next) => {
     pub: req.body.pub,
     lanuage: req.body.lanuage,
     boardImg: _boardImg,
-    tags
+    tags,
   }
 
   const boardSchema = Joi.object({
     writer: Joi.string()
       .regex(/^[a-fA-F0-9]{24}$/)
       .required(),
-    // array() 안의 string().required() 도 작성해야합니다...
     boardImg: Joi.array().items(Joi.string().required()).required(),
     category: Joi.string().required(),
     pub: Joi.number().min(0).max(2).required(),
@@ -48,6 +49,7 @@ export const postBoard = async (req, res, next) => {
       pub: boardData.pub,
     })
   } catch (e) {
+    // 이미지를 S3에 올린 이후에 DB에 저장하므로 이를 삭제합니다.
     if (boardData.boardImg.length > 0) {
       deleteImage(boardData.boardImg)
     }
@@ -95,9 +97,9 @@ export const viewBoard = async (req, res, next) => {
 // 삭제
 export const deleteBoard = async (req, res, next) => {
   const boardId = req.params.boardId
-  const query = await Board.getById(boardId, { _id: 0, feedbacks: 0, writer: 0, boardImg: 1 })
 
   try {
+    const query = await Board.getById(boardId, { _id: 0, feedbacks: 0, writer: 0, boardImg: 1 })
     // for non blocking, didn't use async-await
     deleteImage(query.boardImg)
 
@@ -152,6 +154,8 @@ export const postEditInfo = async function (req, res, next) {
     }
   }
 
+  const session = await startSession()
+
   try {
     const originalData = await Board.getById(req.params.boardId)
 
@@ -167,25 +171,28 @@ export const postEditInfo = async function (req, res, next) {
       language: parseInt(req.body.language || originalData.language),
     }
 
-    const patch = await Board.update(updateData)
+    await session.withTransaction(async () => {
+      const patch = await Board.update(updateData).session(session)
+      if (patch.ok === 1) {
+        const newerData = await Board.getById(req.params.boardId).session(session)
 
-    if (patch.ok === 1) {
-      const newerData = await Board.getById(req.params.boardId)
-
-      console.log(`[INFO] 유저 ${res.locals.uid}가 글 ${req.params.boardId}을 수정했습니다.`)
-      return res.status(200).json({
-        result: 'ok',
-        data: newerData,
-      })
-    } else {
-      console.error(
-        `[ERROR] 글 ${req.params.boardId}의 수정이 실패했습니다: 데이터베이스 질의에 실패했습니다.`
-      )
-      return next(createError(500, '알 수 없는 에러가 발생했습니다.'))
-    }
+        console.log(`[INFO] 유저 ${res.locals.uid}가 글 ${req.params.boardId}을 수정했습니다.`)
+        return res.status(200).json({
+          result: 'ok',
+          data: newerData,
+        })
+      } else {
+        console.error(
+          `[ERROR] 글 ${req.params.boardId}의 수정이 실패했습니다: 데이터베이스 질의에 실패했습니다.`
+        )
+        return next(createError(500, '알 수 없는 에러가 발생했습니다.'))
+      }
+    })
   } catch (e) {
     console.error(`[ERROR] ${e}`)
     return next(createError(500, '알 수 없는 에러가 발생했습니다.'))
+  } finally {
+    session.endSession()
   }
 }
 

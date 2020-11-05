@@ -5,6 +5,7 @@ import { deleteImage } from '../../lib/imageCtrl'
 import dotenv from 'dotenv'
 import Joi from 'joi'
 import createError from 'http-errors'
+import { startSession } from 'mongoose'
 const randomBytesPromise = util.promisify(crypto.randomBytes)
 // const crypto.pbkdf2Sync = util.promisify(crypto.pbkdf2)
 
@@ -64,36 +65,42 @@ export const postUserEditInfo = async function (req, res, next) {
     profile = originalData.profile
   }
 
+  const session = await startSession()
+
   try {
-    const checkId = await User.isScreenIdUnique(screenId)
-    if (checkId || screenId === originalData.screenId) {
-      const newerUserData = {
-        userId: res.locals.uid,
-        screenId,
-        nickname,
-        availableLanguage,
-        country,
-        intro,
-        banner,
-        profile,
+    await session.withTransaction(async() => {
+      const checkIdUnique = await User.isScreenIdUnique(screenId, session)
+      if (checkIdUnique || screenId === originalData.screenId) {
+        const newerUserData = {
+          userId: res.locals.uid,
+          screenId,
+          nickname,
+          availableLanguage,
+          country,
+          intro,
+          banner,
+          profile,
+        }
+  
+        await User.updateProfile(newerUserData, session)
+  
+        console.log(`[INGO] 유저 ${res.locals.uid}가 프로필을 수정했습니다.`)
+        return res.status(200).json({
+          result: 'ok',
+          data: newerUserData,
+        })
+      } else {
+        console.log(
+          `[INFO] 유저 ${res.locals.uid} 가 프로필 변경에 실패했습니다: 중복된 screenId를 입력했습니다.`
+        )
+        return next(createError(400, '중복된 screenId 입니다.'))
       }
-
-      await User.updateProfile(newerUserData)
-
-      console.log(`[INGO] 유저 ${res.locals.uid}가 프로필을 수정했습니다.`)
-      return res.status(200).json({
-        result: 'ok',
-        data: newerUserData,
-      })
-    } else {
-      console.log(
-        `[INFO] 유저 ${res.locals.uid} 가 프로필 변경에 실패했습니다: 중복된 screenId를 입력했습니다.`
-      )
-      return next(createError(400, '중복된 screenId 입니다.'))
-    }
+    }) 
   } catch (e) {
     console.error(`[Error] ${e}`)
     return next(createError(500, '알 수 없는 에러가 발생했습니다.'))
+  } finally {
+    session.endSession()
   }
 }
 
@@ -122,47 +129,55 @@ export const changePass = async function (req, res, next) {
     return next(createError(400, '비밀번호 규칙을 확인해주세요.'))
   }
 
+  const session = await startSession()
+
   if (userPw !== userPwNew) {
     if (userPwNew === userPwNewRe) {
       try {
-        const originalUserData = await User.getUserInfo(uid)
-        const saltNew = await randomBytesPromise(64)
-        const crypt_Pw = await crypto.pbkdf2Sync(
-          userPw,
-          originalUserData['salt'],
-          parseInt(process.env.EXEC_NUM),
-          parseInt(process.env.RESULT_LENGTH),
-          'sha512'
-        )
-        const crypt_PwNew = await crypto.pbkdf2Sync(
-          userPwNew,
-          saltNew.toString('base64'),
-          parseInt(process.env.EXEC_NUM),
-          parseInt(process.env.RESULT_LENGTH),
-          'sha512'
-        )
-        const changeResult = await User.changePass(
-          uid,
-          crypt_Pw.toString('base64'),
-          crypt_PwNew.toString('base64'),
-          saltNew.toString('base64')
-        )
-
-        if (changeResult.ok === 1) {
-          console.log(`[INFO] 유저 ${res.locals.uid} 가 비밀번호를 변경했습니다.`)
-          return res.status(200).json({
-            result: 'ok',
-            message: '비밀번호 변경 완료',
-          })
-        } else if (changeResult.ok !== 1) {
-          console.error(
-            `[ERROR] 유저 ${res.locals.uid} 의 비밀번호 변경이 실패했습니다: 데이터베이스 질의에 실패했습니다.`
+        await session.withTransaction(async() => {
+          const originalUserData = await User.getUserInfo(uid).session(session)
+          const saltNew = await randomBytesPromise(64)
+          const crypt_Pw = await crypto.pbkdf2Sync(
+            userPw,
+            originalUserData['salt'],
+            parseInt(process.env.EXEC_NUM),
+            parseInt(process.env.RESULT_LENGTH),
+            'sha512'
           )
-          return next(createError(500, '알 수 없는 에러가 발생했습니다.'))
-        }
+          const crypt_PwNew = await crypto.pbkdf2Sync(
+            userPwNew,
+            saltNew.toString('base64'),
+            parseInt(process.env.EXEC_NUM),
+            parseInt(process.env.RESULT_LENGTH),
+            'sha512'
+          )
+          
+          const changeResult = await User.changePass(
+            uid,
+            crypt_Pw.toString('base64'),
+            crypt_PwNew.toString('base64'),
+            saltNew.toString('base64'),
+            session
+          )
+  
+          if (changeResult.ok === 1) {
+            console.log(`[INFO] 유저 ${res.locals.uid} 가 비밀번호를 변경했습니다.`)
+            return res.status(200).json({
+              result: 'ok',
+              message: '비밀번호 변경 완료',
+            })
+          } else if (changeResult.ok !== 1) {
+            console.error(
+              `[ERROR] 유저 ${res.locals.uid} 의 비밀번호 변경이 실패했습니다: 데이터베이스 질의에 실패했습니다.`
+            )
+            return next(createError(500, '알 수 없는 에러가 발생했습니다.'))
+          }
+        })
       } catch (e) {
         console.error(`[Error] ${e}`)
         return next(createError(500, '알 수 없는 에러가 발생했습니다.'))
+      } finally {
+        session.endSession()
       }
     } else {
       console.log(
@@ -193,42 +208,48 @@ export const deleteUser = async function (req, res, next) {
     return next(createError(400, '비밀번호를 입력해주세요.'))
   }
 
+  const session = await startSession()
+
   try {
-    const info = await User.getUserInfo(uid)
-    const crypt_Pw = await crypto.pbkdf2Sync(
-      userPw,
-      info['salt'],
-      parseInt(process.env.EXEC_NUM),
-      parseInt(process.env.RESULT_LENGTH),
-      'sha512'
-    )
-
-    // remove old images
-    const originalData = await User.getUserInfo(res.locals.uid)
-    const originalImages = [originalData.banner, originalData.profile]
-    // console.log(originalImages)
-    deleteImage(originalImages)
-
-    const deletion = await User.deleteUser(uid, crypt_Pw.toString('base64'))
-
-    if (deletion.ok === 1) {
-      if (deletion.deletedCount === 1) {
-        console.log(`[INFO] 유저 ${res.locals.uid} 가 탈퇴했습니다.`)
-        return res.status(200).json({
-          result: 'ok',
-        })
-      } else {
-        console.log(`[INFO] 유저 ${res.locals.uid} 가 탈퇴에 실패했습니다: 비밀번호가 다릅니다.`)
-        return next(createError(400, '비밀번호를 확인해주세요.'))
-      }
-    } else {
-      console.error(
-        `[ERROR] 유저 ${res.locals.uid} 가 탈퇴에 실패했습니다: 데이터베이스 질의에 실패했습니다.`
+    await session.withTransaction(async() => {
+      const info = await User.getUserInfo(uid).session(session)
+      const crypt_Pw = await crypto.pbkdf2Sync(
+        userPw,
+        info['salt'],
+        parseInt(process.env.EXEC_NUM),
+        parseInt(process.env.RESULT_LENGTH),
+        'sha512'
       )
-      return next(createError(500, '알 수 없는 에러가 발생했습니다.'))
-    }
+  
+      // remove old images
+      const originalData = await User.getUserInfo(res.locals.uid)
+      const originalImages = [originalData.banner, originalData.profile]
+      // console.log(originalImages)
+      deleteImage(originalImages)
+  
+      const deletion = await User.deleteUser(uid, crypt_Pw.toString('base64')).session(session)
+  
+      if (deletion.ok === 1) {
+        if (deletion.deletedCount === 1) {
+          console.log(`[INFO] 유저 ${res.locals.uid} 가 탈퇴했습니다.`)
+          return res.status(200).json({
+            result: 'ok',
+          })
+        } else {
+          console.log(`[INFO] 유저 ${res.locals.uid} 가 탈퇴에 실패했습니다: 비밀번호가 다릅니다.`)
+          return next(createError(400, '비밀번호를 확인해주세요.'))
+        }
+      } else {
+        console.error(
+          `[ERROR] 유저 ${res.locals.uid} 가 탈퇴에 실패했습니다: 데이터베이스 질의에 실패했습니다.`
+        )
+        return next(createError(500, '알 수 없는 에러가 발생했습니다.'))
+      }
+    })
   } catch (e) {
     console.error(`[Error] ${e}`)
     return next(createError(500, '알 수 없는 에러가 발생했습니다.'))
+  } finally {
+    session.endSession()
   }
 }

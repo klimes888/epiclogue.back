@@ -1,0 +1,11 @@
+FROM mongo
+
+# directory already exists err.
+RUN mkdir -p /usr/src/configs
+WORKDIR /usr/src/configs
+
+COPY innerSetup.sh .
+
+RUN chmod +x ./innerSetup.sh
+
+CMD ["./innerSetup.sh"]
