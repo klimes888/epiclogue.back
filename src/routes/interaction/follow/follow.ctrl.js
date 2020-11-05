@@ -108,18 +108,25 @@ export const getFollow = async (req, res, next) => {
         screenId: 1,
         intro: 1,
         profile: 1,
-        _id: 0,
+        _id: 1,
       }
 
       for (let data of followList) {
-        let temp =
+        let rawUserData =
           type === 'following'
             ? await User.getUserInfo(data.targetUserId, projectionOption).session(session)
             : await User.getUserInfo(data.userId, projectionOption).session(session)
 
-        temp.isFollowing = await Follow.didFollow({ userId: res.locals.uid })
+        const isFollowing = await Follow.didFollow({ userId: res.locals.uid, targetUserId: rawUserData._id })
+        const transformedUserData = {
+          nickname: rawUserData.nickname, 
+          screenId: rawUserData.screenId,
+          intro: rawUserData.intro,
+          profile: rawUserData.profile,
+          isFollowing
+        }
 
-        dataSet.push(temp)
+        dataSet.push(transformedUserData)
       }
       console.log(`[INFO] 유저 ${res.locals.uid} 가 ${userId._id} 의 ${type} 리스트를 확인합니다.`)
       return res.status(200).json({
