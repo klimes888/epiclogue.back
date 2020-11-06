@@ -29,7 +29,7 @@ describe('북마크 테스트', () => {
   const boardData = {
     boardTitle: 'a board Title',
     boardBody: 'a board Body',
-    category: 'Illust',
+    category: 0,
     pub: 1,
     language: 'Korean',
   }

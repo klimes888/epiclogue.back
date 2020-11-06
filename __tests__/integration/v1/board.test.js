@@ -32,7 +32,7 @@ describe('글 테스트', () => {
   const boardData = {
     boardTitle: 'a board Title',
     boardBody: 'a board Body',
-    category: 'Illust',
+    category: 0,
     pub: 1,
     language: 'Korean',
   }
@@ -141,7 +141,7 @@ describe('글 테스트', () => {
         .set('x-access-token', userToken)
         .field('boardTitle', 'edited')
         .field('boardBody', 'edited')
-        .field('category', 'comic')
+        .field('category', 1)
         .field('pub', 0)
         .field('language', 'Japanese')
 
@@ -158,7 +158,7 @@ describe('글 테스트', () => {
         .set('x-access-token', userToken)
         .field('boardTitle', 'edited')
         .field('boardBody', 'edited')
-        .field('category', 'comic')
+        .field('category', 1)
         .field('pub', 0)
         .field('language', 'Japanese')
 
