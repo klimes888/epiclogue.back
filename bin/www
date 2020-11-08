@@ -4,10 +4,12 @@
  * Module dependencies.
  */
 
-const app = require('../app')
-const debug = require('debug')('lunacat-api:server')
-const http = require('http')
-require('dotenv').config()
+import app from '../app.js'
+import debug from 'debug'
+debug('lunacat-api:server')
+import http from 'http'
+import dotenv from 'dotenv'
+dotenv.config()
 /**
  * Get port from environment and store in Express.
  */
