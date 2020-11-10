@@ -16,9 +16,6 @@ export const getReact = async (req, res, next) => {
     })
   } catch (e) {
     console.error(`[Error] ${e}`)
-    return res.status(500).json({
-      result: 'error',
-      message: e.message,
-    })
+    return next(createError(500, '알 수 없는 오류가 발생했습니다.'))
   }
 }
