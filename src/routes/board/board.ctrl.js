@@ -1,6 +1,6 @@
 import { Board } from '../../models'
 import { deleteImage } from '../../lib/imageCtrl'
-import { bookmarkWrapper, contentWrapper } from '../../lib/bookmarkWrapper'
+import { contentsWrapper } from '../../lib/contentsWrapper'
 import Joi from 'joi'
 import createError from 'http-errors'
 import { startSession } from 'mongoose'
@@ -84,12 +84,12 @@ export const viewBoard = async (req, res, next) => {
 
   try {
     const boardData = await Board.getById(boardId)
-
+    const wrappedBoardData = await contentsWrapper(res.locals.uid, boardData, true, true)
     console.log(`[INFO] 유저 ${res.locals.uid}가 글 ${boardId}를 접근했습니다.`)
 
     return res.status(200).json({
       result: 'ok',
-      data: boardData,
+      data: wrappedBoardData,
     })
   } catch (e) {
     console.error(`[ERROR] ${e}`)
@@ -203,7 +203,7 @@ export const postEditInfo = async function (req, res, next) {
 export const getBoards = async (req, res, next) => {
   try {
     const boardList = await Board.findAll() // 썸네일만 골라내는 작업 필요
-    const wrappedData = await contentWrapper(res.locals.uid, boardList, true, false)
+    const wrappedData = await contentsWrapper(res.locals.uid, boardList, true, false)
     console.log(`[INFO] 유저 ${res.locals.uid} 가 자신의 피드를 확인했습니다.`)
     return res.status(200).json({
       result: 'ok',
