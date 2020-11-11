@@ -5,13 +5,17 @@ export const bookmarkWrapper = async (userId, boardDataSet) => {
   return new Promise(async (resolve, reject) => {
     let resultSet = []
     if (boardDataSet) {
-      const bookmarkIdSet = await models.Bookmark.find({ user: userId }, { board: 1, _id: 0 }).map(eachBookmark => {
+      const bookmarkIdSet = await models.Bookmark.find({ user: userId }, { board: 1, _id: 0 })
+      // chaining can't be here... (toString() is not defined)
+      const refinedBookmarkIdSet = bookmarkIdSet.map(eachBookmark => {
         return eachBookmark.board.toString()
       })
 
+      // console.log(refinedBookmarkIdSet)
+
       for (const data of boardDataSet) {
         const eachBoardData = data.toJSON()
-        eachBoardData.isBookmarked = bookmarkIdSet.includes(eachBoardData._id.toString()) ? true : false
+        eachBoardData.isBookmarked = refinedBookmarkIdSet.includes(eachBoardData._id.toString()) ? true : false
         resultSet.push(eachBoardData)
       }
       resolve(resultSet)
