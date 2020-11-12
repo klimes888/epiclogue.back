@@ -38,7 +38,7 @@ export const postBoard = async (req, res, next) => {
       .regex(/^[a-fA-F0-9]{24}$/)
       .required(),
     boardImg: Joi.array().items(Joi.string().required()).required(),
-    category: Joi.string().required(),
+    category: Joi.number().min(0).max(2).required(),
     pub: Joi.number().min(0).max(2).required(),
   })
 
@@ -62,14 +62,10 @@ export const postBoard = async (req, res, next) => {
   }
 
   try {
-    const createdBoard = await Board.create(boardData)
+    await Board.create(boardData)
 
     console.log(`[INFO] 유저 ${boardData.writer}가 글 ${createdBoard._id}를 작성했습니다.`)
-
-    return res.status(201).json({
-      result: 'ok',
-      data: createdBoard,
-    })
+    return res.status(201).json({ result: 'ok' })
   } catch (e) {
     console.error(`[ERROR] ${e}`)
     return next(createError(500, '알 수 없는 에러가 발생했습니다.'))
@@ -175,13 +171,9 @@ export const postEditInfo = async function (req, res, next) {
     await session.withTransaction(async () => {
       const patch = await Board.update(updateData).session(session)
       if (patch.ok === 1) {
-        const newerData = await Board.getById(req.params.boardId).session(session)
-
+        await Board.getById(req.params.boardId).session(session)
         console.log(`[INFO] 유저 ${res.locals.uid}가 글 ${req.params.boardId}을 수정했습니다.`)
-        return res.status(200).json({
-          result: 'ok',
-          data: newerData,
-        })
+        return res.status(200).json({ result: 'ok' })
       } else {
         console.error(
           `[ERROR] 글 ${req.params.boardId}의 수정이 실패했습니다: 데이터베이스 질의에 실패했습니다.`
