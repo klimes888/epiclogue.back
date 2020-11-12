@@ -11,7 +11,7 @@ export const contentsWrapper = async (reqUserId, contentData, isBoard, isForView
   return new Promise(async (resolve, reject) => {
     if (contentData) {
       if (isBoard) {
-        /* feedback, reply, bookmark, like, follow */
+        /* feedback, bookmark, like, follow */
 
         // get user bookmark list
         const bookmarkIdSet = await models.Bookmark.find(
@@ -37,24 +37,38 @@ export const contentsWrapper = async (reqUserId, contentData, isBoard, isForView
           { targetreqUserId: 1, _id: 0 }
         )
         const refinedFollowingIdSet = followingUserSet.map(eachUser => {
-          return eachUser.targetreqUserId.toString()
+          return eachUser.targetUserId.toString()
         })
 
         if (isForViewer) {
           /* For large viewer */
           contentData = contentData.toJSON()
+          // bookmark
           contentData.bookmarked = refinedBookmarkIdSet.includes(contentData._id.toString())
             ? true
             : false
+          // like
           contentData.liked = refinedLikeIdSet.includes(contentData._id.toString()) ? true : false
           contentData.writer.following = refinedFollowingIdSet.includes(
             contentData.writer._id.toString()
           )
             ? true
             : false
+          // whether user is following writer 
           if (contentData.writer._id.toString() === reqUserId) {
             contentData.writer.following = 'me'
           }
+          // feedbacks - like, following
+          const feedbacks = []
+          for (let eachFeedback of contentData.feedbacks) {
+            eachFeedback.liked = refinedLikeIdSet.includes(contentData._id.toString()) ? true : false
+            eachFeedback.writer.following = refinedFollowingIdSet.includes(
+              eachFeedback.writer._id.toString()
+            )
+            feedbacks.push(eachFeedback)
+          }
+          contentData.feedbacks = feedbacks
+
           resolve(contentData)
         } else {
           /* For many, small viewers */
@@ -80,7 +94,10 @@ export const contentsWrapper = async (reqUserId, contentData, isBoard, isForView
           resolve(resultSet)
         }
       } else {
-        // feedback, reply, like, follow
+        /**
+         * 댓글에서 like, follow 여부
+         * ???
+         * */ 
       }
     } else {
       reject(new Error('입력값이 적절하지 않거나 데이터가 존재하지 않습니다.'))
