@@ -49,8 +49,12 @@ export const contentsWrapper = async (reqUserId, contentData, contentType, isFor
               ? true
               : false
             eachBoardData.liked = likeIdSet.includes(eachBoardData._id.toString()) ? true : false
-            if (eachBoardData.writer._id.toString() === reqUserId) {
+            // If get boards from board router
+            if (eachBoardData.writer && eachBoardData.writer._id.toString() === reqUserId) {
               eachBoardData.writer.following = 'me'
+            // If get boards from bookmark router
+            } else if (eachBoardData.user && eachBoardData.user._id.toString() === reqUserId) {
+              eachBoardData.user.following = 'me'
             } else {
               eachBoardData.writer.following = followingIdSet.includes(
                 eachBoardData.writer._id.toString()

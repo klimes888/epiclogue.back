@@ -1,6 +1,7 @@
 import { Bookmark, React, Board, User } from '../../../models'
 import createError from 'http-errors'
 import { startSession } from 'mongoose'
+import { contentsWrapper } from '../../../lib/contentsWrapper'
 
 /* 
   This is bookmark router.
@@ -9,16 +10,17 @@ import { startSession } from 'mongoose'
 */
 
 export const getBookmarkList = async (req, res, next) => {
-  const screenId = req.query.screenId
+  // To use this code on /myboard/:screenId/bookmarks
+  const screenId = req.query.screenId || req.params.screenId
 
   try {
     const userInfo = await User.getIdByScreenId(screenId)
     const bookmarkSet = await Bookmark.getByUserId(userInfo._id)
-
+    const wrappedBookmarks = await contentsWrapper(res.locals.uid, bookmarkSet, 'Board', false)
     console.log(`[INFO] 유저 ${res.locals.uid}가 ${userInfo._id}의 북마크 리스트를 확인했습니다.`)
     return res.status(200).json({
       result: 'ok',
-      data: bookmarkSet,
+      data: wrappedBookmarks,
     })
   } catch (e) {
     console.error(`[Error] ${e}`)
