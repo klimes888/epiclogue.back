@@ -64,10 +64,13 @@ export const postBoard = async (req, res, next) => {
   }
 
   try {
-    await Board.create(boardData)
+    const createdBoard = await Board.create(boardData)
 
     console.log(`[INFO] 유저 ${boardData.writer}가 글 ${createdBoard._id}를 작성했습니다.`)
-    return res.status(201).json({ result: 'ok' })
+    return res.status(201).json({ 
+      result: 'ok', 
+      data: { _id: createdBoard._id } 
+    })
   } catch (e) {
     console.error(`[ERROR] ${e}`)
     return next(createError(500, '알 수 없는 에러가 발생했습니다.'))

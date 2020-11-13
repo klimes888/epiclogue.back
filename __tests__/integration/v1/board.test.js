@@ -77,7 +77,7 @@ describe('글 테스트', () => {
     })
 
     test('실패: 이미지 누락 | 400', async () => {
-      const uploadInstance = request(app)
+      await request(app)
         .post('/boards')
         .set('x-access-token', userToken)
         .field('boardTitle', boardData.boardTitle)
@@ -85,12 +85,9 @@ describe('글 테스트', () => {
         .field('category', boardData.category)
         .field('pub', boardData.pub)
         .field('language', boardData.language)
+        .expect(400)
 
-      // for (let path of imagePathArray) {
-      //   uploadInstance.attach('boardImg', path)
-      // }
-
-      await uploadInstance.expect(400)
+        /* Images are not contained */
     })
 
     test('실패: 필수 속성 누락 | 400', async () => {
