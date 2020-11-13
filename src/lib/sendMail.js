@@ -1,14 +1,14 @@
 import mailer from 'nodemailer'
 import dotenv from 'dotenv'
+import aws from 'aws-sdk'
 dotenv.config()
 
+aws.config.loadFromPath(__dirname + "/aws.config.json")
+
 const transporter = mailer.createTransport({
-  host: 'smtp.gmail.com',
-  auth: {
-    type: 'login',
-    user: process.env.MAIL_USER,
-    pass: process.env.MAIL_PASS,
-  },
+  SES: new aws.SES({
+    apiVersion: '2010-12-01'
+  })
 })
 
 export const emailText = (email, auth_token) => {
