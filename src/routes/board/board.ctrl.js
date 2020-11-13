@@ -83,7 +83,7 @@ export const viewBoard = async (req, res, next) => {
 
   try {
     const boardData = await Board.getById(boardId)
-    const wrappedBoardData = await contentsWrapper(res.locals.uid, boardData, true, true)
+    const wrappedBoardData = await contentsWrapper(res.locals.uid, boardData, 'Board', true)
     console.log(`[INFO] 유저 ${res.locals.uid}가 글 ${boardId}를 접근했습니다.`)
 
     return res.status(200).json({
@@ -176,9 +176,9 @@ export const postEditInfo = async function (req, res, next) {
     await session.withTransaction(async () => {
       const patch = await Board.update(updateData).session(session)
       if (patch.ok === 1) {
-        await Board.getById(req.params.boardId).session(session)
+        const updatedBoardData = await Board.getById(req.params.boardId).session(session)
         console.log(`[INFO] 유저 ${res.locals.uid}가 글 ${req.params.boardId}을 수정했습니다.`)
-        return res.status(200).json({ result: 'ok' })
+        return res.status(200).json({ result: 'ok', data: { _id: updatedBoardData._id } })
       } else {
         console.error(
           `[ERROR] 글 ${req.params.boardId}의 수정이 실패했습니다: 데이터베이스 질의에 실패했습니다.`
@@ -198,7 +198,7 @@ export const postEditInfo = async function (req, res, next) {
 export const getBoards = async (req, res, next) => {
   try {
     const boardList = await Board.findAll() // 썸네일만 골라내는 작업 필요
-    const wrappedData = await contentsWrapper(res.locals.uid, boardList, true, false)
+    const wrappedData = await contentsWrapper(res.locals.uid, boardList, 'Board', false)
     console.log(`[INFO] 유저 ${res.locals.uid} 가 자신의 피드를 확인했습니다.`)
     return res.status(200).json({
       result: 'ok',

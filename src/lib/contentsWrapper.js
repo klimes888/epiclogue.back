@@ -4,65 +4,35 @@ import * as models from '../models'
  * This wrapper is used for identify whether use bookmarked and liked the content.
  * @param {string}  reqUserId   - Requested user's ObjectId(Mongoose).
  * @param {Array}   contentData - Requested dataset which will be wrapped. *NOTE* that it can be an Object type when it is for viewer data
- * @param {Boolean} isBoard     - To identify data type. Users can bookmark boards only.
+ * @param {string}  contentType     - To identify data type. Users can bookmark boards only.
  * @param {Boolean} isForViewer - To identify where the data being used. Is it for small viewer(ex. feed, myboard) or large viewer(boardViewer)
  */
-export const contentsWrapper = async (reqUserId, contentData, isBoard, isForViewer) => {
+export const contentsWrapper = async (reqUserId, contentData, contentType, isForViewer) => {
   return new Promise(async (resolve, reject) => {
     if (contentData) {
-      if (isBoard) {
-        /* feedback, bookmark, like, follow */
-
-        // get user bookmark list
-        const bookmarkIdSet = await models.Bookmark.find(
-          { user: reqUserId },
-          { board: 1, _id: 0 }
-        )
-        const refinedBookmarkIdSet = bookmarkIdSet.map(eachBookmark => {
-          return eachBookmark.board.toString()
-        })
-
-        // get user like list
-        const likeDataSet = await models.Like.find(
-          { reqUserId, targetType: 'Board' },
-          { targetInfo: 1, _id: 0 }
-        )
-        const refinedLikeIdSet = likeDataSet.map(eachLike => {
-          return eachLike.targetInfo.toString()
-        })
-
-        // get user follow list
-        const followingUserSet = await models.Follow.find(
-          { reqUserId },
-          { targetreqUserId: 1, _id: 0 }
-        )
-        const refinedFollowingIdSet = followingUserSet.map(eachUser => {
-          return eachUser.targetUserId.toString()
-        })
-
+      /* feedback, bookmark, like, follow */
+      const followingIdSet = await getFollowingIdSet(reqUserId)
+      if (contentType === 'Board') {
+        let likeIdSet = await getLikeIdSet(reqUserId, 'Board')
+        const bookmarkIdSet = await getBookmarkIdSet(reqUserId)
         if (isForViewer) {
           /* For large viewer */
           contentData = contentData.toJSON()
-          // bookmark
-          contentData.bookmarked = refinedBookmarkIdSet.includes(contentData._id.toString())
+          // like, bookmark, following on board
+          contentData.liked = likeIdSet.includes(contentData._id.toString()) ? true : false
+          contentData.bookmarked = bookmarkIdSet.includes(contentData._id.toString()) ? true : false
+          contentData.writer.following = followingIdSet.includes(contentData.writer._id.toString())
             ? true
             : false
-          // like
-          contentData.liked = refinedLikeIdSet.includes(contentData._id.toString()) ? true : false
-          contentData.writer.following = refinedFollowingIdSet.includes(
-            contentData.writer._id.toString()
-          )
-            ? true
-            : false
-          // whether user is following writer 
           if (contentData.writer._id.toString() === reqUserId) {
             contentData.writer.following = 'me'
           }
-          // feedbacks - like, following
+          // like, following on feedbacks
           const feedbacks = []
+          likeIdSet = await getLikeIdSet(reqUserId, 'Feedback')
           for (let eachFeedback of contentData.feedbacks) {
-            eachFeedback.liked = refinedLikeIdSet.includes(contentData._id.toString()) ? true : false
-            eachFeedback.writer.following = refinedFollowingIdSet.includes(
+            eachFeedback.liked = likeIdSet.includes(eachFeedback._id.toString()) ? true : false
+            eachFeedback.writer.following = followingIdSet.includes(
               eachFeedback.writer._id.toString()
             )
             feedbacks.push(eachFeedback)
@@ -75,51 +45,88 @@ export const contentsWrapper = async (reqUserId, contentData, isBoard, isForView
           const resultSet = []
           for (const data of contentData) {
             const eachBoardData = data.toJSON()
-            eachBoardData.bookmarked = refinedBookmarkIdSet.includes(eachBoardData._id.toString())
+            eachBoardData.bookmarked = bookmarkIdSet.includes(eachBoardData._id.toString())
               ? true
               : false
-            eachBoardData.liked = refinedLikeIdSet.includes(eachBoardData._id.toString())
-              ? true
-              : false
-            eachBoardData.writer.following = refinedFollowingIdSet.includes(
-              eachBoardData.writer._id.toString()
-            )
-              ? true
-              : false
+            eachBoardData.liked = likeIdSet.includes(eachBoardData._id.toString()) ? true : false
             if (eachBoardData.writer._id.toString() === reqUserId) {
               eachBoardData.writer.following = 'me'
+            } else {
+              eachBoardData.writer.following = followingIdSet.includes(
+                eachBoardData.writer._id.toString()
+              )
+                ? true
+                : false
             }
             resultSet.push(eachBoardData)
           }
           resolve(resultSet)
         }
       } else {
-        /**
-         * 댓글에서 like, follow 여부
-         * ???
-         * */ 
-        // get user like list
-        const likeDataSet = await models.Like.find(
-          { reqUserId, targetType: 'Board' },
-          { targetInfo: 1, _id: 0 }
-        )
-        const refinedLikeIdSet = likeDataSet.map(eachLike => {
-          return eachLike.targetInfo.toString()
-        })
-
-        // get user follow list
-        const followingUserSet = await models.Follow.find(
-          { reqUserId },
-          { targetreqUserId: 1, _id: 0 }
-        )
-        const refinedFollowingIdSet = followingUserSet.map(eachUser => {
-          return eachUser.targetUserId.toString()
-        })
-
-        
+        /* following, like on feedbacks and replies */
+        const likeIdSet = await getLikeIdSet(reqUserId, contentType)
+        const resultSet = []
+        for (let data of contentData) {
+          data = data.toJSON()
+          data.liked = likeIdSet.includes(data._id.toString()) ? true : false
+          if (data.writer._id.toString() === reqUserId) {
+            data.writer.following = 'me'
+          } else {
+            data.writer.following = followingIdSet.includes(data.writer._id.toString())
+              ? true
+              : false
+          }
+          resultSet.push(data)
+        }
+        resolve(resultSet)
       }
     } else {
       reject(new Error('입력값이 적절하지 않거나 데이터가 존재하지 않습니다.'))
+    }
+  })
+}
+
+function getBookmarkIdSet(userId) {
+  return new Promise(async (resolve, reject) => {
+    if (userId) {
+      const bookmarkList = await models.Bookmark.find({ user: userId }, { board: 1, _id: 0 })
+      const bookmarkIdSet = bookmarkList.map(eachBookmark => {
+        return eachBookmark.board.toString()
+      })
+      resolve(bookmarkIdSet)
+    } else {
+      reject(new Error('UserId is required.'))
+    }
+  })
+}
+
+function getLikeIdSet(userId, type) {
+  return new Promise(async (resolve, reject) => {
+    if (userId && type) {
+      const likeList = await models.Like.find(
+        { userId, targetType: type },
+        { targetInfo: 1, _id: 0 }
+      )
+      const likeIdSet = likeList.map(eachLike => {
+        return eachLike.targetInfo.toString()
+      })
+      resolve(likeIdSet)
+    } else {
+      reject(new Error('UserId and type is required.'))
+    }
+  })
+}
+
+function getFollowingIdSet(userId) {
+  return new Promise(async (resolve, reject) => {
+    if (userId) {
+      const followingList = await models.Follow.find({ userId }, { targetUserId: 1, _id: 0 })
+      const followingIdSet = followingList.map(eachUser => {
+        return eachUser.targetUserId.toString()
+      })
+      resolve(followingIdSet)
+    } else {
+      reject(new Error('UserId is required.'))
     }
   })
 }
