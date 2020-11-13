@@ -307,7 +307,7 @@ paths:
             boardBody:
               type: string
             category:
-              type: string
+              type: number
             pub:
               type: number
             language:
@@ -1078,6 +1078,11 @@ paths:
         in: "query"
         required: true
         type: string
+      - name: "type"
+        in: "query"
+        required: true
+        type: string
+        enum: ["following", "follower"]
       responses:
         200:
           description: OK
@@ -1154,14 +1159,20 @@ definitions:
         type: array
         example: ["link1", "link2"]
       category:
-        type: string
-        example: 'Comic'
+        type: number
+        example: 0
       pub: 
         type: number
         example: 1 
       writer:
         type: object
         $ref: '#/definitions/Writer'
+      liked:
+        type: boolean
+        example: true
+      bookmarked:
+        type: boolean
+        example: false
 
   board_view:
     type: "object"
@@ -1211,6 +1222,12 @@ definitions:
       edited:
         type: boolean
         default: false
+      bookmarked:
+        type: boolean
+        default: false
+      liked:
+        type: boolean
+        default: false
       writer:
         type: Object
         $ref: '#/definitions/Writer'
@@ -1233,6 +1250,9 @@ definitions:
       profile:
         type: string
         example: 'a_link'
+      following:
+        type: boolean
+        example: true
         
   Feedback:
     type: "object"
@@ -1259,6 +1279,9 @@ definitions:
       heartCount:
         type: number
         default: 0
+      liked:
+        type: boolean
+        default: true
 
   User:
     type: "object"
@@ -1327,6 +1350,9 @@ definitions:
       heartCount:
         type: number
         default: 0
+      liked:
+        type: boolean
+        default: false
   React:
     type: "object"
     required:
@@ -1382,13 +1408,21 @@ definitions:
     - "userId"
     - "targetUserId"
     properties:
-      userId:
+      _id: 
         type: string
-      targetUserId:
+      nickname:
         type: string
-      createdAt:
-        type: number
-        default: Date.now
+      screenId:
+        type: string
+        example: '@ttawadf'
+      profile:
+        type: string
+        example: "https://lunarcat-dev.s3.amazon.com/lalala.png"
+      following:
+        type: boolean
+      follower:
+        type: boolean
+
   Notification:
     type: "object"
     required: 
