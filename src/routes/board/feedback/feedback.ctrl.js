@@ -141,11 +141,10 @@ export const deleteFeedback = async (req, res, next) => {
 export const getFeedback = async (req, res, next) => {
   try {
     const feedbackData = await Feedback.getById(req.params.feedbackId)
-    const wrappedFeedbacks = await contentsWrapper(res.locals.uid, feedbackData, 'Feedback', false)
     console.log(`[INFO] 유저 ${feedbackData.writer} 가 피드백 ${feedbackData._id} 를 조회했습니다.`)
     return res.status(200).json({
       result: 'ok',
-      data: wrappedFeedbacks,
+      data: feedbackData,
     })
   } catch (e) {
     console.log(`[ERROR] ${e.message}`)
