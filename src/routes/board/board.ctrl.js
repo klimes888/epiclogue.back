@@ -36,6 +36,7 @@ export const postBoard = async (req, res, next) => {
     writer: Joi.string()
       .regex(/^[a-fA-F0-9]{24}$/)
       .required(),
+    boardTitle: Joi.string().min(2).max(30).required(),
     boardImg: Joi.array().items(Joi.string().required()).required(),
     category: Joi.string().required(),
     pub: Joi.number().min(0).max(2).required(),
@@ -45,6 +46,7 @@ export const postBoard = async (req, res, next) => {
     await boardSchema.validateAsync({
       writer: boardData.writer,
       boardImg: boardData.boardImg,
+      boardTitle: boardData.boardTitle,
       category: boardData.category,
       pub: boardData.pub,
     })
