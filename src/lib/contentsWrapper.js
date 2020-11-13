@@ -98,6 +98,25 @@ export const contentsWrapper = async (reqUserId, contentData, isBoard, isForView
          * 댓글에서 like, follow 여부
          * ???
          * */ 
+        // get user like list
+        const likeDataSet = await models.Like.find(
+          { reqUserId, targetType: 'Board' },
+          { targetInfo: 1, _id: 0 }
+        )
+        const refinedLikeIdSet = likeDataSet.map(eachLike => {
+          return eachLike.targetInfo.toString()
+        })
+
+        // get user follow list
+        const followingUserSet = await models.Follow.find(
+          { reqUserId },
+          { targetreqUserId: 1, _id: 0 }
+        )
+        const refinedFollowingIdSet = followingUserSet.map(eachUser => {
+          return eachUser.targetUserId.toString()
+        })
+
+        
       }
     } else {
       reject(new Error('입력값이 적절하지 않거나 데이터가 존재하지 않습니다.'))
