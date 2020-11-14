@@ -198,7 +198,12 @@ export const postEditInfo = async function (req, res, next) {
 export const getBoards = async (req, res, next) => {
   try {
     const boardList = await Board.findAll() // 썸네일만 골라내는 작업 필요
-    const wrappedData = await contentsWrapper(res.locals.uid, boardList, 'Board', false)
+    const filterdBoardList = boardList.filter(each => {
+      if (each.writer !== null) {
+        return each
+      }
+    })
+    const wrappedData = await contentsWrapper(res.locals.uid, filterdBoardList, 'Board', false)
     console.log(`[INFO] 유저 ${res.locals.uid} 가 자신의 피드를 확인했습니다.`)
     return res.status(200).json({
       result: 'ok',
