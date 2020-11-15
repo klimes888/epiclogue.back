@@ -6,7 +6,7 @@ const board = new mongoose.Schema({
   boardTitle: { type: String, default: '' },
   boardImg: { type: [String], required: true },
   boardBody: { type: String, default: '' },
-  category: { type: String, enum: [0, 1], default: 0 }, // [on future] 0: Illust, 1: Comic 
+  category: { type: String, enum: [0, 1], default: 0 }, // [on future] 0: Illust, 1: Comic
   pub: { type: Number, enum: [0, 1], default: 1 }, // 0: private, 1: public
   writeDate: { type: Date, default: Date.now },
   language: { type: String, default: 0 }, // [on future] 0: Korean, 1: Japanese, 2: US, 3: China, 4: Taiwan
@@ -30,7 +30,11 @@ board.statics.create = function (data) {
 
 board.statics.getById = function (boardId, option) {
   return this.findOne({ _id: boardId }, option || { __v: 0 })
-    .populate({ path: 'feedbacks', select: '-replies', populate: { path: 'writer', select: '_id screenId nickname profile' } })
+    .populate({
+      path: 'feedbacks',
+      select: '-replies',
+      populate: { path: 'writer', select: '_id screenId nickname profile' },
+    })
     .populate({ path: 'writer', select: '_id screenId nickname profile' })
 }
 
@@ -78,7 +82,11 @@ board.statics.findAll = function () {
       category: 1,
       boardImg: 1,
     }
-  ).populate({ path: 'writer', select: '_id screenId nickname profile' })
+  ).populate({
+    path: 'writer',
+    // match: { deactivatedAt: { $type: 10 } }, // BSON type: 10 is null value. 
+    select: '_id screenId nickname profile',
+  })
 }
 
 board.statics.getFeedback = function (boardId, feedbackId) {
@@ -96,7 +104,7 @@ board.statics.getTitlesByQuery = function (query) {
 
 board.statics.getByQuery = function (query) {
   return this.find(
-    {$or: [{ boardTitle: { $regex: query } }, { tags: query }]},
+    { $or: [{ boardTitle: { $regex: query } }, { tags: query }] },
     {
       _id: 1,
       boardTitle: 1,

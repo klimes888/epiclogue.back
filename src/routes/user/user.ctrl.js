@@ -228,9 +228,9 @@ export const deleteUser = async function (req, res, next) {
       deleteImage(originalImages)
   
       const deletion = await User.deleteUser(uid, crypt_Pw.toString('base64')).session(session)
-  
+
       if (deletion.ok === 1) {
-        if (deletion.deletedCount === 1) {
+        if (deletion.nModified === 1) {
           console.log(`[INFO] 유저 ${res.locals.uid} 가 탈퇴했습니다.`)
           return res.status(200).json({
             result: 'ok',

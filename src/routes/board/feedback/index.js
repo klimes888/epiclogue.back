@@ -7,7 +7,7 @@ import { checkWriter } from '../../../lib/middleware/checkPermission'
 import { checkExistence } from '../../../lib/middleware/checkExistence'
 
 feedback.post('/', verifyToken, feedbackCtrl.postFeedback)
-feedback.get('/:feedbackId', checkExistence, feedbackCtrl.getFeedback)
+feedback.get('/:feedbackId', verifyToken, checkExistence, feedbackCtrl.getFeedback)
 feedback.patch('/:feedbackId', verifyToken, checkExistence, checkWriter, feedbackCtrl.editFeedback)
 feedback.delete('/:feedbackId', verifyToken, checkExistence, checkWriter, feedbackCtrl.deleteFeedback)
 feedback.use('/:feedbackId/reply', reply)

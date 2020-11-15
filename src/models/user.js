@@ -9,6 +9,7 @@ const user = new mongoose.Schema({
   displayLanguage: { type: Number, default: 0 }, // 0: Korean, 1: Japanese, 2: English, 3: Chinese(Simplified), 4: Chinese(Traditional)
   availableLanguage: { type: [String] },
   joinDate: { type: Date, required: true, default: Date.now },
+  deactivatedAt: { type: Date, default: null },
   termsOfUseAcceptedAt: { type: Date, required: true, default: Date.now },
   intro: { type: String, default: null },
   banner: { type: String, default: null },
@@ -87,7 +88,7 @@ user.statics.getUserInfoByScreenId = function (screenId, option) {
 }
 
 user.statics.deleteUser = function (userId, userpw) {
-  return this.deleteOne({ _id: userId, password: userpw })
+  return this.updateOne({ _id: userId, password: userpw }, { deactivatedAt: Date.now() })
 }
 
 user.statics.findAll = function () {
