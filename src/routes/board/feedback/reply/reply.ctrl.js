@@ -1,4 +1,5 @@
 import { Reply, Feedback } from '../../../../models'
+import { contentsWrapper } from '../../../../lib/contentsWrapper'
 import Joi from 'joi'
 import createError from 'http-errors'
 import { startSession } from 'mongoose'
@@ -40,11 +41,12 @@ export const postReply = async (req, res, next) => {
     await session.withTransaction(async () => {
       const replyData = await replySchema.save({ session })
       await Feedback.getReply(req.params.feedbackId, replyData._id).session(session)
-      const newerReplyData = await Reply.getByParentId(replyForm.parentId).session(session)
+      const newerReplies = await Reply.getByParentId(replyForm.parentId).session(session)
+      const wrappedReplies = await contentsWrapper(res.locals.uid, newerReplies, 'Reply', false)
       console.log(`[INFO] 유저 ${res.locals.uid} 가 댓글 ${replyData._id} 를 작성했습니다.`)
       return res.status(201).json({
         result: 'ok',
-        data: newerReplyData,
+        data: wrappedReplies,
       })
     })
   } catch (e) {
@@ -61,12 +63,13 @@ export const getReplys = async (req, res, next) => {
 
   try {
     const replyData = await Reply.getByParentId(feedbackId)
+    const wrappedReplies = await contentsWrapper(res.locals.uid, replyData, 'Reply', false)
     console.log(
       `[INFO] 유저 ${res.locals.uid} 가 피드백 ${feedbackId} 하위의 댓글(들)을 열람합니다.`
     )
     return res.status(200).json({
       result: 'ok',
-      data: replyData,
+      data: wrappedReplies,
     })
   } catch (e) {
     console.error(`[Error] ${e}`)
@@ -103,10 +106,11 @@ export const editReply = async (req, res, next) => {
 
       if (patch.ok === 1) {
         const newerData = await Reply.getByParentId(req.params.feedbackId).session(session)
+        const wrappedReplies = await contentsWrapper(res.locals.uid, newerData, 'Reply', false)
         console.log(`[INFO] 유저 ${res.locals.uid} 가 댓글 ${req.params.replyId} 을 수정했습니다.`)
         return res.status(200).json({
           result: 'ok',
-          data: newerData,
+          data: wrappedReplies,
         })
       } else {
         console.log(
@@ -128,11 +132,12 @@ export const deleteReply = async (req, res, next) => {
     const deletion = await Reply.delete(req.params.replyId, { parentId: 1 })
 
     if (deletion.ok === 1) {
-      const newerReplyData = await Reply.getByParentId(req.params.feedbackId)
+      const newerReplies = await Reply.getByParentId(req.params.feedbackId)
+      const wrappedReplies = await contentsWrapper(res.locals.uid, newerReplies, 'Reply', false)
       console.log(`[INFO] 유저 ${res.locals.uid} 가 댓글 ${req.params.replyId} 을 삭제했습니다.`)
       return res.status(200).json({
         result: 'ok',
-        data: newerReplyData,
+        data: wrappedReplies,
       })
     } else {
       console.error(

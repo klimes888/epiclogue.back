@@ -62,7 +62,16 @@ export const checkExistence = async (req, res, next) => {
 
 // for follow, DM, mute, block
 export const checkUserExistence = async (req, res, next) => {
-  const userId = req.body.targetUserId || (await User.getIdByScreenId(req.params.screenId))
+  const userId = req.body.targetUserId
+
+  if (userId === undefined) {
+    const screenId = req.query.screenId
+    if (await User.findByScreenId(screenId)) {
+      return next()
+    } else {
+      return next(createError(400, '존재하지 않는 screenId를 입력했습니다.'))
+    }
+  }
 
   const userSchema = Joi.object({
     userId: Joi.string()
@@ -74,7 +83,7 @@ export const checkUserExistence = async (req, res, next) => {
     await userSchema.validateAsync({ userId })
   } catch (e) {
     console.log(
-      `[INFO] 유저 ${res.locals.uid} 가 유저 ObjectId에 적절하지 않은 값 ${userId} 길이(${userId.length}) 를 입력했습니다.`
+      `[INFO] 유저 ${res.locals.uid} 가 유저 ObjectId에 적절하지 않은 값 ${userId} 을 입력했습니다.`
     )
     return next(createError(400, '입력값이 적절하지 않습니다.'))
   }

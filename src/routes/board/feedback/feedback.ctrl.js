@@ -2,6 +2,7 @@ import { Board, Feedback } from '../../../models'
 import Joi from 'joi'
 import createError from 'http-errors'
 import { startSession } from 'mongoose'
+import { contentsWrapper } from '../../../lib/contentsWrapper'
 
 /*
   This is feedback router.
@@ -42,10 +43,11 @@ export const postFeedback = async (req, res, next) => {
         `[INFO] 유저 ${res.locals.uid} 가 피드백 ${postFeedbackResult._id} 을 작성했습니다.`
       )
       await Board.getFeedback(req.params.boardId, postFeedbackResult._id).session(session)
-      const newerData = await Feedback.getByBoardId(req.params.boardId).session(session)
+      const newerFeedbacks = await Feedback.getByBoardId(req.params.boardId).session(session)
+      const wrappedFeedbacks = await contentsWrapper(res.locals.uid, newerFeedbacks, 'Feedback', false)
       return res.status(201).json({
         result: 'ok',
-        data: newerData,
+        data: wrappedFeedbacks,
       })
     })
   } catch (e) {
@@ -85,12 +87,12 @@ export const editFeedback = async (req, res, next) => {
       const patch = await Feedback.update(newForm, session)
       // throw new Error("응애")
       if (patch.ok === 1) {
-        const newerData = await Feedback.getByBoardId(req.params.boardId).session(session)
-
+        const newerFeedbacks = await Feedback.getByBoardId(req.params.boardId).session(session)
+        const wrappedFeedbacks = await contentsWrapper(res.locals.uid, newerFeedbacks, 'Feedback', false)
         console.log(`[INFO] 피드백 ${req.params.feedbackId} 가 정상적으로 수정되었습니다.`)
         return res.status(200).json({
           result: 'ok',
-          data: newerData,
+          data: wrappedFeedbacks,
         })
       } else {
         console.error(
@@ -114,12 +116,12 @@ export const deleteFeedback = async (req, res, next) => {
     await session.withTransaction(async () => {
       const deletion = await Feedback.delete(req.params.feedbackId).session(session)
       if (deletion.ok === 1) {
-        const newerData = await Feedback.getByBoardId(req.params.boardId).session(session)
-
+        const newerFeedbacks = await Feedback.getByBoardId(req.params.boardId).session(session)
+        const wrappedFeedbacks = await contentsWrapper(res.locals.uid, newerFeedbacks, 'Feedback', false)
         console.log(`[INFO] 피드백 ${req.params.feedbackId} 가 정상적으로 삭제되었습니다.`)
         return res.status(200).json({
           result: 'ok',
-          data: newerData,
+          data: wrappedFeedbacks,
         })
       } else if (result.ok === 0) {
         console.error(

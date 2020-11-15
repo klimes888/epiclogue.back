@@ -56,6 +56,10 @@ user.statics.isExist = function (email) {
   return this.findOne({ email })
 }
 
+user.statics.findByScreenId = function (screenId) {
+  return this.findOne({ screenId })
+}
+
 /* 
     @2020-08-07
     find 함수가 4개 (findUser, getUserInfo, findAll, getProfile)인데,

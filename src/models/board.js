@@ -29,7 +29,7 @@ board.statics.create = function (data) {
 }
 
 board.statics.getById = function (boardId, option) {
-  return this.findOne({ _id: boardId }, option || { _id: 0, __v: 0 })
+  return this.findOne({ _id: boardId }, option || { __v: 0 })
     .populate({ path: 'feedbacks', select: '-replies', populate: { path: 'writer', select: '_id screenId nickname profile' } })
     .populate({ path: 'writer', select: '_id screenId nickname profile' })
 }

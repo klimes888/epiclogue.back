@@ -1,5 +1,6 @@
 import { Board } from '../../models'
 import { deleteImage } from '../../lib/imageCtrl'
+import { contentsWrapper } from '../../lib/contentsWrapper'
 import Joi from 'joi'
 import createError from 'http-errors'
 import { startSession } from 'mongoose'
@@ -38,7 +39,7 @@ export const postBoard = async (req, res, next) => {
       .required(),
     boardTitle: Joi.string().min(2).max(30).required(),
     boardImg: Joi.array().items(Joi.string().required()).required(),
-    category: Joi.string().required(),
+    category: Joi.number().min(0).max(2).required(),
     pub: Joi.number().min(0).max(2).required(),
   })
 
@@ -66,10 +67,9 @@ export const postBoard = async (req, res, next) => {
     const createdBoard = await Board.create(boardData)
 
     console.log(`[INFO] 유저 ${boardData.writer}가 글 ${createdBoard._id}를 작성했습니다.`)
-
-    return res.status(201).json({
-      result: 'ok',
-      data: createdBoard,
+    return res.status(201).json({ 
+      result: 'ok', 
+      data: { _id: createdBoard._id } 
     })
   } catch (e) {
     console.error(`[ERROR] ${e}`)
@@ -83,12 +83,12 @@ export const viewBoard = async (req, res, next) => {
 
   try {
     const boardData = await Board.getById(boardId)
-
+    const wrappedBoardData = await contentsWrapper(res.locals.uid, boardData, 'Board', true)
     console.log(`[INFO] 유저 ${res.locals.uid}가 글 ${boardId}를 접근했습니다.`)
 
     return res.status(200).json({
       result: 'ok',
-      data: boardData,
+      data: wrappedBoardData,
     })
   } catch (e) {
     console.error(`[ERROR] ${e}`)
@@ -176,13 +176,9 @@ export const postEditInfo = async function (req, res, next) {
     await session.withTransaction(async () => {
       const patch = await Board.update(updateData).session(session)
       if (patch.ok === 1) {
-        const newerData = await Board.getById(req.params.boardId).session(session)
-
+        const updatedBoardData = await Board.getById(req.params.boardId).session(session)
         console.log(`[INFO] 유저 ${res.locals.uid}가 글 ${req.params.boardId}을 수정했습니다.`)
-        return res.status(200).json({
-          result: 'ok',
-          data: newerData,
-        })
+        return res.status(200).json({ result: 'ok', data: { _id: updatedBoardData._id } })
       } else {
         console.error(
           `[ERROR] 글 ${req.params.boardId}의 수정이 실패했습니다: 데이터베이스 질의에 실패했습니다.`
@@ -202,11 +198,11 @@ export const postEditInfo = async function (req, res, next) {
 export const getBoards = async (req, res, next) => {
   try {
     const boardList = await Board.findAll() // 썸네일만 골라내는 작업 필요
-
+    const wrappedData = await contentsWrapper(res.locals.uid, boardList, 'Board', false)
     console.log(`[INFO] 유저 ${res.locals.uid} 가 자신의 피드를 확인했습니다.`)
     return res.status(200).json({
       result: 'ok',
-      data: boardList,
+      data: wrappedData,
     })
   } catch (e) {
     console.error(`[ERROR] ${e}`)

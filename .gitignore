@@ -19,5 +19,5 @@ src/lib/aws.config.json
 # logs
 logs
 
-# keys
+# mongodb key
 mongodb.key
