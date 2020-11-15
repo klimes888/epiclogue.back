@@ -95,6 +95,8 @@ describe('댓글 테스트', () => {
       
       expect(response.statusCode).toBe(201)
 
+      console.log(response)
+
       testReplyId = response.body.data[0]._id
     })
 

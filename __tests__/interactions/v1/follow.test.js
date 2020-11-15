@@ -34,7 +34,7 @@ describe('팔로우 테스트', () => {
   beforeAll(async () => {
     // 임시유저 생성
     await request(app).post('/auth/join').send(userData)
-    const newUserData = await User.isExist(userData.email)
+    const newUserData = await User.findOne({ email: userData.email })
     newUserId = newUserData._id
 
     // 이메일 인증된 사용자
