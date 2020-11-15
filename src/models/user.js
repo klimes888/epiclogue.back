@@ -88,7 +88,7 @@ user.statics.getUserInfoByScreenId = function (screenId, option) {
 }
 
 user.statics.deleteUser = function (userId, userpw) {
-  return this.updateOne({ _id: userId, password: userpw }, { signOutAt: Date.now() })
+  return this.updateOne({ _id: userId, password: userpw }, { deactivatedAt: Date.now() })
 }
 
 user.statics.findAll = function () {
