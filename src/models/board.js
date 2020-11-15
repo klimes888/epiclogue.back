@@ -84,7 +84,7 @@ board.statics.findAll = function () {
     }
   ).populate({
     path: 'writer',
-    match: { deactivatedAt: { $type: 10 } }, // BSON type: 10 is null value. 
+    // match: { deactivatedAt: { $type: 10 } }, // BSON type: 10 is null value. 
     select: '_id screenId nickname profile',
   })
 }
