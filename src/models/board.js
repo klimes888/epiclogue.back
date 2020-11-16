@@ -125,7 +125,7 @@ board.statics.getByQuery = function (query) {
     { $or: [{ boardTitle: { $regex: query } }, { tags: query }] },
     {
       _id: 1,
-      boardTitle: 1,  originUserId: { type: ObjectId },
+      boardTitle: 1,
       uid: 1,
       pub: 1,
       category: 1,
