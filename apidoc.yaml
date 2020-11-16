@@ -1138,7 +1138,75 @@ paths:
           description: OK
       security:
         - access_token: []
-        
+
+  /myboard/{screenId}:
+    get:
+      tags:
+      - "myboard"
+      summary: "Get all works"
+      description: ""
+      parameters:
+      - name: "screenId"
+        in: "params"
+        required: true
+        type: string
+      responses:
+        200:
+          description: OK
+      security:
+        - access_token: []
+  
+  /myboard/{screenId}/originals:
+    get:
+      tags:
+      - "myboard"
+      summary: "Get original works"
+      description: ""
+      parameters:
+      - name: "screenId"
+        in: "params"
+        required: true
+        type: string
+      responses:
+        200:
+          description: OK
+      security:
+        - access_token: []
+
+  /myboard/{screenId}/secondaryWorks:
+    get:
+      tags:
+      - "myboard"
+      summary: "Get secondary works"
+      description: ""
+      parameters:
+      - name: "screenId"
+        in: "params"
+        required: true
+        type: string
+      responses:
+        200:
+          description: OK
+      security:
+        - access_token: []
+
+  /myboard/{screenId}/bookmarks:
+    get:
+      tags:
+      - "myboard"
+      summary: "Get bookmarks"
+      description: ""
+      parameters:
+      - name: "screenId"
+        in: "params"
+        required: true
+        type: string
+      responses:
+        200:
+          description: OK
+      security:
+        - access_token: []
+
 securityDefinitions:
   access_token:
     description: "insert your accessToken in login response."
