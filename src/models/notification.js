@@ -13,11 +13,6 @@ const notification = new mongoose.Schema({
   read: { type: Boolean, default: false },
 })
 
-notification.statics.create = function (data) {
-  const likeData = new this(data)
-  return likeData.save()
-}
-
 // 알림목록
 notification.statics.getNotiList = function (userId) {
   return this.find({ userId })
@@ -26,11 +21,6 @@ notification.statics.getNotiList = function (userId) {
 // 읽음처리
 notification.statics.setRead = function (notificationId) {
   return this.updateOne({ _id: notificationId }, { read: true })
-}
-
-// 삭제
-notification.statics.delete = function (notificationId) {
-  return this.deleteOne({ _id: notificationId })
 }
 
 export default mongoose.model('Notification', notification)
