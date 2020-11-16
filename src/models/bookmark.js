@@ -22,9 +22,12 @@ Bookmark.statics.delete = function (user, boardId) {
 
 // 유저의 북마크 목록
 Bookmark.statics.getByUserId = function (user) {
-  return this.find({ user })
-    .populate({ path: 'user', select: '_id screenId nickname profile' })
-    .populate({ path: 'board', select: '_id boardTitle boardImg pub category' })
+  return this.find({ user }, { user: 0 })
+    .populate({
+      path: 'board',
+      select: '_id boardTitle boardImg pub category',
+      populate: { path: 'writer', select: '_id screenId nickname profile' },
+    })
 }
 
 Bookmark.statics.didBookmark = function (user, board) {

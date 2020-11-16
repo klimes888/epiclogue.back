@@ -89,6 +89,24 @@ board.statics.findAll = function (option) {
   })
 }
 
+board.statics.findAllSecondaryWorks = function (userId) {
+  return this.find(
+    { writer: userId, originUserId: { $exists: true } },
+    {
+      _id: 1,
+      writer: 1,
+      boardTitle: 1,
+      uid: 1,
+      pub: 1,
+      category: 1,
+      boardImg: 1,
+    }
+  ).populate({
+    path: 'writer',
+    select: '_id screenId nickname profile',
+  })
+}
+
 board.statics.getFeedback = function (boardId, feedbackId) {
   return this.updateOne({ _id: boardId }, { $push: { feedbacks: feedbackId } })
 }
@@ -107,7 +125,7 @@ board.statics.getByQuery = function (query) {
     { $or: [{ boardTitle: { $regex: query } }, { tags: query }] },
     {
       _id: 1,
-      boardTitle: 1,
+      boardTitle: 1,  originUserId: { type: ObjectId },
       uid: 1,
       pub: 1,
       category: 1,
