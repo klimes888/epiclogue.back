@@ -55,7 +55,7 @@ export const addBookmark = async function (req, res, next) {
       return next(createError(400, '입력값이 적절하지 않습니다.'))
     }
 
-    const userData = await Board.findOne({ _id: req.body.boardId }, { writer: 1 })
+    const targetData = await Board.findOne({ _id: req.body.boardId }, { writer: 1 })
 
     await session.withTransaction(async () => {
       await bookmarkSchema.save({ session })
@@ -66,7 +66,7 @@ export const addBookmark = async function (req, res, next) {
 
       const bookmarkCount = await Board.getBookmarkCount(req.body.boardId).session(session)
       await makeNotification({
-        targetUserId: userData.writer,
+        targetUserId: targetData.writer,
         targetType: 'Bookmark',
         targetInfo: req.body.boardId
       }, session)
