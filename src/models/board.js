@@ -69,10 +69,10 @@ board.statics.delete = function (buid) {
 }
 
 /* 글 전체 조회 */
-board.statics.findAll = function () {
+board.statics.findAll = function (option) {
   // uid를 이용해 유저 닉네임을 응답데이터에 넣어야하는데 어떻게 넣어야 효율적일지 고민이 필요
   return this.find(
-    {},
+    option,
     {
       _id: 1,
       writer: 1,
@@ -85,6 +85,24 @@ board.statics.findAll = function () {
   ).populate({
     path: 'writer',
     // match: { deactivatedAt: { $type: 10 } }, // BSON type: 10 is null value. 
+    select: '_id screenId nickname profile',
+  })
+}
+
+board.statics.findAllSecondaryWorks = function (userId) {
+  return this.find(
+    { writer: userId, originUserId: { $exists: true } },
+    {
+      _id: 1,
+      writer: 1,
+      boardTitle: 1,
+      uid: 1,
+      pub: 1,
+      category: 1,
+      boardImg: 1,
+    }
+  ).populate({
+    path: 'writer',
     select: '_id screenId nickname profile',
   })
 }
@@ -107,7 +125,7 @@ board.statics.getByQuery = function (query) {
     { $or: [{ boardTitle: { $regex: query } }, { tags: query }] },
     {
       _id: 1,
-      boardTitle: 1,
+      boardTitle: 1,  originUserId: { type: ObjectId },
       uid: 1,
       pub: 1,
       category: 1,

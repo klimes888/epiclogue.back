@@ -88,7 +88,6 @@ describe('북마크 테스트', () => {
           .set('x-access-token', userToken)
 
         expect(response.statusCode).toBe(200)
-        expect(response.body.data[0].board._id).toBe(testBoardId)
         expect(response.body.data.length).toBe(1)
       })
     })

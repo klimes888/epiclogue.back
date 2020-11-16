@@ -23,24 +23,6 @@ tags:
 schemes:
 - "https"
 paths:
-  /user/{screenId}:
-    get:
-      tags:
-      - "user"
-      summary: "get userInfo(myPage)"
-      description: ""
-      parameters:
-      - name: "screenId"
-        in: "path"
-        required: true
-        type: string
-      responses:
-        200:
-          description: OK
-        400:
-          description: ERROR
-      security:
-        - access_token: []
   /user:
     delete:
       tags:
@@ -77,22 +59,18 @@ paths:
           schema:
             type: object
             properties:
-              userNick: 
+              nickname: 
                 type: string
-              userIntro:
+              intro:
                 type: string
-              userCountry:
+              country:
                 type: string
               screenId:
                 type: string
-              usersBannerImg:
+              banner:
                 type: string
-              userProfileImg:
+              profile:
                 type: string
-              lang:
-                type: array
-                items:
-                  type: string
               email:
                 type: string
       security:
@@ -1138,7 +1116,121 @@ paths:
           description: OK
       security:
         - access_token: []
-        
+
+  /myboard/{screenId}:
+    get:
+      tags:
+      - "myboard"
+      summary: "Get user info"
+      description: ""
+      parameters:
+      - name: "screenId"
+        in: "params"
+        required: true
+        type: string
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            properties:
+              nickname: 
+                type: string
+              intro:
+                type: string
+              screenId:
+                type: string
+              banner:
+                type: string
+              profile:
+                type: string
+              followerCount:
+                type: number
+              followingCount:
+                type: number
+      security:
+        - access_token: []
+
+  /myboard/{screenId}/all:
+    get:
+      tags:
+      - "myboard"
+      summary: "Get all works"
+      description: ""
+      parameters:
+      - name: "screenId"
+        in: "params"
+        required: true
+        type: string
+      responses:
+        200:
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/board_thumb'
+      security:
+        - access_token: []
+  
+  /myboard/{screenId}/originals:
+    get:
+      tags:
+      - "myboard"
+      summary: "Get original works"
+      description: ""
+      parameters:
+      - name: "screenId"
+        in: "params"
+        required: true
+        type: string
+      responses:
+        200:
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/board_thumb'
+      security:
+        - access_token: []
+
+  /myboard/{screenId}/secondaryWorks:
+    get:
+      tags:
+      - "myboard"
+      summary: "Get secondary works"
+      description: ""
+      parameters:
+      - name: "screenId"
+        in: "params"
+        required: true
+        type: string
+      responses:
+        200:
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/board_thumb'
+      security:
+        - access_token: []
+
+  /myboard/{screenId}/bookmarks:
+    get:
+      tags:
+      - "myboard"
+      summary: "Get bookmarks"
+      description: ""
+      parameters:
+      - name: "screenId"
+        in: "params"
+        required: true
+        type: string
+      responses:
+        200:
+          description: OK
+      security:
+        - access_token: []
+
 securityDefinitions:
   access_token:
     description: "insert your accessToken in login response."
