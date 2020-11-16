@@ -1,6 +1,15 @@
 import * as models from '../models'
 
-const availableTypes = ['Notice', 'Follow', 'Feedback', 'Reply', 'Like', 'Mention', 'Secondary']
+const availableTypes = [
+  'Notice',
+  'Bookmark',
+  'Follow',
+  'Feedback',
+  'Reply',
+  'Like',
+  'Mention',
+  'Secondary',
+]
 
 /**
  * Integrated notification generator.

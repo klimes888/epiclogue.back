@@ -5,7 +5,7 @@ const notification = new mongoose.Schema({
   userId: { type: ObjectId, required: true },
   targetType: {
     type: String,
-    enum: ['Notice', 'Follow', 'Feedback', 'Reply', 'Like', 'Mention', 'Secondary'],
+    enum: ['Bookmark', 'Notice', 'Follow', 'Feedback', 'Reply', 'Like', 'Mention', 'Secondary'],
     required: true,
   }, // 팔로우, 댓글, 대댓글, 번역, 멘션, 북마크
   targetInfo: { type: ObjectId, required: true },
