@@ -1231,6 +1231,45 @@ paths:
       security:
         - access_token: []
 
+  /notification:
+    get:
+      tags:
+      - "notification"
+      summary: "Get notifications"
+      description: ""
+      responses:
+        200:
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Notification'
+      security:
+        - access_token: []
+
+  /notification/{notiId}:
+    patch:
+      tags:
+      - "notification"
+      summary: "Read notification"
+      description: ""
+      responses:
+        200:
+          description: OK
+      security:
+        - access_token: []
+
+    delete:
+      tags:
+      - "notification"
+      summary: "Delete notification"
+      description: ""
+      responses:
+        200:
+          description: OK
+      security:
+        - access_token: []
+
 securityDefinitions:
   access_token:
     description: "insert your accessToken in login response."
@@ -1522,14 +1561,20 @@ definitions:
     - "targetId"
     - "type"
     properties:
+      _id: 
+        type: string
+        example: "5fb26fed4c6a8d021412665a"
       userId:
         type: string
-      type:
+        example: "5fb2937ac9750d1cb7d1e85b"
+      targetType:
         type: string
-      targetId:
+        example: "5fb26fed4c6a8d021443f56e"
+      targetInfo:
         type: string
+        example: "5fb2915b1000041a81221cc3"
       date:
-        type: number
+        type: date
         default: Date.now
       read:
         type: boolean
@@ -1541,7 +1586,7 @@ definitions:
         type: string
         example: "ok"
       data:
-        type: object
+       board_thumb type: object
   API_response_error:
     type: "object"
     properties:
