@@ -4,9 +4,9 @@ import { getBookmarkList } from '../interaction/bookmark/bookmark.ctrl'
 import { contentsWrapper } from '../../lib/contentsWrapper'
 
 export const getMyboard = async (req, res, next) => {
-  const userId = await User.findOne({ screenId: req.params.screenId })
+  const userId = await models.User.findOne({ screenId: req.params.screenId })
   try {
-    const result = await User.getUserInfo(userId, {
+    const result = await models.User.getUserInfo(userId, {
       nickname: 1,
       intro: 1,
       screenId: 1,
@@ -41,7 +41,7 @@ export const allWorks = async (req, res, next) => {
     })
     const wrappedWorks = await contentsWrapper(allWorks)
 
-    console.log(`[INFO] ${res.locals.uid} 가 ${userId} 의 글들을 확인합니다.`)
+    console.log(`[INFO] ${res.locals.uid} 가 ${userId._id} 의 글들을 확인합니다.`)
     return res.status(200).json({
       result: 'ok',
       data: wrappedWorks,

@@ -2,6 +2,7 @@ import { Bookmark, React, Board, User } from '../../../models'
 import createError from 'http-errors'
 import { startSession } from 'mongoose'
 import { contentsWrapper } from '../../../lib/contentsWrapper'
+import makeNotification from '../../../lib/makeNotification'
 
 /* 
   This is bookmark router.
@@ -32,19 +33,16 @@ export const getBookmarkList = async (req, res, next) => {
 }
 
 export const addBookmark = async function (req, res, next) {
-  const bookmarkData = {
+  const bookmarkSchema = new Bookmark({
     user: res.locals.uid,
     board: req.body.boardId,
-  }
-
-  const reactData = {
+  })
+  const reactSchema = new React({
     user: res.locals.uid,
     boardId: req.body.boardId,
     type: 'bookmark',
-  }
+  })
 
-  const bookmarkSchema = new Bookmark(bookmarkData)
-  const reactSchema = new React(reactData)
   const session = await startSession()
 
   try {

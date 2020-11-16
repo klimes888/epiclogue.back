@@ -84,8 +84,8 @@ export const contentsWrapper = async (reqUserId, contentData, contentType, isFor
         }
         resolve(resultSet)
       }
-    } else {
-      reject(new Error('입력값이 적절하지 않거나 데이터가 존재하지 않습니다.'))
+    } else { /* if contentData is [] or {} */
+      resolve([])
     }
   })
 }
