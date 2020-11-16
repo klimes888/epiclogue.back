@@ -1,6 +1,7 @@
 import { User, Follow } from '../../../models'
 import createError from 'http-errors'
 import { startSession } from 'mongoose'
+import makeNotification from '../../../lib/makeNotification'
 
 /* 
   This is follow router.
@@ -27,9 +28,16 @@ export const addFollow = async (req, res, next) => {
     }
     await session.withTransaction(async () => {
       const followSchema = new Follow(followData)
+      const notiData = {
+        targetUserId: req.body.targetUserId,
+        targetType: 'Follow',
+        targetInfo: res.locals.uid
+      }
+
       await followSchema.save({ session })
       await User.countFollowing(followData.userId, 1).session(session)
       await User.countFollower(followData.targetUserId, 1).session(session)
+      await makeNotification(notiData, session)
 
       console.log(`[INFO] 유저 ${res.locals.uid}가 ${followData.targetUserId}를 팔로우합니다.`)
       return res.status(201).json({
