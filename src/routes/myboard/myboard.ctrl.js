@@ -3,6 +3,32 @@ import createError from 'http-errors'
 import { getBookmarkList } from '../interaction/bookmark/bookmark.ctrl'
 import { contentsWrapper } from '../../lib/contentsWrapper'
 
+export const getMyboard = async (req, res, next) => {
+  const userId = await User.findOne({ screenId: req.params.screenId })
+  try {
+    const result = await User.getUserInfo(userId, {
+      nickname: 1,
+      intro: 1,
+      screenId: 1,
+      banner: 1,
+      profile: 1,
+      followerCount: 1,
+      followingCount: 1
+    })
+
+    return res.status(200).json({
+      result: 'ok',
+      data: result,
+    })
+  } catch (e) {
+    console.error(`[Error] ${e}`)
+    return res.status(500).json({
+      result: 'error',
+      message: e.message,
+    })
+  }
+}
+
 export const allWorks = async (req, res, next) => {
   const userId = await models.User.findOne(
     { screenId: req.params.screenId },

@@ -11,32 +11,6 @@ const randomBytesPromise = util.promisify(crypto.randomBytes)
 
 dotenv.config()
 
-export const getMyboard = async (req, res, next) => {
-  const userId = await User.findOne({ screenId: req.params.screenId })
-  try {
-    const result = await User.getUserInfo(userId, {
-      nickname: 1,
-      intro: 1,
-      screenId: 1,
-      banner: 1,
-      profile: 1,
-      followerCount: 1,
-      followingCount: 1
-    })
-
-    return res.status(200).json({
-      result: 'ok',
-      data: result,
-    })
-  } catch (e) {
-    console.error(`[Error] ${e}`)
-    return res.status(500).json({
-      result: 'error',
-      message: e.message,
-    })
-  }
-}
-
 /* GET users listing. */
 export const getUserEditInfo = async function (req, res, next) {
   const uid = res.locals.uid
