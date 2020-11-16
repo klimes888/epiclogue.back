@@ -198,7 +198,6 @@ export const postEditInfo = async function (req, res, next) {
 export const getBoards = async (req, res, next) => {
   try {
     const boardList = await Board.findAll() // 썸네일만 골라내는 작업 필요
-    console.log(boardList)
     const filterdBoardList = boardList.filter(each => {
       if (each.writer !== null) {
         return each
