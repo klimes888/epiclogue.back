@@ -5,7 +5,8 @@ const noti = express.Router({
   mergeParams: true,
 })
 
-noti.get('/:targetId', verifyToken, notiCtrl.getNoti)
-noti.post('/:targetId', verifyToken, notiCtrl.setRead)
+noti.get('/', verifyToken, notiCtrl.getNoti)
+noti.patch('/:notiId', verifyToken, notiCtrl.setRead)
+noti.delete('/:notiId', verifyToken, notiCtrl.deleteNoti)
 
 export default noti

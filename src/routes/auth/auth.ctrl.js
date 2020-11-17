@@ -190,7 +190,7 @@ export const mailAuth = async function (req, res, next) {
     const result = await User.isConfirmed(email, token)
     if (result) {
       await User.confirmUser(email)
-      console.log(`[INFO] 유저 ${res.locals.uid} 의 이메일 인증이 완료되었습니다.`)
+      console.log(`[INFO] 유저 ${email} 의 이메일 인증이 완료되었습니다.`)
       return res.status(200).json({
         result: 'ok',
       })

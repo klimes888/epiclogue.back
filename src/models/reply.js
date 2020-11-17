@@ -26,7 +26,7 @@ Reply.statics.isWriter = function (userId, replyId) {
 Reply.statics.getByParentId = function (parentId) {
   return this.find({ parentId }, { __v: 0, boardId: 0, parentId: 0 }).populate({
     path: 'writer',
-    select: 'nickname screenId',
+    select: 'nickname screenId profile',
   })
 }
 

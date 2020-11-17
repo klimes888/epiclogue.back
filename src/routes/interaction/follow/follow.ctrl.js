@@ -1,6 +1,7 @@
 import { User, Follow } from '../../../models'
 import createError from 'http-errors'
 import { startSession } from 'mongoose'
+import makeNotification from '../../../lib/makeNotification'
 
 /* 
   This is follow router.
@@ -30,6 +31,11 @@ export const addFollow = async (req, res, next) => {
       await followSchema.save({ session })
       await User.countFollowing(followData.userId, 1).session(session)
       await User.countFollower(followData.targetUserId, 1).session(session)
+      await makeNotification({
+        targetUserId: req.body.targetUserId,
+        targetType: 'Follow',
+        targetInfo: res.locals.uid
+      }, session)
 
       console.log(`[INFO] 유저 ${res.locals.uid}가 ${followData.targetUserId}를 팔로우합니다.`)
       return res.status(201).json({
@@ -92,33 +98,52 @@ export const deleteFollow = async (req, res, next) => {
 
 export const getFollow = async (req, res, next) => {
   const screenId = req.query.screenId
-  const type = req.query.type
   const userId = await User.getIdByScreenId(screenId)
-  const dataSet = []
+  const type = req.query.type
 
   try {
-    const session = await startSession(async () => {
-      const followList =
-        type === 'following'
-          ? await Follow.getFollowingList(userId._id).session(session)
-          : await Follow.getFollowerList(userId._id).session(session)
+    const followingList = await Follow.find({ userId: res.locals.uid })
+    const followingIdSet = followingList.map(each => {
+      return each.targetUserId.toString()
+    })
+    const followerList = await Follow.find({ targetUserId: res.locals.uid })
+    const followerIdSet = followerList.map(each => {
+      return each.userId.toString()
+    })
 
-      for (let data of followList) {
-        let temp = await User.getUserInfo(data.targetUserId, {
-          nickname: 1,
-          screenId: 1,
-          intro: 1,
-          profile: 1,
-          _id: 0,
-        }).session(session)
-
-        dataSet.push(temp)
+    const resultSet = []
+    if (type === 'following') {
+      const requestedData = await Follow.getFollowingList(userId._id)
+      for (let eachData of requestedData) {
+        eachData = eachData.toJSON()
+        if (eachData.targetUserId._id.toString() === res.locals.uid) {
+          eachData.targetUserId.following = 'me'
+          eachData.targetUserId.follower = 'me'
+        } else {
+          eachData.targetUserId.following = followingIdSet.includes(eachData.targetUserId._id.toString()) ? true : false
+          eachData.targetUserId.follower = followerIdSet.includes(eachData.targetUserId._id.toString()) ? true : false
+        }
+        resultSet.push(eachData.targetUserId)
       }
-      console.log(`[INFO] 유저 ${res.locals.uid} 가 ${userId._id} 의 ${type} 리스트를 확인합니다.`)
-      return res.status(200).json({
-        result: 'ok',
-        data: dataSet,
-      })
+    } else if (type === 'follower') {
+      const requestedData = await Follow.getFollowerList(userId._id)
+      for (let eachData of requestedData) {
+        eachData = eachData.toJSON()
+        if (eachData.userId._id.toString() === res.locals.uid) {
+          eachData.userId.following = 'me'
+          eachData.userId.follower = 'me'
+        } else {
+          eachData.userId.following = followingIdSet.includes(eachData.userId._id.toString()) ? true : false
+          eachData.userId.follower = followerIdSet.includes(eachData.userId._id.toString()) ? true : false
+        }
+        resultSet.push(eachData.userId)
+      }
+    }
+
+    console.log(`[INFO] 유저 ${res.locals.uid} 가 ${userId._id} 의 ${type} 리스트를 확인합니다.`)
+    return res.status(200).json({
+      result: 'ok',
+      data: resultSet,
     })
   } catch (e) {
     console.error(`[Error] ${e}`)

@@ -6,7 +6,7 @@ const board = new mongoose.Schema({
   boardTitle: { type: String, default: '' },
   boardImg: { type: [String], required: true },
   boardBody: { type: String, default: '' },
-  category: { type: String, enum: [0, 1], default: 0 }, // [on future] 0: Illust, 1: Comic 
+  category: { type: String, enum: [0, 1], default: 0 }, // [on future] 0: Illust, 1: Comic
   pub: { type: Number, enum: [0, 1], default: 1 }, // 0: private, 1: public
   writeDate: { type: Date, default: Date.now },
   language: { type: String, default: 0 }, // [on future] 0: Korean, 1: Japanese, 2: US, 3: China, 4: Taiwan
@@ -29,8 +29,12 @@ board.statics.create = function (data) {
 }
 
 board.statics.getById = function (boardId, option) {
-  return this.findOne({ _id: boardId }, option || { _id: 0, __v: 0 })
-    .populate({ path: 'feedbacks', select: '-replies', populate: { path: 'writer', select: '_id screenId nickname profile' } })
+  return this.findOne({ _id: boardId }, option || { __v: 0 })
+    .populate({
+      path: 'feedbacks',
+      select: '-replies',
+      populate: { path: 'writer', select: '_id screenId nickname profile' },
+    })
     .populate({ path: 'writer', select: '_id screenId nickname profile' })
 }
 
@@ -65,10 +69,10 @@ board.statics.delete = function (buid) {
 }
 
 /* 글 전체 조회 */
-board.statics.findAll = function () {
+board.statics.findAll = function (option) {
   // uid를 이용해 유저 닉네임을 응답데이터에 넣어야하는데 어떻게 넣어야 효율적일지 고민이 필요
   return this.find(
-    {},
+    option,
     {
       _id: 1,
       writer: 1,
@@ -78,7 +82,29 @@ board.statics.findAll = function () {
       category: 1,
       boardImg: 1,
     }
-  ).populate({ path: 'writer', select: '_id screenId nickname profile' })
+  ).populate({
+    path: 'writer',
+    // match: { deactivatedAt: { $type: 10 } }, // BSON type: 10 is null value. 
+    select: '_id screenId nickname profile',
+  })
+}
+
+board.statics.findAllSecondaryWorks = function (userId) {
+  return this.find(
+    { writer: userId, originUserId: { $exists: true } },
+    {
+      _id: 1,
+      writer: 1,
+      boardTitle: 1,
+      uid: 1,
+      pub: 1,
+      category: 1,
+      boardImg: 1,
+    }
+  ).populate({
+    path: 'writer',
+    select: '_id screenId nickname profile',
+  })
 }
 
 board.statics.getFeedback = function (boardId, feedbackId) {
@@ -96,10 +122,10 @@ board.statics.getTitlesByQuery = function (query) {
 
 board.statics.getByQuery = function (query) {
   return this.find(
-    {$or: [{ boardTitle: { $regex: query } }, { tags: query }]},
+    { $or: [{ boardTitle: { $regex: query } }, { tags: query }] },
     {
       _id: 1,
-      boardTitle: 1,
+      boardTitle: 1,  originUserId: { type: ObjectId },
       uid: 1,
       pub: 1,
       category: 1,

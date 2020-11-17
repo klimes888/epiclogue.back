@@ -14,9 +14,10 @@ coverage
 test.js
 .vscode
 yarn-error.log
+src/lib/aws.config.json
 
 # logs
 logs
 
-# keys
+# mongodb key
 mongodb.key

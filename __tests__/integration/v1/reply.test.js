@@ -57,8 +57,8 @@ describe('댓글 테스트', () => {
     // console.log(userToken) // ok
   })
 
-  describe('댓글 작성', () => {
-    test('선수: 글 작성 | 201', async () => {
+  describe('선수 작업', () => {
+    test('글 작성 | 201', async () => {
       const uploadInstance = await request(app)
         .post('/boards')
         .set('x-access-token', userToken)
@@ -75,7 +75,7 @@ describe('댓글 테스트', () => {
       // console.log(testBoardId) // ok
     })
 
-    test('선수: 피드백 작성 | 201', async () => {
+    test('피드백 작성 | 201', async () => {
       const rawResponse = await request(app)
         .post(`/boards/${testBoardId}/feedback`)
         .set('x-access-token', userToken)
@@ -86,7 +86,9 @@ describe('댓글 테스트', () => {
       testFeedbackId = extractedResponse.data[0]._id
       // console.log(testFeedbackId) // ok
     })
+  })
 
+  describe('댓글 작성', () => {
     test('성공 | 201', async () => {
       const response = await request(app)
         .post(`/boards/${testBoardId}/feedback/${testFeedbackId}/reply`)

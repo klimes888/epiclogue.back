@@ -15,11 +15,19 @@ dotenv.config()
 export const getUserEditInfo = async function (req, res, next) {
   const uid = res.locals.uid
   try {
-    const result = await User.getUserInfo(uid, {nickname:1, intro:1, country:1, screenId:1, banner:1, profile:1, email:1})
+    const result = await User.getUserInfo(uid, {
+      nickname: 1,
+      intro: 1,
+      country: 1,
+      screenId: 1,
+      banner: 1,
+      profile: 1,
+      email: 1,
+    })
 
     return res.status(200).json({
       result: 'ok',
-      data: result
+      data: result,
     })
   } catch (e) {
     console.error(`[Error] ${e}`)
@@ -68,7 +76,7 @@ export const postUserEditInfo = async function (req, res, next) {
   const session = await startSession()
 
   try {
-    await session.withTransaction(async() => {
+    await session.withTransaction(async () => {
       const checkIdUnique = await User.isScreenIdUnique(screenId, session)
       if (checkIdUnique || screenId === originalData.screenId) {
         const newerUserData = {
@@ -81,9 +89,9 @@ export const postUserEditInfo = async function (req, res, next) {
           banner,
           profile,
         }
-  
+
         await User.updateProfile(newerUserData, session)
-  
+
         console.log(`[INGO] 유저 ${res.locals.uid}가 프로필을 수정했습니다.`)
         return res.status(200).json({
           result: 'ok',
@@ -95,7 +103,7 @@ export const postUserEditInfo = async function (req, res, next) {
         )
         return next(createError(400, '중복된 screenId 입니다.'))
       }
-    }) 
+    })
   } catch (e) {
     console.error(`[Error] ${e}`)
     return next(createError(500, '알 수 없는 에러가 발생했습니다.'))
@@ -134,7 +142,7 @@ export const changePass = async function (req, res, next) {
   if (userPw !== userPwNew) {
     if (userPwNew === userPwNewRe) {
       try {
-        await session.withTransaction(async() => {
+        await session.withTransaction(async () => {
           const originalUserData = await User.getUserInfo(uid).session(session)
           const saltNew = await randomBytesPromise(64)
           const crypt_Pw = await crypto.pbkdf2Sync(
@@ -151,7 +159,7 @@ export const changePass = async function (req, res, next) {
             parseInt(process.env.RESULT_LENGTH),
             'sha512'
           )
-          
+
           const changeResult = await User.changePass(
             uid,
             crypt_Pw.toString('base64'),
@@ -159,7 +167,7 @@ export const changePass = async function (req, res, next) {
             saltNew.toString('base64'),
             session
           )
-  
+
           if (changeResult.ok === 1) {
             console.log(`[INFO] 유저 ${res.locals.uid} 가 비밀번호를 변경했습니다.`)
             return res.status(200).json({
@@ -211,7 +219,7 @@ export const deleteUser = async function (req, res, next) {
   const session = await startSession()
 
   try {
-    await session.withTransaction(async() => {
+    await session.withTransaction(async () => {
       const info = await User.getUserInfo(uid).session(session)
       const crypt_Pw = await crypto.pbkdf2Sync(
         userPw,
@@ -220,17 +228,17 @@ export const deleteUser = async function (req, res, next) {
         parseInt(process.env.RESULT_LENGTH),
         'sha512'
       )
-  
+
       // remove old images
       const originalData = await User.getUserInfo(res.locals.uid)
       const originalImages = [originalData.banner, originalData.profile]
       // console.log(originalImages)
       deleteImage(originalImages)
-  
+
       const deletion = await User.deleteUser(uid, crypt_Pw.toString('base64')).session(session)
-  
+
       if (deletion.ok === 1) {
-        if (deletion.deletedCount === 1) {
+        if (deletion.nModified === 1) {
           console.log(`[INFO] 유저 ${res.locals.uid} 가 탈퇴했습니다.`)
           return res.status(200).json({
             result: 'ok',

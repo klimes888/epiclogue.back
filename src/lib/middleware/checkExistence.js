@@ -62,7 +62,19 @@ export const checkExistence = async (req, res, next) => {
 
 // for follow, DM, mute, block
 export const checkUserExistence = async (req, res, next) => {
-  const userId = req.body.targetUserId || (await User.getIdByScreenId(req.params.screenId))
+  const userId = req.body.targetUserId
+
+  if (userId === undefined) {
+    // query: follow, params: myboard
+    const screenId = req.query.screenId || req.params.screenId
+    const userCheck = await User.findByScreenId(screenId)
+
+    if (userCheck && userCheck.deactivatedAt === null) {
+      return next()
+    } else {
+      return next(createError(404, '존재하지 않는 screenId를 입력했습니다.'))
+    }
+  }
 
   const userSchema = Joi.object({
     userId: Joi.string()
@@ -74,15 +86,15 @@ export const checkUserExistence = async (req, res, next) => {
     await userSchema.validateAsync({ userId })
   } catch (e) {
     console.log(
-      `[INFO] 유저 ${res.locals.uid} 가 유저 ObjectId에 적절하지 않은 값 ${userId} 길이(${userId.length}) 를 입력했습니다.`
+      `[INFO] 유저 ${res.locals.uid} 가 유저 ObjectId에 적절하지 않은 값 ${userId} 을 입력했습니다.`
     )
     return next(createError(400, '입력값이 적절하지 않습니다.'))
   }
 
   try {
-    const existence = await User.getById(userId)
+    const existence = await User.findOne({ _id: userId })
 
-    if (existence !== null) {
+    if (existence && existence.deactivatedAt === null) {
       // left is Object, right is String.
       if (existence._id.toString() === res.locals.uid) {
         console.log(`[INFO] 유저 ${res.locals.uid} 가 자신에게 데이터를 요청했습니다.`)
@@ -92,9 +104,9 @@ export const checkUserExistence = async (req, res, next) => {
       }
     } else {
       console.log(
-        `[INFO] 유저 ${res.locals.uid}가 존재하지 않는 유저 ${userId} 에게 접근하려 했습니다.`
+        `[INFO] 유저 ${res.locals.uid}가 존재하지 않거나 탈퇴한 유저 ${userId} 에게 접근하려 했습니다.`
       )
-      return next(createError(404, '존재하지 않는 데이터입니다.'))
+      return next(createError(404, '존재하지 않거나 탈퇴한 유저입니다.'))
     }
   } catch (e) {
     console.error(`[ERROR] 유저 존재 여부를 확인하는 중에 문제가 발생 했습니다. ${e}`)

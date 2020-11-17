@@ -21,6 +21,8 @@ import suggestRouter from './src/routes/suggest'
 import interactionRouter from './src/routes/interaction'
 import authRouter from './src/routes/auth'
 import notiRouter from './src/routes/notification'
+import myboardRouter from './src/routes/myboard'
+
 // utils
 import Database from './src/lib/database'
 import { logger, stream } from './src/configs/winston'
@@ -70,6 +72,7 @@ app.use('/interaction', interactionRouter)
 app.use('/search', searchRouter)
 app.use('/suggest', suggestRouter)
 app.use('/notification', notiRouter)
+app.use('/myboard', myboardRouter)
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec))
 
 // catch 404 and forward to error handler

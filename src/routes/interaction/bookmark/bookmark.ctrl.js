@@ -1,6 +1,8 @@
 import { Bookmark, React, Board, User } from '../../../models'
 import createError from 'http-errors'
 import { startSession } from 'mongoose'
+import { contentsWrapper } from '../../../lib/contentsWrapper'
+import makeNotification from '../../../lib/makeNotification'
 
 /* 
   This is bookmark router.
@@ -9,16 +11,20 @@ import { startSession } from 'mongoose'
 */
 
 export const getBookmarkList = async (req, res, next) => {
-  const screenId = req.query.screenId
+  // To use this code on /myboard/:screenId/bookmarks
+  const screenId = req.query.screenId || req.params.screenId
 
   try {
     const userInfo = await User.getIdByScreenId(screenId)
     const bookmarkSet = await Bookmark.getByUserId(userInfo._id)
-
+    const extractionSet = bookmarkSet.map(each => {
+      return each.board
+    })
+    const wrappedBookmarks = await contentsWrapper(res.locals.uid, extractionSet, 'Board', false)
     console.log(`[INFO] 유저 ${res.locals.uid}가 ${userInfo._id}의 북마크 리스트를 확인했습니다.`)
     return res.status(200).json({
       result: 'ok',
-      data: bookmarkSet,
+      data: wrappedBookmarks,
     })
   } catch (e) {
     console.error(`[Error] ${e}`)
@@ -27,19 +33,16 @@ export const getBookmarkList = async (req, res, next) => {
 }
 
 export const addBookmark = async function (req, res, next) {
-  const bookmarkData = {
+  const bookmarkSchema = new Bookmark({
     user: res.locals.uid,
     board: req.body.boardId,
-  }
-
-  const reactData = {
+  })
+  const reactSchema = new React({
     user: res.locals.uid,
     boardId: req.body.boardId,
     type: 'bookmark',
-  }
+  })
 
-  const bookmarkSchema = new Bookmark(bookmarkData)
-  const reactSchema = new React(reactData)
   const session = await startSession()
 
   try {
@@ -52,6 +55,8 @@ export const addBookmark = async function (req, res, next) {
       return next(createError(400, '입력값이 적절하지 않습니다.'))
     }
 
+    const targetData = await Board.findOne({ _id: req.body.boardId }, { writer: 1 })
+
     await session.withTransaction(async () => {
       await bookmarkSchema.save({ session })
       await reactSchema.save({ session })
@@ -60,7 +65,11 @@ export const addBookmark = async function (req, res, next) {
       await Board.countReact(req.body.boardId, 1).session(session)
 
       const bookmarkCount = await Board.getBookmarkCount(req.body.boardId).session(session)
-
+      await makeNotification({
+        targetUserId: targetData.writer,
+        targetType: 'Bookmark',
+        targetInfo: req.body.boardId
+      }, session)
       console.log(`[INFO] 유저 ${res.locals.uid}가 북마크에 ${req.body.boardId}를 추가했습니다.`)
       return res.status(201).json({
         result: 'ok',
