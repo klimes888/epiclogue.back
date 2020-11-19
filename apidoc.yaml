@@ -253,6 +253,13 @@ paths:
       - "boards"
       summary: "get boards for main page"
       description: ""
+      parameters:
+      - name: "type"
+        in: "query"
+        description: "projection type"
+        required: false
+        type: string
+        example: "Comic"
       responses:
         200:
           description: OK
