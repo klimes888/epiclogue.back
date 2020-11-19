@@ -196,14 +196,25 @@ export const postEditInfo = async function (req, res, next) {
 
 /* 유저마다 다르게 받아야 함 */
 export const getBoards = async (req, res, next) => {
+  const requestType = req.query.type
+  let option = {}
+  switch (requestType) {
+    case ('Illust'):
+      option.category = 0
+      break
+    case ('Comic'):
+      option.category = 1
+      break
+  }
+
   try {
-    const boardList = await Board.findAll() // 썸네일만 골라내는 작업 필요
-    const filterdBoardList = boardList.filter(each => {
+    const boardList = await Board.findAll(option) // 썸네일만 골라내는 작업 필요
+    const filteredBoardList = boardList.filter(each => {
       if (each.writer !== null) {
         return each
       }
     })
-    const wrappedData = await contentsWrapper(res.locals.uid, filterdBoardList, 'Board', false)
+    const wrappedData = await contentsWrapper(res.locals.uid, filteredBoardList, 'Board', false)
     console.log(`[INFO] 유저 ${res.locals.uid} 가 자신의 피드를 확인했습니다.`)
     return res.status(200).json({
       result: 'ok',
