@@ -4,9 +4,9 @@ import { getBookmarkList } from '../interaction/bookmark/bookmark.ctrl'
 import { contentsWrapper } from '../../lib/contentsWrapper'
 
 export const getMyboard = async (req, res, next) => {
-  const userId = await User.findOne({ screenId: req.params.screenId })
+  const userId = await models.User.findOne({ screenId: req.params.screenId })
   try {
-    const result = await User.getUserInfo(userId, {
+    const result = await models.User.getUserInfo(userId, {
       nickname: 1,
       intro: 1,
       screenId: 1,
