@@ -205,6 +205,8 @@ export const getBoards = async (req, res, next) => {
     case ('Comic'):
       option.category = 1
       break
+    default:
+      break
   }
 
   try {
