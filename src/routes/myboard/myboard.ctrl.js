@@ -64,7 +64,7 @@ export const allWorks = async (req, res, next) => {
       data: wrappedWorks,
     })
   } catch (e) {
-    console.error(e)
+    console.error(`[Error] ${e}`)
     next(createError(500, '알 수 없는 오류가 발생했습니다.'))
   }
 }
@@ -81,7 +81,7 @@ export const originals = async (req, res, next) => {
       data: wrappedContents,
     })
   } catch (e) {
-    console.error(`[ERROR] 알 수 없는 에러가 발생했습니다. ${e}`)
+    console.error(`[Error] ${e}`)
     return next(createError(500, '알 수 없는 에러가 발생했습니다.'))
   }
 }
@@ -98,7 +98,7 @@ export const secondaryWorks = async (req, res, next) => {
       data: wrappedContents,
     })
   } catch (e) {
-    console.error(`[ERROR] 알 수 없는 에러가 발생했습니다. ${e}`)
+    console.error(`[Error] ${e}`)
     return next(createError(500, '알 수 없는 에러가 발생했습니다.'))
   }
 }
