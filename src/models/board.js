@@ -131,7 +131,10 @@ board.statics.getByQuery = function (query) {
       category: 1,
       boardImg: 1,
     }
-  ).sort({ writeDate: 1, heartCount: 1 })
+  ).populate({
+    path: 'writer',
+    select: '_id screenId nickname profile',
+  }).sort({ writeDate: 1, heartCount: 1 })
 }
 
 board.statics.countFeedback = function (boardId, flag) {
