@@ -110,9 +110,7 @@ export const getFollow = async (req, res, next) => {
       const requestedData = await Follow.getFollowingList(userId._id)
       // filter if populated data is null
       const filteredData = requestedData.filter(data => {
-        if (data.targetUserId._id) {
-          return data
-        }
+        return data.targetUserId !== null
       })
       for (let eachData of filteredData) {
         eachData = eachData.toJSON()
@@ -129,9 +127,7 @@ export const getFollow = async (req, res, next) => {
       const requestedData = await Follow.getFollowerList(userId._id)
       // filter if populated data is null
       const filteredData = requestedData.filter(data => {
-        if (data.userId._id) {
-          return data
-        }
+        return data.userId !== null
       })
       for (let eachData of filteredData) {
         eachData = eachData.toJSON()
