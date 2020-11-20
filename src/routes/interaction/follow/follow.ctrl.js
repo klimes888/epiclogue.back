@@ -107,11 +107,14 @@ export const getFollow = async (req, res, next) => {
 
     const resultSet = []
     if (type === 'following') {
-      const _requestedData = await Follow.getFollowingList(userId._id)
-      const requestedData = _requestedData.filter(data => {
-        return data._id !== null
+      const requestedData = await Follow.getFollowingList(userId._id)
+      // filter if populated data is null
+      const filteredData = requestedData.filter(data => {
+        if (data.targetUserId._id) {
+          return data
+        }
       })
-      for (let eachData of requestedData) {
+      for (let eachData of filteredData) {
         eachData = eachData.toJSON()
         if (eachData.targetUserId._id.toString() === res.locals.uid) {
           eachData.targetUserId.following = 'me'
@@ -123,11 +126,14 @@ export const getFollow = async (req, res, next) => {
         resultSet.push(eachData.targetUserId)
       }
     } else if (type === 'follower') {
-      const _requestedData = await Follow.getFollowerList(userId._id)
-      const requestedData = _requestedData.filter(data => {
-        return data._id !== null
+      const requestedData = await Follow.getFollowerList(userId._id)
+      // filter if populated data is null
+      const filteredData = requestedData.filter(data => {
+        if (data.userId._id) {
+          return data
+        }
       })
-      for (let eachData of requestedData) {
+      for (let eachData of filteredData) {
         eachData = eachData.toJSON()
         if (eachData.userId._id.toString() === res.locals.uid) {
           eachData.userId.following = 'me'
