@@ -7,12 +7,9 @@ export const searchResult = async (req, res, next) => {
 
   try {
     const boardData = await Board.getByQuery(queryString)
-    const filteredData = boardData.filter(each => {
-      if (each.writer !== null) {
-        return each
-      }
+    const filteredData = boardData.filter(data => {
+      return data.writer !== null
     })
-
     console.log(`[INFO] 유저 ${res.locals.uid} 가 ${queryString} 을 검색했습니다.`)
     return res.status(200).json({
       result: 'ok',

@@ -82,7 +82,8 @@ board.statics.findAll = function (option) {
       category: 1,
       boardImg: 1,
     }
-  ).populate({
+  ).sort({ writeDate: 1, heartCount: 1 })
+  .populate({
     path: 'writer',
     // match: { deactivatedAt: { $type: 10 } }, // BSON type: 10 is null value. 
     select: '_id screenId nickname profile',

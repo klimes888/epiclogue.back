@@ -8,11 +8,13 @@ import { React } from '../../../models'
 export const getReact = async (req, res, next) => {
   try {
     const reactData = await React.getByBoardId(req.params.boardId)
-
+    const filteredData = reactData.filter(data => {
+      return data.user !== null
+    })
     console.log(`[INFO] 유저 ${res.locals.uid} 가 글 ${req.params.boardId} 의 반응내역을 확인합니다.`)
     return res.status(200).json({
       result: 'ok',
-      data: reactData,
+      data: filteredData,
     })
   } catch (e) {
     console.error(`[Error] ${e}`)

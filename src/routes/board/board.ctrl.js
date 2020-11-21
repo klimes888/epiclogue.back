@@ -212,9 +212,7 @@ export const getBoards = async (req, res, next) => {
   try {
     const boardList = await Board.findAll(option) // 썸네일만 골라내는 작업 필요
     const filteredBoardList = boardList.filter(each => {
-      if (each.writer !== null) {
-        return each
-      }
+      return each.writer !== null
     })
     const wrappedData = await contentsWrapper(res.locals.uid, filteredBoardList, 'Board', false)
     console.log(`[INFO] 유저 ${res.locals.uid} 가 자신의 피드를 확인했습니다.`)
