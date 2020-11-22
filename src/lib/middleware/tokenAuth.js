@@ -37,11 +37,11 @@ export const verifyToken = async (req, res, next) => {
         res.locals.uid = decoded.uid
         next()
       } else {
-        console.log(`[INFO] 인증 실패: 유저 ${res.locals.uid} 가 로그인을 시도했으나 이메일 인증이 완료되지 않았습니다.`)
+        console.log(`[INFO] 인증 실패: 유저 ${decoded.uid} 가 로그인을 시도했으나 이메일 인증이 완료되지 않았습니다.`)
         return next(createError(401, '이메일 인증이 완료되지 않았습니다.'))
       }
     } else {
-      console.log(`[INFO] 인증 실패: 유저 ${res.locals.uid} 가 로그인을 시도했으나 토큰의 유효기간이 만료되었거나 토큰이 없습니다.`)
+      console.log(`[INFO] 인증 실패: 유저 가 로그인을 시도했으나 토큰의 유효기간이 만료되었거나 토큰이 없습니다.`)
       return next(createError(401, '인증 실패: 적절하지 않은 인증입니다.'))
     }
   } catch (e) {
