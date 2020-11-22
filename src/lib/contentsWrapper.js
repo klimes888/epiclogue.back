@@ -30,7 +30,10 @@ export const contentsWrapper = async (reqUserId, contentData, contentType, isFor
           // like, following on feedbacks
           const feedbacks = []
           likeIdSet = await getLikeIdSet(reqUserId, 'Feedback')
-          for (let eachFeedback of contentData.feedbacks) {
+          const filteredFeedbacks = contentData.feedbacks.filter(each => {
+            return each.writer !== null
+          })
+          for (let eachFeedback of filteredFeedbacks) {
             eachFeedback.liked = likeIdSet.includes(eachFeedback._id.toString()) ? true : false
             eachFeedback.writer.following = followingIdSet.includes(
               eachFeedback.writer._id.toString()
@@ -43,7 +46,11 @@ export const contentsWrapper = async (reqUserId, contentData, contentType, isFor
         } else {
           /* For many, small viewers */
           const resultSet = []
-          for (let data of contentData) {
+          // null check
+          const filteredData = contentData.filter(each => {
+            return each.writer !== null
+          })
+          for (let data of filteredData) {
             data = data.toJSON()
             data.bookmarked = bookmarkIdSet.includes(data._id.toString())
               ? true
@@ -70,7 +77,10 @@ export const contentsWrapper = async (reqUserId, contentData, contentType, isFor
         /* following, like on feedbacks and replies */
         const likeIdSet = await getLikeIdSet(reqUserId, contentType)
         const resultSet = []
-        for (let data of contentData) {
+        const filteredData = contentData.filter(each => {
+          return each.writer !== null
+        })
+        for (let data of filteredData) {
           data = data.toJSON()
           data.liked = likeIdSet.includes(data._id.toString()) ? true : false
           if (data.writer._id.toString() === reqUserId) {
