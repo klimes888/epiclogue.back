@@ -19,6 +19,8 @@ export const contentsWrapper = async (reqUserId, contentData, contentType, isFor
           /* For large viewer */
           contentData = contentData.toJSON()
           // like, bookmark, following on board
+          // null check
+          
           contentData.liked = likeIdSet.includes(contentData._id.toString()) ? true : false
           contentData.bookmarked = bookmarkIdSet.includes(contentData._id.toString()) ? true : false
           contentData.writer.following = followingIdSet.includes(contentData.writer._id.toString())

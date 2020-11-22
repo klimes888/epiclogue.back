@@ -1,3 +1,4 @@
+import createError from 'http-errors'
 import { User, Board } from '../../models'
 import { contentsWrapper } from '../../lib/contentsWrapper'
 
