@@ -225,3 +225,79 @@ export const getBoards = async (req, res, next) => {
     return next(createError(500, '알 수 없는 에러가 발생했습니다.'))
   }
 }
+
+export const secPost = async (req, res, next) => {
+  let _boardImg = []
+  for (let i = 0; i < req.files.length; i++) {
+    _boardImg.push(req.files[i].location)
+  }
+
+  let tags = ''
+  if (req.body.boardBody) {
+    tags = req.body.boardBody.match(/#[^\{\}\[\]\/?.,;:|\)*~`!^\-+<>@\#$%&\\\=\(\'\"\s]+/g)
+  }
+
+  const boardData = {
+    writer: res.locals.uid,
+    boardTitle: req.body.boardTitle,
+    boardBody: req.body.boardBody,
+    category: req.body.category,
+    pub: req.body.pub,
+    lanuage: req.body.lanuage,
+    boardImg: _boardImg,
+    originUserId: req.body.originUserId,
+    originBoardId: req.body.originBoardId,
+    tags,
+  }
+
+  const boardSchema = Joi.object({
+    writer: Joi.string()
+      .regex(/^[a-fA-F0-9]{24}$/)
+      .required(),
+    boardTitle: Joi.string().min(2).max(30).required(),
+    boardImg: Joi.array().items(Joi.string().required()).required(),
+    category: Joi.number().min(0).max(2).required(),
+    pub: Joi.number().min(0).max(2).required(),
+    originUserId: Joi.string()
+    .regex(/^[a-fA-F0-9]{24}$/)
+    .required(),
+    originBoardId: Joi.string()
+    .regex(/^[a-fA-F0-9]{24}$/)
+    .required(),
+  })
+
+  try {
+    await boardSchema.validateAsync({
+      writer: boardData.writer,
+      boardImg: boardData.boardImg,
+      boardTitle: boardData.boardTitle,
+      category: boardData.category,
+      pub: boardData.pub,
+      originUserId: boardData.originUserId,
+      originBoardId: boardData.originBoardId,
+    })
+  } catch (e) {
+    // 이미지를 S3에 올린 이후에 DB에 저장하므로 이를 삭제합니다.
+    if (boardData.boardImg.length > 0) {
+      deleteImage(boardData.boardImg)
+    }
+
+    console.log(
+      `[INFO] 유저 ${res.locals.uid} 가 적절하지 않은 데이터로 글을 작성하려 했습니다. ${e}`
+    )
+    return next(createError(400, '입력값이 적절하지 않습니다.'))
+  }
+
+  try {
+    const createdBoard = await Board.create(boardData)
+
+    console.log(`[INFO] 유저 ${boardData.writer}가 글 ${createdBoard._id}를 작성했습니다.`)
+    return res.status(201).json({ 
+      result: 'ok', 
+      data: { _id: createdBoard._id } 
+    })
+  } catch (e) {
+    console.error(`[ERROR] ${e}`)
+    return next(createError(500, '알 수 없는 에러가 발생했습니다.'))
+  }
+}
