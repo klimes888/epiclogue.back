@@ -1,5 +1,6 @@
 import { Reply, Feedback } from '../../../../models'
 import { contentsWrapper } from '../../../../lib/contentsWrapper'
+import makeNotification from '../../../../lib/makeNotification'
 import Joi from 'joi'
 import createError from 'http-errors'
 import { startSession } from 'mongoose'
@@ -43,6 +44,15 @@ export const postReply = async (req, res, next) => {
       await Feedback.getReply(req.params.feedbackId, replyData._id).session(session)
       const newerReplies = await Reply.getByParentId(replyForm.parentId).session(session)
       const wrappedReplies = await contentsWrapper(res.locals.uid, newerReplies, 'Reply', false)
+      const feedbackData = await Feedback.findOne({ _id: req.params.feedbackId }, { writer: 1 })
+      /* 자기 자신에게는 알림을 보내지 않음 */
+      if (feedbackData.writer.toString() !== res.locals.uid) {
+        await makeNotification({
+          targetUserId: feedbackData.writer,
+          targetType: 'Reply',
+          targetInfo: req.params.feedbackId
+        }, session)
+      }
       console.log(`[INFO] 유저 ${res.locals.uid} 가 댓글 ${replyData._id} 를 작성했습니다.`)
       return res.status(201).json({
         result: 'ok',

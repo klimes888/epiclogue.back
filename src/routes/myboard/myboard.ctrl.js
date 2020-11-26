@@ -7,6 +7,7 @@ export const getMyboard = async (req, res, next) => {
   const userId = await models.User.findOne({ screenId: req.params.screenId })
   try {
     let result = await models.User.getUserInfo(userId, {
+
       nickname: 1,
       intro: 1,
       screenId: 1,

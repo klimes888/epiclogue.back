@@ -1,10 +1,13 @@
 import express from 'express'
 import * as notiCtrl from './notification.ctrl'
-import {verifyToken} from '../../lib/middleware/tokenAuth'
+import { verifyToken } from '../../lib/middleware/tokenAuth'
 const noti = express.Router({
   mergeParams: true,
 })
 
-noti.get('/:targetId', verifyToken, notiCtrl.getNoti)
+noti.get('/', verifyToken, notiCtrl.getNoti)
+noti.patch('/:notiId', verifyToken, notiCtrl.setRead)
+noti.delete('/:notiId', verifyToken, notiCtrl.deleteNoti)
+noti.patch('/all', verifyToken, notiCtrl.setReadAll)
 
 export default noti
