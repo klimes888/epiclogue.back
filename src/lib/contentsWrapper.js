@@ -37,9 +37,13 @@ export const contentsWrapper = async (reqUserId, contentData, contentType, isFor
           })
           for (let eachFeedback of filteredFeedbacks) {
             eachFeedback.liked = likeIdSet.includes(eachFeedback._id.toString()) ? true : false
-            eachFeedback.writer.following = followingIdSet.includes(
-              eachFeedback.writer._id.toString()
-            )
+            if (eachFeedback.writer._id.toString() === reqUserId) {
+              eachFeedback.writer.following = 'me'
+            } else {
+              eachFeedback.writer.following = followingIdSet.includes(
+                eachFeedback.writer._id.toString()
+              )
+            }
             feedbacks.push(eachFeedback)
           }
           contentData.feedbacks = feedbacks
