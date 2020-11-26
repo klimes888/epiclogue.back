@@ -18,7 +18,7 @@ const board = new mongoose.Schema({
   reactCount: { type: Number, default: 0 },
   tags: { type: [String] },
   originUserId: { type: ObjectId, ref: 'User' },
-  originBoardId: { type: ObjectId, ref: 'Baord' },
+  originBoardId: { type: ObjectId, ref: 'Board' },
   edited: { type: Boolean, default: false },
 })
 
