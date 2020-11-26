@@ -311,6 +311,48 @@ paths:
       security:
         - access_token: []
     
+  /boards/sec:
+    post:
+      tags:
+      - "boards"
+      summary: "post sec board to server"
+      description: ""
+      parameters:
+      - name: "Body"
+        in: "body"
+        required: true
+        description: "board info body"
+        schema:
+          type: object
+          properties:
+            boardTitle:
+              type: string
+            boardBody:
+              type: string
+            category:
+              type: number
+            pub:
+              type: number
+            language:
+              type: string
+            boardImg:
+              type: array
+              items:
+                type: string
+            originUserId:
+              type: string
+            originboardId:
+              type: string
+      responses:
+        201:
+          description: OK
+        500:
+          description: ERROR
+          schema:
+            $ref: '#/definitions/API_response_error'
+      security:
+        - access_token: []
+
   /boards/{boardUid}:
     get:
       tags:

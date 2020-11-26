@@ -17,8 +17,8 @@ const board = new mongoose.Schema({
   bookmarkCount: { type: Number, default: 0 },
   reactCount: { type: Number, default: 0 },
   tags: { type: [String] },
-  originUserId: { type: ObjectId },
-  originBoardId: { type: ObjectId },
+  originUserId: { type: ObjectId, ref: 'User' },
+  originBoardId: { type: ObjectId, ref: 'Baord' },
   edited: { type: Boolean, default: false },
 })
 
@@ -36,6 +36,8 @@ board.statics.getById = function (boardId, option) {
       populate: { path: 'writer', select: '_id screenId nickname profile' },
     })
     .populate({ path: 'writer', select: '_id screenId nickname profile' })
+    .populate({ path: 'originUserId', select: '_id screenId nickname profile' })
+    .populate({ path: 'originBoardId', select: '_id boardTitle boardBody boardImg'})
 }
 
 /* 특정 유저의 글 GET (미검증) */

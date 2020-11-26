@@ -10,6 +10,7 @@ import {uploadImage} from '../../lib/imageCtrl'
 
 board.get('/', verifyToken, boardCtrl.getBoards)
 board.post('/', verifyToken, uploadImage.any(), boardCtrl.postBoard)
+board.post('/sec', verifyToken, boardCtrl.secPost)
 board.get('/:boardId', verifyToken, checkExistence, boardCtrl.viewBoard)
 board.delete('/:boardId', verifyToken, checkExistence, checkWriter, boardCtrl.deleteBoard)
 board.get('/:boardId/edit', verifyToken, checkExistence, checkWriter, boardCtrl.getEditInfo)
