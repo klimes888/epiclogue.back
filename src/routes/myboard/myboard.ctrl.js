@@ -90,7 +90,7 @@ export const secondaryWorks = async (req, res, next) => {
   try {
     const targetUser = await models.User.findOne({ screenId: req.params.screenId }, { _id: 1 })
     const secondaryWorks = await models.Board.findAllSecondaryWorks( targetUser._id )
-    const wrappedContents = await contentsWgetBookmarkListrapper(res.locals.uid, secondaryWorks, 'Board', false)
+    const wrappedContents = await contentsWrapper(res.locals.uid, secondaryWorks, 'Board', false)
 
     console.log(`[INFO] 유저 ${res.locals.uid} 가 유저 ${targetUser._id} 의 2차창작들을 확인합니다.`)
     return res.status(200).json({

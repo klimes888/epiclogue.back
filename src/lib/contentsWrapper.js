@@ -80,7 +80,7 @@ export const contentsWrapper = async (reqUserId, contentData, contentType, isFor
         const likeIdSet = await getLikeIdSet(reqUserId, contentType)
         const resultSet = []
         const filteredData = contentData.filter(each => {
-          return each.writer !== null
+          return each.writer !== nullw
         })
         for (let data of filteredData) {
           data = data.toJSON()

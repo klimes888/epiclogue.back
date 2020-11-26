@@ -300,7 +300,7 @@ paths:
             boardImg:
               type: array
               items:
-                type: string
+                type: number
       responses:
         201:
           description: OK
