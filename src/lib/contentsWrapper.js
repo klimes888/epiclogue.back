@@ -19,6 +19,8 @@ export const contentsWrapper = async (reqUserId, contentData, contentType, isFor
           /* For large viewer */
           contentData = contentData.toJSON()
           // like, bookmark, following on board
+          // null check
+          
           contentData.liked = likeIdSet.includes(contentData._id.toString()) ? true : false
           contentData.bookmarked = bookmarkIdSet.includes(contentData._id.toString()) ? true : false
           contentData.writer.following = followingIdSet.includes(contentData.writer._id.toString())
@@ -30,7 +32,10 @@ export const contentsWrapper = async (reqUserId, contentData, contentType, isFor
           // like, following on feedbacks
           const feedbacks = []
           likeIdSet = await getLikeIdSet(reqUserId, 'Feedback')
-          for (let eachFeedback of contentData.feedbacks) {
+          const filteredFeedbacks = contentData.feedbacks.filter(each => {
+            return each.writer !== null
+          })
+          for (let eachFeedback of filteredFeedbacks) {
             eachFeedback.liked = likeIdSet.includes(eachFeedback._id.toString()) ? true : false
             eachFeedback.writer.following = followingIdSet.includes(
               eachFeedback.writer._id.toString()
@@ -43,26 +48,30 @@ export const contentsWrapper = async (reqUserId, contentData, contentType, isFor
         } else {
           /* For many, small viewers */
           const resultSet = []
-          for (const data of contentData) {
-            const eachBoardData = data.toJSON()
-            eachBoardData.bookmarked = bookmarkIdSet.includes(eachBoardData._id.toString())
+          // null check
+          const filteredData = contentData.filter(each => {
+            return each.writer !== null
+          })
+          for (let data of filteredData) {
+            data = data.toJSON()
+            data.bookmarked = bookmarkIdSet.includes(data._id.toString())
               ? true
               : false
-            eachBoardData.liked = likeIdSet.includes(eachBoardData._id.toString()) ? true : false
+            data.liked = likeIdSet.includes(data._id.toString()) ? true : false
             // If get boards from board router
-            if (eachBoardData.writer && eachBoardData.writer._id.toString() === reqUserId) {
-              eachBoardData.writer.following = 'me'
+            if (data.writer && data.writer._id.toString() === reqUserId) {
+              data.writer.following = 'me'
             // If get boards from bookmark router
-            } else if (eachBoardData.user && eachBoardData.user._id.toString() === reqUserId) {
-              eachBoardData.user.following = 'me'
+            } else if (data.user && data.user._id.toString() === reqUserId) {
+              data.user.following = 'me'
             } else {
-              eachBoardData.writer.following = followingIdSet.includes(
-                eachBoardData.writer._id.toString()
+              data.writer.following = followingIdSet.includes(
+                data.writer._id.toString()
               )
                 ? true
                 : false
             }
-            resultSet.push(eachBoardData)
+            resultSet.push(data)
           }
           resolve(resultSet)
         }
@@ -70,7 +79,10 @@ export const contentsWrapper = async (reqUserId, contentData, contentType, isFor
         /* following, like on feedbacks and replies */
         const likeIdSet = await getLikeIdSet(reqUserId, contentType)
         const resultSet = []
-        for (let data of contentData) {
+        const filteredData = contentData.filter(each => {
+          return each.writer !== null
+        })
+        for (let data of filteredData) {
           data = data.toJSON()
           data.liked = likeIdSet.includes(data._id.toString()) ? true : false
           if (data.writer._id.toString() === reqUserId) {
@@ -84,7 +96,7 @@ export const contentsWrapper = async (reqUserId, contentData, contentType, isFor
         }
         resolve(resultSet)
       }
-    } else { /* if contentData is [] or {} */
+    } else {
       resolve([])
     }
   })

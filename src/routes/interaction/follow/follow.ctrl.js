@@ -114,7 +114,11 @@ export const getFollow = async (req, res, next) => {
     const resultSet = []
     if (type === 'following') {
       const requestedData = await Follow.getFollowingList(userId._id)
-      for (let eachData of requestedData) {
+      // filter if populated data is null
+      const filteredData = requestedData.filter(data => {
+        return data.targetUserId !== null
+      })
+      for (let eachData of filteredData) {
         eachData = eachData.toJSON()
         if (eachData.targetUserId._id.toString() === res.locals.uid) {
           eachData.targetUserId.following = 'me'
@@ -127,7 +131,11 @@ export const getFollow = async (req, res, next) => {
       }
     } else if (type === 'follower') {
       const requestedData = await Follow.getFollowerList(userId._id)
-      for (let eachData of requestedData) {
+      // filter if populated data is null
+      const filteredData = requestedData.filter(data => {
+        return data.userId !== null
+      })
+      for (let eachData of filteredData) {
         eachData = eachData.toJSON()
         if (eachData.userId._id.toString() === res.locals.uid) {
           eachData.userId.following = 'me'

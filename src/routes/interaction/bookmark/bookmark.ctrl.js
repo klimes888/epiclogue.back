@@ -18,7 +18,9 @@ export const getBookmarkList = async (req, res, next) => {
     const userInfo = await User.getIdByScreenId(screenId)
     const bookmarkSet = await Bookmark.getByUserId(userInfo._id)
     const extractionSet = bookmarkSet.map(each => {
-      return each.board
+      if (each.board._id) {
+        return each.board
+      }
     })
     const wrappedBookmarks = await contentsWrapper(res.locals.uid, extractionSet, 'Board', false)
     console.log(`[INFO] 유저 ${res.locals.uid}가 ${userInfo._id}의 북마크 리스트를 확인했습니다.`)

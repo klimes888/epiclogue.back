@@ -73,7 +73,7 @@ export const emailText = (email, auth_token) => {
                   </tr>
                                   <tr style="margin: 0; padding: 0;">
                       <td style="margin: 0; padding: 0;">
-                          <a href="https://api.epiclogue.tk/auth/mailAuth?email=${email}&token=${auth_token}" style="margin: 0; padding: 0;"><button class="button" style="margin: 0; padding: 0; all: unset; display: inline-block; width: 70%; height: 42px; background: rgba(21, 146, 230, 0.8); border-radius: 25px; font-size: 16px; font-weight: 700; line-height: 42px; text-decoration: none; color: #fff;">인증하기</button></a>
+                          <a href="https://front.epiclogue.tk/auth/auth?email=${email}&token=${auth_token}" style="margin: 0; padding: 0;"><button class="button" style="margin: 0; padding: 0; all: unset; display: inline-block; width: 70%; height: 42px; background: rgba(21, 146, 230, 0.8); border-radius: 25px; font-size: 16px; font-weight: 700; line-height: 42px; text-decoration: none; color: #fff;">인증하기</button></a>
                       </td>
                   </tr>
                                                   <tr style="margin: 0; padding: 0;">

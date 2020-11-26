@@ -82,7 +82,8 @@ board.statics.findAll = function (option) {
       category: 1,
       boardImg: 1,
     }
-  ).populate({
+  ).sort({ writeDate: 1, heartCount: 1 })
+  .populate({
     path: 'writer',
     // match: { deactivatedAt: { $type: 10 } }, // BSON type: 10 is null value. 
     select: '_id screenId nickname profile',
@@ -125,13 +126,16 @@ board.statics.getByQuery = function (query) {
     { $or: [{ boardTitle: { $regex: query } }, { tags: query }] },
     {
       _id: 1,
-      boardTitle: 1,  originUserId: { type: ObjectId },
+      boardTitle: 1,
       uid: 1,
       pub: 1,
       category: 1,
       boardImg: 1,
     }
-  ).sort({ writeDate: 1, heartCount: 1 })
+  ).populate({
+    path: 'writer',
+    select: '_id screenId nickname profile',
+  }).sort({ writeDate: 1, heartCount: 1 })
 }
 
 board.statics.countFeedback = function (boardId, flag) {

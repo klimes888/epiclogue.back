@@ -19,7 +19,7 @@ export const verifyToken = async (req, res, next) => {
     try {
       await tokenSchema.validateAsync({ token: clientToken })
     } catch (e) {
-      console.log(`[INFO] 인증 실패: 유저의 토큰이 누락되었거나 적절하지 않습니다. ip: ${req.headers['x-forwarded-for'] ||  req.connection.remoteAddress} token: ${clientToken}`)
+      console.log(`[INFO] 인증 실패: 유저의 토큰이 누락되었거나 적절하지 않습니다. ip: ${req.headers['x-forwarded-for'] ||  req.connection.remoteAddress} token: ${JSON.stringify(clientToken)}`)
       return next(createError(401, '인증 실패: 적절하지 않은 인증입니다.'))
     }
 
@@ -28,7 +28,7 @@ export const verifyToken = async (req, res, next) => {
     try {
       decoded = await jwt.verify(clientToken, SECRET_KEY)
     } catch (e) {
-      console.log(`[INFO] 인증 실패: 손상된 토큰을 사용하였습니다. ip: ${req.headers['x-forwarded-for'] ||  req.connection.remoteAddress} token: ${clientToken}`)
+      console.log(`[INFO] 인증 실패: 손상된 토큰을 사용하였습니다. ip: ${req.headers['x-forwarded-for'] ||  req.connection.remoteAddress} token: ${JSON.stringify(clientToken)}`)
       return next(createError(401, '인증 실패: 적절하지 않은 인증입니다.'))
     }
 
@@ -37,11 +37,11 @@ export const verifyToken = async (req, res, next) => {
         res.locals.uid = decoded.uid
         next()
       } else {
-        console.log(`[INFO] 인증 실패: 유저 ${res.locals.uid} 가 로그인을 시도했으나 이메일 인증이 완료되지 않았습니다.`)
+        console.log(`[INFO] 인증 실패: 유저 ${decoded.uid} 가 로그인을 시도했으나 이메일 인증이 완료되지 않았습니다.`)
         return next(createError(401, '이메일 인증이 완료되지 않았습니다.'))
       }
     } else {
-      console.log(`[INFO] 인증 실패: 유저 ${res.locals.uid} 가 로그인을 시도했으나 토큰의 유효기간이 만료되었거나 토큰이 없습니다.`)
+      console.log(`[INFO] 인증 실패: 유저 ${req.headers['x-forwarded-for'] ||  req.connection.remoteAddress} 가 로그인을 시도했으나 토큰의 유효기간이 만료되었거나 토큰이 없습니다.`)
       return next(createError(401, '인증 실패: 적절하지 않은 인증입니다.'))
     }
   } catch (e) {

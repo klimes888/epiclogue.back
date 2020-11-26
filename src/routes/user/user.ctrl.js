@@ -54,7 +54,7 @@ export const postUserEditInfo = async function (req, res, next) {
 
   if (req.files !== undefined) {
     if (req.files.length > 1) {
-      if (req.files[0].fieldname == 'userBannerImg') {
+      if (req.files[0].fieldname == 'banner') {
         banner = req.files[0].location
         profile = req.files[1].location
       } else {
@@ -62,7 +62,7 @@ export const postUserEditInfo = async function (req, res, next) {
         profile = req.files[0].location
       }
     } else if (req.files.length == 1) {
-      if (req.files[0].fieldname == 'userBannerImg') {
+      if (req.files[0].fieldname == 'banner') {
         banner = req.files[0].location
       } else {
         profile = req.files[0].location
@@ -168,13 +168,13 @@ export const changePass = async function (req, res, next) {
             session
           )
 
-          if (changeResult.ok === 1) {
+          if (changeResult.nModified == 1) {
             console.log(`[INFO] 유저 ${res.locals.uid} 가 비밀번호를 변경했습니다.`)
             return res.status(200).json({
               result: 'ok',
               message: '비밀번호 변경 완료',
             })
-          } else if (changeResult.ok !== 1) {
+          } else if (changeResult.nModified != 1) {
             console.error(
               `[ERROR] 유저 ${res.locals.uid} 의 비밀번호 변경이 실패했습니다: 데이터베이스 질의에 실패했습니다.`
             )
