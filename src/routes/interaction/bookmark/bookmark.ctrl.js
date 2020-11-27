@@ -67,11 +67,17 @@ export const addBookmark = async function (req, res, next) {
       await Board.countReact(req.body.boardId, 1).session(session)
 
       const bookmarkCount = await Board.getBookmarkCount(req.body.boardId).session(session)
-      await makeNotification({
-        targetUserId: targetData.writer,
-        targetType: 'Bookmark',
-        targetInfo: req.body.boardId
-      }, session)
+      
+      // Make notification if requester is not a writer
+      if (targetData.writer.toString() !== res.locals.uid) {
+        await makeNotification({
+          targetUserId: targetData.writer,
+          notificationType: 'Bookmark',
+          targetType: 'Board',
+          targetInfo: req.body.boardId
+        }, session)
+      }
+
       console.log(`[INFO] 유저 ${res.locals.uid}가 북마크에 ${req.body.boardId}를 추가했습니다.`)
       return res.status(201).json({
         result: 'ok',
