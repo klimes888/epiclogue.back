@@ -28,7 +28,7 @@ const makeNotification = async ({ targetUserId, targetType, targetInfo }, sessio
       })
       .save({ session })
   } else {
-    throw new Error('지정된 타입이 아닙니다.')
+    throw new Error(`지정된 타입이 아닙니다. ${targetType}`)
   }
 }
 
