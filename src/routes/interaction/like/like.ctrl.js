@@ -60,7 +60,7 @@ export const addLike = async (req, res, next) => {
       if (targetData.writer.toString() !== res.locals.uid) {
         await makeNotification({
           targetUserId: targetData.writer,
-          targetType: targetType,
+          targetType: 'Like',
           targetInfo: targetInfo
         }, session)
       }
