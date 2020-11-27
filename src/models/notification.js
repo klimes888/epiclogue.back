@@ -18,7 +18,7 @@ const notification = new mongoose.Schema({
   notificationType: {
     type: String,
     requred: true,
-    enum: ['Feedback', 'Reply', 'Mention', 'Bookmark', 'Follow', 'Like', 'Translate'],
+    enum: ['Notice', 'Bookmark', 'Follow', 'Feedback', 'Reply', 'Like', 'Mention', 'Secondary'],
   },
   targetType: {
     type: String,
@@ -40,7 +40,7 @@ notification.statics.setReadAll = function (userId) {
   return this.updateMany({ userId }, { $set: { read: true } })
 }
 
-// (deprecated) 한 개 읽음 
+// (deprecated) 한 개 읽음
 notification.statics.setRead = function (notificationId) {
   return this.updateOne({ _id: notificationId }, { read: true })
 }

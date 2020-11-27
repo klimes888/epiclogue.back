@@ -1,5 +1,6 @@
 import * as models from '../models'
 
+// 아래의 행동에 의해 알림이 만들어집니다. 커스텀 알림은 Notice의 형태로 만들 예정입니다.
 const availableTypes = [
   'Notice',
   'Bookmark',
@@ -12,23 +13,25 @@ const availableTypes = [
 ]
 
 /**
- * Integrated notification generator.
+ * Notification generator.
  *
  * @param {Mongoose.ObjectId} targetUserId - ObjectId who will receive notification.
- * @param {string} targetType - Notification type. This can be ['Notice', 'Follow', 'Feedback', 'Reply', 'Like', 'Mention', 'Secondary', 'Custom']
- * @param {Mongoose.ObjectId} targetInfo - ObjectId for link
+ * @param {String} notificationType - Notification type.
+ * @param {string} targetType - Notification type.
+ * @param {Mongoose.ObjectId} targetInfo - ObjectId for link.
  */
-const makeNotification = async ({ targetUserId, targetType, targetInfo }, session) => {
-  if (availableTypes.includes(targetType)) {
+const makeNotification = async ({ targetUserId, notificationType, targetType, targetInfo }, session) => {
+  if (availableTypes.includes(notificationType)) {
     await models
       .Notification({
         userId: targetUserId,
+        notificationType: notificationType,
         targetType: targetType,
         targetInfo: targetInfo,
       })
       .save({ session })
   } else {
-    throw new Error(`지정된 타입이 아닙니다. ${targetType}`)
+    throw new Error(`지정된 타입이 아닙니다: ${notificationType}`)
   }
 }
 

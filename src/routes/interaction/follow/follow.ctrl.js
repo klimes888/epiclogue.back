@@ -33,7 +33,8 @@ export const addFollow = async (req, res, next) => {
       await User.countFollower(followData.targetUserId, 1).session(session)
       await makeNotification({
         targetUserId: req.body.targetUserId,
-        targetType: 'Follow',
+        notificationType: 'Follow',
+        targetType: 'User',
         targetInfo: res.locals.uid
       }, session)
 
