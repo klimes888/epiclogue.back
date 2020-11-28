@@ -83,6 +83,7 @@ board.statics.findAll = function (option) {
       pub: 1,
       category: 1,
       boardImg: 1,
+      originUserId: 1
     }
   ).sort({ writeDate: 1, heartCount: 1 })
   .populate({
