@@ -7,7 +7,6 @@ export const getMyboard = async (req, res, next) => {
   const userId = await models.User.findOne({ screenId: req.params.screenId })
   try {
     let result = await models.User.getUserInfo(userId, {
-
       nickname: 1,
       intro: 1,
       screenId: 1,
@@ -15,7 +14,7 @@ export const getMyboard = async (req, res, next) => {
       profile: 1,
       followerCount: 1,
       followingCount: 1,
-      joinDate: 1
+      joinDate: 1,
     })
 
     result = result.toJSON()
@@ -23,7 +22,10 @@ export const getMyboard = async (req, res, next) => {
     if (res.locals.uid === result._id.toString()) {
       result.isFollowing = 'me'
     } else {
-      const isFollowing = await models.Follow.findOne({ userId: res.locals.uid, targetUserId: userId })
+      const isFollowing = await models.Follow.findOne({
+        userId: res.locals.uid,
+        targetUserId: userId,
+      })
       // const isFollower = await models.Follow.findOne({ userId: userId, targetUserId: res.locals.uid })
       if (isFollowing) {
         result.isFollowing = true
@@ -90,10 +92,12 @@ export const originals = async (req, res, next) => {
 export const secondaryWorks = async (req, res, next) => {
   try {
     const targetUser = await models.User.findOne({ screenId: req.params.screenId }, { _id: 1 })
-    const secondaryWorks = await models.Board.findAllSecondaryWorks( targetUser._id )
+    const secondaryWorks = await models.Board.findAllSecondaryWorks(targetUser._id)
     const wrappedContents = await contentsWrapper(res.locals.uid, secondaryWorks, 'Board', false)
 
-    console.log(`[INFO] 유저 ${res.locals.uid} 가 유저 ${targetUser._id} 의 2차창작들을 확인합니다.`)
+    console.log(
+      `[INFO] 유저 ${res.locals.uid} 가 유저 ${targetUser._id} 의 2차창작들을 확인합니다.`
+    )
     return res.status(200).json({
       result: 'ok',
       data: wrappedContents,
