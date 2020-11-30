@@ -32,7 +32,7 @@ const notification = new mongoose.Schema({
 
 // 알림목록
 notification.statics.getNotiList = function (userId) {
-  return this.find({ userId }).sort({ createdAt: 1 })
+  return this.find({ userId }).sort({ createdAt: -1 })
 }
 
 // 전체 읽음
