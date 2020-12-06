@@ -18,6 +18,17 @@ import transporter, { emailText } from '../../lib/sendMail'
 
 dotenv.config()
 
+export const snsLogin = async function (req, res, next) {
+  const userData = req.body.userData
+  const snsType = req.body.snsType
+  console.log(userData, snsType)
+
+  // 유저 존재여부 확인 후 있으면 db 저장, 없으면 바로 로그인 처리 조건문 요구
+  // db에 추가되는 sns유저 정보는 아래와 같음
+  // email, token, nickname, snsType
+  // sns유저는 회원가입 절차가 없으므로 기존의 이메일 인증토큰용 컬럼을 재활용
+}
+
 export const login = async function (req, res, next) {
   const email = req.body['email']
   const userPw = req.body['userPw']
