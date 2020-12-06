@@ -142,7 +142,46 @@ paths:
           description: ERROR
       security:
         - access_token: []
-    
+  /auth/snsLogin:
+    post:
+      tags:
+      - "auth"
+      summary: "for sns login"
+      description: ""
+      parameters:
+      - name: "Body"
+        in: "body"
+        description: "params for login"
+        required: true
+        schema:
+          type: object
+          properties:
+            userData:
+              type: object
+              properties:
+                token:
+                  type: string
+                email:
+                  type: string
+                nickname:
+                  type: string
+            snsType:
+              type: string
+      responses:
+        201:
+          description: OK
+          schema:
+            type: object
+            properties:
+              result:
+                type: string
+                example: "ok"
+              token:
+                type: string
+              nick:
+                type: string
+              screenId:
+                type: string
   /auth/login:
     post:
       tags:
