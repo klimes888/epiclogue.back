@@ -31,6 +31,7 @@ export const addFollow = async (req, res, next) => {
       await followSchema.save({ session })
       await makeNotification({
         targetUserId: req.body.targetUserId,
+        maker: res.locals.uid,
         notificationType: 'Follow',
         targetType: 'User',
         targetInfo: res.locals.uid
