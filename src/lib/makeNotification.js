@@ -20,14 +20,19 @@ const availableTypes = [
  * @param {string} targetType - Notification type.
  * @param {Mongoose.ObjectId} targetInfo - ObjectId for link.
  */
-const makeNotification = async ({ targetUserId, notificationType, targetType, targetInfo }, session) => {
+const makeNotification = async (
+  { targetUserId, maker, notificationType, targetType, targetInfo, highlightId },
+  session
+) => {
   if (availableTypes.includes(notificationType)) {
     await models
       .Notification({
         userId: targetUserId,
-        notificationType: notificationType,
-        targetType: targetType,
-        targetInfo: targetInfo,
+        maker,
+        notificationType,
+        targetType,
+        targetInfo,
+        highlightId,
       })
       .save({ session })
   } else {
