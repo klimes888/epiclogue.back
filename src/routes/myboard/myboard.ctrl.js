@@ -55,10 +55,7 @@ export const allWorks = async (req, res, next) => {
     { _id: 1, screenId: 0 }
   )
   try {
-    const allWorks = await models.Board.find({ writer: userId }).populate({
-      path: 'writer',
-      select: '_id screenId nickname profile',
-    })
+    const allWorks = await models.Board.findAll({ writer: targetUser._id })
     const wrappedWorks = await contentsWrapper(allWorks)
 
     console.log(`[INFO] ${res.locals.uid} 가 ${userId._id} 의 글들을 확인합니다.`)
@@ -74,7 +71,7 @@ export const allWorks = async (req, res, next) => {
 
 export const originals = async (req, res, next) => {
   try {
-    const targetUser = await models.User.findOne({ screenId: req.params.screenId }, { _id: 1 })
+    const targetUser = await models.User.findOne({ screenId: req.params.screenId, originalUserId: undefined }, { _id: 1 })
     const myContents = await models.Board.findAll({ writer: targetUser._id })
     const wrappedContents = await contentsWrapper(res.locals.uid, myContents, 'Board', false)
 

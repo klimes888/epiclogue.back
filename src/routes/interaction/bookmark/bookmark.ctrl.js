@@ -72,6 +72,7 @@ export const addBookmark = async function (req, res, next) {
       if (targetData.writer.toString() !== res.locals.uid) {
         await makeNotification({
           targetUserId: targetData.writer,
+          maker: res.locals.uid,
           notificationType: 'Bookmark',
           targetType: 'Board',
           targetInfo: req.body.boardId

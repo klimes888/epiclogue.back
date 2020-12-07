@@ -6,15 +6,17 @@ const ObjectId = mongoose.ObjectId
  * @constructor Notification
  *
  * @var {ObjectId} userId - 알림을 수신할 유저의 ObjectId 입니다.
+ * @var {ObjectId} maker - 알림을 발생시킨 유저의 ObjectId 입니다.
  * @var {String} notificationType - 알림의 타입입니다. 어떤 알림인지 알리기 위해 저장합니다.
  * @var {String} targetType - 해당 알림을 발생시킨 주체의 타입입니다. 클라이언트에서 리다이렉션 할 경로를 위해 저장합니다.
- * @var {ObjectId} targetInfo - 해당 알림을 발생시킨 주체의 ObjectId입니다.
+ * @var {ObjectId} targetInfo - 해당 알림을 발생시킨 주체로 이동하기위한 Id입니다.
+ * @var {ObjectId} highlightId - 알림의 발생 주체를 알려주기 위한 Id입니다. 피드백과 멘션, 대댓글에서 사용됩니다.
  * @var {Date} createdAt - 해당 알림이 발생한 날짜입니다.
  * @var {Boolean} read - 알림 수신 유저의 알림 읽음 여부입니다.
- *
  */
 const notification = new mongoose.Schema({
   userId: { type: ObjectId, required: true },
+  maker: { type: ObjectId, required: true, ref: 'User' },
   notificationType: {
     type: String,
     requred: true,
@@ -26,23 +28,28 @@ const notification = new mongoose.Schema({
     enum: ['Board', 'Feedback', 'Reply', 'User'],
   },
   targetInfo: { type: ObjectId, required: true, refPath: 'targetType' },
+  highlightId: { type: ObjectId },
   createdAt: { type: Date, default: Date.now },
   read: { type: Boolean, default: false },
 })
 
 // 알림목록
 notification.statics.getNotiList = function (userId) {
-  return this.find({ userId }).sort({ createdAt: -1 })
+  return this.find({ userId })
+    .populate({
+      path: 'maker',
+      select: '_id screenId nickname profile'
+    })
+    .populate({
+      path: 'targetInfo',
+      select: 'screenId nickname profile boardTitle feedbackBody replyBody boardId parentId',
+    })
+    .sort({ createdAt: -1 })
 }
 
 // 전체 읽음
 notification.statics.setReadAll = function (userId) {
   return this.updateMany({ userId }, { $set: { read: true } })
-}
-
-// (deprecated) 한 개 읽음
-notification.statics.setRead = function (notificationId) {
-  return this.updateOne({ _id: notificationId }, { read: true })
 }
 
 export default mongoose.model('Notification', notification)

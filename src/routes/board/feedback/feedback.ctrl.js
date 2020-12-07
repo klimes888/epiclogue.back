@@ -50,6 +50,7 @@ export const postFeedback = async (req, res, next) => {
       if (res.locals.uid !== targetData.writer.toString()) {
         await makeNotification({
           targetUserId: targetData.writer,
+          maker: res.locals.uid,
           notificationType: 'Feedback',
           targetType: 'Board',
           targetInfo: req.params.boardId

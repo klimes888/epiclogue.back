@@ -5,7 +5,7 @@ info:
   title: "epiclogue API"
   contact:
     email: "dladsds123@gmail.com"
-host: "api.epiclogue.tk"
+host: "api.epiclogue.com"
 basePath: "/"
 tags:
 - name: "user"
@@ -1284,7 +1284,7 @@ paths:
     get:
       tags:
       - "notification"
-      summary: "Get notifications"
+      summary: "Get notifications and set read all"
       description: ""
       responses:
         200:
@@ -1293,18 +1293,6 @@ paths:
             type: array
             items:
               $ref: '#/definitions/Notification'
-      security:
-        - access_token: []
-
-  /notification/{notiId}:
-    patch:
-      tags:
-      - "notification"
-      summary: "Read notification"
-      description: ""
-      responses:
-        200:
-          description: OK
       security:
         - access_token: []
 
@@ -1616,12 +1604,33 @@ definitions:
       userId:
         type: string
         example: "5fb2937ac9750d1cb7d1e85b"
+      maker:
+        type: object
+        $ref: '#/definitions/Writer'
       targetType:
         type: string
         example: "5fb26fed4c6a8d021443f56e"
       targetInfo:
-        type: string
-        example: "5fb2915b1000041a81221cc3"
+        type: object
+        properties:
+          _id:
+            type: string
+            example: "5fce00b437de6b024f4b3272"
+          boardId:
+            type: string 
+            example: "5fc1192e929281006d036dd7"
+          parentId: 
+            type: string
+            example: "5fce003fc8ba2c023375abc1"
+          replyBody: 
+            type: string
+            example: "temp reply body"
+          feedbackBody:
+            type: string
+            example: "temp feedback Body. It can be skipped if you want"
+          boardTitle:
+            type: string
+            example: "board title. It can be skipped if you want"
       date:
         type: date
         default: Date.now

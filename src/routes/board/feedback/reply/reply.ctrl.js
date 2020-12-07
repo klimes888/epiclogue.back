@@ -16,6 +16,7 @@ export const postReply = async (req, res, next) => {
     writer: res.locals.uid,
     boardId: req.params.boardId,
     parentId: req.params.feedbackId,
+    boardId: req.params.boardId,
     replyBody: req.body.replyBody,
   }
 
@@ -50,6 +51,7 @@ export const postReply = async (req, res, next) => {
       if (feedbackData.writer.toString() !== res.locals.uid) {
         await makeNotification({
           targetUserId: feedbackData.writer,
+          maker: res.locals.uid,
           notificationType: 'Reply',
           targetType: 'Feedback',
           targetInfo: req.params.feedbackId
