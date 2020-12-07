@@ -67,7 +67,7 @@ export const addLike = async (req, res, next) => {
       console.log(`[INFO] 유저 ${res.locals.uid}가 ${targetType}: ${targetInfo}를 좋아합니다.`)
       return res.status(201).json({
         result: 'ok',
-        data: likeCount,
+        data: { heartCount: likeCount },
       })
     })
   } catch (e) {
@@ -112,7 +112,7 @@ export const deleteLike = async (req, res, next) => {
       )
       return res.status(200).json({
         result: 'ok',
-        data: likeCount,
+        data: { heartCount: likeCount },
       })
     })
   } catch (e) {

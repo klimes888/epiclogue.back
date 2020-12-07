@@ -84,7 +84,7 @@ export const addBookmark = async function (req, res, next) {
       console.log(`[INFO] 유저 ${res.locals.uid}가 북마크에 ${req.body.boardId}를 추가했습니다.`)
       return res.status(201).json({
         result: 'ok',
-        data: bookmarkCount,
+        data: { bookmarkCount },
       })
     })
   } catch (e) {
@@ -119,7 +119,7 @@ export const deleteBookmark = async (req, res, next) => {
       console.log(`[INFO] 유저 ${res.locals.uid}가 북마크에 ${req.body.boardId}를 해제했습니다.`)
       return res.status(200).json({
         result: 'ok',
-        data: bookmarkCount,
+        data: { bookmarkCount },
       })
     })
   } catch (e) {
