@@ -1297,10 +1297,10 @@ paths:
         - access_token: []
 
   /notification/{notiId}:
-    patch:
+    delete:
       tags:
       - "notification"
-      summary: "Read notification"
+      summary: "Delete notification"
       description: ""
       responses:
         200:
@@ -1308,10 +1308,11 @@ paths:
       security:
         - access_token: []
 
+  /notification/all:
     delete:
       tags:
       - "notification"
-      summary: "Delete notification"
+      summary: "Delete all notifications"
       description: ""
       responses:
         200:
