@@ -22,7 +22,9 @@ export const contentsWrapper = async (reqUserId, contentData, contentType, isFor
           // null check
           
           contentData.liked = likeIdSet.includes(contentData._id.toString()) ? true : false
+          contentData.heartCount = await models.Like.countDocuments({ targetInfo:contentData._id, targetType:'Board' })
           contentData.bookmarked = bookmarkIdSet.includes(contentData._id.toString()) ? true : false
+          contentData.bookmarkCount = await models.Bookmark.countDocuments({ board: contentData._id })
           contentData.writer.following = followingIdSet.includes(contentData.writer._id.toString())
             ? true
             : false
@@ -47,7 +49,9 @@ export const contentsWrapper = async (reqUserId, contentData, contentType, isFor
             feedbacks.push(eachFeedback)
           }
           contentData.feedbacks = feedbacks
-
+          contentData.feedbackCount = feedbacks.length
+          contentData.reactCount = await models.React.countDocuments({ boardId: contentData._id })
+          
           resolve(contentData)
         } else {
           /* For many, small viewers */
