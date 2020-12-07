@@ -49,7 +49,7 @@ export const contentsWrapper = async (reqUserId, contentData, contentType, isFor
             feedbacks.push(eachFeedback)
           }
           contentData.feedbacks = feedbacks
-          contentData.feedbackCount = feedbacks.length()
+          contentData.feedbackCount = feedbacks.length
           contentData.reactCount = await models.React.countDocuments({ boardId: contentData._id })
           
           resolve(contentData)
