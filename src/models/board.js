@@ -12,10 +12,6 @@ const board = new mongoose.Schema({
   language: { type: String, default: 0 }, // [on future] 0: Korean, 1: Japanese, 2: US, 3: China, 4: Taiwan
   allowSecondaryCreation: { type: Number, default: 1 }, // 0: not allow, 1: allow, 2: only allow on followers
   feedbacks: [{ type: ObjectId, ref: 'Feedback' }],
-  heartCount: { type: Number, default: 0 },
-  feedbackCount: { type: Number, default: 0 },
-  bookmarkCount: { type: Number, default: 0 },
-  reactCount: { type: Number, default: 0 },
   tags: { type: [String] },
   originUserId: { type: ObjectId, ref: 'User' },
   originBoardId: { type: ObjectId, ref: 'Board' },
@@ -93,9 +89,9 @@ board.statics.findAll = function (option) {
   })
 }
 
-board.statics.findAllSecondaryWorks = function (userId) {
+board.statics.findAllOriginOrSecondary = function (userId, isExists) {
   return this.find(
-    { writer: userId, originUserId: { $exists: true } },
+    { writer: userId, originUserId: { $exists: isExists } },
     {
       _id: 1,
       writer: 1,

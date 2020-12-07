@@ -17,8 +17,7 @@ const user = new mongoose.Schema({
   salt: { type: String },
   isConfirmed: { type: Boolean, required: true, default: false },
   token: { type: String },
-  followerCount: { type: Number, default: 0 },
-  followingCount: { type: Number, default: 0 },
+  snsType: { type: String, default: 'normal' },
 })
 
 user.statics.create = function (data) {
@@ -131,16 +130,6 @@ user.statics.getByQuery = function (query) {
   return this.find({ screenId: { $regex: query } }, { screenId: 1, nickname: 1, profile: 1 }).sort({
     screenId: 'asc',
   })
-}
-
-user.statics.countFollower = function (userId, flag) {
-  const increment = flag ? 1 : -1
-  return this.updateOne({ _id: userId }, { followerCount: increment })
-}
-
-user.statics.countFollowing = function (userId, flag) {
-  const increment = flag ? 1 : -1
-  return this.updateOne({ _id: userId }, { followingCount: increment })
 }
 
 export default mongoose.model('User', user)

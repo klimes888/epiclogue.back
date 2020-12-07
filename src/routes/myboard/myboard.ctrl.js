@@ -4,20 +4,17 @@ import { getBookmarkList } from '../interaction/bookmark/bookmark.ctrl'
 import { contentsWrapper } from '../../lib/contentsWrapper'
 
 export const getMyboard = async (req, res, next) => {
-  const userId = await models.User.findOne({ screenId: req.params.screenId })
+  const userId = await models.User.findOne({ screenId: req.params.screenId }, {
+    _id: 1,
+    nickname: 1,
+    intro: 1,
+    screenId: 1,
+    banner: 1,
+    profile: 1,
+    joinDate: 1,
+  })
   try {
-    let result = await models.User.getUserInfo(userId, {
-      nickname: 1,
-      intro: 1,
-      screenId: 1,
-      banner: 1,
-      profile: 1,
-      followerCount: 1,
-      followingCount: 1,
-      joinDate: 1,
-    })
-
-    result = result.toJSON()
+    let result = userId.toJSON()
 
     if (res.locals.uid === result._id.toString()) {
       result.isFollowing = 'me'
@@ -39,6 +36,9 @@ export const getMyboard = async (req, res, next) => {
       // }
     }
 
+    result.followerCount = await models.Follow.countDocuments({targetUserId: userId._id})
+    result.followingCount = await models.Follow.countDocuments({userId: userId._id})
+
     return res.status(200).json({
       result: 'ok',
       data: result,
@@ -55,11 +55,8 @@ export const allWorks = async (req, res, next) => {
     { _id: 1, screenId: 0 }
   )
   try {
-    const allWorks = await models.Board.find({ writer: userId }).populate({
-      path: 'writer',
-      select: '_id screenId nickname profile',
-    })
-    const wrappedWorks = await contentsWrapper(allWorks)
+    const allWorks = await models.Board.findAll({ writer: userId._id })
+    const wrappedWorks = await contentsWrapper(res.locals.uid, allWorks, 'Board', false);
 
     console.log(`[INFO] ${res.locals.uid} 가 ${userId._id} 의 글들을 확인합니다.`)
     return res.status(200).json({
@@ -75,7 +72,7 @@ export const allWorks = async (req, res, next) => {
 export const originals = async (req, res, next) => {
   try {
     const targetUser = await models.User.findOne({ screenId: req.params.screenId }, { _id: 1 })
-    const myContents = await models.Board.findAll({ writer: targetUser._id })
+    const myContents = await models.Board.findAllOriginOrSecondary(targetUser._id, false)
     const wrappedContents = await contentsWrapper(res.locals.uid, myContents, 'Board', false)
 
     console.log(`[INFO] 유저 ${res.locals.uid} 가 유저 ${targetUser._id} 의 원작들을 확인합니다.`)
@@ -92,7 +89,7 @@ export const originals = async (req, res, next) => {
 export const secondaryWorks = async (req, res, next) => {
   try {
     const targetUser = await models.User.findOne({ screenId: req.params.screenId }, { _id: 1 })
-    const secondaryWorks = await models.Board.findAllSecondaryWorks(targetUser._id)
+    const secondaryWorks = await models.Board.findAllOriginOrSecondary(targetUser._id, true)
     const wrappedContents = await contentsWrapper(res.locals.uid, secondaryWorks, 'Board', false)
 
     console.log(
