@@ -56,3 +56,13 @@ export const deleteNoti = async (req, res, next) => {
     return next(createError(500, '알 수 없는 오류가 발생했습니다.'))
   }
 }
+
+export const deleteAll = async (req, res, next) => {
+  try {
+    await Notification.deleteMany({ userId: res.locals.uid })
+    return res.status(200).json({ result: 'ok' })
+  } catch (e) {
+    console.error(`[Error] ${e}`)
+    return next(createError('알 수 없는 오류가 발생했습니다.'))
+  }
+}
