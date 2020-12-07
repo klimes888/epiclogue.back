@@ -7,6 +7,6 @@ const noti = express.Router({
 
 noti.get('/', verifyToken, notiCtrl.getNoti)
 noti.delete('/:notiId', verifyToken, notiCtrl.deleteNoti)
-noti.patch('/all', verifyToken, notiCtrl.setReadAll)
+noti.delete('/all', verifyToken, notiCtrl.deleteAll)
 
 export default noti
