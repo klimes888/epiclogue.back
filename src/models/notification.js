@@ -32,17 +32,17 @@ const notification = new mongoose.Schema({
 
 // 알림목록
 notification.statics.getNotiList = function (userId) {
-  return this.find({ userId }).sort({ createdAt: -1 })
+  return this.find({ userId })
+    .populate({
+      path: 'targetInfo',
+      select: 'screenId nickname profile boardTitle feedbackBody replyBody',
+    })
+    .sort({ createdAt: -1 })
 }
 
 // 전체 읽음
 notification.statics.setReadAll = function (userId) {
   return this.updateMany({ userId }, { $set: { read: true } })
-}
-
-// (deprecated) 한 개 읽음
-notification.statics.setRead = function (notificationId) {
-  return this.updateOne({ _id: notificationId }, { read: true })
 }
 
 export default mongoose.model('Notification', notification)
