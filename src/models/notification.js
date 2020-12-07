@@ -6,6 +6,7 @@ const ObjectId = mongoose.ObjectId
  * @constructor Notification
  *
  * @var {ObjectId} userId - 알림을 수신할 유저의 ObjectId 입니다.
+ * @var {ObjectId} maker - 알림을 발생시킨 유저의 ObjectId 입니다.
  * @var {String} notificationType - 알림의 타입입니다. 어떤 알림인지 알리기 위해 저장합니다.
  * @var {String} targetType - 해당 알림을 발생시킨 주체의 타입입니다. 클라이언트에서 리다이렉션 할 경로를 위해 저장합니다.
  * @var {ObjectId} targetInfo - 해당 알림을 발생시킨 주체로 이동하기위한 Id입니다.
