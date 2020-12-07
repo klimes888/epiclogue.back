@@ -56,7 +56,7 @@ export const allWorks = async (req, res, next) => {
   )
   try {
     const allWorks = await models.Board.findAll({ writer: userId._id })
-    const wrappedWorks = await contentsWrapper(allWorks)
+    const wrappedWorks = await contentsWrapper(res.locals.uid, allWorks, 'Board', false);
 
     console.log(`[INFO] ${res.locals.uid} 가 ${userId._id} 의 글들을 확인합니다.`)
     return res.status(200).json({
