@@ -101,7 +101,7 @@ export const deleteLike = async (req, res, next) => {
     await session.withTransaction(async () => {
       await Like.unlike(likeData).session(session)
 
-      const likeCount = await Like.countDocuments({ targetInfo, targetType })
+      const likeCount = await Like.countDocuments({ targetInfo, targetType }).session(session)
 
       if (targetType === 'Board') {
         await React.delete(likeData.userId, targetInfo).session(session)
