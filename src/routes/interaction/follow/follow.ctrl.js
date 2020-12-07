@@ -29,8 +29,6 @@ export const addFollow = async (req, res, next) => {
     await session.withTransaction(async () => {
       const followSchema = new Follow(followData)
       await followSchema.save({ session })
-      await User.countFollowing(followData.userId, 1).session(session)
-      await User.countFollower(followData.targetUserId, 1).session(session)
       await makeNotification({
         targetUserId: req.body.targetUserId,
         notificationType: 'Follow',
@@ -71,9 +69,6 @@ export const deleteFollow = async (req, res, next) => {
 
     await session.withTransaction(async () => {
       const unfollow = await Follow.unfollow(followData).session(session)
-
-      await User.countFollowing(followData.userId, 0).session(session)
-      await User.countFollower(followData.targetUserId, 0).session(session)
 
       if (unfollow.ok === 1) {
         console.log(
