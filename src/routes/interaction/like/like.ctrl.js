@@ -12,8 +12,8 @@ import { startSession } from 'mongoose'
 export const addLike = async (req, res, next) => {
   let likeData = {
     userId: res.locals.uid,
-    targetInfo: req.body.targetInfo,
     targetType: req.body.targetType,
+    targetInfo: req.body.targetInfo,
   }
 
   const { targetInfo, targetType } = req.body
@@ -30,9 +30,9 @@ export const addLike = async (req, res, next) => {
     }
 
     await session.withTransaction(async () => {
-      await Like.like(likeData)
+      await new Like(likeData).save({ session })
 
-      let likeCount
+      const likeCount = await Like.countDocuments({ targetInfo, targetType }).session(session)
       let targetData
 
       if (targetType === 'Board') {
@@ -41,30 +41,28 @@ export const addLike = async (req, res, next) => {
           boardId: req.body.targetInfo,
           type: 'like',
         })
+
         await reactSchema.save({ session })
+
         targetData = await Board.findOne({ _id: req.body.targetInfo }, { writer: 1 })
-        await Board.countHeart(targetInfo, 1).session(session)
-        await Board.countReact(targetInfo, 1).session(session)
-        likeCount = await Board.getHeartCount(targetInfo).session(session)
       } else if (targetType === 'Feedback') {
-        await Feedback.countHeart(targetInfo, 1).session(session)
         targetData = await Feedback.findOne({ _id: req.body.targetInfo }, { writer: 1 })
-        likeCount = await Feedback.getHeartCount(targetInfo).session(session)
-      } else if (targetType === 'Reply') { /* 대댓글의 경우 좋아요 카운트,  */
-        await Reply.countHeart(req.body.targetInfo, 1).session(session)
+      } else if (targetType === 'Reply') {
         targetData = await Reply.findOne({ _id: req.body.targetInfo }, { writer: 1 })
-        likeCount = await Reply.getHeartCount(targetInfo).session(session)
       }
 
       /* 자기 자신에게는 알림을 보내지 않음 */
       if (targetData.writer.toString() !== res.locals.uid) {
-        await makeNotification({
-          targetUserId: targetData.writer,
-          maker: res.locals.uid,
-          notificationType: 'Like',
-          targetType: targetType,
-          targetInfo: targetInfo
-        }, session)
+        await makeNotification(
+          {
+            targetUserId: targetData.writer,
+            maker: res.locals.uid,
+            notificationType: 'Like',
+            targetType: targetType,
+            targetInfo: targetInfo,
+          },
+          session
+        )
       }
       console.log(`[INFO] 유저 ${res.locals.uid}가 ${targetType}: ${targetInfo}를 좋아합니다.`)
       return res.status(201).json({
@@ -103,20 +101,12 @@ export const deleteLike = async (req, res, next) => {
     await session.withTransaction(async () => {
       await Like.unlike(likeData).session(session)
 
-      let likeCount
+      const likeCount = await Like.countDocuments({ targetInfo, targetType })
 
       if (targetType === 'Board') {
         await React.delete(likeData.userId, targetInfo).session(session)
-        await Board.countHeart(req.body.targetInfo, 0).session(session)
-        await Board.countReact(req.body.targetInfo, 0).session(session)
-        likeCount = await Board.getHeartCount(targetInfo).session(session)
-      } else if (targetType === 'Feedback') {
-        await Feedback.countHeart(req.body.targetInfo, 0).session(session)
-        likeCount = await Feedback.getHeartCount(targetInfo).session(session)
-      } else if (targetType === 'Reply') {
-        await Reply.countHeart(req.body.targetInfo, 0).session(session)
-        likeCount = await Reply.getHeartCount(targetInfo).session(session)
       }
+
       console.log(
         `[INFO] 유저 ${res.locals.uid}가 ${targetType}: ${targetInfo}의 좋아요를 해제했습니다.`
       )

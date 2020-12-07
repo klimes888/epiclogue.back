@@ -63,20 +63,22 @@ export const addBookmark = async function (req, res, next) {
       await bookmarkSchema.save({ session })
       await reactSchema.save({ session })
 
-      await Board.countBookmark(req.body.boardId, 1).session(session)
-      await Board.countReact(req.body.boardId, 1).session(session)
+      const bookmarkCount = await Bookmark.countDocuments({ board: req.body.boardId }).session(
+        session
+      )
 
-      const bookmarkCount = await Board.getBookmarkCount(req.body.boardId).session(session)
-      
       // Make notification if requester is not a writer
       if (targetData.writer.toString() !== res.locals.uid) {
-        await makeNotification({
-          targetUserId: targetData.writer,
-          maker: res.locals.uid,
-          notificationType: 'Bookmark',
-          targetType: 'Board',
-          targetInfo: req.body.boardId
-        }, session)
+        await makeNotification(
+          {
+            targetUserId: targetData.writer,
+            maker: res.locals.uid,
+            notificationType: 'Bookmark',
+            targetType: 'Board',
+            targetInfo: req.body.boardId,
+          },
+          session
+        )
       }
 
       console.log(`[INFO] 유저 ${res.locals.uid}가 북마크에 ${req.body.boardId}를 추가했습니다.`)
@@ -111,10 +113,8 @@ export const deleteBookmark = async (req, res, next) => {
     await session.withTransaction(async () => {
       await Bookmark.delete(userId, boardId).session(session)
       await React.delete(userId, boardId).session(session)
-      await Board.countBookmark(req.body.boardId, 0).session(session)
-      await Board.countReact(req.body.boardId, 0).session(session)
 
-      const bookmarkCount = await Board.getBookmarkCount(req.body.boardId).session(session)
+      const bookmarkCount = await Bookmark.countDocuments({ board: boardId }).session(session)
 
       console.log(`[INFO] 유저 ${res.locals.uid}가 북마크에 ${req.body.boardId}를 해제했습니다.`)
       return res.status(200).json({
