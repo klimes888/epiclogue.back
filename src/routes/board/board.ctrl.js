@@ -1,6 +1,7 @@
 import { Board } from '../../models'
 import { deleteImage } from '../../lib/imageCtrl'
 import { contentsWrapper } from '../../lib/contentsWrapper'
+import makeNotification from '../../lib/makeNotification'
 import Joi from 'joi'
 import createError from 'http-errors'
 import { startSession } from 'mongoose'
@@ -289,12 +290,21 @@ export const secPost = async (req, res, next) => {
   }
 
   try {
-    const createdBoard = await Board.create(boardData)
-
-    console.log(`[INFO] 유저 ${boardData.writer}가 글 ${createdBoard._id}를 작성했습니다.`)
-    return res.status(201).json({ 
-      result: 'ok', 
-      data: { _id: createdBoard._id } 
+    const session = await startSession()
+    await session.withTransaction(async() => {
+      const createdBoard = await new Board(boardData).save({ session })
+      await makeNotification({
+        targetUserId: req.body.originUserId,
+        maker: res.locals.uid,
+        notificationType: 'Secondary',
+        targetType: 'Board',
+        targetInfo: createdBoard._id
+      }, session)
+      console.log(`[INFO] 유저 ${boardData.writer}가 2차창작 ${createdBoard._id}를 작성했습니다.`)
+      return res.status(201).json({ 
+        result: 'ok', 
+        data: { _id: createdBoard._id } 
+      })
     })
   } catch (e) {
     console.error(`[ERROR] ${e}`)

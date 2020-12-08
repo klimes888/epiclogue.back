@@ -1,3 +1,4 @@
+import { Mongoose } from 'mongoose'
 import * as models from '../models'
 
 // 아래의 행동에 의해 알림이 만들어집니다. 커스텀 알림은 Notice의 형태로 만들 예정입니다.
@@ -16,9 +17,12 @@ const availableTypes = [
  * Notification generator.
  *
  * @param {Mongoose.ObjectId} targetUserId - ObjectId who will receive notification.
+ * @param {Mongoose.ObjectId} maker - ObjectId who causes notificcation
  * @param {String} notificationType - Notification type.
  * @param {string} targetType - Notification type.
  * @param {Mongoose.ObjectId} targetInfo - ObjectId for link.
+ * @param {Mongoose.ObjectId} highlightId - Component id for highlighting
+ * @param {Mongoose Session} session
  */
 const makeNotification = async (
   { targetUserId, maker, notificationType, targetType, targetInfo, highlightId },
