@@ -25,12 +25,21 @@ export const contentsWrapper = async (reqUserId, contentData, contentType, isFor
           contentData.heartCount = await models.Like.countDocuments({ targetInfo:contentData._id, targetType:'Board' })
           contentData.bookmarked = bookmarkIdSet.includes(contentData._id.toString()) ? true : false
           contentData.bookmarkCount = await models.Bookmark.countDocuments({ board: contentData._id })
-          contentData.writer.following = followingIdSet.includes(contentData.writer._id.toString())
-            ? true
-            : false
+          // writer following check
           if (contentData.writer._id.toString() === reqUserId) {
             contentData.writer.following = 'me'
+          } else {
+          contentData.writer.following = followingIdSet.includes(contentData.writer._id.toString())
+            ? true
+            : false  
           }
+          // original user following check
+          if (contentData.originUserId) {
+            contentData.originUserId.following = followingIdSet.includes(contentData.originUserId._id.toString())
+            ? true
+            : false
+          }
+          
           // like, following on feedbacks
           const feedbacks = []
           likeIdSet = await getLikeIdSet(reqUserId, 'Feedback')
