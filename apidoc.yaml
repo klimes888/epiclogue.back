@@ -20,6 +20,10 @@ tags:
   description: "search functions"
 - name: "suggest"
   description: "suggest functions"
+- name: "notifycation"
+  description: "notify functions"
+- name: "myboard"
+  description: "myboard functions"
 schemes:
 - "https"
 paths:
