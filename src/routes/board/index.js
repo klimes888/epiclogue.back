@@ -7,10 +7,11 @@ import { verifyToken } from '../../lib/middleware/tokenAuth'
 import { checkWriter } from '../../lib/middleware/checkPermission'
 import { checkExistence } from '../../lib/middleware/checkExistence'
 import {uploadImage} from '../../lib/imageCtrl'
+import checkSecondaryAllow from '../../lib/middleware/checkSecondaryAllow'
 
 board.get('/', verifyToken, boardCtrl.getBoards)
 board.post('/', verifyToken, uploadImage.any(), boardCtrl.postBoard)
-board.post('/sec', verifyToken, uploadImage.any(), boardCtrl.secPost)
+board.post('/sec', verifyToken, checkSecondaryAllow, uploadImage.any(), boardCtrl.secPost)
 board.get('/:boardId', verifyToken, checkExistence, boardCtrl.viewBoard)
 board.delete('/:boardId', verifyToken, checkExistence, checkWriter, boardCtrl.deleteBoard)
 board.get('/:boardId/edit', verifyToken, checkExistence, checkWriter, boardCtrl.getEditInfo)
