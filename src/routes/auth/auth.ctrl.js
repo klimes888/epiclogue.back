@@ -197,18 +197,18 @@ export const join = async function (req, res, next) {
   }
 }
 
-export const findPass = async (req, res, next) => {
+export const mailToFindPass = async (req, res, next) => {
   const { email } = req.body
-  const userToken = await (await randomBytesPromise(24)).toString('hex');
+  const userToken = await (await randomBytesPromise(24)).toString('hex')
   const option = {
     from: process.env.MAIL_USER,
     to: email,
     subject: '비밀번호 재설정을 위해 이메일 인증을 완료해주세요.',
-    html: findPassText(email, userToken)
+    html: findPassText(email, userToken),
   }
 
   try {
-    await User.updateOne({ email }, { $set: { token: userToken }})
+    await User.updateOne({ email }, { $set: { token: userToken } })
     await transporter.sendMail(option)
     console.log(`[INFO] ${email} 에게 성공적으로 메일을 보냈습니다`)
     return res.status(201).json({
@@ -217,6 +217,59 @@ export const findPass = async (req, res, next) => {
   } catch (e) {
     console.error(`[Error] ${e}`)
     return next(createError(e))
+  }
+}
+
+export const findPass = async (req, res, next) => {
+  const { email, userPwNew, userPwNewRe, token } = req.body
+  const changePassSchema = Joi.object({
+    userPwNew: Joi.string()
+      .regex(/^(?=.*[A-Za-z])(?=.*\d)(?=.*[$@$!%*#?&])[A-Za-z\d$@$!%*#?&]{8,}$/)
+      .required(),
+    userPwNewRe: Joi.string()
+      .regex(/^(?=.*[A-Za-z])(?=.*\d)(?=.*[$@$!%*#?&])[A-Za-z\d$@$!%*#?&]{8,}$/)
+      .required(),
+  })
+
+  /* Check password validation */
+  try {
+    await changePassSchema.validateAsync({ userPw, userPwNew, userPwNewRe })
+  } catch (e) {
+    console.log(`[INFO] 유저 ${email} 의 비밀번호 변경 실패: ${e}`)
+    return next(createError(400, '비밀번호 규칙을 확인해주세요.'))
+  }
+
+  try {
+    if (userPwNew === userPwNewRe) {
+      const authUser = await User.findOne({ email, token })
+      if (authUser) {
+        const newSalt = await randomBytesPromise(64)
+        const newPass = await crypto.pbkdf2Sync(
+          userPwNew,
+          newSalt,
+          parseInt(process.env.EXEC_NUM),
+          parseInt(process.env.RESULT_LENGTH),
+          'sha512'
+        )
+
+        await User.updateOne({ email }, { password: newPass })
+
+        console.log(`[INFO] 유저 ${email} 가 비밀번호 변경에 성공했습니다.`)
+        return res.status(200).json({
+          result: 'ok',
+          message: '새로운 비밀번호로 로그인해주세요.',
+        })
+      } else {
+        console.log(`[INFO] 유저 ${email} 가 잘못된 토큰 ${token} 으로 비밀번호 변경을 시도했습니다.`)
+        return next(createError(401, '적절하지 않은 인증입니다.'))
+      }
+    } else {
+      console.log(`[INFO] 유저 ${email} 서로 다른 비밀번호 ${userPwNew}, ${userPwNewRe} 로 비밀번호 변경을 시도했습니다.`)
+      return next(createError(400, '비밀번호가 다릅니다.'))
+    }
+  } catch (e) {
+    console.error(`[Error] ${e}`)
+    return next(createError('알 수 없는 에러가 발생했습니다.'))
   }
 }
 
