@@ -197,7 +197,7 @@ export const join = async function (req, res, next) {
   }
 }
 
-export const findPass = (req, res, next) => {
+export const findPass = async (req, res, next) => {
   const { email } = req.body
   
   const option = {
