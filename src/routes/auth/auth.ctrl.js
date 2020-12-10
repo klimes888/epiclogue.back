@@ -8,7 +8,7 @@ import createError from 'http-errors'
 import { startSession } from 'mongoose'
 const SECRET_KEY = process.env.SECRET_KEY
 const randomBytesPromise = util.promisify(crypto.randomBytes)
-import transporter, { emailText } from '../../lib/sendMail'
+import transporter, { emailText, findPassText } from '../../lib/sendMail'
 
 /* 
   This is auth router. 
@@ -194,6 +194,31 @@ export const join = async function (req, res, next) {
   } catch (e) {
     console.error(`[ERROR] 알 수 없는 에러가 발생했습니다. ${e}`)
     return next(createError(500, '알 수 없는 에러가 발생했습니다.'))
+  }
+}
+
+export const findPass = (req, res, next) => {
+  const { email } = req.body
+  
+  const option = {
+    from: process.env.MAIL_USER,
+    to: email,
+    subject: '비밀번호 재설정을 위해 이메일 인증을 완료해주세요.',
+    html: findPassText(email),
+  }
+
+  const userToken = crypto.randomBytes(24);
+  
+  try {
+    await User.updateOne({ email }, { $set: { token: userToken.toString('hex') }})
+    await transporter.sendMail(option)
+    console.log(`[INFO] ${email} 에게 성공적으로 메일을 보냈습니다`)
+    return res.status(201).json({
+      result: 'ok',
+    })
+  } catch (e) {
+    console.error(`[Error] ${e}`)
+    return next(createError(e))
   }
 }
 
