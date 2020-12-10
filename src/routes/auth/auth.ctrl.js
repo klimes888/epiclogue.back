@@ -233,7 +233,7 @@ export const findPass = async (req, res, next) => {
 
   /* Check password validation */
   try {
-    await changePassSchema.validateAsync({ userPw, userPwNew, userPwNewRe })
+    await changePassSchema.validateAsync({ userPwNew, userPwNewRe })
   } catch (e) {
     console.log(`[INFO] 유저 ${email} 의 비밀번호 변경 실패: ${e}`)
     return next(createError(400, '비밀번호 규칙을 확인해주세요.'))
@@ -243,16 +243,16 @@ export const findPass = async (req, res, next) => {
     if (userPwNew === userPwNewRe) {
       const authUser = await User.findOne({ email, token })
       if (authUser) {
-        const newSalt = await randomBytesPromise(64)
-        const newPass = await crypto.pbkdf2Sync(
+        const newSalt = await (await randomBytesPromise(64)).toString('base64')
+        const newPass = await (await crypto.pbkdf2Sync(
           userPwNew,
-          newSalt,
+          newSalt.toString('base64') ,
           parseInt(process.env.EXEC_NUM),
           parseInt(process.env.RESULT_LENGTH),
           'sha512'
-        )
+        )).toString('base64') 
 
-        await User.updateOne({ email }, { password: newPass })
+        await User.updateOne({ email }, { salt: newSalt, password: newPass })
 
         console.log(`[INFO] 유저 ${email} 가 비밀번호 변경에 성공했습니다.`)
         return res.status(200).json({
