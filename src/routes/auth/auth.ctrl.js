@@ -208,7 +208,7 @@ export const findPass = async (req, res, next) => {
   }
 
   try {
-    const userToken = await crypto.randomBytesPromise(24);
+    const userToken = await randomBytesPromise(24);
     await User.updateOne({ email }, { $set: { token: userToken.toString('hex') }})
     await transporter.sendMail(option)
     console.log(`[INFO] ${email} 에게 성공적으로 메일을 보냈습니다`)
