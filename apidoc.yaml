@@ -1362,6 +1362,24 @@ paths:
           description: OK
       security:
         - access_token: []
+  
+  /notification/check:
+    get:
+      tags:
+      - "notification"
+      summary: "Get number of notifications"
+      description: ""
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            properties:
+              notiCount:
+                type: number
+                example: 3
+      security:
+        - access_token: []
 
 securityDefinitions:
   access_token:
@@ -1442,6 +1460,8 @@ definitions:
       originUserId:
         type: string
       originBoardId:
+        type: string
+      allowSecondaryCreation:
         type: string
       edited:
         type: boolean
