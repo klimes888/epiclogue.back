@@ -199,17 +199,16 @@ export const join = async function (req, res, next) {
 
 export const findPass = async (req, res, next) => {
   const { email } = req.body
-  
+  const userToken = await (await randomBytesPromise(24)).toString('hex');
   const option = {
     from: process.env.MAIL_USER,
     to: email,
     subject: '비밀번호 재설정을 위해 이메일 인증을 완료해주세요.',
-    html: findPassText(email),
+    html: findPassText(email, userToken)
   }
 
   try {
-    const userToken = await randomBytesPromise(24);
-    await User.updateOne({ email }, { $set: { token: userToken.toString('hex') }})
+    await User.updateOne({ email }, { $set: { token: userToken }})
     await transporter.sendMail(option)
     console.log(`[INFO] ${email} 에게 성공적으로 메일을 보냈습니다`)
     return res.status(201).json({
