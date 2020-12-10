@@ -21,6 +21,7 @@ services:
       - mongodb1
     ports:
       - 3000:3000
+    restart: always
 
   mongodb1:
     container_name: mongodb1
