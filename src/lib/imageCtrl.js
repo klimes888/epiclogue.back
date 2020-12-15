@@ -20,17 +20,19 @@ export const s3 = new aws.S3({
 export const deleteImage = (images) => {
   const garbageImage = []
 
-  for (let image of images) {
-    if (image) {
-      const objectKey = image.split('/')
-      const deletionFormat = {
-        Key: objectKey[3],
+  if(images instanceof Array) {
+    for (let image of images) {
+      if (image) {
+        const objectKey = image.split('/')
+        const deletionFormat = {
+          Key: objectKey[3],
+        }
+        garbageImage.push(deletionFormat)
       }
-      garbageImage.push(deletionFormat)
     }
+  } else {
+    garbageImage.push(images)
   }
-
-  if(garbageImage.length !== 0)
     s3.deleteObjects(
       {
         Bucket: process.env.AWS_BUCKET_NAME,
