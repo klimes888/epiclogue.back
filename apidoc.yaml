@@ -1426,6 +1426,16 @@ paths:
         - access_token: []
 
   /notification/{notiId}:
+    patch:
+      tags:
+      - "notification"
+      summary: "Read notification"
+      description: ""
+      responses:
+        200:
+          description: OK
+      security:
+        - access_token: []
     delete:
       tags:
       - "notification"
@@ -1438,6 +1448,16 @@ paths:
         - access_token: []
 
   /notification/all:
+    patch:
+      tags:
+      - "notification"
+      summary: "Read all notifications"
+      description: ""
+      responses:
+        200:
+          description: OK
+      security:
+        - access_token: []
     delete:
       tags:
       - "notification"
