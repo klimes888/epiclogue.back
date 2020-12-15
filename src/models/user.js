@@ -45,7 +45,7 @@ user.statics.isConfirmed = function (email, token) {
 }
 
 user.statics.confirmUser = function (email) {
-  return this.updateOne({ email }, { isConfirmed: true, token: '' })
+  return this.updateOne({ email }, { isConfirmed: true })
 }
 
 user.statics.getById = function (userId) {

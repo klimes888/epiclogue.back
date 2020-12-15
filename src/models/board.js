@@ -81,7 +81,7 @@ board.statics.findAll = function (option) {
       boardImg: 1,
       originUserId: 1
     }
-  ).sort({ writeDate: 1, heartCount: 1 })
+  ).sort({ writeDate: -1 })
   .populate({
     path: 'writer',
     // match: { deactivatedAt: { $type: 10 } }, // BSON type: 10 is null value. 
