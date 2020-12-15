@@ -28,8 +28,8 @@ export const getNoti = async (req, res, next) => {
 
 export const setRead = async (req, res, next) => {
   try {
-    await Notification.updateMany({ _id: req.params.notiId, userId: res.locals.uid }, { read: true })
-    console.log(`[INFO] 유저 ${res.locals.uid} 가 알림을 ${req.params.notiId} 를 확인했습니다.`)
+    await Notification.updateMany({ _id: req.body.notiId, userId: res.locals.uid }, { read: true })
+    console.log(`[INFO] 유저 ${res.locals.uid} 가 알림을 ${req.body.notiId} 를 확인했습니다.`)
     return res.status(200).json({
       result: 'ok',
       data: notiData,
@@ -82,18 +82,18 @@ export const deleteNoti = async (req, res, next) => {
 
   try {
     await notiObjectId.validateAsync({
-      _id: req.params.notiId,
+      _id: req.body.notiId,
     })
   } catch (e) {
     console.log(
-      `[INFO] 유저 ${res.locals.uid} 가 적절하지 않은 알림 ${req.params.notiId} 을 읽음처리 하려 했습니다.`
+      `[INFO] 유저 ${res.locals.uid} 가 적절하지 않은 알림 ${req.body.notiId} 을 읽음처리 하려 했습니다.`
     )
     return next(createError(400, '적절하지 않은 ObjectId입니다.'))
   }
 
   try {
-    await Notification.deleteOne({ _id: req.params.notiId })
-    console.log(`[INFO] 유저 ${res.locals.uid} 가 알림 ${req.params.notiId} 를 삭제했습니다.`)
+    await Notification.deleteOne({ _id: req.body.notiId })
+    console.log(`[INFO] 유저 ${res.locals.uid} 가 알림 ${req.body.notiId} 를 삭제했습니다.`)
     return res.status(200).json({
       result: 'ok',
     })
