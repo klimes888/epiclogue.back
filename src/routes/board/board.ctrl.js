@@ -29,7 +29,8 @@ export const postBoard = async (req, res, next) => {
     boardBody: req.body.boardBody,
     category: req.body.category,
     pub: req.body.pub,
-    lanuage: req.body.lanuage,
+    lanugage: req.body.language,
+    allowSecondaryCreation: req.body.allowSecondaryCreation,
     boardImg: _boardImg,
     tags,
   }
