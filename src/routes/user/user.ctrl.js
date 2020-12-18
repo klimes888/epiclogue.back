@@ -50,7 +50,7 @@ export const postUserEditInfo = async function (req, res, next) {
   let banner
   let profile
 
-  if (req.files !== undefined) {
+  if (req.files !== undefined && req.files.length !== 0) {
     if (req.files.length > 1) {
       if (req.files[0].fieldname == 'banner') {
         banner = req.files[0].location
