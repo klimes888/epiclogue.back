@@ -38,7 +38,7 @@ const swaggerDefinition = {
     version: '1.0.0', // Version (required)
     description: 'epiclogue service API', // Description (optional)
   },
-  host: 'api.epiclogue.tk', // Host (optional)
+  host: 'api.epiclogue.com', // Host (optional)
   basePath: '/', // Base path (optional)
   schemes: ['https'],
 }
