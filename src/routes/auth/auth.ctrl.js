@@ -19,8 +19,7 @@ import transporter, { emailText, findPassText } from '../../lib/sendMail'
 dotenv.config()
 
 export const snsLogin = async function (req, res, next) {
-  const userData = req.body.userData
-  const snsType = req.body.snsType
+  const { userData, snsType } = req.body
   console.log(userData, snsType)
   return res.status(200).json({
     result: 'ok',
@@ -33,8 +32,7 @@ export const snsLogin = async function (req, res, next) {
 }
 
 export const login = async function (req, res, next) {
-  const email = req.body['email']
-  const userPw = req.body['userPw']
+  const { email, userPw } = req.body
 
   const loginValidationSchema = Joi.object({
     email: Joi.string()
@@ -91,6 +89,7 @@ export const login = async function (req, res, next) {
           token,
           nick: result.nickname,
           screenId: result.screenId,
+          displayLanguage: result.displayLanguage
         })
       } else {
         console.log(`[INFO] 유저 ${email} 가 다른 비밀번호 ${userPw} 로 로그인을 시도했습니다.`)
@@ -107,10 +106,7 @@ export const login = async function (req, res, next) {
 }
 
 export const join = async function (req, res, next) {
-  const email = req.body['email']
-  const userPw = req.body['userPw']
-  const userPwRe = req.body['userPwRe']
-  const nick = req.body['userNick']
+  const { email, userPw, userPwRe, userLang, userNick: nick } = req.body
   const check = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[$@$!%*#?&])[A-Za-z\d$@$!%*#?&]{8,}$/.test(userPw)
 
   const joinValidationSchema = Joi.object({
@@ -120,6 +116,7 @@ export const join = async function (req, res, next) {
     userPw: Joi.string().required(),
     userPwRe: Joi.string().required(),
     nick: Joi.string().trim().required(),
+    userLang: Joi.number().required()
   })
 
   try {
@@ -129,7 +126,7 @@ export const join = async function (req, res, next) {
         validate를 사용하면 try-catch를 사용할 수 없고
         await 를 붙이지 않으면 unhandled promise error 가 나온다...
       */
-      await joinValidationSchema.validateAsync({ email, userPw, userPwRe, nick })
+      await joinValidationSchema.validateAsync({ email, userPw, userPwRe, nick, userLang })
     } catch (e) {
       console.log(`[INFO] 유저 ${email} 가 적절하지 않은 데이터로 가입하려 했습니다. ${e}`)
       return next(createError(400, '적절하지 않은 값을 입력했습니다.'))
@@ -160,6 +157,7 @@ export const join = async function (req, res, next) {
           nickname: nick,
           token: auth_token,
           screenId: generatedId,
+          displayLanguage: userLang
         })
 
         if (result) {
