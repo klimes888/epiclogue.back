@@ -70,6 +70,10 @@ export const login = async function (req, res, next) {
       const result = await User.findUser(email, crypt_Pw.toString('base64'))
 
       if (result) {
+        if (result.deactivatedAt != null) {
+          return next(createError(404, '탈퇴한 계정입니다.'))
+        }
+
         const token = jwt.sign(
           {
             nick: result['nickname'],
