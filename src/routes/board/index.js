@@ -11,7 +11,7 @@ import checkSecondaryAllow from '../../lib/middleware/checkSecondaryAllow'
 
 board.get('/', verifyToken, boardCtrl.getBoards)
 board.post('/', verifyToken, uploadImage.any(), boardCtrl.postBoard)
-board.post('/sec', verifyToken, checkSecondaryAllow, uploadImage.any(), boardCtrl.secPost)
+board.post('/sec', verifyToken, uploadImage.any(), checkSecondaryAllow, boardCtrl.secPost)
 board.get('/:boardId', verifyToken, checkExistence, boardCtrl.viewBoard)
 board.delete('/:boardId', verifyToken, checkExistence, checkWriter, boardCtrl.deleteBoard)
 board.get('/:boardId/edit', verifyToken, checkExistence, checkWriter, boardCtrl.getEditInfo)
