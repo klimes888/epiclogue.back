@@ -31,7 +31,7 @@ export const deleteImage = (images) => {
       }
     }
   } else {
-    const objectKey = image.split('/')
+    const objectKey = images.split('/')
     const deletionFormat = {
       Key: objectKey[3],
     }
