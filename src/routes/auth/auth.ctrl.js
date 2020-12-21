@@ -70,6 +70,9 @@ export const login = async function (req, res, next) {
       const result = await User.findUser(email, crypt_Pw.toString('base64'))
 
       if (result) {
+	if (result.deactivatedAt != null) {
+		return next(createError(404, "탈퇴한 계정입니다."));
+	}
         const token = jwt.sign(
           {
             nick: result['nickname'],
@@ -87,6 +90,7 @@ export const login = async function (req, res, next) {
           token,
           nick: result.nickname,
           screenId: result.screenId,
+          displayLanguage: result.displayLanguage
         })
       } else {
         console.log(`[INFO] 유저 ${email} 가 다른 비밀번호 ${userPw} 로 로그인을 시도했습니다.`)
@@ -103,10 +107,11 @@ export const login = async function (req, res, next) {
 }
 
 export const join = async function (req, res, next) {
-  const email = req.body['email']
-  const userPw = req.body['userPw']
-  const userPwRe = req.body['userPwRe']
-  const nick = req.body['userNick']
+  const { email, userPw, userPwRe, userLang, userNick: nick } = req.body
+//  const email = req.body['email']
+//  const userPw = req.body['userPw']
+//  const userPwRe = req.body['userPwRe']
+//  const nick = req.body['userNick']
   const check = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[$@$!%*#?&])[A-Za-z\d$@$!%*#?&]{8,}$/.test(userPw)
 
   const joinValidationSchema = Joi.object({
@@ -156,6 +161,7 @@ export const join = async function (req, res, next) {
           nickname: nick,
           token: auth_token,
           screenId: generatedId,
+          displayLanguage: userLang
         })
 
         if (result) {

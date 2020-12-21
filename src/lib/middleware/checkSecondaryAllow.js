@@ -4,7 +4,6 @@ const checkSecondaryAllow = async (req, res, next) => {
   const { originBoardId } = req.body;
 
   const isAllowing = await Board.findOne({ _id: originBoardId }, { allowSecondaryCreation: 1 })
-
   if (isAllowing.allowSecondaryCreation == 1) {
     next()
   } else {
