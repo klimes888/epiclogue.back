@@ -249,6 +249,8 @@ paths:
               type: string
             userNick:
               type: string
+            userLang:
+              type: string
       responses:
         201:
           description: OK
@@ -1424,13 +1426,21 @@ paths:
               $ref: '#/definitions/Notification'
       security:
         - access_token: []
-
-  /notification/{notiId}:
     patch:
       tags:
       - "notification"
       summary: "Read notification"
       description: ""
+      parameters:
+      - name: "Body"
+        in: "body"
+        description: "Notificataion ID to read"
+        required: true
+        schema:
+          type: object
+          properties:
+            notiId:
+              type: string
       responses:
         200:
           description: OK
@@ -1441,6 +1451,16 @@ paths:
       - "notification"
       summary: "Delete notification"
       description: ""
+      parameters:
+      - name: "Body"
+        in: "body"
+        description: "Notificataion ID to delete"
+        required: true
+        schema:
+          type: object
+          properties:
+            notiId:
+              type: string
       responses:
         200:
           description: OK
