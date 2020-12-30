@@ -2,7 +2,7 @@ import mongoose from 'mongoose'
 
 const user = new mongoose.Schema({
   nickname: { type: String, required: true },
-  email: { type: String, required: true, unique: true },
+  email: { type: String, required: true },
   password: { type: String, required: true },
   screenId: { type: String },
   country: { type: Number, default: 0 }, // 0: Korean, 1: Japanese, 2: English, 3: Chinese, 4: Taiwan
@@ -17,6 +17,7 @@ const user = new mongoose.Schema({
   salt: { type: String },
   isConfirmed: { type: Boolean, required: true, default: false },
   token: { type: String },
+  snsId: {type: String},
   snsType: { type: String, default: 'normal' },
 })
 
@@ -130,6 +131,10 @@ user.statics.getByQuery = function (query) {
   return this.find({ screenId: { $regex: query } }, { screenId: 1, nickname: 1, profile: 1 }).sort({
     screenId: 'asc',
   })
+}
+
+user.statics.isExistSns = function (snsId) {
+  return this.find({snsId})
 }
 
 export default mongoose.model('User', user)
