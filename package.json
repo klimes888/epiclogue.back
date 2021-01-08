@@ -12,8 +12,9 @@
     "test:docker": "docker exec -it server yarn test"
   },
   "dependencies": {
-    "@sentry/node": "5.19.0",
+    "@slack/webhook": "^5.0.3",
     "aws-sdk": "^2.696.0",
+    "axios": "^0.21.1",
     "cookie-parser": "~1.4.4",
     "cors": "^2.8.5",
     "crypto": "^1.0.1",
@@ -35,6 +36,7 @@
     "multer-s3": "^2.9.0",
     "nodemailer": "^6.4.10",
     "nodemon": "^2.0.4",
+    "slack-node": "^0.1.8",
     "swagger-jsdoc": "^4.0.0",
     "swagger-ui-express": "^4.1.4",
     "winston": "^3.3.3"

@@ -49,7 +49,7 @@ export const postUserEditInfo = async function (req, res, next) {
   const intro = req.body['userIntro'] || originalData.intro
   let banner
   let profile
-
+  console.log(originalImages)
   if (req.files !== undefined && req.files.length !== 0) {
     if (req.files.length > 1) {
       if (req.files[0].fieldname == 'banner') {
@@ -64,11 +64,11 @@ export const postUserEditInfo = async function (req, res, next) {
       if (req.files[0].fieldname == 'banner') {
         banner = req.files[0].location
         profile = originalImages[1]
-        deleteImage(originalImages[0])
+        if(originalImages[0] !== null) deleteImage(originalImages[0])
       } else {
         profile = req.files[0].location
         banner = originalImages[0]
-        deleteImage(originalImages[1])
+        if(originalImages[1] !== null) deleteImage(originalImages[1])
       }
     }
   } else {

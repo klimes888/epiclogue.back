@@ -249,6 +249,8 @@ paths:
               type: string
             userNick:
               type: string
+            userLang:
+              type: string
       responses:
         201:
           description: OK
