@@ -44,7 +44,7 @@ export const snsLogin = async function (req, res, next) {
     profile : await getFBProfile(snsData.id),
     name : snsData.name
   }
-  let result = User.isExistSns(userData.uid)
+  let result = await User.isExistSns(userData.uid)
 
   if(!result) {
     const generatedId = crypto.createHash('sha256').update(userData.email).digest('hex').slice(0, 14)

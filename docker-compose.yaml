@@ -31,7 +31,7 @@ services:
     volumes:
       - ./data/db-01:/data/db
       - ./dbinit.sh:/docker-entrypoint-initdb.d/dbinit.sh:ro
-      - ./mongodb.key:/keys/mongodb.key:ro
+      # - ./mongodb.key:/keys/mongodb.key:ro
     ports:
       - 27017:27017
     environment:
@@ -39,46 +39,46 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
       MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
       MONGO_TEST_DATABASE: ${MONGO_TEST_DATABASE}
-    command: ["mongod", "--bind_ip_all", "--replSet", "rs0", "--keyFile", "/keys/mongodb.key"]
+    command: ["mongod", "--bind_ip_all", "--replSet", "rs0"]
     restart: unless-stopped
 
-  mongodb2:
-    container_name: mongodb2
-    image: mongo
-    networks:
-      - backend
-    volumes:
-      - ./data/db-02:/data/db
-      - ./dbinit.sh:/docker-entrypoint-initdb.d/dbinit.sh:ro
-      - ./mongodb.key:/keys/mongodb.key:ro
-    ports:
-      - 27018:27017
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
-      MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
-      MONGO_TEST_DATABASE: ${MONGO_TEST_DATABASE}
-    command: ["mongod", "--bind_ip_all", "--replSet", "rs0", "--keyFile", "/keys/mongodb.key"]
-    restart: unless-stopped
+  # mongodb2:
+  #   container_name: mongodb2
+  #   image: mongo
+  #   networks:
+  #     - backend
+  #   volumes:
+  #     - ./data/db-02:/data/db
+  #     - ./dbinit.sh:/docker-entrypoint-initdb.d/dbinit.sh:ro
+  #     - ./mongodb.key:/keys/mongodb.key:ro
+  #   ports:
+  #     - 27018:27017
+  #   environment:
+  #     MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+  #     MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+  #     MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
+  #     MONGO_TEST_DATABASE: ${MONGO_TEST_DATABASE}
+  #   command: ["mongod", "--bind_ip_all", "--replSet", "rs0", "--keyFile", "/keys/mongodb.key"]
+  #   restart: unless-stopped
 
-  mongodb3:
-    container_name: mongodb3
-    image: mongo
-    networks:
-      - backend
-    volumes:
-      - ./data/db-03:/data/db
-      - ./dbinit.sh:/docker-entrypoint-initdb.d/dbinit.sh:ro
-      - ./mongodb.key:/keys/mongodb.key:ro
-    ports:
-      - 27019:27017
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
-      MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
-      MONGO_TEST_DATABASE: ${MONGO_TEST_DATABASE}
-    command: ["mongod", "--bind_ip_all", "--replSet", "rs0", "--keyFile", "/keys/mongodb.key"]
-    restart: unless-stopped
+  # mongodb3:
+  #   container_name: mongodb3
+  #   image: mongo
+  #   networks:
+  #     - backend
+  #   volumes:
+  #     - ./data/db-03:/data/db
+  #     - ./dbinit.sh:/docker-entrypoint-initdb.d/dbinit.sh:ro
+  #     - ./mongodb.key:/keys/mongodb.key:ro
+  #   ports:
+  #     - 27019:27017
+  #   environment:
+  #     MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+  #     MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+  #     MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
+  #     MONGO_TEST_DATABASE: ${MONGO_TEST_DATABASE}
+  #   command: ["mongod", "--bind_ip_all", "--replSet", "rs0", "--keyFile", "/keys/mongodb.key"]
+  #   restart: unless-stopped
 
   repl-helper:
     container_name: repl-helper
