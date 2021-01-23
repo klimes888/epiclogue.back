@@ -20,6 +20,10 @@ tags:
   description: "search functions"
 - name: "suggest"
   description: "suggest functions"
+- name: "notifycation"
+  description: "notify functions"
+- name: "myboard"
+  description: "myboard functions"
 schemes:
 - "https"
 paths:
@@ -245,6 +249,8 @@ paths:
               type: string
             userNick:
               type: string
+            userLang:
+              type: string
       responses:
         201:
           description: OK
@@ -260,7 +266,93 @@ paths:
           description: ERROR
           schema:
             $ref: '#/definitions/API_response_error'
-    
+  /auth/findPass:
+    post:
+      tags:
+      - "auth"
+      summary: "Change password who lost it"
+      description: ""
+      parameters:
+      - name: "Body"
+        in: "body"
+        required: true
+        description: "Email whose lost password"
+        schema:
+          type: object
+          properties:
+            email:
+              type: string
+              example: "lost@lunarcat.com"
+      responses:
+        201:
+          description: OK
+        500:
+          description: ERROR
+          schema:
+            $ref: '#/definitions/API_response_error'
+    patch:
+      tags:
+      - "auth"
+      summary: "Change password who lost it"
+      description: ""
+      parameters:
+      - name: "Body"
+        in: "body"
+        required: true
+        description: "Email whose lost password"
+        schema:
+          type: object
+          properties:
+            email:
+              type: string
+              example: "lost@lunarcat.com"
+            token:
+              type: string 
+              example: "13abe90105628acf1461947aff"
+            userPwNew:
+              type: string
+              example: "newpassword1234!"
+            newPwNewRe:
+              type: string
+              example: "newpassword1234!"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+        400:
+          description: ERROR
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result: 
+                    type: string
+                    example: 'error'
+                  message:
+                    type: string
+                    example: '비밀번호가 서로 다릅니다.'
+        401:
+          description: ERROR
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result: 
+                    type: string
+                    example: 'error'
+                  message:
+                    type: string
+                    example: '적절하지 않은 토큰입니다.'
+        500:
+          description: ERROR
+          schema:
+            $ref: '#/definitions/API_response_error' 
   /auth/mailAuth:
     get:
       tags:
@@ -1334,13 +1426,41 @@ paths:
               $ref: '#/definitions/Notification'
       security:
         - access_token: []
-
-  /notification/{notiId}:
+    patch:
+      tags:
+      - "notification"
+      summary: "Read notification"
+      description: ""
+      parameters:
+      - name: "Body"
+        in: "body"
+        description: "Notificataion ID to read"
+        required: true
+        schema:
+          type: object
+          properties:
+            notiId:
+              type: string
+      responses:
+        200:
+          description: OK
+      security:
+        - access_token: []
     delete:
       tags:
       - "notification"
       summary: "Delete notification"
       description: ""
+      parameters:
+      - name: "Body"
+        in: "body"
+        description: "Notificataion ID to delete"
+        required: true
+        schema:
+          type: object
+          properties:
+            notiId:
+              type: string
       responses:
         200:
           description: OK
@@ -1348,6 +1468,16 @@ paths:
         - access_token: []
 
   /notification/all:
+    patch:
+      tags:
+      - "notification"
+      summary: "Read all notifications"
+      description: ""
+      responses:
+        200:
+          description: OK
+      security:
+        - access_token: []
     delete:
       tags:
       - "notification"

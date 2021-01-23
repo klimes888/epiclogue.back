@@ -4,7 +4,7 @@ import { startSession } from 'mongoose'
 
 /* 
   This is notification router.
-  base url: /notification/{notiId}
+  base url: /notification/[:notiId/all]
   OPTIONS: GET, PATCH, DELETE
 */
 
@@ -14,12 +14,37 @@ export const getNoti = async (req, res, next) => {
   try {
     await session.withTransaction(async () => {
       const notiData = await Notification.getNotiList(res.locals.uid).session(session)
-      await Notification.updateMany({ userId: res.locals.uid }, { read: true }, { session })
       console.log(`[INFO] 유저 ${res.locals.uid} 가 알림을 확인했습니다.`)
       return res.status(200).json({
         result: 'ok',
         data: notiData,
       })
+    })
+  } catch (e) {
+    console.error(`[Error] ${e}`)
+    return next(createError(500, '알 수 없는 오류가 발생했습니다.'))
+  }
+}
+
+export const setRead = async (req, res, next) => {
+  try {
+    await Notification.updateMany({ _id: req.body.notiId, userId: res.locals.uid }, { read: true })
+    console.log(`[INFO] 유저 ${res.locals.uid} 가 알림을 ${req.body.notiId} 를 확인했습니다.`)
+    return res.status(200).json({
+      result: 'ok',
+    })
+  } catch (e) {
+    console.error(`[Error] ${e}`)
+    return next(createError(500, '알 수 없는 오류가 발생했습니다.'))
+  }
+}
+
+export const setReadAll = async (req, res, next) => {
+  try {
+    await Notification.updateMany({ userId: res.locals.uid }, { read: true })
+    console.log(`[INFO] 유저 ${res.locals.uid} 가 알림을 모두 읽음처리 했습니다.`)
+    return res.status(200).json({
+      result: 'ok',
     })
   } catch (e) {
     console.error(`[Error] ${e}`)
@@ -55,18 +80,18 @@ export const deleteNoti = async (req, res, next) => {
 
   try {
     await notiObjectId.validateAsync({
-      _id: req.params.notiId,
+      _id: req.body.notiId,
     })
   } catch (e) {
     console.log(
-      `[INFO] 유저 ${res.locals.uid} 가 적절하지 않은 알림 ${req.params.notiId} 을 읽음처리 하려 했습니다.`
+      `[INFO] 유저 ${res.locals.uid} 가 적절하지 않은 알림 ${req.body.notiId} 을 읽음처리 하려 했습니다.`
     )
     return next(createError(400, '적절하지 않은 ObjectId입니다.'))
   }
 
   try {
-    await Notification.deleteOne({ _id: req.params.notiId })
-    console.log(`[INFO] 유저 ${res.locals.uid} 가 알림 ${req.params.notiId} 를 삭제했습니다.`)
+    await Notification.deleteOne({ _id: req.body.notiId })
+    console.log(`[INFO] 유저 ${res.locals.uid} 가 알림 ${req.body.notiId} 를 삭제했습니다.`)
     return res.status(200).json({
       result: 'ok',
     })

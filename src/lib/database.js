@@ -18,7 +18,7 @@ class Database {
 
   async connect() {
     const dbEnvironment =
-      process.env.NODE_ENV === 'test' ? process.env.MONGO_TEST_URI : process.env.MONGO_URI
+      process.env.NODE_ENV === 'test' ? process.env.MONGO_TEST_URI : process.env.MONGO_URI_ALONE
 
     try {
       await mongoose.connect(dbEnvironment, options)

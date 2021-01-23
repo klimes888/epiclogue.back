@@ -5,10 +5,11 @@ import util from 'util'
 import crypto from 'crypto'
 import Joi from 'joi'
 import createError from 'http-errors'
+import axios from 'axios'
 import { startSession } from 'mongoose'
 const SECRET_KEY = process.env.SECRET_KEY
 const randomBytesPromise = util.promisify(crypto.randomBytes)
-import transporter, { emailText } from '../../lib/sendMail'
+import transporter, { emailText, findPassText } from '../../lib/sendMail'
 
 /* 
   This is auth router. 
@@ -18,23 +19,86 @@ import transporter, { emailText } from '../../lib/sendMail'
 
 dotenv.config()
 
+const getFBProfile = async (uid) => {
+  axios({
+    url: `https://graph.facebook.com/v9.0/${uid}/picture`,
+    method: 'GET'
+  })
+  .then(res => {
+    return res.request.res.responseUrl
+  })
+}
+
 export const snsLogin = async function (req, res, next) {
-  const userData = req.body.userData
-  const snsType = req.body.snsType
-  console.log(userData, snsType)
+  const { snsData, snsType, userLang } = req.body
+  console.log(snsData, snsType)
+  const userData = snsType === 'google' 
+  ? { 
+    uid : snsData.profileObj.googleId,
+    email : snsData.profileObj.email,
+    profile : snsData.profileObj.imageUrl,
+    name : snsData.profileObj.name
+  } : {
+    uid: snsData.id,
+    email : snsData.email,
+    profile : await getFBProfile(snsData.id),
+    name : snsData.name
+  }
+  let result = await User.isExistSns(userData.uid)
+
+  if(!result) {
+    const generatedId = crypto.createHash('sha256').update(userData.email).digest('hex').slice(0, 14)
+    const salt = await randomBytesPromise(64)
+    const crypt_Email = crypto.pbkdf2Sync(
+      userData.email,
+      salt.toString('base64'),
+      parseInt(process.env.EXEC_NUM),
+      parseInt(process.env.RESULT_LENGTH),
+      'sha512'
+    )
+    const auth_token = crypt_Email.toString('hex').slice(0, 24)
+    result = await User.create({
+      email: userData.email,
+      password: crypt_Email,
+      salt: salt.toString('base64'),
+      nickname: userData.name,
+      token: auth_token,
+      screenId: generatedId,
+      displayLanguage: userLang,
+      profile: userData.profile,
+      snsId: userData.uid,
+      snsType,
+      isConfirmed: true
+    })
+  }
+
+  if (result.deactivatedAt != null) {
+    return next(createError(404, '탈퇴한 계정입니다.'))
+  }
+
+  const token = jwt.sign(
+    {
+      nick: result['nickname'],
+      uid: result['_id'],
+      isConfirmed: result['isConfirmed'],
+    },
+    SECRET_KEY,
+    {
+      expiresIn: process.env.JWT_EXPIRES_IN,
+    }
+  )
+  console.log(`[INFO] SNS유저 ${result._id} 가 로그인했습니다.`)
   return res.status(200).json({
     result: 'ok',
-    token: userData,
+    token,
+    nick: result.nickname,
+    screenId: result.screenId,
+    displayLanguage: result.displayLanguage
   })
-  // 유저 존재여부 확인 후 있으면 db 저장, 없으면 바로 로그인 처리 조건문 요구
-  // db에 추가되는 sns유저 정보는 아래와 같음
-  // email, token, nickname, snsType
-  // sns유저는 회원가입 절차가 없으므로 기존의 이메일 인증토큰용 컬럼을 재활용
 }
 
 export const login = async function (req, res, next) {
-  const email = req.body['email']
-  const userPw = req.body['userPw']
+  const { email, userPw } = req.body
 
   const loginValidationSchema = Joi.object({
     email: Joi.string()
@@ -70,6 +134,10 @@ export const login = async function (req, res, next) {
       const result = await User.findUser(email, crypt_Pw.toString('base64'))
 
       if (result) {
+        if (result.deactivatedAt != null) {
+          return next(createError(404, '탈퇴한 계정입니다.'))
+        }
+
         const token = jwt.sign(
           {
             nick: result['nickname'],
@@ -87,6 +155,7 @@ export const login = async function (req, res, next) {
           token,
           nick: result.nickname,
           screenId: result.screenId,
+          displayLanguage: result.displayLanguage
         })
       } else {
         console.log(`[INFO] 유저 ${email} 가 다른 비밀번호 ${userPw} 로 로그인을 시도했습니다.`)
@@ -103,10 +172,7 @@ export const login = async function (req, res, next) {
 }
 
 export const join = async function (req, res, next) {
-  const email = req.body['email']
-  const userPw = req.body['userPw']
-  const userPwRe = req.body['userPwRe']
-  const nick = req.body['userNick']
+  const { email, userPw, userPwRe, userLang, userNick: nick } = req.body
   const check = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[$@$!%*#?&])[A-Za-z\d$@$!%*#?&]{8,}$/.test(userPw)
 
   const joinValidationSchema = Joi.object({
@@ -116,6 +182,7 @@ export const join = async function (req, res, next) {
     userPw: Joi.string().required(),
     userPwRe: Joi.string().required(),
     nick: Joi.string().trim().required(),
+    userLang: Joi.number().required()
   })
 
   try {
@@ -125,7 +192,7 @@ export const join = async function (req, res, next) {
         validate를 사용하면 try-catch를 사용할 수 없고
         await 를 붙이지 않으면 unhandled promise error 가 나온다...
       */
-      await joinValidationSchema.validateAsync({ email, userPw, userPwRe, nick })
+      await joinValidationSchema.validateAsync({ email, userPw, userPwRe, nick, userLang })
     } catch (e) {
       console.log(`[INFO] 유저 ${email} 가 적절하지 않은 데이터로 가입하려 했습니다. ${e}`)
       return next(createError(400, '적절하지 않은 값을 입력했습니다.'))
@@ -156,6 +223,7 @@ export const join = async function (req, res, next) {
           nickname: nick,
           token: auth_token,
           screenId: generatedId,
+          displayLanguage: userLang
         })
 
         if (result) {
@@ -194,6 +262,82 @@ export const join = async function (req, res, next) {
   } catch (e) {
     console.error(`[ERROR] 알 수 없는 에러가 발생했습니다. ${e}`)
     return next(createError(500, '알 수 없는 에러가 발생했습니다.'))
+  }
+}
+
+export const mailToFindPass = async (req, res, next) => {
+  const { email } = req.body
+  const userToken = await (await randomBytesPromise(24)).toString('hex')
+  const option = {
+    from: process.env.MAIL_USER,
+    to: email,
+    subject: '비밀번호 재설정을 위해 이메일 인증을 완료해주세요.',
+    html: findPassText(email, userToken),
+  }
+
+  try {
+    await User.updateOne({ email }, { $set: { token: userToken } })
+    await transporter.sendMail(option)
+    console.log(`[INFO] ${email} 에게 성공적으로 메일을 보냈습니다`)
+    return res.status(201).json({
+      result: 'ok',
+    })
+  } catch (e) {
+    console.error(`[Error] ${e}`)
+    return next(createError(e))
+  }
+}
+
+export const findPass = async (req, res, next) => {
+  const { email, userPwNew, userPwNewRe, token } = req.body
+  const changePassSchema = Joi.object({
+    userPwNew: Joi.string()
+      .regex(/^(?=.*[A-Za-z])(?=.*\d)(?=.*[$@$!%*#?&])[A-Za-z\d$@$!%*#?&]{8,}$/)
+      .required(),
+    userPwNewRe: Joi.string()
+      .regex(/^(?=.*[A-Za-z])(?=.*\d)(?=.*[$@$!%*#?&])[A-Za-z\d$@$!%*#?&]{8,}$/)
+      .required(),
+  })
+
+  /* Check password validation */
+  try {
+    await changePassSchema.validateAsync({ userPwNew, userPwNewRe })
+  } catch (e) {
+    console.log(`[INFO] 유저 ${email} 의 비밀번호 변경 실패: ${e}`)
+    return next(createError(400, '비밀번호 규칙을 확인해주세요.'))
+  }
+
+  try {
+    if (userPwNew === userPwNewRe) {
+      const authUser = await User.findOne({ email, token })
+      if (authUser) {
+        const newSalt = await (await randomBytesPromise(64)).toString('base64')
+        const newPass = await (await crypto.pbkdf2Sync(
+          userPwNew,
+          newSalt.toString('base64') ,
+          parseInt(process.env.EXEC_NUM),
+          parseInt(process.env.RESULT_LENGTH),
+          'sha512'
+        )).toString('base64') 
+
+        await User.updateOne({ email }, { salt: newSalt, password: newPass })
+
+        console.log(`[INFO] 유저 ${email} 가 비밀번호 변경에 성공했습니다.`)
+        return res.status(200).json({
+          result: 'ok',
+          message: '새로운 비밀번호로 로그인해주세요.',
+        })
+      } else {
+        console.log(`[INFO] 유저 ${email} 가 잘못된 토큰 ${token} 으로 비밀번호 변경을 시도했습니다.`)
+        return next(createError(401, '적절하지 않은 인증입니다.'))
+      }
+    } else {
+      console.log(`[INFO] 유저 ${email} 서로 다른 비밀번호 ${userPwNew}, ${userPwNewRe} 로 비밀번호 변경을 시도했습니다.`)
+      return next(createError(400, '비밀번호가 다릅니다.'))
+    }
+  } catch (e) {
+    console.error(`[Error] ${e}`)
+    return next(createError('알 수 없는 에러가 발생했습니다.'))
   }
 }
 

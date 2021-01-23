@@ -11,6 +11,7 @@ import dotenv from 'dotenv'
 import dotenvExpand from 'dotenv-expand'
 import dayjs from 'dayjs'
 import dayjsPluginUTC from 'dayjs-plugin-utc'
+import Slack from 'slack-node'
 
 // routers
 import indexRouter from './src/routes'
@@ -31,6 +32,7 @@ const app = express()
 dotenvExpand(dotenv.config())
 dayjs.extend(dayjsPluginUTC)
 
+// Swagger setting
 const swaggerDefinition = {
   info: {
     // API informations (required)
@@ -38,7 +40,7 @@ const swaggerDefinition = {
     version: '1.0.0', // Version (required)
     description: 'epiclogue service API', // Description (optional)
   },
-  host: 'api.epiclogue.tk', // Host (optional)
+  host: 'api.epiclogue.com', // Host (optional)
   basePath: '/', // Base path (optional)
   schemes: ['https'],
 }
@@ -53,10 +55,14 @@ const options = {
 const swaggerSpec = swaggerJSDoc(options)
 
 app.use(cors({ credentials: true, origin: true }))
-app.use(morgan('combined', {
-  stream,
-  skip: (req, res) => { return res.statusCode > 399 }
-}))
+app.use(
+  morgan('combined', {
+    stream,
+    skip: (req, res) => {
+      return res.statusCode > 399
+    },
+  })
+)
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(cookieParser())
@@ -83,19 +89,36 @@ app.use(function (req, res, next) {
 // error handler
 app.use((err, req, res, next) => {
   // if (process.env.NODE_ENV !== 'production') { }
+
+  if (err.status === 500) {
+    // Only alert on 500 error
+    const slack = new Slack()
+    slack.setWebhook(process.env.SLACK_WEBHOOK)
+    slack.webhook(
+      {
+        text: `*Message*: ${err.message} \n *Stack*: ${err.stack} \n *StatusCode*: ${err.status}`,
+      },
+      (err, response) => {
+        if (err) console.error(err)
+      }
+    )
+  }
+
   const errObject = {
-    req: { route: req.route, url: req.url, method: req.method, headers: req.headers }, err: { message: err.message, stack: err.stack, status: err.status },
-    user: res.locals.uid
+    req: { route: req.route, url: req.url, method: req.method, headers: req.headers },
+    err: { message: err.message, stack: err.stack, status: err.status },
+    user: res.locals.uid,
   }
 
   logger.error(`${dayjs().local().format('YYYY-MM-DD HH:mm:ss')}`, errObject)
 
   res.locals.message = err.message
   res.locals.error = err
+
   return res.status(err.status || 500).json({
     result: 'error',
-    message: err.message || "Internal server error",
-    data: err.properties
+    message: err.message || 'Internal server error',
+    data: err.properties,
   })
 })
 

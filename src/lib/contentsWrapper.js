@@ -48,6 +48,7 @@ export const contentsWrapper = async (reqUserId, contentData, contentType, isFor
           })
           for (let eachFeedback of filteredFeedbacks) {
             eachFeedback.liked = likeIdSet.includes(eachFeedback._id.toString()) ? true : false
+            eachFeedback.heartCount = await models.Like.countDocuments({ targetInfo: eachFeedback._id })
             if (eachFeedback.writer._id.toString() === reqUserId) {
               eachFeedback.writer.following = 'me'
             } else {

@@ -29,7 +29,8 @@ export const postBoard = async (req, res, next) => {
     boardBody: req.body.boardBody,
     category: req.body.category,
     pub: req.body.pub,
-    lanuage: req.body.lanuage,
+    language: req.body.language,
+    allowSecondaryCreation: req.body.allowSecondaryCreation,
     boardImg: _boardImg,
     tags,
   }
@@ -244,7 +245,7 @@ export const secPost = async (req, res, next) => {
     boardBody: req.body.boardBody,
     category: req.body.category,
     pub: req.body.pub,
-    lanuage: req.body.lanuage,
+    language: req.body.language,
     boardImg: _boardImg,
     originUserId: req.body.originUserId,
     originBoardId: req.body.originBoardId,

@@ -19,18 +19,24 @@ export const s3 = new aws.S3({
 
 export const deleteImage = (images) => {
   const garbageImage = []
-
-  for (let image of images) {
-    if (image) {
-      const objectKey = image.split('/')
-      const deletionFormat = {
-        Key: objectKey[3],
+  if(images === undefined) return false
+  if(images instanceof Array) {
+    for (let image of images) {
+      if (image) {
+        const objectKey = image.split('/')
+        const deletionFormat = {
+          Key: objectKey[3],
+        }
+        garbageImage.push(deletionFormat)
       }
-      garbageImage.push(deletionFormat)
     }
+  } else {
+    const objectKey = images.split('/')
+    const deletionFormat = {
+      Key: objectKey[3],
+    }
+    garbageImage.push(deletionFormat)
   }
-
-  if(garbageImage.length !== 0)
     s3.deleteObjects(
       {
         Bucket: process.env.AWS_BUCKET_NAME,
@@ -42,6 +48,7 @@ export const deleteImage = (images) => {
         if (err) console.error(err, err.stack)
       }
     )
+  return true
 }
 
 const storage = multerS3({
