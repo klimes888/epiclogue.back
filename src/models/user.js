@@ -134,7 +134,7 @@ user.statics.getByQuery = function (query) {
 }
 
 user.statics.isExistSns = function (snsId) {
-  return this.find({snsId})
+  return this.findOne({snsId})
 }
 
 export default mongoose.model('User', user)
