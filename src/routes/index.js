@@ -7,7 +7,7 @@ const router = express.Router({
 router.get('/', (req, res, next) => {
   res.status(200).json({
     result: 'ok',
-    comment: 'server is ok with codeDeploy?',
+    comment: 'server is ok',
   })
 })
 
