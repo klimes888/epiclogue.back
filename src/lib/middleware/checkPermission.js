@@ -1,4 +1,4 @@
-import { Board, Reply, Feedback } from '../../models'
+import { Board, Reply, Feedback, User } from '../../models'
 import createError from 'http-errors'
 
 // 작성자에 대한 인증 미들웨어
@@ -8,6 +8,9 @@ export const checkWriter = async (req, res, next) => {
   let id
 
   try {
+    // 어드민이면 통과
+    if (await User.isAdmin(res.locals.uid)) next()
+
     // 검사 전에 해당 게시물(댓글, 피드백, 글)이 존재하는지 먼저 검사하지 않으면 auth error 발생
     if (req.params.replyId !== undefined) {
       type = '댓글'

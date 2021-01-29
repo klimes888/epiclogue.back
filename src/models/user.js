@@ -137,4 +137,9 @@ user.statics.isExistSns = function (snsId) {
   return this.find({snsId})
 }
 
+user.statics.isAdmin = function (_id) {
+  const userData = this.findOne({_id})
+  return userData.isAdmin == true
+}
+
 export default mongoose.model('User', user)
