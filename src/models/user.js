@@ -137,9 +137,10 @@ user.statics.isExistSns = function (snsId) {
   return this.find({snsId})
 }
 
-user.statics.isAdmin = function (_id) {
-  const userData = this.findOne({_id})
-  return userData.isAdmin == true
+user.statics.isAdmin = async function (_id) {
+  const tempData = await this.findOne({_id})
+  const userData = tempData.toJSON()
+  return userData.isAdmin === true
 }
 
 export default mongoose.model('User', user)
