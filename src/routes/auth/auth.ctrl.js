@@ -20,12 +20,13 @@ import transporter, { emailText, findPassText } from '../../lib/sendMail'
 dotenv.config()
 
 const getFBProfile = async (uid) => {
-  axios({
-    url: `https://graph.facebook.com/v9.0/${uid}/picture`,
-    method: 'GET'
-  })
-  .then(res => {
-    return res.request.res.responseUrl
+  return new Promise( async (resolve, reject) => {
+    axios({
+      url: `https://graph.facebook.com/v9.0/${uid}/picture`,
+      method: 'GET'
+    })
+    .then(res => resolve(res.request.res.responseUrl))
+    .catch(err => reject(err))
   })
 }
 
