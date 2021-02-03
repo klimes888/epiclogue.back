@@ -134,7 +134,7 @@ board.statics.getByQuery = function (query) {
   ).populate({
     path: 'writer',
     select: '_id screenId nickname profile',
-  }).sort({ writeDate: 1, heartCount: 1 })
+  }).sort({ writeDate: 1 })
 }
 
 export default mongoose.model('Board', board)
