@@ -137,18 +137,4 @@ board.statics.getByQuery = function (query) {
   }).sort({ writeDate: 1, heartCount: 1 })
 }
 
-board.statics.countFeedback = function (boardId, flag) {
-  const increment = flag ? 1 : -1
-  return this.updateOne({ _id: boardId }, { $inc: { feedbackCount: increment } })
-}
-
-board.statics.countBookmark = function (boardId, flag) {
-  const increment = flag ? 1 : -1
-  return this.updateOne({ _id: boardId }, { $inc: { bookmarkCount: increment } })
-}
-
-board.statics.getBookmarkCount = function (boardId) {
-  return this.findOne({ _id: boardId }, { _id: 0, bookmarkCount: 1 })
-}
-
 export default mongoose.model('Board', board)
