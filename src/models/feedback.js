@@ -8,8 +8,6 @@ const Feedback = new mongoose.Schema({
   writeDate: { type: Date, default: Date.now },
   edited: { type: Boolean, default: false },
   replies: [{ type: ObjectId, ref: 'Reply' }],
-  childCount: { type: Number, default: 0 },
-  heartCount: { type: Number, default: 0 },
 })
 
 // Create

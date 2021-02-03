@@ -8,7 +8,6 @@ const Reply = new mongoose.Schema({
   replyBody: { type: String, required: true },
   writeDate: { type: Date, default: Date.now },
   edited: { type: Boolean, default: false },
-  heartCount: { type: Number, default: 0 },
 })
 
 // Create
