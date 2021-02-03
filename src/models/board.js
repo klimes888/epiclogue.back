@@ -151,18 +151,4 @@ board.statics.getBookmarkCount = function (boardId) {
   return this.findOne({ _id: boardId }, { _id: 0, bookmarkCount: 1 })
 }
 
-board.statics.countHeart = function (boardId, flag) {
-  const increment = flag ? 1 : -1
-  return this.updateOne({ _id: boardId }, { $inc: { heartCount: increment } })
-}
-
-board.statics.getHeartCount = function (boardId) {
-  return this.findOne({ _id: boardId }, { heartCount: 1, _id: 0 })
-}
-
-board.statics.countReact = function (boardId, flag) {
-  const increment = flag ? 1 : -1
-  return this.updateOne({ _id: boardId }, { $inc: { reactCount: increment } })
-}
-
 export default mongoose.model('Board', board)
