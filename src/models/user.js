@@ -42,11 +42,11 @@ user.statics.getByScreenId = function (screenId) {
 }
 
 user.statics.isConfirmed = function (email, token) {
-  return this.findOne({ email, token })
+  return this.findOne({ email, token, snsType: 'normal' })
 }
 
 user.statics.confirmUser = function (email) {
-  return this.updateOne({ email }, { isConfirmed: true })
+  return this.updateOne({ email, snsType: 'normal' }, { isConfirmed: true })
 }
 
 user.statics.getById = function (userId) {
@@ -54,7 +54,7 @@ user.statics.getById = function (userId) {
 }
 
 user.statics.isExist = function (email) {
-  return this.findOne({ email })
+  return this.findOne({ email, snsType: 'normal' })
 }
 
 user.statics.findByScreenId = function (screenId) {
@@ -72,7 +72,7 @@ user.statics.findUser = function (email, userpw) {
 }
 
 user.statics.getSalt = function (email) {
-  return this.findOne({ email }, { _id: 0, salt: 1 })
+  return this.findOne({ email, snsType: 'normal' }, { _id: 0, salt: 1 })
 }
 
 user.statics.getUserInfo = function (userId, option) {
@@ -89,10 +89,6 @@ user.statics.getUserInfoByScreenId = function (screenId, option) {
 
 user.statics.deleteUser = function (userId, userpw) {
   return this.updateOne({ _id: userId, password: userpw }, { deactivatedAt: Date.now() })
-}
-
-user.statics.findAll = function () {
-  return this.find({})
 }
 
 user.statics.changePass = function (userId, userPw, userPwNew, saltNew, session) {
