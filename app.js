@@ -90,19 +90,19 @@ app.use(function (req, res, next) {
 app.use((err, req, res, next) => {
   // if (process.env.NODE_ENV !== 'production') { }
 
-  // if (err.status === 500) {
-  //   // Only alert on 500 error
-  //   const slack = new Slack()
-  //   slack.setWebhook(process.env.SLACK_WEBHOOK)
-  //   slack.webhook(
-  //     {
-  //       text: `*Message*: ${err.message} \n *Stack*: ${err.stack} \n *StatusCode*: ${err.status}`,
-  //     },
-  //     (err, response) => {
-  //       if (err) console.error(err)
-  //     }
-  //   )
-  // }
+  if (err.status === 500) {
+    // Only alert on 500 error
+    const slack = new Slack()
+    slack.setWebhook(process.env.SLACK_WEBHOOK)
+    slack.webhook(
+      {
+        text: `*Message*: ${err.message} \n *Stack*: ${err.stack} \n *StatusCode*: ${err.status}`,
+      },
+      (err, response) => {
+        if (err) console.error(err)
+      }
+    )
+  }
 
   const errObject = {
     req: { route: req.route, url: req.url, method: req.method, headers: req.headers },
