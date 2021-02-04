@@ -157,7 +157,10 @@ export const postEditInfo = async function (req, res, next) {
       boardImg.push(req.files[i].location)
     }
   }
-
+  let tags = ''
+  if (req.body.boardBody) {
+    tags = req.body.boardBody.match(/#[^\{\}\[\]\/?.,;:|\)*~`!^\-+<>@\#$%&\\\=\(\'\"\s]+/g)
+  }
   const session = await startSession()
 
   try {
@@ -173,6 +176,7 @@ export const postEditInfo = async function (req, res, next) {
       category: parseInt(req.body.category || originalData.category),
       pub: parseInt(req.body.pub || originalData.pub),
       language: parseInt(req.body.language || originalData.language),
+      tags,
     }
 
     await session.withTransaction(async () => {

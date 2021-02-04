@@ -57,6 +57,7 @@ board.statics.update = function (articleData, session) {
       pub: articleData.pub,
       language: articleData.language,
       edited: true,
+      tags: articleData.tags,
     },
     { session }
   )
