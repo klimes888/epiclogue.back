@@ -104,17 +104,20 @@ export const contentsWrapper = async (reqUserId, contentData, contentType, isFor
         const resultSet = []
 
         for (let userData of contentData) {
-          // 팔로우 여부
+          // 팔로우 여부 (회원일 경우에만 적용)
           userData = userData.toJSON()
-          userData.isFollowing =
-          userData._id === reqUserId
-            ? (await Follow.didFollow({
-                userId: reqUserId,
-                targetUserId: userData._id,
-              }))
-              ? true
-              : false
-            : 'me'
+          if (reqUserId) {
+            userData.isFollowing =
+            userData._id === reqUserId
+              ? (await Follow.didFollow({
+                  userId: reqUserId,
+                  targetUserId: userData._id,
+                }))
+                ? true
+                : false
+              : 'me'
+          }
+
           // 작품 수
           userData.illustCount = await models.Board.countByWriterAndCategory(userData._id, 0)
           userData.comicCount = await models.Board.countByWriterAndCategory(userData._id, 1)
