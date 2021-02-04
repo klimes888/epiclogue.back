@@ -9,10 +9,10 @@ import { checkExistence } from '../../lib/middleware/checkExistence'
 import {uploadImage} from '../../lib/imageCtrl'
 import checkSecondaryAllow from '../../lib/middleware/checkSecondaryAllow'
 
-board.get('/', verifyToken, boardCtrl.getBoards)
+board.get('/', boardCtrl.getBoards)
 board.post('/', verifyToken, uploadImage.any(), boardCtrl.postBoard)
 board.post('/sec', verifyToken, uploadImage.any(), checkSecondaryAllow, boardCtrl.secPost)
-board.get('/:boardId', verifyToken, checkExistence, boardCtrl.viewBoard)
+board.get('/:boardId', checkExistence, boardCtrl.viewBoard)
 board.delete('/:boardId', verifyToken, checkExistence, checkWriter, boardCtrl.deleteBoard)
 board.get('/:boardId/edit', verifyToken, checkExistence, checkWriter, boardCtrl.getEditInfo)
 board.post('/:boardId/edit', verifyToken, checkExistence, checkWriter, uploadImage.any(), boardCtrl.postEditInfo)
