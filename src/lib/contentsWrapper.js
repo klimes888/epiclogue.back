@@ -20,26 +20,35 @@ export const contentsWrapper = async (reqUserId, contentData, contentType, isFor
           contentData = contentData.toJSON()
           // like, bookmark, following on board
           // null check
-          
+
           contentData.liked = likeIdSet.includes(contentData._id.toString()) ? true : false
-          contentData.heartCount = await models.Like.countDocuments({ targetInfo:contentData._id, targetType:'Board' })
+          contentData.heartCount = await models.Like.countDocuments({
+            targetInfo: contentData._id,
+            targetType: 'Board',
+          })
           contentData.bookmarked = bookmarkIdSet.includes(contentData._id.toString()) ? true : false
-          contentData.bookmarkCount = await models.Bookmark.countDocuments({ board: contentData._id })
+          contentData.bookmarkCount = await models.Bookmark.countDocuments({
+            board: contentData._id,
+          })
           // writer following check
-          if (contentData.writer._id.toString() === reqUserId) {
+          if (data.writer && contentData.writer._id.toString() === reqUserId) {
             contentData.writer.following = 'me'
           } else {
-          contentData.writer.following = followingIdSet.includes(contentData.writer._id.toString())
-            ? true
-            : false  
+            contentData.writer.following = followingIdSet.includes(
+              contentData.writer._id.toString()
+            )
+              ? true
+              : false
           }
           // original user following check
           if (contentData.originUserId) {
-            contentData.originUserId.following = followingIdSet.includes(contentData.originUserId._id.toString())
-            ? true
-            : false
+            contentData.originUserId.following = followingIdSet.includes(
+              contentData.originUserId._id.toString()
+            )
+              ? true
+              : false
           }
-          
+
           // like, following on feedbacks
           const feedbacks = []
           likeIdSet = await getLikeIdSet(reqUserId, 'Feedback')
@@ -48,7 +57,9 @@ export const contentsWrapper = async (reqUserId, contentData, contentType, isFor
           })
           for (let eachFeedback of filteredFeedbacks) {
             eachFeedback.liked = likeIdSet.includes(eachFeedback._id.toString()) ? true : false
-            eachFeedback.heartCount = await models.Like.countDocuments({ targetInfo: eachFeedback._id })
+            eachFeedback.heartCount = await models.Like.countDocuments({
+              targetInfo: eachFeedback._id,
+            })
             if (eachFeedback.writer._id.toString() === reqUserId) {
               eachFeedback.writer.following = 'me'
             } else {
@@ -61,7 +72,7 @@ export const contentsWrapper = async (reqUserId, contentData, contentType, isFor
           contentData.feedbacks = feedbacks
           contentData.feedbackCount = feedbacks.length
           contentData.reactCount = await models.React.countDocuments({ boardId: contentData._id })
-          
+
           resolve(contentData)
         } else {
           /* For many, small viewers */
@@ -72,20 +83,16 @@ export const contentsWrapper = async (reqUserId, contentData, contentType, isFor
           })
           for (let data of filteredData) {
             data = data.toJSON()
-            data.bookmarked = bookmarkIdSet.includes(data._id.toString())
-              ? true
-              : false
+            data.bookmarked = bookmarkIdSet.includes(data._id.toString()) ? true : false
             data.liked = likeIdSet.includes(data._id.toString()) ? true : false
             // If get boards from board router
             if (data.writer && data.writer._id.toString() === reqUserId) {
               data.writer.following = 'me'
-            // If get boards from bookmark router
+              // If get boards from bookmark router
             } else if (data.user && data.user._id.toString() === reqUserId) {
               data.user.following = 'me'
             } else {
-              data.writer.following = followingIdSet.includes(
-                data.writer._id.toString()
-              )
+              data.writer.following = followingIdSet.includes(data.writer._id.toString())
                 ? true
                 : false
             }
@@ -93,6 +100,30 @@ export const contentsWrapper = async (reqUserId, contentData, contentType, isFor
           }
           resolve(resultSet)
         }
+      } else if (contentType === 'User') {
+        const resultSet = []
+
+        for (let userData of contentData) {
+          // 팔로우 여부 (회원일 경우에만 적용)
+          userData = userData.toJSON()
+          if (reqUserId) {
+            userData.isFollowing =
+            userData._id === reqUserId
+              ? (await Follow.didFollow({
+                  userId: reqUserId,
+                  targetUserId: userData._id,
+                }))
+                ? true
+                : false
+              : 'me'
+          }
+
+          // 작품 수
+          userData.illustCount = await models.Board.countByWriterAndCategory(userData._id, 0)
+          userData.comicCount = await models.Board.countByWriterAndCategory(userData._id, 1)
+          resultSet.push(userData)
+        }
+        resolve(resultSet)
       } else {
         /* following, like on feedbacks and replies */
         const likeIdSet = await getLikeIdSet(reqUserId, contentType)
@@ -103,7 +134,7 @@ export const contentsWrapper = async (reqUserId, contentData, contentType, isFor
         for (let data of filteredData) {
           data = data.toJSON()
           data.liked = likeIdSet.includes(data._id.toString()) ? true : false
-          if (data.writer._id.toString() === reqUserId) {
+          if (data.writer && data.writer._id.toString() === reqUserId) {
             data.writer.following = 'me'
           } else {
             data.writer.following = followingIdSet.includes(data.writer._id.toString())

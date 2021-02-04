@@ -8,7 +8,6 @@ const Reply = new mongoose.Schema({
   replyBody: { type: String, required: true },
   writeDate: { type: Date, default: Date.now },
   edited: { type: Boolean, default: false },
-  heartCount: { type: Number, default: 0 },
 })
 
 // Create
@@ -66,15 +65,6 @@ Reply.statics.getById = function (replyId, option) {
 
 Reply.statics.getParentId = function (replyId) {
   return this.findOne({ _id: replyId }, { parentId: 1 })
-}
-
-Reply.statics.countHeart = function (replyId, flag) {
-  const increment = flag ? 1 : -1
-  return this.updateOne({ _id: replyId }, { $inc: { heartCount: increment } })
-}
-
-Reply.statics.getHeartCount = function (replyId) {
-  return this.findOne({ _id: replyId }, { heartCount: 1, _id: 0 })
 }
 
 export default mongoose.model('Reply', Reply)

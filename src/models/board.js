@@ -57,6 +57,7 @@ board.statics.update = function (articleData, session) {
       pub: articleData.pub,
       language: articleData.language,
       edited: true,
+      tags: articleData.tags,
     },
     { session }
   )
@@ -120,7 +121,7 @@ board.statics.getTitlesByQuery = function (query) {
   ).sort({ boardTitle: 'asc' })
 }
 
-board.statics.getByQuery = function (query) {
+board.statics.searchByTitleOrTag = function (query) {
   return this.find(
     { $or: [{ boardTitle: { $regex: query } }, { tags: query }] },
     {
@@ -134,35 +135,12 @@ board.statics.getByQuery = function (query) {
   ).populate({
     path: 'writer',
     select: '_id screenId nickname profile',
-  }).sort({ writeDate: 1, heartCount: 1 })
+  }).sort({ writeDate: 1 })
 }
 
-board.statics.countFeedback = function (boardId, flag) {
-  const increment = flag ? 1 : -1
-  return this.updateOne({ _id: boardId }, { $inc: { feedbackCount: increment } })
-}
-
-board.statics.countBookmark = function (boardId, flag) {
-  const increment = flag ? 1 : -1
-  return this.updateOne({ _id: boardId }, { $inc: { bookmarkCount: increment } })
-}
-
-board.statics.getBookmarkCount = function (boardId) {
-  return this.findOne({ _id: boardId }, { _id: 0, bookmarkCount: 1 })
-}
-
-board.statics.countHeart = function (boardId, flag) {
-  const increment = flag ? 1 : -1
-  return this.updateOne({ _id: boardId }, { $inc: { heartCount: increment } })
-}
-
-board.statics.getHeartCount = function (boardId) {
-  return this.findOne({ _id: boardId }, { heartCount: 1, _id: 0 })
-}
-
-board.statics.countReact = function (boardId, flag) {
-  const increment = flag ? 1 : -1
-  return this.updateOne({ _id: boardId }, { $inc: { reactCount: increment } })
+board.statics.countByWriterAndCategory = function (userId, category) {
+  // 0: Illust, 1: Comic
+  return this.countDocuments({ writer: userId, category })
 }
 
 export default mongoose.model('Board', board)

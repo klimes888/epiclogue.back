@@ -1,5 +1,5 @@
 import { Router } from 'express'
-const board = new Router()
+const board = new Router({ mergeParams: true })
 import * as boardCtrl from './board.ctrl'
 import feedback from './feedback'
 import react from './react'
@@ -17,6 +17,6 @@ board.delete('/:boardId', verifyToken, checkExistence, checkWriter, boardCtrl.de
 board.get('/:boardId/edit', verifyToken, checkExistence, checkWriter, boardCtrl.getEditInfo)
 board.post('/:boardId/edit', verifyToken, checkExistence, checkWriter, uploadImage.any(), boardCtrl.postEditInfo)
 board.use('/:boardId/feedback', checkExistence, feedback)
-board.use('/:boardId/react', verifyToken, react)
+board.use('/:boardId/react', checkExistence, react)
 
 export default board
