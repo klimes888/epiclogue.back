@@ -127,10 +127,30 @@ user.statics.getProfile = function (screenId) {
   return this.find({ _id: screenId }, { _id: 1, screenId: 1, nickname: 1 })
 }
 
-user.statics.getByQuery = function (query) {
-  return this.find({ screenId: { $regex: query } }, { screenId: 1, nickname: 1, profile: 1 }).sort({
-    screenId: 'asc',
-  })
+user.statics.searchByScreenId = function (query) {
+  return this.find(
+    { screenId: { $regex: query } },
+    {
+      nickname: 1,
+      screenId: 1,
+      profile: 1,
+      banner: 1,
+      intro: 1
+    }
+  ).sort({ screenId: 1 })
+}
+
+user.statics.searchByNickname = function (query) {
+  return this.find(
+    { nickname: { $regex: query } },
+    {
+      nickname: 1,
+      screenId: 1,
+      profile: 1,
+      banner: 1,
+      intro: 1
+    }
+  ).sort({ nickname: 1 })
 }
 
 user.statics.isExistSns = function (snsId) {

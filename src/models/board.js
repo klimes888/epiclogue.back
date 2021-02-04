@@ -120,7 +120,7 @@ board.statics.getTitlesByQuery = function (query) {
   ).sort({ boardTitle: 'asc' })
 }
 
-board.statics.getByQuery = function (query) {
+board.statics.searchByTitleOrTag = function (query) {
   return this.find(
     { $or: [{ boardTitle: { $regex: query } }, { tags: query }] },
     {
@@ -163,6 +163,11 @@ board.statics.getHeartCount = function (boardId) {
 board.statics.countReact = function (boardId, flag) {
   const increment = flag ? 1 : -1
   return this.updateOne({ _id: boardId }, { $inc: { reactCount: increment } })
+}
+
+board.statics.countByWriterAndCategory = function (userId, category) {
+  // 0: Illust, 1: Comic
+  return this.countDocuments({ writer: userId, category })
 }
 
 export default mongoose.model('Board', board)
