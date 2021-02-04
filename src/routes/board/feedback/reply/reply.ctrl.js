@@ -78,7 +78,7 @@ export const getReplys = async (req, res, next) => {
 
   try {
     const replyData = await Reply.getByParentId(feedbackId)
-    const wrappedReplies = await contentsWrapper(res.locals.uid, replyData, 'Reply', false)
+    const wrappedReplies = res.locals?.uid ? await contentsWrapper(res.locals.uid, replyData, 'Reply', false) : replyData
     console.log(
       `[INFO] 유저 ${res.locals.uid} 가 피드백 ${feedbackId} 하위의 댓글(들)을 열람합니다.`
     )
