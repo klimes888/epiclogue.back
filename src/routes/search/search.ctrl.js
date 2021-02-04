@@ -3,7 +3,7 @@ import { User, Board, Follow } from '../../models'
 import { contentsWrapper } from '../../lib/contentsWrapper'
 
 /* 검색 화면 렌더링을 가정한 데이터 API */
-export const searchResult = async (req, res, next) => {
+export const search = async (req, res, next) => {
   const { q: queryString, type: searchType } = req.query
 
   let searchResult
@@ -27,8 +27,9 @@ export const searchResult = async (req, res, next) => {
     }
   }
 
+  console.log(`[INFO] 유저 ${res.locals.uid} 가 ${searchType} ${queryString} 을 검색했습니다.`)
   return res.status(200).json({
     result: 'ok',
-    data: await contentsWrapper(res.locals.uid, searchResult, searchType, false)
+    data: res.locals.uid ? await contentsWrapper(res.locals.uid, searchResult, searchType, false) : searchResult
   })
 }
