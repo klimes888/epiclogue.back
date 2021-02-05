@@ -27,14 +27,4 @@ like.statics.getByUserId = async function (userId, targetType) {
   .populate({path: 'targetInfo', populate: { path: 'writer', select: '_id screenId nickname profile' }})
 }
 
-like.statics.getCount = function (likeData) {
-  return this.find(
-    { targetType: likeData.targetType, targetId: likeData.targetId, board: likeData.board, feedback: likeData.feedback, reply: likeData.reply },
-    {
-      _id: 0,
-      createAt: 1,
-    }
-  )
-}
-
 export default mongoose.model('Like', like)

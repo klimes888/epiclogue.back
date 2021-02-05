@@ -8,8 +8,6 @@ const Feedback = new mongoose.Schema({
   writeDate: { type: Date, default: Date.now },
   edited: { type: Boolean, default: false },
   replies: [{ type: ObjectId, ref: 'Reply' }],
-  childCount: { type: Number, default: 0 },
-  heartCount: { type: Number, default: 0 },
 })
 
 // Create
@@ -64,20 +62,6 @@ Feedback.statics.getById = function (feedbackId, option) {
 
 Feedback.statics.getReply = function (feedbackId, replyId) {
   return this.updateOne({ _id: feedbackId }, { $push: { replies: replyId } })
-}
-
-Feedback.statics.countReply = function (feedbackId, flag) {
-  const increment = flag ? 1 : -1
-  return this.updateOne({ _id: feedbackId }, { $inc: { childCount: increment } })
-}
-
-Feedback.statics.countHeart = function (feedbackId, flag) {
-  const increment = flag ? 1 : -1
-  return this.updateOne({ _id: feedbackId }, { $inc: { heartCount: increment } })
-}
-
-Feedback.statics.getHeartCount = function (feedbackId) {
-  return this.findOne({ _id: feedbackId }, { heartCount: 1, _id: 0 })
 }
 
 export default mongoose.model('Feedback', Feedback)

@@ -42,11 +42,11 @@ user.statics.getByScreenId = function (screenId) {
 }
 
 user.statics.isConfirmed = function (email, token) {
-  return this.findOne({ email, token })
+  return this.findOne({ email, token, snsType: 'normal' })
 }
 
 user.statics.confirmUser = function (email) {
-  return this.updateOne({ email }, { isConfirmed: true })
+  return this.updateOne({ email, snsType: 'normal' }, { isConfirmed: true })
 }
 
 user.statics.getById = function (userId) {
@@ -54,7 +54,7 @@ user.statics.getById = function (userId) {
 }
 
 user.statics.isExist = function (email) {
-  return this.findOne({ email })
+  return this.findOne({ email, snsType: 'normal' })
 }
 
 user.statics.findByScreenId = function (screenId) {
@@ -72,7 +72,7 @@ user.statics.findUser = function (email, userpw) {
 }
 
 user.statics.getSalt = function (email) {
-  return this.findOne({ email }, { _id: 0, salt: 1 })
+  return this.findOne({ email, snsType: 'normal' }, { _id: 0, salt: 1 })
 }
 
 user.statics.getUserInfo = function (userId, option) {
@@ -89,10 +89,6 @@ user.statics.getUserInfoByScreenId = function (screenId, option) {
 
 user.statics.deleteUser = function (userId, userpw) {
   return this.updateOne({ _id: userId, password: userpw }, { deactivatedAt: Date.now() })
-}
-
-user.statics.findAll = function () {
-  return this.find({})
 }
 
 user.statics.changePass = function (userId, userPw, userPwNew, saltNew, session) {
@@ -127,14 +123,40 @@ user.statics.getProfile = function (screenId) {
   return this.find({ _id: screenId }, { _id: 1, screenId: 1, nickname: 1 })
 }
 
-user.statics.getByQuery = function (query) {
-  return this.find({ screenId: { $regex: query } }, { screenId: 1, nickname: 1, profile: 1 }).sort({
-    screenId: 'asc',
-  })
+user.statics.searchByScreenId = function (query) {
+  return this.find(
+    { screenId: { $regex: query } },
+    {
+      nickname: 1,
+      screenId: 1,
+      profile: 1,
+      banner: 1,
+      intro: 1
+    }
+  ).sort({ screenId: 1 })
+}
+
+user.statics.searchByNickname = function (query) {
+  return this.find(
+    { nickname: { $regex: query } },
+    {
+      nickname: 1,
+      screenId: 1,
+      profile: 1,
+      banner: 1,
+      intro: 1
+    }
+  ).sort({ nickname: 1 })
 }
 
 user.statics.isExistSns = function (snsId) {
-  return this.find({snsId})
+  return this.findOne({snsId})
+}
+
+user.statics.isAdmin = async function (_id) {
+  const tempData = await this.findOne({_id})
+  const userData = tempData.toJSON()
+  return userData.isAdmin === true
 }
 
 export default mongoose.model('User', user)
