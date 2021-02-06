@@ -22,8 +22,8 @@ export const getBookmarkList = async (req, res, next) => {
     }).map(each => {
       return each.board
     })
-    const wrappedBookmarks = await contentsWrapper(res.locals.uid, extractionSet, 'Board', false)
-    console.log(`[INFO] 유저 ${res.locals.uid}가 ${userInfo._id}의 북마크 리스트를 확인했습니다.`)
+    const wrappedBookmarks = res.locals?.uid ? await contentsWrapper(res.locals.uid, extractionSet, 'Board', false) : extractionSet
+    console.log(`[INFO] 유저 ${res.locals.uid || '비회원유저'}가 ${userInfo._id}의 북마크 리스트를 확인했습니다.`)
     return res.status(200).json({
       result: 'ok',
       data: wrappedBookmarks,
