@@ -58,7 +58,7 @@ export const allWorks = async (req, res, next) => {
     const allWorks = await models.Board.findAll({ writer: userId._id })
     const wrappedWorks = res.locals?.uid ? await contentsWrapper(res.locals.uid, allWorks, 'Board', false) : allWorks
 
-    console.log(`[INFO] ${res.locals.uid} 가 ${userId._id} 의 글들을 확인합니다.`)
+    console.log(`[INFO] ${res.locals.uid || '비회원유저'} 가 ${userId._id} 의 글들을 확인합니다.`)
     return res.status(200).json({
       result: 'ok',
       data: wrappedWorks,
@@ -75,7 +75,7 @@ export const originals = async (req, res, next) => {
     const myContents = await models.Board.findAllOriginOrSecondary(targetUser._id, false)
     const wrappedContents = res.locals?.uid ? await contentsWrapper(res.locals.uid, myContents, 'Board', false) : myContents
 
-    console.log(`[INFO] 유저 ${res.locals.uid} 가 유저 ${targetUser._id} 의 원작들을 확인합니다.`)
+    console.log(`[INFO] 유저 ${res.locals.uid || '비회원유저'} 가 유저 ${targetUser._id} 의 원작들을 확인합니다.`)
     return res.status(200).json({
       result: 'ok',
       data: wrappedContents,
@@ -93,7 +93,7 @@ export const secondaryWorks = async (req, res, next) => {
     const wrappedContents = res.locals?.uid ? await contentsWrapper(res.locals.uid, secondaryWorks, 'Board', false) : secondaryWorks
 
     console.log(
-      `[INFO] 유저 ${res.locals.uid} 가 유저 ${targetUser._id} 의 2차창작들을 확인합니다.`
+      `[INFO] 유저 ${res.locals.uid || '비회원유저'} 가 유저 ${targetUser._id} 의 2차창작들을 확인합니다.`
     )
     return res.status(200).json({
       result: 'ok',

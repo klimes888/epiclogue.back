@@ -86,7 +86,7 @@ export const viewBoard = async (req, res, next) => {
   try {
     const boardData = await Board.getById(boardId)
     const wrappedBoardData = req.locals?.uid ? await contentsWrapper(res.locals.uid, boardData, 'Board', true) : boardData
-    console.log(`[INFO] 유저 ${res.locals.uid}가 글 ${boardId}를 접근했습니다.`)
+    console.log(`[INFO] 유저 ${res.locals.uid || '비회원유저'}가 글 ${boardId}를 접근했습니다.`)
 
     return res.status(200).json({
       result: 'ok',
@@ -221,7 +221,7 @@ export const getBoards = async (req, res, next) => {
       return each.writer !== null
     })
     const wrappedData = res.locals?.uid ? await contentsWrapper(res.locals.uid, filteredBoardList, 'Board', false) : filteredBoardList
-    console.log(`[INFO] 유저 ${res.locals.uid} 가 자신의 피드를 확인했습니다.`)
+    console.log(`[INFO] 유저 ${res.locals.uid || '비회원유저'} 가 자신의 피드를 확인했습니다.`)
     return res.status(200).json({
       result: 'ok',
       data: wrappedData,

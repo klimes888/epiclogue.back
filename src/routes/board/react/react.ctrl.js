@@ -11,7 +11,7 @@ export const getReact = async (req, res, next) => {
     const filteredData = reactData.filter(data => {
       return data.user !== null
     })
-    console.log(`[INFO] 유저 ${res.locals.uid} 가 글 ${req.params.boardId} 의 반응내역을 확인합니다.`)
+    console.log(`[INFO] 유저 ${res.locals.uid || '비회원유저'} 가 글 ${req.params.boardId} 의 반응내역을 확인합니다.`)
     return res.status(200).json({
       result: 'ok',
       data: filteredData,
