@@ -56,7 +56,7 @@ export const allWorks = async (req, res, next) => {
   )
   try {
     const allWorks = await models.Board.findAll({ writer: userId._id })
-    const wrappedWorks = await contentsWrapper(res.locals.uid, allWorks, 'Board', false);
+    const wrappedWorks = res.locals?.uid ? await contentsWrapper(res.locals.uid, allWorks, 'Board', false) : allWorks
 
     console.log(`[INFO] ${res.locals.uid} 가 ${userId._id} 의 글들을 확인합니다.`)
     return res.status(200).json({
@@ -73,7 +73,7 @@ export const originals = async (req, res, next) => {
   try {
     const targetUser = await models.User.findOne({ screenId: req.params.screenId }, { _id: 1 })
     const myContents = await models.Board.findAllOriginOrSecondary(targetUser._id, false)
-    const wrappedContents = await contentsWrapper(res.locals.uid, myContents, 'Board', false)
+    const wrappedContents = res.locals?.uid ? await contentsWrapper(res.locals.uid, myContents, 'Board', false) : myContents
 
     console.log(`[INFO] 유저 ${res.locals.uid} 가 유저 ${targetUser._id} 의 원작들을 확인합니다.`)
     return res.status(200).json({
@@ -90,7 +90,7 @@ export const secondaryWorks = async (req, res, next) => {
   try {
     const targetUser = await models.User.findOne({ screenId: req.params.screenId }, { _id: 1 })
     const secondaryWorks = await models.Board.findAllOriginOrSecondary(targetUser._id, true)
-    const wrappedContents = await contentsWrapper(res.locals.uid, secondaryWorks, 'Board', false)
+    const wrappedContents = res.locals?.uid ? await contentsWrapper(res.locals.uid, secondaryWorks, 'Board', false) : secondaryWorks
 
     console.log(
       `[INFO] 유저 ${res.locals.uid} 가 유저 ${targetUser._id} 의 2차창작들을 확인합니다.`
