@@ -9,6 +9,10 @@ import * as models from '../models'
  */
 export const contentsWrapper = async (reqUserId, contentData, contentType, isForViewer) => {
   return new Promise(async (resolve, reject) => {
+    if (!reqUserId) {
+      resolve(contentData)
+    }
+    
     if (contentData) {
       /* feedback, bookmark, like, follow */
       const followingIdSet = await getFollowingIdSet(reqUserId)
