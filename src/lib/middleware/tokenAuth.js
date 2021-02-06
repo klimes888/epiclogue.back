@@ -15,7 +15,8 @@ const authExceptions = [
   "bookmarks",
   "secondaryWorks",
   "originals",
-  "allWorks"  // 마이보드 페이지 끝
+  "allWorks",  // 마이보드 페이지 끝
+  "getReplys", // 대댓글 확인
 ]
 
 const SECRET_KEY = process.env.SECRET_KEY
