@@ -50,36 +50,46 @@ export const getUserEditInfo = async (req, res, next) => {
  * @param {*} next ExpressJS next middleware
  * @returns 수정한 유저 데이터
  */
-export const postUserEditInfo = async (req, res, next) => {
-  const originalData = await User.getUserInfo(res.locals.uid);
-  const originalImages = [originalData.banner, originalData.profile];
-  const screenId = req.body.screenId || originalData.screenId;
-  const nickname = req.body.userNick || originalData.nickname;
-  const country = parseInt(req.body.userCountry, 10) || originalData.country;
-  const availableLanguage = req.body.userLang || originalData.availableLanguage;
-  const intro = req.body.userIntro || originalData.intro;
-  let banner;
-  let profile;
+
+export const postUserEditInfo = async function (req, res, next) {
+  // remove old images
+  const originalData = await User.getUserInfo(res.locals.uid)
+  const originalImages = [originalData.banner, originalData.profile]
+  const screenId = req.body['screenId'] || originalData.screenId
+  const nickname = req.body['userNick'] || originalData.nickname
+  const country = parseInt(req.body['userCountry']) || originalData.country
+  const availableLanguage = req.body['userLang'] || originalData.availableLanguage
+  const intro = req.body['userIntro'] || originalData.intro
+  const banner
+  const profile
 
   if (req.files !== undefined && req.files.length !== 0) {
     if (req.files.length > 1) {
-      if (req.files[0].fieldname === 'banner') {
-        banner = req.files[0].location;
-        profile = req.files[1].location;
+      if (req.files[0].fieldname == 'banner') {
+        banner.origin = req.files[0].location
+        banner.thumbnail = 'resized-' + req.files[0].location
+        profile.origin = req.files[1].location
+        profile.thumbnail = 'resized-' + req.files[1].location
       } else {
-        banner = req.files[1].location;
-        profile = req.files[0].location;
+        banner.origin = req.files[1].location
+        banner.thumbnail = 'resized-' + req.files[1].location
+        profile.origin = req.files[0].location
+        profile.thumbnail = 'resized-' + req.files[0].location
       }
-      deleteImage(originalImages);
-    } else if (req.files.length === 1) {
-      if (req.files[0].fieldname === 'banner') {
-        banner = req.files[0].location;
-        [, profile] = originalImages;
-        if (originalImages[0] !== null) deleteImage(originalImages[0]);
+      deleteImage(originalImages, 'mypage')
+    } else if (req.files.length == 1) {
+      if (req.files[0].fieldname == 'banner') {
+        banner.origin = req.files[0].location
+        banner.thumbnail = 'resized-' + req.files[0].location
+        profile.origin = originalImages[1]
+        profile.thumbnail = 'resized-' + originalImages[1]
+        if(originalImages[0] !== null) deleteImage(originalImages[0], 'mypage')
       } else {
-        profile = req.files[0].location;
-        [banner] = originalImages;
-        if (originalImages[1] !== null) deleteImage(originalImages[1]);
+        profile.origin = req.files[0].location
+        profile.thumbnail = 'resized-' + req.files[0].location
+        banner.origin = originalImages[0]
+        banner.thumbnail = 'resized-' + originalImages[0]
+        if(originalImages[1] !== null) deleteImage(originalImages[1], 'mypage')
       }
     }
   } else {

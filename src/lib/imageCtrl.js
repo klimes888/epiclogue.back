@@ -15,32 +15,38 @@ const s3 = new aws.S3({
   region: process.env.AWS_REGION, // 지역설정
 });
 
-export const deleteImage = images => {
+export const deleteImage = (images, location) => {
   let garbageImage = [];
-  console.error(images)
+
   if (images === undefined) return false;
-  if (images instanceof Array) {
-    garbageImage = images.filter(image => {
+  else if(images instanceof Array) {
+    for (let image of images) {
       if (image) {
-        const objectKey = image.split('/');
-        return { Key: objectKey[3] };
+        const objectKey = image.split('/')
+        garbageImage.push({
+          Key: objectKey[3],
+        })
+        garbageImage.push({
+          key : 'resized-' + objectKey[3]
+        })
       }
-      return { Key: null }
-    })
+    }
   } else {
     const objectKey = images.split('/');
-    const deletionFormat = {
+    garbageImage.push({
       Key: objectKey[3],
-    };
-    garbageImage.push(deletionFormat);
+    });
+    garbageImage.push({
+      Key: 'resized-' + objectKey[3]
+    })
   }
-  s3.deleteObjects(
-    {
-      Bucket: process.env.AWS_BUCKET_NAME,
-      Delete: {
-        Objects: garbageImage,
+    s3.deleteObjects(
+      {
+        Bucket: location === 'board' ? process.env.AWS_DATA_BUCKET_NAME : process.env.AWS_USERDATA_BUCKET_NAME,
+        Delete: {
+          Objects: garbageImage,
+        },
       },
-    },
     (err) => {
       if (err) {
         console.error(err, err.stack);
