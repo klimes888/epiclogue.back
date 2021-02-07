@@ -1,3 +1,4 @@
+/* eslint-disable no-underscore-dangle */
 import dotenv from 'dotenv'
 import randomString from 'random-string'
 import request from 'supertest'
@@ -31,6 +32,7 @@ describe('팔로우 테스트', () => {
     userLang: 0,
   }
 
+  // eslint-disable-next-line no-undef
   beforeAll(async () => {
     // 임시유저 생성
     await request(app).post('/auth/join').send(userData)

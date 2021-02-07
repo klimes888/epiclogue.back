@@ -1,3 +1,4 @@
+/* eslint-disable no-underscore-dangle */
 import dotenv from 'dotenv'
 import request from 'supertest'
 import fs from 'fs'
@@ -47,6 +48,7 @@ describe('피드백 테스트', () => {
     })
   })
 
+  // eslint-disable-next-line no-undef
   beforeAll(async () => {
     // join and login
     await request(app).post('/auth/join').send(userData)
@@ -112,8 +114,6 @@ describe('피드백 테스트', () => {
       const response = await request(app)
         .get(`/boards/${testBoardId}/feedback/${testFeedbackId}`)
         .set('x-access-token', userToken)
-
-      if (response.status > 399) console.log(response)
 
       expect(response.statusCode).toBe(200)
     })

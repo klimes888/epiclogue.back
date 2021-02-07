@@ -54,6 +54,7 @@ describe('유저 테스트', () => {
     })
   })
 
+  // eslint-disable-next-line no-undef
   beforeAll(async () => {
     // 이메일 인증된 사용자
     await request(app).post('/auth/join').send(verifiedUserData)

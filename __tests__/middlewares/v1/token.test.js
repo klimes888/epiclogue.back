@@ -31,6 +31,7 @@ describe('토큰 테스트', () => {
   
   let userToken; let screenId
 
+  // eslint-disable-next-line no-undef
   beforeAll(async () => {
     await request(app).post('/auth/join').send(verifiedUserData)
     await User.confirmUser(verifiedUserData.email)

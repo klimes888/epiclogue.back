@@ -1,3 +1,4 @@
+/* eslint-disable no-underscore-dangle */
 import dotenv from 'dotenv'
 import randomString from 'random-string'
 import request from 'supertest'
@@ -44,6 +45,7 @@ describe('북마크 테스트', () => {
     })
   })
 
+  // eslint-disable-next-line no-undef
   beforeAll(async () => {
     await request(app).post('/auth/join').send(userData)
     await User.confirmUser(userData.email)

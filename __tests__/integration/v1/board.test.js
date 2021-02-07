@@ -1,3 +1,4 @@
+/* eslint-disable no-underscore-dangle */
 import dotenv from 'dotenv'
 import request from 'supertest'
 import fs from 'fs'
@@ -48,6 +49,7 @@ describe('글 테스트', () => {
     })
   })
 
+  // eslint-disable-next-line no-undef
   beforeAll(async () => {
     await request(app).post('/auth/join').send(writerData)
     await User.confirmUser(writerData.email)

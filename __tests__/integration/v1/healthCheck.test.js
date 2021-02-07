@@ -1,5 +1,5 @@
 import request from 'supertest'
-import { describe, expect, test } from '@jest/globals'
+import { describe, test } from '@jest/globals'
 import app from '../../../app'
 
 describe('Health check', () => {
