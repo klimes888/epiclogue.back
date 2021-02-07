@@ -25,8 +25,12 @@ react.statics.getByBoardId = function (boardId) {
       _id: 0,
       __v: 0,
       boardId: 0,
-    },
+    }
   ).populate({ path: 'user', select: '_id screenId nickname profile' });
+};
+
+react.statics.countReacts = function (boardId) {
+  return this.countDocuments({ boardId });
 };
 
 export default mongoose.model('React', react);

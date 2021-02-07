@@ -5,7 +5,6 @@ import crypto from 'crypto';
 import Joi from 'joi';
 import createError from 'http-errors';
 import axios from 'axios';
-import { startSession } from 'mongoose';
 import { User } from '../../models';
 import transporter, { emailText, findPassText } from '../../lib/sendMail';
 
@@ -20,31 +19,33 @@ const randomBytesPromise = util.promisify(crypto.randomBytes);
 
 dotenv.config();
 
-const getFBProfile = async (uid) => new Promise(async (resolve, reject) => {
-  axios({
-    url: `https://graph.facebook.com/v9.0/${uid}/picture`,
-    method: 'GET',
-  })
-    .then((res) => resolve(res.request.res.responseUrl))
-    .catch((err) => reject(err));
-});
+const getFBProfile = async uid =>
+  new Promise(async (resolve, reject) => {
+    axios({
+      url: `https://graph.facebook.com/v9.0/${uid}/picture`,
+      method: 'GET',
+    })
+      .then(res => resolve(res.request.res.responseUrl))
+      .catch(err => reject(err));
+  });
 
 export const snsLogin = async function (req, res, next) {
   const { snsData, snsType, userLang } = req.body;
   console.log(snsData, snsType);
-  const userData = snsType === 'google'
-    	? {
-    		uid: snsData.profileObj.googleId,
-    		email: snsData.profileObj.email,
-    		profile: snsData.profileObj.imageUrl,
-    		name: snsData.profileObj.name,
-    	}
-    	: {
-    		uid: snsData.id,
-    		email: snsData.email,
-    		profile: await getFBProfile(snsData.id),
-    		name: snsData.name,
-    	};
+  const userData =
+    snsType === 'google'
+      ? {
+          uid: snsData.profileObj.googleId,
+          email: snsData.profileObj.email,
+          profile: snsData.profileObj.imageUrl,
+          name: snsData.profileObj.name,
+        }
+      : {
+          uid: snsData.id,
+          email: snsData.email,
+          profile: await getFBProfile(snsData.id),
+          name: snsData.name,
+        };
   let result = await User.isExistSns(userData.uid);
 
   if (!result) {
@@ -54,20 +55,20 @@ export const snsLogin = async function (req, res, next) {
       .digest('hex')
       .slice(0, 14);
     const salt = await randomBytesPromise(64);
-    const crypt_Email = crypto.pbkdf2Sync(
+    const cryptedEmail = crypto.pbkdf2Sync(
       userData.email,
       salt.toString('base64'),
-      parseInt(process.env.EXEC_NUM),
-      parseInt(process.env.RESULT_LENGTH),
-      'sha512',
+      parseInt(process.env.EXEC_NUM, 10),
+      parseInt(process.env.RESULT_LENGTH, 10),
+      'sha512'
     );
-    const auth_token = crypt_Email.toString('hex').slice(0, 24);
+    const authToken = cryptedEmail.toString('hex').slice(0, 24);
     result = await User.create({
       email: userData.email,
-      password: crypt_Email,
+      password: cryptedEmail,
       salt: salt.toString('base64'),
       nickname: userData.name,
-      token: auth_token,
+      token: authToken,
       screenId: generatedId,
       displayLanguage: userLang,
       profile: userData.profile,
@@ -90,7 +91,7 @@ export const snsLogin = async function (req, res, next) {
     SECRET_KEY,
     {
       expiresIn: process.env.JWT_EXPIRES_IN,
-    },
+    }
   );
   console.log(`[INFO] SNS유저 ${result._id} 가 로그인했습니다.`);
   return res.status(200).json({
@@ -120,7 +121,7 @@ export const login = async function (req, res, next) {
       console.log(
         `[INFO] ${
           req.headers['x-forwarded-for'] || req.connection.remoteAddress
-        } 에서 적절하지 않은 로그인 데이터를 입력했습니다: email: ${email}, password: ${userPw}`,
+        } 에서 적절하지 않은 로그인 데이터를 입력했습니다: email: ${email}, password: ${userPw}`
       );
       return next(createError(400, '적절하지 않은 값을 입력했습니다.'));
     }
@@ -128,15 +129,15 @@ export const login = async function (req, res, next) {
     const user = await User.getSalt(email);
 
     if (user) {
-      const crypt_Pw = crypto.pbkdf2Sync(
+      const cryptedPass = crypto.pbkdf2Sync(
         userPw,
         user.salt,
-        parseInt(process.env.EXEC_NUM),
-        parseInt(process.env.RESULT_LENGTH),
-        'sha512',
+        parseInt(process.env.EXEC_NUM, 10),
+        parseInt(process.env.RESULT_LENGTH, 10),
+        'sha512'
       );
 
-      const result = await User.findUser(email, crypt_Pw.toString('base64'));
+      const result = await User.findUser(email, cryptedPass.toString('base64'));
 
       if (result) {
         if (result.deactivatedAt != null) {
@@ -152,7 +153,7 @@ export const login = async function (req, res, next) {
           SECRET_KEY,
           {
             expiresIn: process.env.JWT_EXPIRES_IN,
-          },
+          }
         );
         console.log(`[INFO] 유저 ${result._id} 가 로그인했습니다.`);
         return res.status(200).json({
@@ -175,9 +176,7 @@ export const login = async function (req, res, next) {
 };
 
 export const join = async function (req, res, next) {
-  const {
-    email, userPw, userPwRe, userLang, userNick: nick,
-  } = req.body;
+  const { email, userPw, userPwRe, userLang, userNick: nick } = req.body;
   const check = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[$@$!%*#?&])[A-Za-z\d$@$!%*#?&]{8,}$/.test(userPw);
 
   const joinValidationSchema = Joi.object({
@@ -198,7 +197,11 @@ export const join = async function (req, res, next) {
         await 를 붙이지 않으면 unhandled promise error 가 나온다...
       */
       await joinValidationSchema.validateAsync({
-        email, userPw, userPwRe, nick, userLang,
+        email,
+        userPw,
+        userPwRe,
+        nick,
+        userLang,
       });
     } catch (e) {
       console.log(`[INFO] 유저 ${email} 가 적절하지 않은 데이터로 가입하려 했습니다. ${e}`);
@@ -215,20 +218,20 @@ export const join = async function (req, res, next) {
 
         const generatedId = crypto.createHash('sha256').update(email).digest('hex').slice(0, 14);
         const salt = await randomBytesPromise(64);
-        const crypt_Pw = crypto.pbkdf2Sync(
+        const cryptedPass = crypto.pbkdf2Sync(
           userPw,
           salt.toString('base64'),
-          parseInt(process.env.EXEC_NUM),
-          parseInt(process.env.RESULT_LENGTH),
-          'sha512',
+          parseInt(process.env.EXEC_NUM, 10),
+          parseInt(process.env.RESULT_LENGTH, 10),
+          'sha512'
         );
-        const auth_token = crypt_Pw.toString('hex').slice(0, 24);
+        const authToken = cryptedPass.toString('hex').slice(0, 24);
         const result = await User.create({
           email,
-          password: crypt_Pw.toString('base64'),
+          password: cryptedPass.toString('base64'),
           salt: salt.toString('base64'),
           nickname: nick,
-          token: auth_token,
+          token: authToken,
           screenId: generatedId,
           displayLanguage: userLang,
         });
@@ -238,12 +241,12 @@ export const join = async function (req, res, next) {
             from: process.env.MAIL_USER,
             to: email,
             subject: '이메일 인증을 완료해주세요.',
-            html: emailText(email, auth_token),
+            html: emailText(email, authToken),
           };
           transporter.sendMail(option, (error, info) => {
             if (error) {
               console.error(
-                `[ERROR] ${email} 에게 메일을 보내는 도중 문제가 발생했습니다. ${error}`,
+                `[ERROR] ${email} 에게 메일을 보내는 도중 문제가 발생했습니다. ${error}`
               );
               return next(createError(500, '알 수 없는 오류가 발생했습니다.'));
             }
@@ -295,9 +298,7 @@ export const mailToFindPass = async (req, res, next) => {
 };
 
 export const findPass = async (req, res, next) => {
-  const {
-    email, userPwNew, userPwNewRe, token,
-  } = req.body;
+  const { email, userPwNew, userPwNewRe, token } = req.body;
   const changePassSchema = Joi.object({
     userPwNew: Joi.string()
       .regex(/^(?=.*[A-Za-z])(?=.*\d)(?=.*[$@$!%*#?&])[A-Za-z\d$@$!%*#?&]{8,}$/)
@@ -324,9 +325,9 @@ export const findPass = async (req, res, next) => {
           await crypto.pbkdf2Sync(
             userPwNew,
             newSalt.toString('base64'),
-            parseInt(process.env.EXEC_NUM),
-            parseInt(process.env.RESULT_LENGTH),
-            'sha512',
+            parseInt(process.env.EXEC_NUM, 10),
+            parseInt(process.env.RESULT_LENGTH, 10),
+            'sha512'
           )
         ).toString('base64');
 
@@ -339,12 +340,12 @@ export const findPass = async (req, res, next) => {
         });
       }
       console.log(
-        `[INFO] 유저 ${email} 가 잘못된 토큰 ${token} 으로 비밀번호 변경을 시도했습니다.`,
+        `[INFO] 유저 ${email} 가 잘못된 토큰 ${token} 으로 비밀번호 변경을 시도했습니다.`
       );
       return next(createError(401, '적절하지 않은 인증입니다.'));
     }
     console.log(
-      `[INFO] 유저 ${email} 서로 다른 비밀번호 ${userPwNew}, ${userPwNewRe} 로 비밀번호 변경을 시도했습니다.`,
+      `[INFO] 유저 ${email} 서로 다른 비밀번호 ${userPwNew}, ${userPwNewRe} 로 비밀번호 변경을 시도했습니다.`
     );
     return next(createError(400, '비밀번호가 다릅니다.'));
   } catch (e) {
@@ -354,8 +355,8 @@ export const findPass = async (req, res, next) => {
 };
 
 export const mailAuth = async function (req, res, next) {
-  const { email } = req.query;
-  const { token } = req.query;
+  const { email, token } = req.query;
+
   try {
     const result = await User.isConfirmed(email, token);
     if (result) {

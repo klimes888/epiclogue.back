@@ -11,7 +11,7 @@ myboard.get(
   '/:screenId/secondaryWorks',
   verifyToken,
   checkUserExistence,
-  myboardCtrl.secondaryWorks,
+  myboardCtrl.secondaryWorks
 );
 myboard.get('/:screenId/bookmarks', verifyToken, checkUserExistence, myboardCtrl.bookmarks);
 myboard.get('/:screenId', verifyToken, checkUserExistence, myboardCtrl.getMyboard);

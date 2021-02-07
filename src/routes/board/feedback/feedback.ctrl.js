@@ -28,7 +28,7 @@ export const postFeedback = async (req, res, next) => {
     });
   } catch (e) {
     console.log(
-      `[INFO] 유저 ${res.locals.uid} 가 피드백 작성 중 적절하지 않은 데이터를 입력했습니다. ${e}`,
+      `[INFO] 유저 ${res.locals.uid} 가 피드백 작성 중 적절하지 않은 데이터를 입력했습니다. ${e}`
     );
     return next(createError(400, '입력값이 적절하지 않습니다.'));
   }
@@ -41,7 +41,7 @@ export const postFeedback = async (req, res, next) => {
       const postFeedbackResult = await feedbackSchema.save({ session });
       const targetData = await Board.findOne({ _id: req.params.boardId }, { writer: 1 });
       console.log(
-        `[INFO] 유저 ${res.locals.uid} 가 피드백 ${postFeedbackResult._id} 을 작성했습니다.`,
+        `[INFO] 유저 ${res.locals.uid} 가 피드백 ${postFeedbackResult._id} 을 작성했습니다.`
       );
       await Board.getFeedback(req.params.boardId, postFeedbackResult._id).session(session);
       const newerFeedbacks = await Feedback.getByBoardId(req.params.boardId).session(session);
@@ -49,7 +49,7 @@ export const postFeedback = async (req, res, next) => {
         res.locals.uid,
         newerFeedbacks,
         'Feedback',
-        false,
+        false
       );
       /* 자신에게는 알림을 보내지 않음 */
       if (res.locals.uid !== targetData.writer.toString()) {
@@ -61,7 +61,7 @@ export const postFeedback = async (req, res, next) => {
             targetType: 'Board',
             targetInfo: req.params.boardId,
           },
-          session,
+          session
         );
       }
 
@@ -94,7 +94,7 @@ export const editFeedback = async (req, res, next) => {
     });
   } catch (e) {
     console.log(
-      `[INFO] 유저 ${res.locals.uid} 가 피드백 작성 중 적절하지 않은 데이터를 입력했습니다. ${e}`,
+      `[INFO] 유저 ${res.locals.uid} 가 피드백 작성 중 적절하지 않은 데이터를 입력했습니다. ${e}`
     );
     return next(createError(400, '입력값이 적절하지 않습니다.'));
   }
@@ -112,7 +112,7 @@ export const editFeedback = async (req, res, next) => {
           res.locals.uid,
           newerFeedbacks,
           'Feedback',
-          false,
+          false
         );
         console.log(`[INFO] 피드백 ${req.params.feedbackId} 가 정상적으로 수정되었습니다.`);
         return res.status(200).json({
@@ -121,7 +121,7 @@ export const editFeedback = async (req, res, next) => {
         });
       }
       console.error(
-        `[ERROR] 피드백 ${req.params.feedbackId} 의 수정이 정상적으로 처리되지 않았습니다: 데이터베이스 질의에 실패했습니다.`,
+        `[ERROR] 피드백 ${req.params.feedbackId} 의 수정이 정상적으로 처리되지 않았습니다: 데이터베이스 질의에 실패했습니다.`
       );
       return next(createError(500, '알 수 없는 에러가 발생했습니다.'));
     });
@@ -145,16 +145,17 @@ export const deleteFeedback = async (req, res, next) => {
           res.locals.uid,
           newerFeedbacks,
           'Feedback',
-          false,
+          false
         );
         console.log(`[INFO] 피드백 ${req.params.feedbackId} 가 정상적으로 삭제되었습니다.`);
         return res.status(200).json({
           result: 'ok',
           data: wrappedFeedbacks,
         });
-      } if (result.ok === 0) {
+      }
+      if (result.ok === 0) {
         console.error(
-          `[ERROR] 피드백 ${req.params.feedbackId} 의 삭제가 정상적으로 처리되지 않았습니다: 데이터베이스 질의에 실패했습니다.`,
+          `[ERROR] 피드백 ${req.params.feedbackId} 의 삭제가 정상적으로 처리되지 않았습니다: 데이터베이스 질의에 실패했습니다.`
         );
         return next(createError(500, '알 수 없는 에러가 발생했습니다.'));
       }
@@ -170,7 +171,9 @@ export const deleteFeedback = async (req, res, next) => {
 export const getFeedback = async (req, res, next) => {
   try {
     const feedbackData = await Feedback.getById(req.params.feedbackId);
-    console.log(`[INFO] 유저 ${feedbackData.writer} 가 피드백 ${feedbackData._id} 를 조회했습니다.`);
+    console.log(
+      `[INFO] 유저 ${feedbackData.writer} 가 피드백 ${feedbackData._id} 를 조회했습니다.`
+    );
     return res.status(200).json({
       result: 'ok',
       data: feedbackData,

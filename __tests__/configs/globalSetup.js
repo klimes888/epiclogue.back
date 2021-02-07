@@ -1,6 +1,6 @@
-import { Connection } from 'mongoose'
-import child_process from 'child_process'
-import Database from '../../src/lib/database'
+import { Connection } from 'mongoose';
+import child_process from 'child_process';
+import Database from '../../src/lib/database';
 
 module.exports = async () => {
   // console.log(`mongodb: ${Connection.readyState}`) // normally got 'undefined' while mongodb is running
@@ -17,6 +17,6 @@ module.exports = async () => {
   //   })
   // }
 
-  await Database.connect()
-  await Database.drop()
-}
+  await Database.connect();
+  await Database.drop();
+};

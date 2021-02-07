@@ -1,8 +1,6 @@
 import createError from 'http-errors';
 import { startSession } from 'mongoose';
-import {
-  Like, React, Board, Feedback, Reply, User,
-} from '../../../models';
+import { Like, React, Board, Feedback, Reply, User } from '../../../models';
 import makeNotification from '../../../lib/makeNotification';
 
 /*
@@ -26,7 +24,7 @@ export const addLike = async (req, res, next) => {
 
     if (didLike) {
       console.log(
-        `[INFO] 유저 ${res.locals.uid} 가 이미 좋아요 한 ${likeData.targetType}:${targetInfo} 에 좋아요를 요청했습니다.`,
+        `[INFO] 유저 ${res.locals.uid} 가 이미 좋아요 한 ${likeData.targetType}:${targetInfo} 에 좋아요를 요청했습니다.`
       );
       return next(createError(400, '이미 처리된 데이터입니다.'));
     }
@@ -63,7 +61,7 @@ export const addLike = async (req, res, next) => {
             targetType,
             targetInfo,
           },
-          session,
+          session
         );
       }
       console.log(`[INFO] 유저 ${res.locals.uid}가 ${targetType}: ${targetInfo}를 좋아합니다.`);
@@ -95,7 +93,7 @@ export const deleteLike = async (req, res, next) => {
 
     if (!didLike) {
       console.log(
-        `[INFO] 유저 ${res.locals.uid} 가 좋아요 하지 않은 ${targetType}:${targetInfo}에 대해 좋아요를 해제하려 했습니다.`,
+        `[INFO] 유저 ${res.locals.uid} 가 좋아요 하지 않은 ${targetType}:${targetInfo}에 대해 좋아요를 해제하려 했습니다.`
       );
       return next(createError(400, '이미 처리된 데이터입니다.'));
     }
@@ -110,7 +108,7 @@ export const deleteLike = async (req, res, next) => {
       }
 
       console.log(
-        `[INFO] 유저 ${res.locals.uid}가 ${targetType}: ${targetInfo}의 좋아요를 해제했습니다.`,
+        `[INFO] 유저 ${res.locals.uid}가 ${targetType}: ${targetInfo}의 좋아요를 해제했습니다.`
       );
       return res.status(200).json({
         result: 'ok',
@@ -135,7 +133,9 @@ export const getLikeList = async (req, res, next) => {
       const userId = await User.getIdByScreenId(screenId);
       const likeObjectIdList = await Like.getByUserId(userId, targetType);
 
-      console.log(`[INFO] 유저 ${res.locals.uid}가 유저 ${userId} 의 좋아요 리스트를 확인했습니다.`);
+      console.log(
+        `[INFO] 유저 ${res.locals.uid}가 유저 ${userId} 의 좋아요 리스트를 확인했습니다.`
+      );
       return res.status(200).json({
         result: 'ok',
         data: likeObjectIdList,

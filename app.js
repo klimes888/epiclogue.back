@@ -67,7 +67,7 @@ app.use('/', indexRouter)
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec))
 
 // catch 404 and forward to error handler
-app.use(function (req, res, next) {
+app.use((req, res, next) => {
   next(createError(404, '올바른 접근이 아닙니다.'))
 })
 
@@ -75,7 +75,7 @@ app.use(function (req, res, next) {
 app.use((err, req, res, next) => {
   // if (process.env.NODE_ENV !== 'production') { }
 
-  if (err.status === 500) {
+  if (!process.env.NODE_ENV === 'test' && err.status === 500) {
     // Only alert on 500 error
     const slack = new Slack()
     slack.setWebhook(process.env.SLACK_WEBHOOK)

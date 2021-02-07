@@ -13,7 +13,7 @@ const router = express.Router({
   mergeParams: true,
 });
 
-router.get('/', (req, res, next) => {
+router.get('/', (req, res) => {
   res.status(200).json({
     result: 'ok',
     comment: 'server is ok',

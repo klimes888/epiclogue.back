@@ -31,4 +31,8 @@ like.statics.getByUserId = async function (userId, targetType) {
     });
 };
 
+like.statics.countHearts = function (targetInfo, targetType) {
+  return this.countDocuments({ targetInfo, targetType });
+};
+
 export default mongoose.model('Like', like);

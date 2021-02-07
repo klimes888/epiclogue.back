@@ -1,8 +1,6 @@
 import createError from 'http-errors';
 import { startSession } from 'mongoose';
-import {
-  Bookmark, React, Board, User,
-} from '../../../models';
+import { Bookmark, React, Board, User } from '../../../models';
 import { contentsWrapper } from '../../../lib/contentsWrapper';
 import makeNotification from '../../../lib/makeNotification';
 
@@ -19,16 +17,14 @@ export const getBookmarkList = async (req, res, next) => {
   try {
     const userInfo = await User.getIdByScreenId(screenId);
     const bookmarkSet = await Bookmark.getByUserId(userInfo._id);
-    const extractionSet = bookmarkSet
-      .filter((each) => each.board !== null)
-      .map((each) => each.board);
+    const extractionSet = bookmarkSet.filter(each => each.board !== null).map(each => each.board);
     const wrappedBookmarks = res.locals?.uid
       ? await contentsWrapper(res.locals.uid, extractionSet, 'Board', false)
       : extractionSet;
     console.log(
       `[INFO] 유저 ${res.locals.uid || '비회원유저'}가 ${
         userInfo._id
-      }의 북마크 리스트를 확인했습니다.`,
+      }의 북마크 리스트를 확인했습니다.`
     );
     return res.status(200).json({
       result: 'ok',
@@ -58,7 +54,7 @@ export const addBookmark = async function (req, res, next) {
 
     if (didBookmark) {
       console.log(
-        `[INFO] 유저 ${res.locals.uid} 가 이미 북마크한 글 ${req.body.boardId} 에 북마크를 시도했습니다.`,
+        `[INFO] 유저 ${res.locals.uid} 가 이미 북마크한 글 ${req.body.boardId} 에 북마크를 시도했습니다.`
       );
       return next(createError(400, '입력값이 적절하지 않습니다.'));
     }
@@ -70,7 +66,7 @@ export const addBookmark = async function (req, res, next) {
       await reactSchema.save({ session });
 
       const bookmarkCount = await Bookmark.countDocuments({ board: req.body.boardId }).session(
-        session,
+        session
       );
 
       // Make notification if requester is not a writer
@@ -83,7 +79,7 @@ export const addBookmark = async function (req, res, next) {
             targetType: 'Board',
             targetInfo: req.body.boardId,
           },
-          session,
+          session
         );
       }
 
@@ -111,7 +107,7 @@ export const deleteBookmark = async (req, res, next) => {
 
     if (!didBookmark) {
       console.log(
-        `[INFO] 유저 ${res.locals.uid} 가 북마크 하지 않은 글 ${req.body.boardId} 에 북마크 해제를 시도했습니다.`,
+        `[INFO] 유저 ${res.locals.uid} 가 북마크 하지 않은 글 ${req.body.boardId} 에 북마크 해제를 시도했습니다.`
       );
       return next(createError(400, '입력값이 적절하지 않습니다.'));
     }

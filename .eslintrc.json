@@ -13,5 +13,12 @@
         "sourceType": "module"
     },
     "rules": {
+        "no-underscore-dangle": "off",  // _id warning
+        "func-names": "off", // MongoDB static 함수 warning
+        "no-use-before-define": "off", // 함수 정의 전에 사용 허용
+        "no-console": "off",
+        "import/prefer-default-export": "off",
+        "no-useless-escape": "off",  // 정규식 예외
+        "consistent-return": "off"   // async function return 강제 해제
     }
 }

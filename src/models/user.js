@@ -94,7 +94,7 @@ user.statics.changePass = function (userId, userPw, userPwNew, saltNew, session)
   return this.updateOne(
     { _id: userId, password: userPw },
     { password: userPwNew, salt: saltNew },
-    { session },
+    { session }
   );
 };
 
@@ -118,7 +118,7 @@ user.statics.updateProfile = function (profile, session) {
       banner: profile.banner,
       profile: profile.profile,
     },
-    { session },
+    { session }
   );
 };
 
@@ -135,7 +135,7 @@ user.statics.searchByScreenId = function (query) {
       profile: 1,
       banner: 1,
       intro: 1,
-    },
+    }
   ).sort({ screenId: 1 });
 };
 
@@ -148,7 +148,7 @@ user.statics.searchByNickname = function (query) {
       profile: 1,
       banner: 1,
       intro: 1,
-    },
+    }
   ).sort({ nickname: 1 });
 };
 

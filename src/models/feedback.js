@@ -23,7 +23,7 @@ Feedback.statics.getByBoardId = function (boardId) {
     { boardId },
     {
       __v: 0,
-    },
+    }
   ).populate({ path: 'writer', select: '_id screenId nickname profile' });
 };
 
@@ -44,7 +44,7 @@ Feedback.statics.update = async function (newFeedbackData, session) {
       feedbackBody: newFeedbackData.newFeedbackBody,
       edited: true,
     },
-    { session },
+    { session }
   );
 };
 

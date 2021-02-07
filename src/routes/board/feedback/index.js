@@ -15,7 +15,7 @@ feedback.delete(
   verifyToken,
   checkExistence,
   checkWriter,
-  feedbackCtrl.deleteFeedback,
+  feedbackCtrl.deleteFeedback
 );
 feedback.use('/:feedbackId/reply', reply);
 

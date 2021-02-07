@@ -19,9 +19,10 @@ export const search = async (req, res, next) => {
   } else if (searchType === 'User') {
     // 유저 screenId/닉네임으로 검색
     try {
-      searchResult = queryString[0] === '@'
-        	? await User.searchByScreenId(queryString.substr(1))
-        	: await User.searchByNickname(queryString);
+      searchResult =
+        queryString[0] === '@'
+          ? await User.searchByScreenId(queryString.substr(1))
+          : await User.searchByNickname(queryString);
     } catch (e) {
       console.error(e);
       return next(createError('유저 검색에 실패했습니다.'));

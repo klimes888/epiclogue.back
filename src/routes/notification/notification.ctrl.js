@@ -1,4 +1,5 @@
 import createError from 'http-errors';
+import Joi from 'joi';
 import { startSession } from 'mongoose';
 import { Notification } from '../../models';
 
@@ -84,7 +85,7 @@ export const deleteNoti = async (req, res, next) => {
     });
   } catch (e) {
     console.log(
-      `[INFO] 유저 ${res.locals.uid} 가 적절하지 않은 알림 ${req.body.notiId} 을 읽음처리 하려 했습니다.`,
+      `[INFO] 유저 ${res.locals.uid} 가 적절하지 않은 알림 ${req.body.notiId} 을 읽음처리 하려 했습니다.`
     );
     return next(createError(400, '적절하지 않은 ObjectId입니다.'));
   }

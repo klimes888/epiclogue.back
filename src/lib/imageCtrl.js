@@ -1,7 +1,6 @@
 import aws from 'aws-sdk';
 import multer from 'multer';
 import multerS3 from 'multer-s3';
-// import moment from 'moment'
 import dayjs from 'dayjs';
 import crypto from 'crypto';
 import util from 'util';
@@ -18,7 +17,7 @@ const s3 = new aws.S3({
 
 // 이미지 삭제 함수 여기다 추가해서 export 필요
 
-export const deleteImage = (images) => {
+export const deleteImage = images => {
   const garbageImage = [];
   if (images === undefined) return false;
   if (images instanceof Array) {
@@ -50,7 +49,7 @@ export const deleteImage = (images) => {
         console.error(err, err.stack);
         return false;
       }
-    },
+    }
   );
   return true;
 };

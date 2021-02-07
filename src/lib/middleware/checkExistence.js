@@ -1,8 +1,7 @@
+/* eslint-disable no-underscore-dangle */
 import createError from 'http-errors';
 import Joi from 'joi';
-import {
-  User, Board, Reply, Feedback,
-} from '../../models';
+import { User, Board, Reply, Feedback } from '../../models';
 
 // to patch, delete, like, bookmark on board, feedback, reply
 export const checkExistence = async (req, res, next) => {
@@ -35,7 +34,7 @@ export const checkExistence = async (req, res, next) => {
       await checkSchema.validateAsync({ targetId, type });
     } catch (e) {
       console.log(
-        `[INFO] 유저 ${res.locals.uid} 가 ${type} ObjectId에 적절하지 않은 값 ${targetId} 를 입력했습니다. ${e}`,
+        `[INFO] 유저 ${res.locals.uid} 가 ${type} ObjectId에 적절하지 않은 값 ${targetId} 를 입력했습니다. ${e}`
       );
       return next(createError(400, '입력값이 적절하지 않습니다.'));
     }
@@ -52,7 +51,7 @@ export const checkExistence = async (req, res, next) => {
       next();
     } else {
       console.log(
-        `[INFO] 유저 ${res.locals.uid}가 존재하지 않는 ${type} ${targetId} 를 접근하려 했습니다.`,
+        `[INFO] 유저 ${res.locals.uid}가 존재하지 않는 ${type} ${targetId} 를 접근하려 했습니다.`
       );
       return next(createError(404, '존재하지 않는 데이터입니다.'));
     }
@@ -87,7 +86,7 @@ export const checkUserExistence = async (req, res, next) => {
     await userSchema.validateAsync({ userId });
   } catch (e) {
     console.log(
-      `[INFO] 유저 ${res.locals.uid} 가 유저 ObjectId에 적절하지 않은 값 ${userId} 을 입력했습니다.`,
+      `[INFO] 유저 ${res.locals.uid} 가 유저 ObjectId에 적절하지 않은 값 ${userId} 을 입력했습니다.`
     );
     return next(createError(400, '입력값이 적절하지 않습니다.'));
   }
@@ -104,7 +103,7 @@ export const checkUserExistence = async (req, res, next) => {
       next();
     } else {
       console.log(
-        `[INFO] 유저 ${res.locals.uid}가 존재하지 않거나 탈퇴한 유저 ${userId} 에게 접근하려 했습니다.`,
+        `[INFO] 유저 ${res.locals.uid}가 존재하지 않거나 탈퇴한 유저 ${userId} 에게 접근하려 했습니다.`
       );
       return next(createError(404, '존재하지 않거나 탈퇴한 유저입니다.'));
     }

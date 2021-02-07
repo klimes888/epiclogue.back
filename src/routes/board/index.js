@@ -22,7 +22,7 @@ board.post(
   checkExistence,
   checkWriter,
   uploadImage.any(),
-  boardCtrl.postEditInfo,
+  boardCtrl.postEditInfo
 );
 board.use('/:boardId/feedback', checkExistence, feedback);
 board.use('/:boardId/react', checkExistence, react);

@@ -42,7 +42,7 @@ Reply.statics.update = async function (updateForm, session) {
       replyBody: updateForm.newReplyBody,
       edited: true,
     },
-    { session },
+    { session }
   );
 };
 

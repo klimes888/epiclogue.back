@@ -1,3 +1,4 @@
+import createError from 'http-errors';
 import { React } from '../../../models';
 /*
   This is react router.
@@ -8,11 +9,11 @@ import { React } from '../../../models';
 export const getReact = async (req, res, next) => {
   try {
     const reactData = await React.getByBoardId(req.params.boardId);
-    const filteredData = reactData.filter((data) => data.user !== null);
+    const filteredData = reactData.filter(data => data.user !== null);
     console.log(
       `[INFO] 유저 ${res.locals.uid || '비회원유저'} 가 글 ${
         req.params.boardId
-      } 의 반응내역을 확인합니다.`,
+      } 의 반응내역을 확인합니다.`
     );
     return res.status(200).json({
       result: 'ok',

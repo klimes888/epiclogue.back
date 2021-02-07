@@ -60,7 +60,7 @@ export const postBoard = async (req, res, next) => {
     }
 
     console.log(
-      `[INFO] 유저 ${res.locals.uid} 가 적절하지 않은 데이터로 글을 작성하려 했습니다. ${e}`,
+      `[INFO] 유저 ${res.locals.uid} 가 적절하지 않은 데이터로 글을 작성하려 했습니다. ${e}`
     );
     return next(createError(400, '입력값이 적절하지 않습니다.'));
   }
@@ -82,13 +82,14 @@ export const postBoard = async (req, res, next) => {
 // 글 뷰
 export const viewBoard = async (req, res, next) => {
   const { boardId } = req.params;
+  const { uid: userId } = res.locals;
 
   try {
     const boardData = await Board.getById(boardId);
-    const wrappedBoardData = req.locals?.uid
-      ? await contentsWrapper(res.locals.uid, boardData, 'Board', true)
-      : boardData;
-    console.log(`[INFO] 유저 ${res.locals.uid || '비회원유저'}가 글 ${boardId}를 접근했습니다.`);
+
+    const wrappedBoardData = await contentsWrapper(userId, boardData, 'Board', true);
+
+    console.log(`[INFO] 유저 ${userId || '비회원유저'}가 글 ${boardId}를 접근했습니다.`);
 
     return res.status(200).json({
       result: 'ok',
@@ -106,7 +107,10 @@ export const deleteBoard = async (req, res, next) => {
 
   try {
     const query = await Board.getById(boardId, {
-      _id: 0, feedbacks: 0, writer: 0, boardImg: 1,
+      _id: 0,
+      feedbacks: 0,
+      writer: 0,
+      boardImg: 1,
     });
     // for non blocking, didn't use async-await
     deleteImage(query.boardImg);
@@ -120,7 +124,7 @@ export const deleteBoard = async (req, res, next) => {
       });
     }
     console.error(
-      `[ERROR] 글 ${boardId} 의 삭제가 실패했습니다: 데이터베이스 질의에 실패했습니다.`,
+      `[ERROR] 글 ${boardId} 의 삭제가 실패했습니다: 데이터베이스 질의에 실패했습니다.`
     );
     return next(createError(500, '알 수 없는 에러가 발생했습니다.'));
   } catch (e) {
@@ -137,7 +141,7 @@ export const getEditInfo = async (req, res, next) => {
     const previousData = await Board.getById(boardId);
 
     console.log(
-      `[INFO] 유저 ${res.locals.uid}가 글 ${boardId}을 수정을 위해 데이터를 요청했습니다.`,
+      `[INFO] 유저 ${res.locals.uid}가 글 ${boardId}을 수정을 위해 데이터를 요청했습니다.`
     );
 
     return res.status(200).json({
@@ -152,19 +156,13 @@ export const getEditInfo = async (req, res, next) => {
 
 // 수정
 export const postEditInfo = async function (req, res, next) {
-  let boardImg = null;
-
-  if (req.files !== undefined) {
-    boardImg = [];
-    for (let i = 0; i < req.files.length; i++) {
-      boardImg.push(req.files[i].location);
-    }
-  }
+  const boardImg = req.files ? req.files.map(file => file.location) : [];
+  const session = await startSession();
   let tags = '';
+
   if (req.body.boardBody) {
     tags = req.body.boardBody.match(/#[^\{\}\[\]\/?.,;:|\)*~`!^\-+<>@\#$%&\\\=\(\'\"\s]+/g);
   }
-  const session = await startSession();
 
   try {
     const originalData = await Board.getById(req.params.boardId);
@@ -176,9 +174,9 @@ export const postEditInfo = async function (req, res, next) {
       boardTitle: req.body.boardTitle || originalData.boardTitle,
       boardBody: req.body.boardBody || originalData.boardBody,
       boardImg: boardImg || originalData.boardImg,
-      category: parseInt(req.body.category || originalData.category),
-      pub: parseInt(req.body.pub || originalData.pub),
-      language: parseInt(req.body.language || originalData.language),
+      category: parseInt(req.body.category || originalData.category, 10),
+      pub: parseInt(req.body.pub || originalData.pub, 10),
+      language: parseInt(req.body.language || originalData.language, 10),
       tags,
     };
 
@@ -190,7 +188,7 @@ export const postEditInfo = async function (req, res, next) {
         return res.status(200).json({ result: 'ok', data: { _id: updatedBoardData._id } });
       }
       console.error(
-        `[ERROR] 글 ${req.params.boardId}의 수정이 실패했습니다: 데이터베이스 질의에 실패했습니다.`,
+        `[ERROR] 글 ${req.params.boardId}의 수정이 실패했습니다: 데이터베이스 질의에 실패했습니다.`
       );
       return next(createError(500, '알 수 없는 에러가 발생했습니다.'));
     });
@@ -204,22 +202,13 @@ export const postEditInfo = async function (req, res, next) {
 
 /* 유저마다 다르게 받아야 함 */
 export const getBoards = async (req, res, next) => {
-  const requestType = req.query.type;
-  const option = {};
-  switch (requestType) {
-    case 'Illust':
-      option.category = 0;
-      break;
-    case 'Comic':
-      option.category = 1;
-      break;
-    default:
-      break;
-  }
+  const { type: requestType } = req.query;
+  const option = { pub: 1 };
+  option.category = requestType === 'Illust' ? 0 : 1;
 
   try {
     const boardList = await Board.findAll(option); // 썸네일만 골라내는 작업 필요
-    const filteredBoardList = boardList.filter((each) => each.writer !== null);
+    const filteredBoardList = boardList.filter(each => each.writer !== null);
     const wrappedData = res.locals?.uid
       ? await contentsWrapper(res.locals.uid, filteredBoardList, 'Board', false)
       : filteredBoardList;
@@ -235,10 +224,7 @@ export const getBoards = async (req, res, next) => {
 };
 
 export const secPost = async (req, res, next) => {
-  const _boardImg = [];
-  for (let i = 0; i < req.files.length; i++) {
-    _boardImg.push(req.files[i].location);
-  }
+  const boardImg = req.files ? req.files.map(file => file.location) : [];
 
   let tags = '';
   if (req.body.boardBody) {
@@ -252,7 +238,7 @@ export const secPost = async (req, res, next) => {
     category: req.body.category,
     pub: req.body.pub,
     language: req.body.language,
-    boardImg: _boardImg,
+    boardImg,
     originUserId: req.body.originUserId,
     originBoardId: req.body.originBoardId,
     tags,
@@ -291,7 +277,7 @@ export const secPost = async (req, res, next) => {
     }
 
     console.log(
-      `[INFO] 유저 ${res.locals.uid} 가 적절하지 않은 데이터로 글을 작성하려 했습니다. ${e}`,
+      `[INFO] 유저 ${res.locals.uid} 가 적절하지 않은 데이터로 글을 작성하려 했습니다. ${e}`
     );
     return next(createError(400, '입력값이 적절하지 않습니다.'));
   }
@@ -308,7 +294,7 @@ export const secPost = async (req, res, next) => {
           targetType: 'Board',
           targetInfo: createdBoard._id,
         },
-        session,
+        session
       );
       console.log(`[INFO] 유저 ${boardData.writer}가 2차창작 ${createdBoard._id}를 작성했습니다.`);
       return res.status(201).json({

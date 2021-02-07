@@ -16,7 +16,6 @@ export const postReply = async (req, res, next) => {
     writer: res.locals.uid,
     boardId: req.params.boardId,
     parentId: req.params.feedbackId,
-    boardId: req.params.boardId,
     replyBody: req.body.replyBody,
   };
 
@@ -30,7 +29,7 @@ export const postReply = async (req, res, next) => {
     });
   } catch (e) {
     console.log(
-      `[INFO] 유저 ${res.locals.uid} 가 적절하지 않은 데이터로 댓글을 작성하려 했습니다. ${e}`,
+      `[INFO] 유저 ${res.locals.uid} 가 적절하지 않은 데이터로 댓글을 작성하려 했습니다. ${e}`
     );
     return next(createError(400, '입력값이 적절하지 않습니다.'));
   }
@@ -57,7 +56,7 @@ export const postReply = async (req, res, next) => {
             targetType: 'Feedback',
             targetInfo: req.params.feedbackId,
           },
-          session,
+          session
         );
       }
 
@@ -87,7 +86,7 @@ export const getReplys = async (req, res, next) => {
     console.log(
       `[INFO] 유저 ${
         res.locals.uid || '비회원유저'
-      } 가 피드백 ${feedbackId} 하위의 댓글(들)을 열람합니다.`,
+      } 가 피드백 ${feedbackId} 하위의 댓글(들)을 열람합니다.`
     );
     return res.status(200).json({
       result: 'ok',
@@ -115,7 +114,7 @@ export const editReply = async (req, res, next) => {
     });
   } catch (e) {
     console.log(
-      `[INFO] 유저 ${res.locals.uid} 가 적절하지 않은 데이터로 댓글을 작성하려 했습니다. ${e}`,
+      `[INFO] 유저 ${res.locals.uid} 가 적절하지 않은 데이터로 댓글을 작성하려 했습니다. ${e}`
     );
     return next(createError(400, '입력값이 적절하지 않습니다.'));
   }
@@ -136,7 +135,7 @@ export const editReply = async (req, res, next) => {
         });
       }
       console.log(
-        `[INFO] 유저 ${res.locals.uid}가 댓글 ${req.params.replyId} 의 수정을 시도했으나 실패했습니다.`,
+        `[INFO] 유저 ${res.locals.uid}가 댓글 ${req.params.replyId} 의 수정을 시도했으나 실패했습니다.`
       );
       return next(createError(500, '알 수 없는 에러가 발생했습니다.'));
     });
@@ -162,7 +161,7 @@ export const deleteReply = async (req, res, next) => {
       });
     }
     console.error(
-      `[Error] 데이터베이스 질의에 실패했습니다: ${req.params.replyId} 의 삭제를 시도했으나 존재하지 않습니다.`,
+      `[Error] 데이터베이스 질의에 실패했습니다: ${req.params.replyId} 의 삭제를 시도했으나 존재하지 않습니다.`
     );
     return next(createError(500, '알 수 없는 에러가 발생했습니다.'));
   } catch (e) {

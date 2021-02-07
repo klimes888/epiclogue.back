@@ -24,10 +24,8 @@ const availableTypes = [
  * @param {Mongoose Session} session
  */
 const makeNotification = async (
-  {
-    targetUserId, maker, notificationType, targetType, targetInfo, highlightId,
-  },
-  session,
+  { targetUserId, maker, notificationType, targetType, targetInfo, highlightId },
+  session
 ) => {
   if (availableTypes.includes(notificationType)) {
     await models

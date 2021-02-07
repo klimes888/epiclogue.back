@@ -13,10 +13,9 @@ const options = {
 };
 
 class Database {
-  constructor() {}
-
   async connect() {
-    const dbEnvironment = process.env.NODE_ENV === 'test' ? process.env.MONGO_TEST_URI : process.env.MONGO_URI_ALONE;
+    const dbEnvironment =
+      process.env.NODE_ENV === 'test' ? process.env.MONGO_TEST_URI : process.env.MONGO_URI_ALONE;
 
     try {
       await mongoose.connect(dbEnvironment, options);
@@ -37,7 +36,7 @@ class Database {
         console.error(e);
       }
     } else {
-      console.warn('[WARN] Disconnecting database requested while there\'s no connection');
+      console.warn("[WARN] Disconnecting database requested while there's no connection");
     }
   }
 

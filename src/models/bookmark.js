@@ -34,4 +34,8 @@ Bookmark.statics.didBookmark = function (user, board) {
   return this.findOne({ user, board });
 };
 
+Bookmark.statics.countBookmarks = function (boardId) {
+  return this.countDocuments({ _id: boardId });
+};
+
 export default mongoose.model('Bookmark', Bookmark);

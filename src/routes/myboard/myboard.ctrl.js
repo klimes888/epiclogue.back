@@ -14,7 +14,7 @@ export const getMyboard = async (req, res, next) => {
       banner: 1,
       profile: 1,
       joinDate: 1,
-    },
+    }
   );
   try {
     const result = userId.toJSON();
@@ -55,13 +55,13 @@ export const getMyboard = async (req, res, next) => {
 export const allWorks = async (req, res, next) => {
   const userId = await models.User.findOne(
     { screenId: req.params.screenId },
-    { _id: 1, screenId: 0 },
+    { _id: 1, screenId: 0 }
   );
   try {
-    const allWorks = await models.Board.findAll({ writer: userId._id });
+    const userAllWorks = await models.Board.findAll({ writer: userId._id });
     const wrappedWorks = res.locals?.uid
-      ? await contentsWrapper(res.locals.uid, allWorks, 'Board', false)
-      : allWorks;
+      ? await contentsWrapper(res.locals.uid, userAllWorks, 'Board', false)
+      : userAllWorks;
 
     console.log(`[INFO] ${res.locals.uid || '비회원유저'} 가 ${userId._id} 의 글들을 확인합니다.`);
     return res.status(200).json({
@@ -85,7 +85,7 @@ export const originals = async (req, res, next) => {
     console.log(
       `[INFO] 유저 ${res.locals.uid || '비회원유저'} 가 유저 ${
         targetUser._id
-      } 의 원작들을 확인합니다.`,
+      } 의 원작들을 확인합니다.`
     );
     return res.status(200).json({
       result: 'ok',
@@ -100,15 +100,15 @@ export const originals = async (req, res, next) => {
 export const secondaryWorks = async (req, res, next) => {
   try {
     const targetUser = await models.User.findOne({ screenId: req.params.screenId }, { _id: 1 });
-    const secondaryWorks = await models.Board.findAllOriginOrSecondary(targetUser._id, true);
+    const userSecondaryWorks = await models.Board.findAllOriginOrSecondary(targetUser._id, true);
     const wrappedContents = res.locals?.uid
-      ? await contentsWrapper(res.locals.uid, secondaryWorks, 'Board', false)
-      : secondaryWorks;
+      ? await contentsWrapper(res.locals.uid, userSecondaryWorks, 'Board', false)
+      : userSecondaryWorks;
 
     console.log(
       `[INFO] 유저 ${res.locals.uid || '비회원유저'} 가 유저 ${
         targetUser._id
-      } 의 2차창작들을 확인합니다.`,
+      } 의 2차창작들을 확인합니다.`
     );
     return res.status(200).json({
       result: 'ok',
