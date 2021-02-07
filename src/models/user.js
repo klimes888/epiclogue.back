@@ -1,5 +1,10 @@
 import mongoose from 'mongoose'
 
+const userImageSchema = new mongoose.Schema({
+  origin: { type: String, default: null },
+  thumbnail: { type: String, default: null }
+})
+
 const user = new mongoose.Schema({
   nickname: { type: String, required: true },
   email: { type: String, required: true },
@@ -12,8 +17,8 @@ const user = new mongoose.Schema({
   deactivatedAt: { type: Date, default: null },
   termsOfUseAcceptedAt: { type: Date, required: true, default: Date.now },
   intro: { type: String, default: null },
-  banner: { type: String, default: null },
-  profile: { type: String, default: null },
+  banner: userImageSchema,
+  profile: userImageSchema,
   salt: { type: String },
   isConfirmed: { type: Boolean, required: true, default: false },
   token: { type: String },

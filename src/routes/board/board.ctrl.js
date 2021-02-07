@@ -32,6 +32,7 @@ export const postBoard = async (req, res, next) => {
     language: req.body.language,
     allowSecondaryCreation: req.body.allowSecondaryCreation,
     boardImg: _boardImg,
+    thumbnail: 'resized' + _boardImg[0],
     tags,
   }
 
@@ -56,7 +57,7 @@ export const postBoard = async (req, res, next) => {
   } catch (e) {
     // 이미지를 S3에 올린 이후에 DB에 저장하므로 이를 삭제합니다.
     if (boardData.boardImg.length > 0) {
-      deleteImage(boardData.boardImg)
+      deleteImage(boardData.boardImg, 'board')
     }
 
     console.log(
@@ -105,7 +106,7 @@ export const deleteBoard = async (req, res, next) => {
   try {
     const query = await Board.getById(boardId, { _id: 0, feedbacks: 0, writer: 0, boardImg: 1 })
     // for non blocking, didn't use async-await
-    deleteImage(query.boardImg)
+    deleteImage(query.boardImg, 'board')
 
     const deletion = await Board.delete(boardId)
 
@@ -166,7 +167,7 @@ export const postEditInfo = async function (req, res, next) {
   try {
     const originalData = await Board.getById(req.params.boardId)
 
-    deleteImage(originalData.boardImg)
+    deleteImage(originalData.boardImg, 'board')
 
     const updateData = {
       boardId: req.params.boardId,
@@ -176,6 +177,7 @@ export const postEditInfo = async function (req, res, next) {
       category: parseInt(req.body.category || originalData.category),
       pub: parseInt(req.body.pub || originalData.pub),
       language: parseInt(req.body.language || originalData.language),
+      thumbnail: 'resized' + boardImg[0],
       tags,
     }
 
@@ -253,6 +255,7 @@ export const secPost = async (req, res, next) => {
     boardImg: _boardImg,
     originUserId: req.body.originUserId,
     originBoardId: req.body.originBoardId,
+    thumbnail: 'resized' + _boardImg[0],
     tags,
   }
 
@@ -285,7 +288,7 @@ export const secPost = async (req, res, next) => {
   } catch (e) {
     // 이미지를 S3에 올린 이후에 DB에 저장하므로 이를 삭제합니다.
     if (boardData.boardImg.length > 0) {
-      deleteImage(boardData.boardImg)
+      deleteImage(boardData.boardImg, 'board')
     }
 
     console.log(

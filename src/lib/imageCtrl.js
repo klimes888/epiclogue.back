@@ -17,7 +17,7 @@ const s3 = new aws.S3({
 
 // 이미지 삭제 함수 여기다 추가해서 export 필요
 
-export const deleteImage = (images) => {
+export const deleteImage = (images, location) => {
   const garbageImage = []
   if(images === undefined) return false
   if(images instanceof Array) {
@@ -39,7 +39,7 @@ export const deleteImage = (images) => {
   }
     s3.deleteObjects(
       {
-        Bucket: process.env.AWS_BUCKET_NAME,
+        Bucket: location === 'board' ? process.env.AWS_DATA_BUCKET_NAME : process.env.AWS_USERDATA_BUCKET_NAME,
         Delete: {
           Objects: garbageImage,
         },

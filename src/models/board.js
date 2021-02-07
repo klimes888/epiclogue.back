@@ -4,6 +4,7 @@ const ObjectId = mongoose.ObjectId
 const board = new mongoose.Schema({
   writer: { type: ObjectId, ref: 'User' },
   boardTitle: { type: String, default: '' },
+  thumbnail: {type: String},
   boardImg: { type: [String], required: true },
   boardBody: { type: String, default: '' },
   category: { type: String, enum: [0, 1], default: 0 }, // [on future] 0: Illust, 1: Comic
@@ -79,7 +80,7 @@ board.statics.findAll = function (option) {
       uid: 1,
       pub: 1,
       category: 1,
-      boardImg: 1,
+      thumbnail: 1,
       originUserId: 1
     }
   ).sort({ writeDate: -1 })

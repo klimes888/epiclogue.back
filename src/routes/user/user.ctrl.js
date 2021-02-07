@@ -47,28 +47,36 @@ export const postUserEditInfo = async function (req, res, next) {
   const country = parseInt(req.body['userCountry']) || originalData.country
   const availableLanguage = req.body['userLang'] || originalData.availableLanguage
   const intro = req.body['userIntro'] || originalData.intro
-  let banner
-  let profile
+  const banner
+  const profile
   console.log(originalImages)
   if (req.files !== undefined && req.files.length !== 0) {
     if (req.files.length > 1) {
       if (req.files[0].fieldname == 'banner') {
-        banner = req.files[0].location
-        profile = req.files[1].location
+        banner.origin = req.files[0].location
+        banner.thumbnail = 'resized-' + req.files[0].location
+        profile.origin = req.files[1].location
+        profile.thumbnail = 'resized-' + req.files[1].location
       } else {
-        banner = req.files[1].location
-        profile = req.files[0].location
+        banner.origin = req.files[1].location
+        banner.thumbnail = 'resized-' + req.files[1].location
+        profile.origin = req.files[0].location
+        profile.thumbnail = 'resized-' + req.files[0].location
       }
-      deleteImage(originalImages)
+      deleteImage(originalImages, 'mypage')
     } else if (req.files.length == 1) {
       if (req.files[0].fieldname == 'banner') {
-        banner = req.files[0].location
-        profile = originalImages[1]
-        if(originalImages[0] !== null) deleteImage(originalImages[0])
+        banner.origin = req.files[0].location
+        banner.thumbnail = 'resized-' + req.files[0].location
+        profile.origin = originalImages[1]
+        profile.thumbnail = 'resized-' + originalImages[1]
+        if(originalImages[0] !== null) deleteImage(originalImages[0], 'mypage')
       } else {
-        profile = req.files[0].location
-        banner = originalImages[0]
-        if(originalImages[1] !== null) deleteImage(originalImages[1])
+        profile.origin = req.files[0].location
+        profile.thumbnail = 'resized-' + req.files[0].location
+        banner.origin = originalImages[0]
+        banner.thumbnail = 'resized-' + originalImages[0]
+        if(originalImages[1] !== null) deleteImage(originalImages[1], 'mypage')
       }
     }
   } else {
