@@ -1,5 +1,3 @@
-'use strict'
-
 import dotenv from 'dotenv'
 import randomString from 'random-string'
 import request from 'supertest'
@@ -18,12 +16,13 @@ const invalidId = '123456789012345678901234'
 let testBoardId
 
 describe('북마크 테스트', () => {
-  const tempPw = randomString() + '1!2@3#4$'
+  const tempPw = `${randomString()  }1!2@3#4$`
   const userData = {
     email: 'bookmark@lunarcat.com',
     userPw: tempPw,
     userPwRe: tempPw,
     userNick: randomString(),
+    userLang: 0,
   }
 
   const boardData = {
@@ -34,14 +33,14 @@ describe('북마크 테스트', () => {
     language: 'Korean',
   }
 
-  const imgPath = path.join(__dirname + '/../../testImages')
+  const imgPath = path.join(`${__dirname  }/../../testImages`)
   const imagePathArray = []
   fs.readdir(imgPath, (err, files) => {
     if (err) {
       console.error(err)
     }
     files.forEach(name => {
-      imagePathArray.push(imgPath + '/' + name)
+      imagePathArray.push(`${imgPath  }/${  name}`)
     })
   })
 
@@ -100,7 +99,7 @@ describe('북마크 테스트', () => {
           .set('x-access-token', userToken)
           .expect(200)
 
-          const response = await request(app)
+        const response = await request(app)
           .get(`/interaction/bookmark?screenId=${screenId}`)
           .set('x-access-token', userToken)
 
@@ -128,7 +127,10 @@ describe('북마크 테스트', () => {
 
   describe('테스트 종료', () => {
     test('S3 오브젝트 삭제 | 200', async () => {
-      await request(app).delete(`/boards/${testBoardId}`).set('x-access-token', userToken).expect(200)
+      await request(app)
+        .delete(`/boards/${testBoardId}`)
+        .set('x-access-token', userToken)
+        .expect(200)
     })
   })
 })

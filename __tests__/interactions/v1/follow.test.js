@@ -1,5 +1,3 @@
-'use strict'
-
 import dotenv from 'dotenv'
 import randomString from 'random-string'
 import request from 'supertest'
@@ -15,13 +13,14 @@ let verifiedToken
 const invalidId = '123456789012345678901234'
 
 describe('팔로우 테스트', () => {
-  const tempPw = randomString() + '1!2@3#4$'
+  const tempPw = `${randomString()  }1!2@3#4$`
 
   const userData = {
-    email: randomString() + '@lunarcat.com',
+    email: `${randomString()  }@lunarcat.com`,
     userPw: tempPw,
     userPwRe: tempPw,
     userNick: randomString(),
+    userLang: 0,
   }
 
   const verifiedUserData = {
@@ -29,6 +28,7 @@ describe('팔로우 테스트', () => {
     userPw: tempPw,
     userPwRe: tempPw,
     userNick: randomString(),
+    userLang: 0,
   }
 
   beforeAll(async () => {

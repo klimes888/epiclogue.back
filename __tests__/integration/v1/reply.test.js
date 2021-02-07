@@ -1,5 +1,3 @@
-'use strict'
-
 import dotenv from 'dotenv'
 import request from 'supertest'
 import fs from 'fs'
@@ -15,13 +13,15 @@ dotenv.config()
 
 describe('댓글 테스트', () => {
   // user data
-  const tempPw = randomString() + '1!2@3#4$'
+  const tempPw = `${randomString()  }1!2@3#4$`
   const userData = {
     email: 'replytest@lunarcat.com',
     userPw: tempPw,
     userPwRe: tempPw,
     userNick: 'replywriter',
+    userLang: 0,
   }
+
   const invalidId = '012345678901234567890123'
   let userToken
   let testBoardId
@@ -37,19 +37,18 @@ describe('댓글 테스트', () => {
     language: 'Korean',
   }
 
-  const imgPath = path.join(__dirname + '/../../testImages')
+  const imgPath = path.join(`${__dirname  }/../../testImages`)
   const imagePathArray = []
   fs.readdir(imgPath, (err, files) => {
     if (err) {
       console.error(err)
     }
     files.forEach(name => {
-      imagePathArray.push(imgPath + '/' + name)
+      imagePathArray.push(`${imgPath  }/${  name}`)
     })
   })
 
   beforeAll(async () => {
-    // join and login
     await request(app).post('/auth/join').send(userData)
     await User.confirmUser(userData.email)
     const loginInstance = await request(app).post('/auth/login').send(userData)
@@ -94,7 +93,7 @@ describe('댓글 테스트', () => {
         .post(`/boards/${testBoardId}/feedback/${testFeedbackId}/reply`)
         .set('x-access-token', userToken)
         .send({ replyBody: 'hi, it is reply body' })
-      
+
       expect(response.statusCode).toBe(201)
 
       testReplyId = response.body.data[0]._id
@@ -104,7 +103,7 @@ describe('댓글 테스트', () => {
       const response = await request(app)
         .post(`/boards/${testBoardId}/feedback/${testFeedbackId}/reply`)
         .set('x-access-token', userToken)
-      
+
       expect(response.statusCode).toBe(400)
     })
 
@@ -113,7 +112,7 @@ describe('댓글 테스트', () => {
         .post(`/boards/${testBoardId}/feedback/${testFeedbackId}/reply`)
         .set('x-access-token', userToken)
         .send({ replyBody: '   ' })
-      
+
       expect(response.statusCode).toBe(400)
     })
   })
@@ -123,7 +122,7 @@ describe('댓글 테스트', () => {
       const response = await request(app)
         .patch(`/boards/${testBoardId}/feedback/${testFeedbackId}/reply/${testReplyId}`)
         .set('x-access-token', userToken)
-        .send({ newReplyBody: 'it is new reply body'})
+        .send({ newReplyBody: 'it is new reply body' })
 
       expect(response.statusCode).toBe(200)
     })
@@ -132,10 +131,10 @@ describe('댓글 테스트', () => {
       const response = await request(app)
         .patch(`/boards/${testBoardId}/feedback/${testFeedbackId}/reply/${testReplyId}`)
         .set('x-access-token', userToken)
-        
+
       expect(response.statusCode).toBe(400)
     })
-    
+
     test('실패: replyBody가 공백 | 400', async () => {
       const response = await request(app)
         .patch(`/boards/${testBoardId}/feedback/${testFeedbackId}/reply/${testReplyId}`)
@@ -172,10 +171,13 @@ describe('댓글 테스트', () => {
       expect(response.statusCode).toBe(404)
     })
   })
-  
+
   describe('테스트 종료', () => {
     test('S3 오브젝트 삭제 | 200', async () => {
-      await request(app).delete(`/boards/${testBoardId}`).set('x-access-token', userToken).expect(200)
+      await request(app)
+        .delete(`/boards/${testBoardId}`)
+        .set('x-access-token', userToken)
+        .expect(200)
     })
   })
 })

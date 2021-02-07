@@ -1,5 +1,4 @@
-import { Mongoose } from 'mongoose'
-import * as models from '../models'
+import * as models from '../models';
 
 // 아래의 행동에 의해 알림이 만들어집니다. 커스텀 알림은 Notice의 형태로 만들 예정입니다.
 const availableTypes = [
@@ -11,7 +10,7 @@ const availableTypes = [
   'Like',
   'Mention',
   'Secondary',
-]
+];
 
 /**
  * Notification generator.
@@ -25,8 +24,10 @@ const availableTypes = [
  * @param {Mongoose Session} session
  */
 const makeNotification = async (
-  { targetUserId, maker, notificationType, targetType, targetInfo, highlightId },
-  session
+  {
+    targetUserId, maker, notificationType, targetType, targetInfo, highlightId,
+  },
+  session,
 ) => {
   if (availableTypes.includes(notificationType)) {
     await models
@@ -38,10 +39,10 @@ const makeNotification = async (
         targetInfo,
         highlightId,
       })
-      .save({ session })
+      .save({ session });
   } else {
-    throw new Error(`지정된 타입이 아닙니다: ${notificationType}`)
+    throw new Error(`지정된 타입이 아닙니다: ${notificationType}`);
   }
-}
+};
 
-export default makeNotification
+export default makeNotification;

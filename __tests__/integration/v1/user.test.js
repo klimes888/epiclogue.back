@@ -1,5 +1,3 @@
-'use strict'
-
 import dotenv from 'dotenv'
 import randomString from 'random-string'
 import request from 'supertest'
@@ -14,23 +12,25 @@ import app from '../../../app'
 dotenv.config()
 
 let userToken
-let newUserId
 
 describe('유저 테스트', () => {
   // user data
-  const tempPw = randomString() + '1!2@3#4$'
-  const newPw = randomString() + '!!11@@22'
+  const tempPw = `${randomString()  }1!2@3#4$`
+  const newPw = `${randomString()  }!!11@@22`
   const userData = {
-    email: randomString() + '@lunarcat.com',
+    email: `${randomString()  }@lunarcat.com`,
     userPw: tempPw,
     userPwRe: tempPw,
     userNick: 'AwesomeUser',
+    userLang: 1
   }
+
   const verifiedUserData = {
     email: 'usertest@lunarcat.com',
     userPw: tempPw,
     userPwRe: tempPw,
     userNick: 'Verification',
+    userLang: 1
   }
 
   // profile data
@@ -39,27 +39,22 @@ describe('유저 테스트', () => {
     userNick: 'computer2',
     userCountry: 2,
     userLang: [1, 2],
-    userIntro: `I'm the greatest writer ever`
+    userIntro: `I'm the greatest writer ever`,
   }
 
   // image data path
-  const imgPath = path.join(__dirname + '/../../testImages')
+  const imgPath = path.join(`${__dirname  }/../../testImages`)
   const imagePathArray = []
   fs.readdir(imgPath, (err, files) => {
     if (err) {
       console.error(err)
     }
     files.forEach(name => {
-      imagePathArray.push(imgPath + '/' + name)
+      imagePathArray.push(`${imgPath  }/${  name}`)
     })
   })
 
   beforeAll(async () => {
-    // 임시유저 생성
-    await request(app).post('/auth/join').send(userData)
-    const newUserData = await User.isExist(userData.email)
-    newUserId = newUserData._id
-
     // 이메일 인증된 사용자
     await request(app).post('/auth/join').send(verifiedUserData)
     await User.confirmUser(verifiedUserData.email)
@@ -72,40 +67,47 @@ describe('유저 테스트', () => {
   })
 
   describe('회원가입 테스트', () => {
-    test("성공 | 201", async () => {
-      await request(app).post("/auth/join").send({
-        email: randomString() + '@lunarcat.com',
-        userPw: '1q2w3e4r!!',
-        userPwRe: '1q2w3e4r!!',
-        userNick: randomString()
-      }).expect(201)
+    test('성공 | 201', async () => {
+      await request(app)
+        .post('/auth/join')
+        .send(userData)
+        .expect(201)
     })
 
-    test("실패: 이메일 형식이 아님 | 400", async () => {
-      await request(app).post("/auth/join").send({
-        email: randomString(),
-        userPw: '1q2w3e4r!!',
-        userPwRe: '1q2w3e4r!!',
-        userNick: randomString()
-      }).expect(400)
+    test('실패: 이메일 형식이 아님 | 400', async () => {
+      await request(app)
+        .post('/auth/join')
+        .send({
+          email: randomString(),
+          userPw: '1q2w3e4r!!',
+          userPwRe: '1q2w3e4r!!',
+          userNick: randomString(),
+        })
+        .expect(400)
     })
 
-    test("실패: 비밀번호 형식이 적절하지 않음 | 400", async () => {
-      await request(app).post("/auth/join").send({
-        email: randomString() + '@lunarcat.com',
-        userPw: '1q2w3e4r',
-        userPwRe: '1q2w3e4r',
-        userNick: randomString()
-      }).expect(400)
+    test('실패: 비밀번호 형식이 적절하지 않음 | 400', async () => {
+      await request(app)
+        .post('/auth/join')
+        .send({
+          email: `${randomString()  }@lunarcat.com`,
+          userPw: '1q2w3e4r',
+          userPwRe: '1q2w3e4r',
+          userNick: randomString(),
+        })
+        .expect(400)
     })
 
-    test("실패: 필수 입력 누락 | 400", async () => {
-      await request(app).post("/auth/join").send({
-        email: randomString() + '@lunarcat.com',
-        userPw: '1q2w3e4r',
-        userPwRe: '1q2w3e4r',
-        // userNick: randomString()
-      }).expect(400)
+    test('실패: 필수 입력 누락 | 400', async () => {
+      await request(app)
+        .post('/auth/join')
+        .send({
+          email: `${randomString()  }@lunarcat.com`,
+          userPw: '1q2w3e4r',
+          userPwRe: '1q2w3e4r',
+          // userNick: randomString()
+        })
+        .expect(400)
     })
 
     test('실패: 중복 회원가입 시도 | 400', async () => {
@@ -146,7 +148,7 @@ describe('유저 테스트', () => {
         .post('/auth/login')
         .send({
           email: userData.email,
-          userPw: randomString() + '1!2@3#4$',
+          userPw: `${randomString()  }1!2@3#4$`,
         })
         .expect(400)
     })
@@ -155,8 +157,8 @@ describe('유저 테스트', () => {
       await request(app)
         .post('/auth/login')
         .send({
-          email: randomString() + '@test.com',
-          userPw: randomString() + '1!2@3#4$',
+          email: `${randomString()  }@test.com`,
+          userPw: `${randomString()  }1!2@3#4$`,
         })
         .expect(404)
     })
@@ -200,14 +202,14 @@ describe('유저 테스트', () => {
     })
 
     test('실패: 새로운 비밀번호와 재입력이 다름 | 400', async () => {
-      const differentPw = verifiedUserData.userPw + '1'
+      const differentPw = `${verifiedUserData.userPw  }1`
       await request(app)
         .patch('/user/changePass')
         .set('x-access-token', userToken)
         .send({
           userPw: verifiedUserData.userPw,
           userPwNew: differentPw,
-          userPwNewRe: differentPw + '1',
+          userPwNewRe: `${differentPw  }1`,
         })
         .expect(400)
     })
@@ -215,9 +217,7 @@ describe('유저 테스트', () => {
 
   describe('프로필 변경', () => {
     test('성공: 이전 데이터 불러오기 | 200', async () => {
-      const response = await request(app)
-        .get('/user/editProfile')
-        .set('x-access-token', userToken)
+      const response = await request(app).get('/user/editProfile').set('x-access-token', userToken)
 
       expect(response.statusCode).toBe(200)
     })
@@ -249,10 +249,10 @@ describe('유저 테스트', () => {
         .field('userLang', newProfileData.userLang[0])
         .field('userIntro', newProfileData.userIntro)
         .attach('userBannerImg', imagePathArray[0])
-        // .attach('userProfileImg', imagePathArray[1])
+      // .attach('userProfileImg', imagePathArray[1])
 
       expect(response.statusCode).toBe(200)
-      
+
       // console.log(response)
     })
   })
@@ -273,7 +273,7 @@ describe('유저 테스트', () => {
         .send({ userPw: randomString() })
         .expect(400)
     })
-    
+
     test('성공 | 200', async () => {
       await request(app)
         .delete('/user')

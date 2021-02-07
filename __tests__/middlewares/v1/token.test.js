@@ -1,4 +1,4 @@
-'use strict'
+
 
 import dotenv from 'dotenv'
 import request from 'supertest'
@@ -18,21 +18,18 @@ describe('토큰 테스트', () => {
     userPw: 'lunarcat1!2@3#4$',
     userPwRe: 'lunarcat1!2@3#4$',
     userNick: 'token',
+    userLang: 1
   }
+
   const verifiedUserData = {
     email: 'tokenverify@lunarcat.com',
     userPw: 'lunarcat1!2@3#4$',
     userPwRe: 'lunarcat1!2@3#4$',
     userNick: 'tokenman',
+    userLang: 1
   }
-  const boardData = {
-    boardTitle: 'a board Title',
-    boardBody: 'a board Body',
-    category: 'Illust',
-    pub: 1,
-    language: 'Korean',
-  }
-  let userToken, screenId
+  
+  let userToken; let screenId
 
   beforeAll(async () => {
     await request(app).post('/auth/join').send(verifiedUserData)
@@ -52,9 +49,7 @@ describe('토큰 테스트', () => {
     })
 
     test('실패: 인증 토큰 누락 | 401', async () => {
-      await request(app)
-        .get(`/interaction/bookmark?screenId=${screenId}`)
-        .expect(401)
+      await request(app).get(`/interaction/bookmark?screenId=${screenId}`).expect(401)
     })
 
     test('실패: 손상된 인증 토큰 | 401', async () => {

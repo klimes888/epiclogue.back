@@ -1,5 +1,3 @@
-'use strict'
-
 import dotenv from 'dotenv'
 import request from 'supertest'
 import fs from 'fs'
@@ -15,13 +13,15 @@ dotenv.config()
 
 describe('피드백 테스트', () => {
   // user data
-  const tempPw = randomString() + '1!2@3#4$'
+  const tempPw = `${randomString()}1!2@3#4$`
   const userData = {
     email: 'feedbacktest@lunarcat.com',
     userPw: tempPw,
     userPwRe: tempPw,
     userNick: 'boardWriter',
+    userLang: 0,
   }
+
   const invalidId = '012345678901234567890123'
   let userToken
   let testBoardId
@@ -36,14 +36,14 @@ describe('피드백 테스트', () => {
     language: 'Korean',
   }
 
-  const imgPath = path.join(__dirname + '/../../testImages')
+  const imgPath = path.join(`${__dirname  }/../../testImages`)
   const imagePathArray = []
   fs.readdir(imgPath, (err, files) => {
     if (err) {
       console.error(err)
     }
     files.forEach(name => {
-      imagePathArray.push(imgPath + '/' + name)
+      imagePathArray.push(`${imgPath  }/${  name}`)
     })
   })
 
@@ -113,8 +113,7 @@ describe('피드백 테스트', () => {
         .get(`/boards/${testBoardId}/feedback/${testFeedbackId}`)
         .set('x-access-token', userToken)
 
-      if (response.status > 399) 
-        console.log(response)
+      if (response.status > 399) console.log(response)
 
       expect(response.statusCode).toBe(200)
     })

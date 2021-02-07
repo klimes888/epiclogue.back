@@ -1,11 +1,11 @@
-import Database from '../../src/lib/database'
 import { Connection } from 'mongoose'
 import child_process from 'child_process'
+import Database from '../../src/lib/database'
 
 module.exports = async () => {
   // console.log(`mongodb: ${Connection.readyState}`) // normally got 'undefined' while mongodb is running
   /* MongoDB가 servicing이 아닐 때 시작시켜주는 코드입니다. 다만 db health check가 적절하지 않아 매번 동작하므로 리팩토링이 필요합니다. */
-  // if (Connection.readyState !== 1) { 
+  // if (Connection.readyState !== 1) {
   //   console.log(`[FATAL] Database is not servicing or disconnected`)
   //   child_process.exec('sudo service mongodb start', (err, stdout, stderr) => {
   //     if (err) {
@@ -16,7 +16,7 @@ module.exports = async () => {
   //     console.log(stdout)
   //   })
   // }
-  
+
   await Database.connect()
   await Database.drop()
 }

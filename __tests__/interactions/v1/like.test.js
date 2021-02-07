@@ -1,5 +1,3 @@
-'use strict'
-
 import dotenv from 'dotenv'
 import randomString from 'random-string'
 import request from 'supertest'
@@ -18,12 +16,13 @@ let testBoardId
 let testFeedbackId
 let testReplyId
 describe('좋아요 테스트', () => {
-  const tempPw = randomString() + '1!2@3#4$'
+  const tempPw = `${randomString()  }1!2@3#4$`
   const userData = {
     email: 'like@lunarcat.com',
     userPw: tempPw,
     userPwRe: tempPw,
     userNick: randomString(),
+    userLang: 0,
   }
 
   const boardData = {
@@ -34,14 +33,14 @@ describe('좋아요 테스트', () => {
     language: 'Korean',
   }
 
-  const imgPath = path.join(__dirname + '/../../testImages')
+  const imgPath = path.join(`${__dirname  }/../../testImages`)
   const imagePathArray = []
   fs.readdir(imgPath, (err, files) => {
     if (err) {
       console.error(err)
     }
     files.forEach(name => {
-      imagePathArray.push(imgPath + '/' + name)
+      imagePathArray.push(`${imgPath  }/${  name}`)
     })
   })
 

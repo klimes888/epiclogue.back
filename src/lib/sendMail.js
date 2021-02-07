@@ -1,18 +1,18 @@
-import mailer from 'nodemailer'
-import dotenv from 'dotenv'
-import aws from 'aws-sdk'
-dotenv.config()
+import mailer from 'nodemailer';
+import dotenv from 'dotenv';
+import aws from 'aws-sdk';
 
-aws.config.loadFromPath(__dirname + "/aws.config.json")
+dotenv.config();
+
+aws.config.loadFromPath(`${__dirname}/aws.config.json`);
 
 const transporter = mailer.createTransport({
   SES: new aws.SES({
-    apiVersion: '2010-12-01'
-  })
-})
+    apiVersion: '2010-12-01',
+  }),
+});
 
-export const emailText = (email, auth_token) => {
-  return `
+export const emailText = (email, auth_token) => `
   <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
   <html html="" xmlns="http://www.w3.org/1999/xhtml" style="margin: 0; padding: 0;">
   
@@ -87,11 +87,9 @@ export const emailText = (email, auth_token) => {
   </body>
   
   </html>
-`
-}
+`;
 
-export const findPassText = (email, authToken) => {
-    return `
+export const findPassText = (email, authToken) => `
     <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
     <html html="" xmlns="http://www.w3.org/1999/xhtml" style="margin: 0; padding: 0;">
     
@@ -151,7 +149,6 @@ export const findPassText = (email, authToken) => {
     </body>
     
     </html>
-  `
-}
+  `;
 
-export default transporter
+export default transporter;
