@@ -71,10 +71,19 @@ const contentDataStorage = multerS3({
       .createHash('sha256')
       .update(file.originalname)
       .digest('hex')
+<<<<<<< HEAD
       .slice(0, 16);
     const random = await randomBytesPromise(64);
     name += random.toString('hex').slice(0, 32);
     cb(null, `${dayjs().format('YYYYMMDDHHmmss')}_${name}`);
+=======
+      .slice(0, 16)
+    const random = await randomBytesPromise(64)
+    name += random.toString('hex').slice(0, 32)
+    const type = file.mimetype.split('/')
+    name += ('.' + type[1])
+    cb(null, dayjs().format('YYYYMMDDHHmmss') + '_' + name)
+>>>>>>> remove congolelog and add isAdmin in user model
   },
 });
 
@@ -92,10 +101,19 @@ const userDataStorage = multerS3({
       .createHash('sha256')
       .update(file.originalname)
       .digest('hex')
+<<<<<<< HEAD
       .slice(0, 16);
     const random = await randomBytesPromise(64);
     name += random.toString('hex').slice(0, 32);
     cb(null, `${dayjs().format('YYYYMMDDHHmmss')}_${name}`);
+=======
+      .slice(0, 16)
+    const random = await randomBytesPromise(64)
+    name += random.toString('hex').slice(0, 32)
+    const type = file.mimetype.split('/')
+    name += ('.' + type[1])
+    cb(null, dayjs().format('YYYYMMDDHHmmss') + '_' + name)
+>>>>>>> remove congolelog and add isAdmin in user model
   },
 });
 
