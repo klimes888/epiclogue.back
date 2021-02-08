@@ -1,3 +1,4 @@
+import createError from 'http-errors';
 import { Board, Like, Bookmark, React, Follow } from '../models';
 
 /**
@@ -11,6 +12,10 @@ export const contentsWrapper = async (reqUserId, contentData, contentType, isFor
   new Promise(async (resolve, reject) => {
     // 회원/비회원 유저에 관계없이 필요한 데이터: 컨텐츠(글/댓글/대댓글)의 좋아요/리액트/북마크 카운트
     // 회원에게만 필요한 데이터: 해당 컨텐츠(글/댓글/대댓글)의 좋아요/북마크 여부
+
+    if (!contentType) {
+      reject(createError(400, '컨텐츠 타입이 존재하지 않습니다.'));
+    }
 
     if (contentData) {
       // MongoDB JSON을 pure JSON 으로 변환
@@ -52,18 +57,18 @@ export const contentsWrapper = async (reqUserId, contentData, contentType, isFor
             }
           }
 
-          // like, following on feedbacks
+          // 피드백의 팔로잉, 좋아요
           const feedbacks = [];
           const filteredFeedbacks = targetContent.feedbacks.filter(each => each.writer !== null);
 
-          filteredFeedbacks.map(async (feedback) => {
+          filteredFeedbacks.map(async feedback => {
             const feedbackData = feedback;
             feedbackData.heartCount = await Like.countHearts(feedbackData._id, 'Feedback');
 
             if (reqUserId) {
               feedbackData.liked = !!likeIdSet.includes(feedback._id);
               feedbackData.writer.following =
-                feedback.writer._id === reqUserId
+                feedback.writer._id.toString() === reqUserId
                   ? 'me'
                   : !!followingIdSet.includes(feedback.writer._id);
             }
@@ -80,17 +85,21 @@ export const contentsWrapper = async (reqUserId, contentData, contentType, isFor
           // 메인페이지와 마이 보드에서 사용하는 *다수의 글 데이터*
           const filteredData = targetContent.filter(each => each.writer !== null);
 
+          // 비회원일경우 바로 리턴
           if (!reqUserId) {
-            resolve(filteredData);
+            return resolve(filteredData);
           }
 
           const resultSet = filteredData.map(data => {
             const boardData = data.toJSON();
-            
+
             if (reqUserId) {
               boardData.bookmarked = !!bookmarkIdSet.includes(data._id.toString());
               boardData.liked = !!likeIdSet.includes(data._id.toString());
-              boardData.writer.following = boardData.writer._id === reqUserId ? 'me' : !!followingIdSet.includes(data.writer._id.toString());
+              boardData.writer.following =
+                boardData.writer._id.toString() === reqUserId
+                  ? 'me'
+                  : !!followingIdSet.includes(data.writer._id.toString());
             }
 
             return boardData;
@@ -99,42 +108,66 @@ export const contentsWrapper = async (reqUserId, contentData, contentType, isFor
           resolve(resultSet);
         }
       } else if (contentType === 'User') {
-        const resultSet = [];
+        // 유저 검색시에 사용
+        const resultSet = await Promise.all(
+          targetContent.map(async data => {
+            const userData = data.toJSON();
+            // 작품 수
+            userData.illustCount = await Board.countByWriterAndCategory(userData._id, 0);
+            userData.comicCount = await Board.countByWriterAndCategory(userData._id, 1);
 
-        for (let userData of targetContent) {
-          // 팔로우 여부 (회원일 경우에만 적용)
-          userData = userData.toJSON();
-          if (reqUserId) {
-            userData.isFollowing =
-              userData._id === reqUserId
-                ? !!(await Follow.didFollow({
-                    userId: reqUserId,
-                    targetUserId: userData._id,
-                  }))
-                : 'me';
-          }
+            if (reqUserId) {
+              userData.isFollowing =
+                userData._id.toString() === reqUserId
+                  ? 'me'
+                  : !!(await Follow.didFollow({
+                      userId: reqUserId,
+                      targetUserId: userData._id,
+                    }));
+            }
 
-          // 작품 수
-          userData.illustCount = await Board.countByWriterAndCategory(userData._id, 0);
-          userData.comicCount = await Board.countByWriterAndCategory(userData._id, 1);
-          resultSet.push(userData);
+            return userData;
+          })
+        );
+
+        resolve(resultSet);
+      } else if (contentType === 'Follow') {
+        if (!reqUserId) {
+          return resolve(contentData);
         }
+
+        const followerIdSet = await getFollowerIdSet(reqUserId);
+        const resultSet = 
+          targetContent.map(data => {
+            const userData = data.toJSON();
+            userData.following = !!followingIdSet.includes(reqUserId);
+            userData.follower = !!followerIdSet.includes(reqUserId);
+            return userData;
+          })
+        ;
+
         resolve(resultSet);
       } else {
-        /* following, like on feedbacks and replies */
-        const likeIdSet = await getLikeIdSet(reqUserId, contentType);
-        const resultSet = [];
+        /* 피드백과 대댓글에서 팔로우, 좋아요 여부 확인 */
         const filteredData = targetContent.filter(each => each.writer !== null);
-        for (let data of filteredData) {
-          data = data.toJSON();
-          data.liked = !!likeIdSet.includes(data._id.toString());
-          if (data.writer && data.writer._id.toString() === reqUserId) {
-            data.writer.following = 'me';
-          } else {
-            data.writer.following = !!followingIdSet.includes(data.writer._id.toString());
-          }
-          resultSet.push(data);
+
+        // 비회원일 경우 바로 리턴
+        if (!reqUserId) {
+          return resolve(filteredData);
         }
+
+        const resultSet = 
+          filteredData.map(data => {
+            const userData = data.toJSON();
+            userData.liked = !!likeIdSet.includes(userData._id.toString());
+            userData.writer.following =
+              reqUserId === userData._id.toString()
+                ? 'me'
+                : !!followingIdSet.includes(userData.writer._id.toString());
+
+            return userData;
+          });
+
         resolve(resultSet);
       }
     } else {
@@ -145,7 +178,7 @@ export const contentsWrapper = async (reqUserId, contentData, contentType, isFor
 function getBookmarkIdSet(userId) {
   return new Promise(async (resolve, reject) => {
     if (userId) {
-      const bookmarkList = await Bookmark.find({ user: userId }, { board: 1, _id: 0 });
+      const bookmarkList = await Bookmark.getIdByUserId(userId);
       const bookmarkIdSet = bookmarkList.map(eachBookmark => eachBookmark.board.toString());
       resolve(bookmarkIdSet);
     } else {
@@ -157,7 +190,7 @@ function getBookmarkIdSet(userId) {
 function getLikeIdSet(userId) {
   return new Promise(async (resolve, reject) => {
     if (userId) {
-      const likeList = await Like.find({ userId }, { targetInfo: 1, _id: 0 });
+      const likeList = await Like.getByUserId(userId);
       const likeIdSet = likeList.map(eachLike => eachLike.targetInfo.toString());
       resolve(likeIdSet);
     } else {
@@ -169,9 +202,21 @@ function getLikeIdSet(userId) {
 function getFollowingIdSet(userId) {
   return new Promise(async (resolve, reject) => {
     if (userId) {
-      const followingList = await Follow.find({ userId }, { targetUserId: 1, _id: 0 });
-      const followingIdSet = followingList.map(eachUser => eachUser.targetUserId.toString());
+      const followingList = await Follow.getFollowingIdList(userId);
+      const followingIdSet = followingList.map(eachUser => eachUser.userId.toString());
       resolve(followingIdSet);
+    } else {
+      reject(new Error('UserId is required.'));
+    }
+  });
+}
+
+function getFollowerIdSet(userId) {
+  return new Promise(async (resolve, reject) => {
+    if (userId) {
+      const followerList = await Follow.getFollowerIdList(userId);
+      const followerIdSet = followerList.map(eachUser => eachUser.targetUserId.toString());
+      resolve(followerIdSet);
     } else {
       reject(new Error('UserId is required.'));
     }

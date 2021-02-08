@@ -80,9 +80,8 @@ export const getReplys = async (req, res, next) => {
 
   try {
     const replyData = await Reply.getByParentId(feedbackId);
-    const wrappedReplies = res.locals?.uid
-      ? await contentsWrapper(res.locals.uid, replyData, 'Reply', false)
-      : replyData;
+    const wrappedReplies = await contentsWrapper(res.locals?.uid, replyData, 'Reply', false);
+
     console.log(
       `[INFO] 유저 ${
         res.locals.uid || '비회원유저'

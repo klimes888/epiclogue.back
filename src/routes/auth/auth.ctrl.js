@@ -11,12 +11,6 @@ import transporter, { emailText, findPassText } from '../../lib/sendMail';
 const { SECRET_KEY } = process.env;
 const randomBytesPromise = util.promisify(crypto.randomBytes);
 
-/*
-  This is auth router.
-  base url: /auth
-  OPTIONS: [ GET / POST ]
-*/
-
 dotenv.config();
 
 const getFBProfile = async uid =>
@@ -29,6 +23,14 @@ const getFBProfile = async uid =>
       .catch(err => reject(err));
   });
 
+/**
+ * @description SNS 로그인
+ * @access POST /auth/snsLogin
+ * @param {*} req HTTP request
+ * @param {*} res HTTP response
+ * @param {*} next ExpressJS next middleware
+ * @returns 로그인 정보 및 토큰
+ */
 export const snsLogin = async function (req, res, next) {
   const { snsData, snsType, userLang } = req.body;
   console.log(snsData, snsType);
@@ -103,6 +105,14 @@ export const snsLogin = async function (req, res, next) {
   });
 };
 
+/**
+ * @description 로그인
+ * @access POST /auth/login
+ * @param {*} req HTTP request
+ * @param {*} res HTTP response
+ * @param {*} next ExpressJS next middleware
+ * @returns 로그인 정보 및 토큰
+ */
 export const login = async function (req, res, next) {
   const { email, userPw } = req.body;
 
@@ -175,6 +185,14 @@ export const login = async function (req, res, next) {
   }
 };
 
+/**
+ * @description 회원가입
+ * @access POST /auth/join
+ * @param {*} req HTTP request
+ * @param {*} res HTTP response
+ * @param {*} next ExpressJS next middleware
+ * @returns -
+ */
 export const join = async function (req, res, next) {
   const { email, userPw, userPwRe, userLang, userNick: nick } = req.body;
   const check = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[$@$!%*#?&])[A-Za-z\d$@$!%*#?&]{8,}$/.test(userPw);
@@ -209,7 +227,7 @@ export const join = async function (req, res, next) {
     }
 
     if (check) {
-      if (userPw == userPwRe) {
+      if (userPw === userPwRe) {
         /* 중복 가입 이메일 처리 */
         if ((await User.isExist(email)) != null) {
           console.log(`[INFO] 중복된 이메일 ${email} 로 가입하려했습니다.`);
@@ -274,6 +292,14 @@ export const join = async function (req, res, next) {
   }
 };
 
+/**
+ * @description 비밀번호 찾기를 위해 메일 전송
+ * @access POST /auth/findPass
+ * @param {*} req HTTP request
+ * @param {*} res HTTP response
+ * @param {*} next ExpressJS next middleware
+ * @returns -
+ */
 export const mailToFindPass = async (req, res, next) => {
   const { email } = req.body;
   const userToken = await (await randomBytesPromise(24)).toString('hex');
@@ -297,6 +323,14 @@ export const mailToFindPass = async (req, res, next) => {
   }
 };
 
+/**
+ * @description 유저 비밀번호 변경
+ * @access PATCH /auth/findPass
+ * @param {*} req HTTP request
+ * @param {*} res HTTP response
+ * @param {*} next ExpressJS next middleware
+ * @returns -
+ */
 export const findPass = async (req, res, next) => {
   const { email, userPwNew, userPwNewRe, token } = req.body;
   const changePassSchema = Joi.object({
@@ -354,6 +388,14 @@ export const findPass = async (req, res, next) => {
   }
 };
 
+/**
+ * @description 유저의 메일 인증
+ * @access PATCH /auth/mailAuth
+ * @param {*} req HTTP request
+ * @param {*} res HTTP response
+ * @param {*} next ExpressJS next middleware
+ * @returns -
+ */
 export const mailAuth = async function (req, res, next) {
   const { email, token } = req.query;
 

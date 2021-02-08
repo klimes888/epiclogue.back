@@ -110,6 +110,10 @@ describe('글 테스트', () => {
       await request(app).get(`/boards/${testBoardId}`).set('x-access-token', userToken).expect(200);
     });
 
+    test('비회원 유저 접근 성공 | 200', async () => {
+      await request(app).get(`/boards/${testBoardId}`).expect(200);
+    })
+
     test('실패: 존재하지 않는 글 | 404', async () => {
       await request(app)
         .get(`/boards/${invalidBoardId}`)
@@ -163,6 +167,10 @@ describe('글 테스트', () => {
         .delete(`/boards/${testBoardId}`)
         .set('x-access-token', userToken)
         .expect(200);
+    });
+
+    test('실패: 권한이 없는 유저 | 401', async () => {
+      await request(app).delete(`/boards/${testBoardId}`).set('x-access-token', userToken).expect(400);
     });
 
     test('실패: 올바르지 않은 boardId | 400', async () => {

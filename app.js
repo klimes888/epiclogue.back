@@ -51,9 +51,7 @@ app.use(cors({ credentials: true, origin: true }))
 app.use(
   morgan('combined', {
     stream,
-    skip: (req, res) => {
-      return res.statusCode > 399
-    },
+    skip: (req, res) => res.statusCode > 399,
   })
 )
 app.use(express.json())
@@ -72,7 +70,7 @@ app.use((req, res, next) => {
 })
 
 // error handler
-app.use((err, req, res, next) => {
+app.use((err, req, res) => {
   // if (process.env.NODE_ENV !== 'production') { }
 
   if (!process.env.NODE_ENV === 'test' && err.status === 500) {
@@ -83,8 +81,8 @@ app.use((err, req, res, next) => {
       {
         text: `*Message*: ${err.message} \n *Stack*: ${err.stack} \n *StatusCode*: ${err.status}`,
       },
-      (err, response) => {
-        if (err) console.error(err)
+      (webhookError) => {
+        if (webhookError) console.error(webhookError)
       }
     )
   }

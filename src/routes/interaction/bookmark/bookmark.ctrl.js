@@ -4,12 +4,14 @@ import { Bookmark, React, Board, User } from '../../../models';
 import { contentsWrapper } from '../../../lib/contentsWrapper';
 import makeNotification from '../../../lib/makeNotification';
 
-/*
-  This is bookmark router.
-  base url: /interaction/bookmark[?screenId=lunarcat123]
-  OPTIONS: [GET / POST / DELETE]
-*/
-
+/**
+ * 경로: /interaction/bookmark?screenId=SCREEN_ID
+ *
+ * @param {*} req HTTP request
+ * @param {*} res HTTP response
+ * @param {*} next ExpressJS next middleware
+ * @returns 유저의 북마크 리스트
+ */
 export const getBookmarkList = async (req, res, next) => {
   // To use this code on /myboard/:screenId/bookmarks
   const screenId = req.query.screenId || req.params.screenId;
@@ -36,11 +38,20 @@ export const getBookmarkList = async (req, res, next) => {
   }
 };
 
+/**
+ * 경로: /interaction/bookmark
+ *
+ * @param {*} req HTTP request
+ * @param {*} res HTTP response
+ * @param {*} next ExpressJS next middleware
+ * @returns 글 북마크 수
+ */
 export const addBookmark = async function (req, res, next) {
   const bookmarkSchema = new Bookmark({
     user: res.locals.uid,
     board: req.body.boardId,
   });
+
   const reactSchema = new React({
     user: res.locals.uid,
     boardId: req.body.boardId,
@@ -97,6 +108,14 @@ export const addBookmark = async function (req, res, next) {
   }
 };
 
+/**
+ * 경로: /interaction/bookmark
+ *
+ * @param {*} req HTTP request
+ * @param {*} res HTTP response
+ * @param {*} next ExpressJS next middleware
+ * @returns 글 북마크 수
+ */
 export const deleteBookmark = async (req, res, next) => {
   const userId = res.locals.uid;
   const { boardId } = req.body;

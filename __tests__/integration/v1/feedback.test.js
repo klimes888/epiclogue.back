@@ -108,7 +108,7 @@ describe('피드백 테스트', () => {
     });
   });
 
-  describe('피드백 읽기', () => {
+  describe('피드백 조회', () => {
     test('성공 | 200', async () => {
       const response = await request(app)
         .get(`/boards/${testBoardId}/feedback/${testFeedbackId}`)

@@ -6,17 +6,48 @@ import { deleteImage } from '../../lib/imageCtrl';
 import { contentsWrapper } from '../../lib/contentsWrapper';
 import makeNotification from '../../lib/makeNotification';
 
-/*
-  This is board router.
-  base url: /boards/[boardId]
-  OPTIONS: [ GET / POST / DELETE ]
-*/
-
-export const postBoard = async (req, res, next) => {
-  const _boardImg = [];
-  for (let i = 0; i < req.files.length; i++) {
-    _boardImg.push(req.files[i].location);
+/**
+ * @description 유저 피드
+ * @access GET /boards?type=[Illust, Comic]
+ * @param {*} req HTTP request
+ * @param {*} res HTTP response
+ * @param {*} next ExpressJS next middleware
+ * @returns 요청한 글 배열
+ */
+export const getBoards = async (req, res, next) => {
+  const { type: requestType } = req.query;
+  const option = { pub: 1 };
+  // 특정 카테고리만 요청할 경우
+  if (requestType) {
+    option.category = requestType === 'Illust' ? 0 : 1;
   }
+
+  try {
+    const boardList = await Board.findAll(option); // 썸네일만 골라내는 작업 필요
+    const filteredBoardList = boardList.filter(each => each.writer !== null);
+    const wrappedData = await contentsWrapper(res.locals.uid, filteredBoardList, 'Board', false);
+
+    console.log(`[INFO] 유저 ${res.locals.uid || '비회원유저'} 가 자신의 피드를 확인했습니다.`);
+    return res.status(200).json({
+      result: 'ok',
+      data: wrappedData,
+    });
+  } catch (e) {
+    console.error(`[ERROR] ${e}`);
+    return next(createError(500, '알 수 없는 에러가 발생했습니다.'));
+  }
+};
+
+/**
+ * @description 글 작성
+ * @access POST /boards
+ * @param {*} req HTTP request
+ * @param {*} res HTTP response
+ * @param {*} next ExpressJS next middleware
+ * @returns 생성된 글의 아이디
+ */
+export const postBoard = async (req, res, next) => {
+  const _boardImg = req.files.map(file => file.location);
 
   let tags = '';
   if (req.body.boardBody) {
@@ -79,7 +110,14 @@ export const postBoard = async (req, res, next) => {
   }
 };
 
-// 글 뷰
+/**
+ * @description 글 뷰어
+ * @access GET /boards/:boardId
+ * @param {*} req HTTP request
+ * @param {*} res HTTP response
+ * @param {*} next ExpressJS next middleware
+ * @returns 글의 데이터
+ */
 export const viewBoard = async (req, res, next) => {
   const { boardId } = req.params;
   const { uid: userId } = res.locals;
@@ -101,7 +139,14 @@ export const viewBoard = async (req, res, next) => {
   }
 };
 
-// 삭제
+/**
+ * @description 글 삭제
+ * @access DELETE /boards/:boardId
+ * @param {*} req HTTP request
+ * @param {*} res HTTP response
+ * @param {*} next ExpressJS next middleware
+ * @returns -
+ */
 export const deleteBoard = async (req, res, next) => {
   const { boardId } = req.params;
 
@@ -133,7 +178,14 @@ export const deleteBoard = async (req, res, next) => {
   }
 };
 
-// 수정 전 이전 데이터 불러오기
+/**
+ * @description 글을 수정하기 위해 데이터 가져오기
+ * @access GET /boards/:boardId/edit
+ * @param {*} req HTTP request
+ * @param {*} res HTTP response
+ * @param {*} next ExpressJS next middleware
+ * @returns 수정할 글의 데이터
+ */
 export const getEditInfo = async (req, res, next) => {
   const { boardId } = req.params;
 
@@ -154,7 +206,14 @@ export const getEditInfo = async (req, res, next) => {
   }
 };
 
-// 수정
+/**
+ * @description 글 수정
+ * @access PATCH /boards/:boardId/edit
+ * @param {*} req HTTP request
+ * @param {*} res HTTP response
+ * @param {*} next ExpressJS next middleware
+ * @returns 수정한 글의 아이디
+ */
 export const postEditInfo = async function (req, res, next) {
   const boardImg = req.files ? req.files.map(file => file.location) : [];
   const session = await startSession();
@@ -200,29 +259,14 @@ export const postEditInfo = async function (req, res, next) {
   }
 };
 
-/* 유저마다 다르게 받아야 함 */
-export const getBoards = async (req, res, next) => {
-  const { type: requestType } = req.query;
-  const option = { pub: 1 };
-  option.category = requestType === 'Illust' ? 0 : 1;
-
-  try {
-    const boardList = await Board.findAll(option); // 썸네일만 골라내는 작업 필요
-    const filteredBoardList = boardList.filter(each => each.writer !== null);
-    const wrappedData = res.locals?.uid
-      ? await contentsWrapper(res.locals.uid, filteredBoardList, 'Board', false)
-      : filteredBoardList;
-    console.log(`[INFO] 유저 ${res.locals.uid || '비회원유저'} 가 자신의 피드를 확인했습니다.`);
-    return res.status(200).json({
-      result: 'ok',
-      data: wrappedData,
-    });
-  } catch (e) {
-    console.error(`[ERROR] ${e}`);
-    return next(createError(500, '알 수 없는 에러가 발생했습니다.'));
-  }
-};
-
+/**
+ * @description 2차 창작
+ * @access POST /boards/sec
+ * @param {*} req HTTP request
+ * @param {*} res HTTP response
+ * @param {*} next ExpressJS next middleware
+ * @returns 생성된 글의 아이디
+ */
 export const secPost = async (req, res, next) => {
   const boardImg = req.files ? req.files.map(file => file.location) : [];
 

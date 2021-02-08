@@ -36,8 +36,8 @@ user.statics.isScreenIdUnique = async function (screenId, session) {
   return false;
 };
 
-user.statics.getByScreenId = function (screenId) {
-  return this.findOne({ screenId });
+user.statics.getByScreenId = function (screenId, projectionOption) {
+  return this.findOne({ screenId }, projectionOption);
 };
 
 user.statics.isConfirmed = function (email, token) {

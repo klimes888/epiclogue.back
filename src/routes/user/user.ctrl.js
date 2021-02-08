@@ -11,7 +11,14 @@ const randomBytesPromise = util.promisify(crypto.randomBytes);
 
 dotenv.config();
 
-/* GET users listing. */
+/**
+ * @description 수정할 유저의 프로필 정보 반환
+ * @access GET /user/editProfile
+ * @param {*} req HTTP request
+ * @param {*} res HTTP response
+ * @param {*} next ExpressJS next middleware
+ * @returns 수정할 유저 프로필
+ */
 export const getUserEditInfo = async (req, res, next) => {
   const { uid } = res.locals;
   try {
@@ -35,8 +42,15 @@ export const getUserEditInfo = async (req, res, next) => {
   }
 };
 
+/**
+ * @description 유저 프로필 수정
+ * @access POST /user/editProfile
+ * @param {*} req HTTP request
+ * @param {*} res HTTP response
+ * @param {*} next ExpressJS next middleware
+ * @returns 수정한 유저 데이터
+ */
 export const postUserEditInfo = async (req, res, next) => {
-  // remove old images
   const originalData = await User.getUserInfo(res.locals.uid);
   const originalImages = [originalData.banner, originalData.profile];
   const screenId = req.body.screenId || originalData.screenId;
@@ -111,6 +125,14 @@ export const postUserEditInfo = async (req, res, next) => {
   }
 };
 
+/**
+ * @description 비밀번호 변경
+ * @access PATCH /user/changePass
+ * @param {*} req HTTP request
+ * @param {*} res HTTP response
+ * @param {*} next ExpressJS next middleware
+ * @returns 비밀번호 변경 여부 메세지(문자열)
+ */
 export const changePass = async (req, res, next) => {
   const { uid } = res.locals;
   const { userPw, userPwNew, userPwNewRe } = req.body;
@@ -199,6 +221,14 @@ export const changePass = async (req, res, next) => {
   }
 };
 
+/**
+ * @description 유저 탈퇴
+ * @access DELETE /user
+ * @param {*} req HTTP request
+ * @param {*} res HTTP response
+ * @param {*} next ExpressJS next middleware
+ * @returns -
+ */
 export const deleteUser = async (req, res, next) => {
   const { uid } = res.locals;
   const { userPw } = req.body;

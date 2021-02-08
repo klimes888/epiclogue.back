@@ -5,12 +5,14 @@ import { Board, Feedback } from '../../../models';
 import { contentsWrapper } from '../../../lib/contentsWrapper';
 import makeNotification from '../../../lib/makeNotification';
 
-/*
-  This is feedback router.
-  base url: /boards/{boardId}/feedback/{feedbackId}
-  OPTIONS: [ GET / POST / PATCH / DELETE ]
-*/
-
+/**
+ * @description 피드백 작성
+ * @access POST /boards/:boardId/feedback
+ * @param {*} req HTTP request
+ * @param {*} res HTTP response
+ * @param {*} next ExpressJS next middleware
+ * @returns 해당 글의 모든 피드백
+ */
 export const postFeedback = async (req, res, next) => {
   const feedbackData = {
     writer: res.locals.uid,
@@ -18,12 +20,12 @@ export const postFeedback = async (req, res, next) => {
     feedbackBody: req.body.feedbackBody,
   };
 
-  const feedbackSchema = Joi.object({
+  const feedbackValidateSchema = Joi.object({
     feedbackBody: Joi.string().trim().required(),
   });
 
   try {
-    await feedbackSchema.validateAsync({
+    await feedbackValidateSchema.validateAsync({
       feedbackBody: feedbackData.feedbackBody,
     });
   } catch (e) {
@@ -78,6 +80,14 @@ export const postFeedback = async (req, res, next) => {
   }
 };
 
+/**
+ * @description 피드백 수정
+ * @access PATCH /boards/:boardId/feedback/:feedbackId
+ * @param {*} req HTTP request
+ * @param {*} res HTTP response
+ * @param {*} next ExpressJS next middleware
+ * @returns 해당 글의 모든 피드백
+ */
 export const editFeedback = async (req, res, next) => {
   const newForm = {
     feedbackId: req.params.feedbackId,
@@ -103,9 +113,8 @@ export const editFeedback = async (req, res, next) => {
 
   try {
     await session.withTransaction(async () => {
-      // 얘는 왜 .session(session)을 하면 models.Feedbacks.update.session is not a function이 뜰까...
       const patch = await Feedback.update(newForm, session);
-      // throw new Error("응애")
+
       if (patch.ok === 1) {
         const newerFeedbacks = await Feedback.getByBoardId(req.params.boardId).session(session);
         const wrappedFeedbacks = await contentsWrapper(
@@ -114,6 +123,7 @@ export const editFeedback = async (req, res, next) => {
           'Feedback',
           false
         );
+
         console.log(`[INFO] 피드백 ${req.params.feedbackId} 가 정상적으로 수정되었습니다.`);
         return res.status(200).json({
           result: 'ok',
@@ -133,6 +143,14 @@ export const editFeedback = async (req, res, next) => {
   }
 };
 
+/**
+ * @description 피드백 삭제
+ * @access DELETE /boards/:boardId/feedback/:feedbackId
+ * @param {*} req HTTP request
+ * @param {*} res HTTP response
+ * @param {*} next ExpressJS next middleware
+ * @returns 해당 글의 모든 피드백
+ */
 export const deleteFeedback = async (req, res, next) => {
   const session = await startSession();
 
@@ -153,12 +171,10 @@ export const deleteFeedback = async (req, res, next) => {
           data: wrappedFeedbacks,
         });
       }
-      if (result.ok === 0) {
-        console.error(
-          `[ERROR] 피드백 ${req.params.feedbackId} 의 삭제가 정상적으로 처리되지 않았습니다: 데이터베이스 질의에 실패했습니다.`
-        );
-        return next(createError(500, '알 수 없는 에러가 발생했습니다.'));
-      }
+      console.error(
+        `[ERROR] 피드백 ${req.params.feedbackId} 의 삭제가 정상적으로 처리되지 않았습니다: 데이터베이스 질의에 실패했습니다.`
+      );
+      return next(createError(500, '알 수 없는 에러가 발생했습니다.'));
     });
   } catch (e) {
     console.error(`[Error] ${e}`);
@@ -168,6 +184,14 @@ export const deleteFeedback = async (req, res, next) => {
   }
 };
 
+/**
+ * @description 피드백 조회(테스트)
+ * @access GET /boards/:boardId/feedback/:feedbackId
+ * @param {*} req HTTP request
+ * @param {*} res HTTP response
+ * @param {*} next ExpressJS next middleware
+ * @returns 요청한 피드백 데이터
+ */
 export const getFeedback = async (req, res, next) => {
   try {
     const feedbackData = await Feedback.getById(req.params.feedbackId);

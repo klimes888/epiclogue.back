@@ -1,50 +1,49 @@
 import createError from 'http-errors';
-import * as models from '../../models';
+import { User, Board, Follow } from '../../models';
 import { getBookmarkList } from '../interaction/bookmark/bookmark.ctrl';
 import { contentsWrapper } from '../../lib/contentsWrapper';
 
+/**
+ * 경로: /myboard/:screenId
+ *
+ * @param {*} req - HTTP Requset
+ * @param {*} res - HTTP Response
+ * @param {*} next - Express next middleware
+ * @returns 마이보드 소유자의 정보
+ */
 export const getMyboard = async (req, res, next) => {
-  const userId = await models.User.findOne(
-    { screenId: req.params.screenId },
-    {
-      _id: 1,
-      nickname: 1,
-      intro: 1,
-      screenId: 1,
-      banner: 1,
-      profile: 1,
-      joinDate: 1,
-    }
-  );
+  const { screenId } = req.params;
+  const projectionOpt = {
+    _id: 1,
+    nickname: 1,
+    intro: 1,
+    screenId: 1,
+    banner: 1,
+    profile: 1,
+    joinDate: 1,
+  };
+
+  const userData = await User.getByScreenId(screenId, projectionOpt);
+
   try {
-    const result = userId.toJSON();
+    const myBoardData = userData.toJSON();
 
-    if (res.locals.uid === result._id.toString()) {
-      result.isFollowing = 'me';
-    } else {
-      const isFollowing = await models.Follow.findOne({
-        userId: res.locals.uid,
-        targetUserId: userId,
-      });
-      // const isFollower = await models.Follow.findOne({ userId: userId, targetUserId: res.locals.uid })
-      if (isFollowing) {
-        result.isFollowing = true;
-      } else {
-        result.isFollowing = false;
-      }
-      // if (isFollower) {
-      //   result.isFollower = true
-      // } else {
-      //   result.isFollower = false
-      // }
+    myBoardData.followerCount = await Follow.countDocuments({ targetUserId: userData._id });
+    myBoardData.followingCount = await Follow.countDocuments({ userId: userData._id });
+    console.log(res.locals.uid, userData._id);
+    if (res.locals?.uid) {
+      myBoardData.isFollowing =
+        res.locals.uid === userData._id.toString()
+          ? 'me'
+          : !!(await Follow.isFollowing(res.locals.uid, userData._id));
     }
 
-    result.followerCount = await models.Follow.countDocuments({ targetUserId: userId._id });
-    result.followingCount = await models.Follow.countDocuments({ userId: userId._id });
-
+    console.log(
+      `[INFO] ${res.locals?.uid || '비회원 유저'} 가 @${screenId} 의 마이보드를 열람합니다.`
+    );
     return res.status(200).json({
       result: 'ok',
-      data: result,
+      data: myBoardData,
     });
   } catch (e) {
     console.error(`[Error] ${e}`);
@@ -52,13 +51,18 @@ export const getMyboard = async (req, res, next) => {
   }
 };
 
+/**
+ * 경로: /myboard/:screenId/all
+ *
+ * @param {*} req - HTTP Requset
+ * @param {*} res - HTTP Response
+ * @param {*} next - Express next middleware
+ * @returns Array of all works
+ */
 export const allWorks = async (req, res, next) => {
-  const userId = await models.User.findOne(
-    { screenId: req.params.screenId },
-    { _id: 1, screenId: 0 }
-  );
+  const userId = await User.findOne({ screenId: req.params.screenId }, { _id: 1, screenId: 0 });
   try {
-    const userAllWorks = await models.Board.findAll({ writer: userId._id });
+    const userAllWorks = await Board.findAll({ writer: userId._id });
     const wrappedWorks = res.locals?.uid
       ? await contentsWrapper(res.locals.uid, userAllWorks, 'Board', false)
       : userAllWorks;
@@ -74,13 +78,19 @@ export const allWorks = async (req, res, next) => {
   }
 };
 
+/**
+ * 경로: /myboard/:screenId/originals
+ *
+ * @param {*} req - HTTP Requset
+ * @param {*} res - HTTP Response
+ * @param {*} next - Express next middleware
+ * @returns 유저의 원작물 배열
+ */
 export const originals = async (req, res, next) => {
   try {
-    const targetUser = await models.User.findOne({ screenId: req.params.screenId }, { _id: 1 });
-    const myContents = await models.Board.findAllOriginOrSecondary(targetUser._id, false);
-    const wrappedContents = res.locals?.uid
-      ? await contentsWrapper(res.locals.uid, myContents, 'Board', false)
-      : myContents;
+    const targetUser = await User.getIdByScreenId(req.params.screenId);
+    const myContents = await Board.findAllOriginOrSecondary(targetUser._id, false);
+    const wrappedContents = await contentsWrapper(res.locals.uid, myContents, 'Board', false);
 
     console.log(
       `[INFO] 유저 ${res.locals.uid || '비회원유저'} 가 유저 ${
@@ -97,10 +107,18 @@ export const originals = async (req, res, next) => {
   }
 };
 
+/**
+ * 경로: /myboard/:screenId/secondaryWorks
+ *
+ * @param {*} req - HTTP Requset
+ * @param {*} res - HTTP Response
+ * @param {*} next - Express next middleware
+ * @returns 유저의 2차창작물 배열
+ */
 export const secondaryWorks = async (req, res, next) => {
   try {
-    const targetUser = await models.User.findOne({ screenId: req.params.screenId }, { _id: 1 });
-    const userSecondaryWorks = await models.Board.findAllOriginOrSecondary(targetUser._id, true);
+    const targetUser = await User.findOne({ screenId: req.params.screenId }, { _id: 1 });
+    const userSecondaryWorks = await Board.findAllOriginOrSecondary(targetUser._id, true);
     const wrappedContents = res.locals?.uid
       ? await contentsWrapper(res.locals.uid, userSecondaryWorks, 'Board', false)
       : userSecondaryWorks;
@@ -120,4 +138,12 @@ export const secondaryWorks = async (req, res, next) => {
   }
 };
 
+/**
+ * 경로: /myboard/:screenId/bookmarks
+ *
+ * @param {*} req - HTTP Requset
+ * @param {*} res - HTTP Response
+ * @param {*} next - Express next middleware
+ * @returns 유저의 북마크 배열
+ */
 export const bookmarks = (req, res, next) => getBookmarkList(req, res, next);
