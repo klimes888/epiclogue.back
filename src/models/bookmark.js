@@ -22,8 +22,8 @@ Bookmark.statics.delete = function (user, boardId) {
 };
 
 Bookmark.statics.getIdByUserId = function (userId) {
-  return this.find({ user: userId})
-}
+  return this.find({ user: userId });
+};
 
 // 유저의 북마크 목록
 Bookmark.statics.getByUserId = function (user) {

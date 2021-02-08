@@ -122,13 +122,23 @@ export const getFollow = async (req, res, next) => {
   const { type } = req.query;
 
   try {
-    const requestedData = type === 'following' 
-      ? await Follow.getFollowingList(userId._id) 
-      : await Follow.getFollowerList(userId._id);
+    const requestedData =
+      type === 'following'
+        ? await Follow.getFollowingList(userId._id)
+        : await Follow.getFollowerList(userId._id);
 
-    const wrappedFollowData = await contentsWrapper(res.locals?.uid, requestedData, 'Follow', false);
+    const wrappedFollowData = await contentsWrapper(
+      res.locals?.uid,
+      requestedData,
+      'Follow',
+      false
+    );
 
-    console.log(`[INFO] 유저 ${res.locals.uid || '비회원 유저'} 가 ${userId._id} 의 ${type} 리스트를 확인합니다.`);
+    console.log(
+      `[INFO] 유저 ${res.locals.uid || '비회원 유저'} 가 ${
+        userId._id
+      } 의 ${type} 리스트를 확인합니다.`
+    );
     return res.status(200).json({
       result: 'ok',
       data: wrappedFollowData,

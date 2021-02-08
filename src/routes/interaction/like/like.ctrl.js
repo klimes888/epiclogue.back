@@ -146,16 +146,14 @@ export const getLikeList = async (req, res, next) => {
   const { type: targetType } = req.query;
 
   try {
-      const userId = await User.getIdByScreenId(screenId);
-      const likeObjectIdList = await Like.getByUserId(userId, targetType);
+    const userId = await User.getIdByScreenId(screenId);
+    const likeObjectIdList = await Like.getByUserId(userId, targetType);
 
-      console.log(
-        `[INFO] 유저 ${res.locals.uid}가 유저 ${userId} 의 좋아요 리스트를 확인했습니다.`
-      );
-      return res.status(200).json({
-        result: 'ok',
-        data: likeObjectIdList,
-      });
+    console.log(`[INFO] 유저 ${res.locals.uid}가 유저 ${userId} 의 좋아요 리스트를 확인했습니다.`);
+    return res.status(200).json({
+      result: 'ok',
+      data: likeObjectIdList,
+    });
   } catch (e) {
     console.error(`[Error] ${e}`);
     return next(createError(500, '알 수 없는 에러가 발생했습니다.'));

@@ -5,8 +5,8 @@ import { contentsWrapper } from '../../../lib/contentsWrapper';
 import makeNotification from '../../../lib/makeNotification';
 
 /**
- * 경로: /interaction/bookmark?screenId=SCREEN_ID
- *
+ * @description 유저 북마크 리스트 확인
+ * @access /interaction/bookmark?screenId={SCREEN_ID}
  * @param {*} req HTTP request
  * @param {*} res HTTP response
  * @param {*} next ExpressJS next middleware
@@ -39,8 +39,8 @@ export const getBookmarkList = async (req, res, next) => {
 };
 
 /**
- * 경로: /interaction/bookmark
- *
+ * @description 북마크 추가
+ * @access POST /interaction/bookmark
  * @param {*} req HTTP request
  * @param {*} res HTTP response
  * @param {*} next ExpressJS next middleware
@@ -109,8 +109,8 @@ export const addBookmark = async function (req, res, next) {
 };
 
 /**
- * 경로: /interaction/bookmark
- *
+ * @description 북마크 삭제
+ * @access DELETE /interaction/bookmark
  * @param {*} req HTTP request
  * @param {*} res HTTP response
  * @param {*} next ExpressJS next middleware

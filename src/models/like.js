@@ -32,8 +32,8 @@ like.statics.getByUserId = async function (userId, targetType) {
 };
 
 like.statics.getByUserId = function (userId) {
-  return this.find({ userId }, { targetInfo: 1, _id: 0 })
-}
+  return this.find({ userId }, { targetInfo: 1, _id: 0 });
+};
 
 like.statics.countHearts = function (targetInfo, targetType) {
   return this.countDocuments({ targetInfo, targetType });

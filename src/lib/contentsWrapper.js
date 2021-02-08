@@ -137,15 +137,12 @@ export const contentsWrapper = async (reqUserId, contentData, contentType, isFor
         }
 
         const followerIdSet = await getFollowerIdSet(reqUserId);
-        const resultSet = 
-          targetContent.map(data => {
-            const userData = data.toJSON();
-            userData.following = !!followingIdSet.includes(reqUserId);
-            userData.follower = !!followerIdSet.includes(reqUserId);
-            return userData;
-          })
-        ;
-
+        const resultSet = targetContent.map(data => {
+          const userData = data.toJSON();
+          userData.following = !!followingIdSet.includes(reqUserId);
+          userData.follower = !!followerIdSet.includes(reqUserId);
+          return userData;
+        });
         resolve(resultSet);
       } else {
         /* 피드백과 대댓글에서 팔로우, 좋아요 여부 확인 */
@@ -156,17 +153,16 @@ export const contentsWrapper = async (reqUserId, contentData, contentType, isFor
           return resolve(filteredData);
         }
 
-        const resultSet = 
-          filteredData.map(data => {
-            const userData = data.toJSON();
-            userData.liked = !!likeIdSet.includes(userData._id.toString());
-            userData.writer.following =
-              reqUserId === userData._id.toString()
-                ? 'me'
-                : !!followingIdSet.includes(userData.writer._id.toString());
+        const resultSet = filteredData.map(data => {
+          const userData = data.toJSON();
+          userData.liked = !!likeIdSet.includes(userData._id.toString());
+          userData.writer.following =
+            reqUserId === userData._id.toString()
+              ? 'me'
+              : !!followingIdSet.includes(userData.writer._id.toString());
 
-            return userData;
-          });
+          return userData;
+        });
 
         resolve(resultSet);
       }

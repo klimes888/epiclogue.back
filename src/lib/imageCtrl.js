@@ -15,21 +15,18 @@ const s3 = new aws.S3({
   region: process.env.AWS_REGION, // 지역설정
 });
 
-// 이미지 삭제 함수 여기다 추가해서 export 필요
-
 export const deleteImage = images => {
-  const garbageImage = [];
+  let garbageImage = [];
+  console.error(images)
   if (images === undefined) return false;
   if (images instanceof Array) {
-    for (const image of images) {
+    garbageImage = images.filter(image => {
       if (image) {
         const objectKey = image.split('/');
-        const deletionFormat = {
-          Key: objectKey[3],
-        };
-        garbageImage.push(deletionFormat);
+        return { Key: objectKey[3] };
       }
-    }
+      return { Key: null }
+    })
   } else {
     const objectKey = images.split('/');
     const deletionFormat = {
@@ -44,7 +41,7 @@ export const deleteImage = images => {
         Objects: garbageImage,
       },
     },
-    (err, data) => {
+    (err) => {
       if (err) {
         console.error(err, err.stack);
         return false;

@@ -5,12 +5,14 @@ import { Reply, Feedback } from '../../../../models';
 import { contentsWrapper } from '../../../../lib/contentsWrapper';
 import makeNotification from '../../../../lib/makeNotification';
 
-/*
-  This is reply router.
-  base url: /boards/{boardId}/feedback
-  OPTIONS: [ GET / POST / PATCH / DELETE ]
-*/
-
+/**
+ * @description 대댓글 작성
+ * @access POST /boards/:boardId/feedback/:feedbackId/reply
+ * @param {*} req HTTP request
+ * @param {*} res HTTP response
+ * @param {*} next ExpressJS next middleware
+ * @returns 해당 댓글의 모든 대댓글 리스트
+ */
 export const postReply = async (req, res, next) => {
   const replyForm = {
     writer: res.locals.uid,
@@ -74,7 +76,14 @@ export const postReply = async (req, res, next) => {
   }
 };
 
-// 댓글 하위의 대댓글 뷰
+/**
+ * @description 대댓글 열람
+ * @access GET /boards/:boardId/feedback/:feedbackId/reply
+ * @param {*} req HTTP request
+ * @param {*} res HTTP response
+ * @param {*} next ExpressJS next middleware
+ * @returns 해당 댓글의 모든 대댓글 리스트
+ */
 export const getReplys = async (req, res, next) => {
   const { feedbackId } = req.params;
 
@@ -97,6 +106,14 @@ export const getReplys = async (req, res, next) => {
   }
 };
 
+/**
+ * @description 대댓글 수정
+ * @access PATCH /boards/:boardId/feedback/:feedbackId/reply/:replyId
+ * @param {*} req HTTP request
+ * @param {*} res HTTP response
+ * @param {*} next ExpressJS next middleware
+ * @returns 해당 댓글의 모든 대댓글 리스트
+ */
 export const editReply = async (req, res, next) => {
   const newForm = {
     replyId: req.params.replyId,
@@ -146,6 +163,14 @@ export const editReply = async (req, res, next) => {
   }
 };
 
+/**
+ * @description 대댓글 삭제
+ * @access DELETE /boards/:boardId/feedback/:feedbackId/reply/:replyId
+ * @param {*} req HTTP request
+ * @param {*} res HTTP response
+ * @param {*} next ExpressJS next middleware
+ * @returns 해당 댓글의 모든 대댓글 리스트
+ */
 export const deleteReply = async (req, res, next) => {
   try {
     const deletion = await Reply.delete(req.params.replyId, { parentId: 1 });
