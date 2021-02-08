@@ -3,12 +3,14 @@ import { startSession } from 'mongoose';
 import { Like, React, Board, Feedback, Reply, User } from '../../../models';
 import makeNotification from '../../../lib/makeNotification';
 
-/*
-  This is like router
-  base url: /interaction/like[?screenId=lunarcat123]
-  OPTIONS: [GET / POST / DELETE]
-*/
-
+/**
+ * @description 좋아요 추가
+ * @access POST /interaction/like
+ * @param {*} req HTTP request
+ * @param {*} res HTTP response
+ * @param {*} next ExpressJS next middleware
+ * @returns -
+ */
 export const addLike = async (req, res, next) => {
   const likeData = {
     userId: res.locals.uid,
@@ -78,6 +80,14 @@ export const addLike = async (req, res, next) => {
   }
 };
 
+/**
+ * @description 좋아요 취소
+ * @access DELETE /interaction/like
+ * @param {*} req HTTP request
+ * @param {*} res HTTP response
+ * @param {*} next ExpressJS next middleware
+ * @returns -
+ */
 export const deleteLike = async (req, res, next) => {
   const likeData = {
     userId: res.locals.uid,
@@ -123,13 +133,19 @@ export const deleteLike = async (req, res, next) => {
   }
 };
 
+/**
+ * @description 좋아요 리스트 확인
+ * @access GET /interaction/like?screenId={SCREENID}&type=[Board, Feedback, Reply]
+ * @param {*} req HTTP request
+ * @param {*} res HTTP response
+ * @param {*} next ExpressJS next middleware
+ * @returns -
+ */
 export const getLikeList = async (req, res, next) => {
   const { screenId } = req.query;
-  const { targetType } = req.query;
-  const session = await startSession();
+  const { type: targetType } = req.query;
 
   try {
-    await session.withTransaction(async () => {
       const userId = await User.getIdByScreenId(screenId);
       const likeObjectIdList = await Like.getByUserId(userId, targetType);
 
@@ -140,11 +156,8 @@ export const getLikeList = async (req, res, next) => {
         result: 'ok',
         data: likeObjectIdList,
       });
-    });
   } catch (e) {
     console.error(`[Error] ${e}`);
     return next(createError(500, '알 수 없는 에러가 발생했습니다.'));
-  } finally {
-    session.endSession();
   }
 };

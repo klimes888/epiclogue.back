@@ -4,8 +4,8 @@ import { getBookmarkList } from '../interaction/bookmark/bookmark.ctrl';
 import { contentsWrapper } from '../../lib/contentsWrapper';
 
 /**
- * 경로: /myboard/:screenId
- *
+ * @description 마이보드 - 유저의 프로필 정보 요청
+ * @access GET /myboard/:screenId
  * @param {*} req - HTTP Requset
  * @param {*} res - HTTP Response
  * @param {*} next - Express next middleware
@@ -52,8 +52,8 @@ export const getMyboard = async (req, res, next) => {
 };
 
 /**
- * 경로: /myboard/:screenId/all
- *
+ * @description 모든 작품 확인
+ * @access GET /myboard/:screenId/all
  * @param {*} req - HTTP Requset
  * @param {*} res - HTTP Response
  * @param {*} next - Express next middleware
@@ -79,8 +79,8 @@ export const allWorks = async (req, res, next) => {
 };
 
 /**
- * 경로: /myboard/:screenId/originals
- *
+ * @description 모든 작품 확인
+ * @access GET /myboard/:screenId/originals
  * @param {*} req - HTTP Requset
  * @param {*} res - HTTP Response
  * @param {*} next - Express next middleware
@@ -108,8 +108,8 @@ export const originals = async (req, res, next) => {
 };
 
 /**
- * 경로: /myboard/:screenId/secondaryWorks
- *
+ * @description 이차창작물 확인
+ * @access GET /myboard/:screenId/secondaryWorks
  * @param {*} req - HTTP Requset
  * @param {*} res - HTTP Response
  * @param {*} next - Express next middleware
@@ -139,8 +139,8 @@ export const secondaryWorks = async (req, res, next) => {
 };
 
 /**
- * 경로: /myboard/:screenId/bookmarks
- *
+ * @description 북마크 확인
+ * @access GET /myboard/:screenId/bookmarks
  * @param {*} req - HTTP Requset
  * @param {*} res - HTTP Response
  * @param {*} next - Express next middleware

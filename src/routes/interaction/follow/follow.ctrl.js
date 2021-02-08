@@ -4,12 +4,14 @@ import { User, Follow } from '../../../models';
 import makeNotification from '../../../lib/makeNotification';
 import { contentsWrapper } from '../../../lib/contentsWrapper';
 
-/*
-  This is follow router.
-  base url: /interaction/follow[?screenId=lunarcat123&type=following]
-  OPTIONS: [GET / POST / DELETE]
-*/
-
+/**
+ * @description 팔로우 추가
+ * @access POST /interaction/follow
+ * @param {*} req HTTP request
+ * @param {*} res HTTP response
+ * @param {*} next ExpressJS next middleware
+ * @returns -
+ */
 export const addFollow = async (req, res, next) => {
   const followData = {
     userId: res.locals.uid,
@@ -54,6 +56,14 @@ export const addFollow = async (req, res, next) => {
   }
 };
 
+/**
+ * @description 팔로우 취소
+ * @access DELETE /interaction/follow
+ * @param {*} req HTTP request
+ * @param {*} res HTTP response
+ * @param {*} next ExpressJS next middleware
+ * @returns -
+ */
 export const deleteFollow = async (req, res, next) => {
   const followData = {
     userId: res.locals.uid,
@@ -98,6 +108,14 @@ export const deleteFollow = async (req, res, next) => {
   }
 };
 
+/**
+ * @description 팔로잉/팔로워 리스트 확인
+ * @access GET /interaction/follow?screenId={SCREENID}&type=[following/follower]
+ * @param {*} req HTTP request
+ * @param {*} res HTTP response
+ * @param {*} next ExpressJS next middleware
+ * @returns 팔로잉 또는 팔로워 리스트
+ */
 export const getFollow = async (req, res, next) => {
   const { screenId } = req.query;
   const userId = await User.getIdByScreenId(screenId);

@@ -21,7 +21,12 @@ const authExceptions = [
 
 const { SECRET_KEY } = process.env;
 
-// JWT 기반 유저 인증 미들웨어
+/**
+ * @description JWT토큰으로 유저 인증 수행
+ * @param {*} req HTTP request
+ * @param {*} res HTTP response
+ * @param {*} next ExpressJS middleware
+ */
 export const verifyToken = async (req, res, next) => {
   try {
     const clientToken = req.headers['x-access-token'];

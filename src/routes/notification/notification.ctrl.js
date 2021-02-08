@@ -3,12 +3,14 @@ import Joi from 'joi';
 import { startSession } from 'mongoose';
 import { Notification } from '../../models';
 
-/*
-  This is notification router.
-  base url: /notification/[:notiId/all]
-  OPTIONS: GET, PATCH, DELETE
-*/
-
+/**
+ * @description 모든 알림 확인
+ * @access GET /notification
+ * @param {*} req - HTTP Requset
+ * @param {*} res - HTTP Response
+ * @param {*} next - Express next middleware
+ * @returns 사용자의 모든 알림
+ */
 export const getNoti = async (req, res, next) => {
   const session = await startSession();
 
@@ -27,6 +29,14 @@ export const getNoti = async (req, res, next) => {
   }
 };
 
+/**
+ * @description 특정 알림 읽음 처리
+ * @access PATCH /notification
+ * @param {*} req - HTTP Requset
+ * @param {*} res - HTTP Response
+ * @param {*} next - Express next middleware
+ * @returns -
+ */
 export const setRead = async (req, res, next) => {
   try {
     await Notification.updateMany({ _id: req.body.notiId, userId: res.locals.uid }, { read: true });
@@ -40,6 +50,14 @@ export const setRead = async (req, res, next) => {
   }
 };
 
+/**
+ * @description 모든 알림 읽음처리
+ * @access PATCH /notification/all
+ * @param {*} req - HTTP Requset
+ * @param {*} res - HTTP Response
+ * @param {*} next - Express next middleware
+ * @returns -
+ */
 export const setReadAll = async (req, res, next) => {
   try {
     await Notification.updateMany({ userId: res.locals.uid }, { read: true });
@@ -53,6 +71,14 @@ export const setReadAll = async (req, res, next) => {
   }
 };
 
+/**
+ * @description 새로운 알림 유무
+ * @access GET /notification/check
+ * @param {*} req - HTTP Requset
+ * @param {*} res - HTTP Response
+ * @param {*} next - Express next middleware
+ * @returns 새로운 알림 유무(true/false)
+ */
 export const checkNotified = async (req, res, next) => {
   try {
     const notified = await Notification.find({ userId: res.locals.uid, read: false }, { _id: 1 });
@@ -72,6 +98,14 @@ export const checkNotified = async (req, res, next) => {
   }
 };
 
+/**
+ * @description 알림 삭제
+ * @access DELETE /notification
+ * @param {*} req - HTTP Requset
+ * @param {*} res - HTTP Response
+ * @param {*} next - Express next middleware
+ * @returns -
+ */
 export const deleteNoti = async (req, res, next) => {
   const notiObjectId = Joi.object({
     _id: Joi.string()
@@ -85,7 +119,7 @@ export const deleteNoti = async (req, res, next) => {
     });
   } catch (e) {
     console.log(
-      `[INFO] 유저 ${res.locals.uid} 가 적절하지 않은 알림 ${req.body.notiId} 을 읽음처리 하려 했습니다.`
+      `[INFO] 유저 ${res.locals.uid} 가 적절하지 않은 알림 ${req.body.notiId} 을 삭제처리 하려 했습니다.`
     );
     return next(createError(400, '적절하지 않은 ObjectId입니다.'));
   }
@@ -102,9 +136,18 @@ export const deleteNoti = async (req, res, next) => {
   }
 };
 
+/**
+ * @description 모든 알림 삭제
+ * @access DELETE /notification/all
+ * @param {*} req - HTTP Requset
+ * @param {*} res - HTTP Response
+ * @param {*} next - Express next middleware
+ * @returns -
+ */
 export const deleteAll = async (req, res, next) => {
   try {
     await Notification.deleteMany({ userId: res.locals.uid });
+    console.log(`[INFO] 유저 ${res.locals.uid} 가 모든 알림을 삭제했습니다.`);
     return res.status(200).json({ result: 'ok' });
   } catch (e) {
     console.error(`[Error] ${e}`);

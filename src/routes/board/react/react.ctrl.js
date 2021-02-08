@@ -1,11 +1,14 @@
 import createError from 'http-errors';
 import { React } from '../../../models';
-/*
-  This is react router.
-  base url: /boards/:boardId/react
-  OPTIONS: GET
-*/
 
+/**
+ * @description 글의 반응 확인
+ * @access GET /boards/:boardId/react
+ * @param {*} req - HTTP Requset
+ * @param {*} res - HTTP Response
+ * @param {*} next - Express next middleware
+ * @returns 반응 리스트
+ */
 export const getReact = async (req, res, next) => {
   try {
     const reactData = await React.getByBoardId(req.params.boardId);

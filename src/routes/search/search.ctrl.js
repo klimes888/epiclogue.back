@@ -2,7 +2,14 @@ import createError from 'http-errors';
 import { User, Board } from '../../models';
 import { contentsWrapper } from '../../lib/contentsWrapper';
 
-/* 검색 화면 렌더링을 가정한 데이터 API */
+/**
+ * @description 글 및 유저 검색
+ * @access GET /search?type=[User/Board]&q=QUERY
+ * @param {*} req - HTTP Requset
+ * @param {*} res - HTTP Response
+ * @param {*} next - Express next middleware
+ * @returns 검색 결과 array
+ */
 export const search = async (req, res, next) => {
   const { q: queryString, type: searchType } = req.query;
 
