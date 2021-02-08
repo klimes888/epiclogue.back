@@ -24,6 +24,7 @@ const user = new mongoose.Schema({
   token: { type: String },
   snsId: {type: String},
   snsType: { type: String, default: 'normal' },
+  isAdmin: {type: String, default: false}
 })
 
 user.statics.create = function (data) {

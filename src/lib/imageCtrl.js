@@ -71,6 +71,8 @@ const contentDataStorage = multerS3({
       .slice(0, 16)
     const random = await randomBytesPromise(64)
     name += random.toString('hex').slice(0, 32)
+    const type = file.mimetype.split('/')
+    name += ('.' + type[1])
     cb(null, dayjs().format('YYYYMMDDHHmmss') + '_' + name)
   },
 })
@@ -92,6 +94,8 @@ const userDataStorage = multerS3({
       .slice(0, 16)
     const random = await randomBytesPromise(64)
     name += random.toString('hex').slice(0, 32)
+    const type = file.mimetype.split('/')
+    name += ('.' + type[1])
     cb(null, dayjs().format('YYYYMMDDHHmmss') + '_' + name)
   },
 })
