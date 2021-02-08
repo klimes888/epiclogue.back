@@ -20,14 +20,18 @@ const s3 = new aws.S3({
 export const deleteImage = (images, location) => {
   const garbageImage = []
   if(images === undefined) return false
-  if(images instanceof Array) {
+  else if(images instanceof Array) {
     for (let image of images) {
       if (image) {
         const objectKey = image.split('/')
         const deletionFormat = {
           Key: objectKey[3],
         }
+        const thumbDeletionFormat = {
+          key : 'resized-' + objectKey[3]
+        }
         garbageImage.push(deletionFormat)
+        garbageImage.push(thumbDeletionFormat)
       }
     }
   } else {
@@ -35,7 +39,11 @@ export const deleteImage = (images, location) => {
     const deletionFormat = {
       Key: objectKey[3],
     }
+    const thumbDeletionFormat = {
+      key : 'resized-' + objectKey[3]
+    }
     garbageImage.push(deletionFormat)
+    garbageImage.push(thumbDeletionFormat)
   }
     s3.deleteObjects(
       {
