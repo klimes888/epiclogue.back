@@ -24,12 +24,7 @@ const user = new mongoose.Schema({
   token: { type: String },
   snsId: { type: String },
   snsType: { type: String, default: 'normal' },
-<<<<<<< HEAD
 });
-=======
-  isAdmin: {type: String, default: false}
-})
->>>>>>> remove congolelog and add isAdmin in user model
 
 user.statics.create = function (data) {
   const userinfo = new this(data);
