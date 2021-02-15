@@ -1,16 +1,17 @@
+import 'dotenv/config';
 import mailer from 'nodemailer';
-import dotenv from 'dotenv';
-import aws from 'aws-sdk';
+import AWS from 'aws-sdk';
 
-dotenv.config();
+const { AWS_SES_ID, AWS_SES_SECRET, AWA_SES_REGION } = process.env;
 
-aws.config.loadFromPath(`${__dirname}/aws.config.json`);
-
-const transporter = mailer.createTransport({
-  SES: new aws.SES({
-    apiVersion: '2010-12-01',
-  }),
+const SES = new AWS.SES({
+  apiVersion: '2010-12-01',
+  accessKeyId: AWS_SES_ID,
+  secretAccessKey: AWS_SES_SECRET,
+  region: AWA_SES_REGION,
 });
+
+const transporter = mailer.createTransport({ SES });
 
 export const emailText = (email, authToken) => `
   <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
