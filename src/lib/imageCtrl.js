@@ -5,7 +5,6 @@ import dayjs from 'dayjs';
 import crypto from 'crypto';
 import util from 'util';
 import dotenv from 'dotenv';
-import { unwatchFile } from 'fs';
 
 const randomBytesPromise = util.promisify(crypto.randomBytes);
 dotenv.config();
