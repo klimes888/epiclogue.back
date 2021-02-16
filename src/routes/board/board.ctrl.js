@@ -63,7 +63,7 @@ export const postBoard = async (req, res, next) => {
     language: req.body.language,
     allowSecondaryCreation: req.body.allowSecondaryCreation,
     boardImg: _boardImg,
-    thumbnail: thumbPathGen(_boardImg.split('/')),
+    thumbnail: thumbPathGen(_boardImg[0].split('/')),
     tags,
   };
 
@@ -237,7 +237,7 @@ export const postEditInfo = async function (req, res, next) {
       category: parseInt(req.body.category || originalData.category, 10),
       pub: parseInt(req.body.pub || originalData.pub, 10),
       language: parseInt(req.body.language || originalData.language, 10),
-      thumbnail: thumbPathGen(boardImg.split('/')),
+      thumbnail: thumbPathGen(boardImg[0].split('/')),
       tags,
     };
 
@@ -287,7 +287,7 @@ export const secPost = async (req, res, next) => {
     boardImg,
     originUserId: req.body.originUserId,
     originBoardId: req.body.originBoardId,
-    thumbnail: thumbPathGen(boardImg.split('/')),
+    thumbnail: thumbPathGen(boardImg[0].split('/')),
     tags,
   };
 
