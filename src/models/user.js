@@ -1,9 +1,9 @@
 import mongoose from 'mongoose';
 
-const userImageSchema = new mongoose.Schema({
+const userImageSchema = {
   origin: { type: String, default: null },
   thumbnail: { type: String, default: null }
-})
+}
 
 const user = new mongoose.Schema({
   nickname: { type: String, required: true },

@@ -5,6 +5,7 @@ import dayjs from 'dayjs';
 import crypto from 'crypto';
 import util from 'util';
 import dotenv from 'dotenv';
+import { unwatchFile } from 'fs';
 
 const randomBytesPromise = util.promisify(crypto.randomBytes);
 dotenv.config();
@@ -32,6 +33,7 @@ export const deleteImage = (images, location) => {
       }
     }
   } else if(images instanceof Object) {
+    if(images.origin === null) return false
     let objectKey = images.origin.split('/');
     garbageImage.push({
       Key: objectKey[3],
