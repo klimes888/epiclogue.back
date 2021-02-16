@@ -27,7 +27,7 @@ export const deleteImage = (images, location) => {
           Key: objectKey[3],
         })
         garbageImage.push({
-          key : 'resized-' + objectKey[3]
+          Key : 'resized-' + objectKey[3]
         })
       }
     }
@@ -46,7 +46,7 @@ export const deleteImage = (images, location) => {
       Key: objectKey[3],
     })
     garbageImage.push({
-      key : 'resized-' + objectKey[3]
+      Key : 'resized-' + objectKey[3]
     })
   }
     s3.deleteObjects(
