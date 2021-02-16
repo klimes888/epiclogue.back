@@ -4,7 +4,7 @@ import dotenv from 'dotenv';
 import Joi from 'joi';
 import createError from 'http-errors';
 import { startSession } from 'mongoose';
-import { deleteImage } from '../../lib/imageCtrl';
+import { deleteImage, thumbPathGen } from '../../lib/imageCtrl';
 import { User } from '../../models';
 
 const randomBytesPromise = util.promisify(crypto.randomBytes);
@@ -60,37 +60,20 @@ export const postUserEditInfo = async function (req, res, next) {
   const country = parseInt(req.body['userCountry']) || originalData.country
   const availableLanguage = req.body['userLang'] || originalData.availableLanguage
   const intro = req.body['userIntro'] || originalData.intro
-  const banner
-  const profile
+  let banner = {}
+  let profile = {}
   if (req.files !== undefined && req.files.length !== 0) {
-    if (req.files.length > 1) {
       if (req.files[0].fieldname == 'banner') {
         banner.origin = req.files[0].location
-        banner.thumbnail = 'resized-' + req.files[0].location
-        profile.origin = req.files[1].location
-        profile.thumbnail = 'resized-' + req.files[1].location
-      } else {
-        banner.origin = req.files[1].location
-        banner.thumbnail = 'resized-' + req.files[1].location
-        profile.origin = req.files[0].location
-        profile.thumbnail = 'resized-' + req.files[0].location
-      }
-      deleteImage(originalImages, 'mypage')
-    } else if (req.files.length == 1) {
-      if (req.files[0].fieldname == 'banner') {
-        banner.origin = req.files[0].location
-        banner.thumbnail = 'resized-' + req.files[0].location
-        profile.origin = originalImages[1]
-        profile.thumbnail = 'resized-' + originalImages[1]
+        banner.thumbnail = thumbPathGen(req.files[0].location.split('/'))
+        profile = originalImages[1]
         if(originalImages[0] !== null) deleteImage(originalImages[0], 'mypage')
       } else {
         profile.origin = req.files[0].location
-        profile.thumbnail = 'resized-' + req.files[0].location
-        banner.origin = originalImages[0]
-        banner.thumbnail = 'resized-' + originalImages[0]
+        profile.thumbnail = thumbPathGen(req.files[0].location.split('/'))
+        banner = originalImages[0]
         if(originalImages[1] !== null) deleteImage(originalImages[1], 'mypage')
       }
-    }
   } else {
     banner = originalData.banner;
     profile = originalData.profile;

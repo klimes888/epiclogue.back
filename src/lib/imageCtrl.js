@@ -17,11 +17,12 @@ const s3 = new aws.S3({
 
 export const deleteImage = (images, location) => {
   const garbageImage = []
+  console.log(images)
   if(images === undefined) return false
   else if(images instanceof Array) {
     for (let image of images) {
       if (image) {
-        const objectKey = image.split('/')
+        let objectKey = image.split('/')
         garbageImage.push({
           Key: objectKey[3],
         })
@@ -30,13 +31,22 @@ export const deleteImage = (images, location) => {
         })
       }
     }
-  } else {
-    const objectKey = images.split('/');
+  } else if(images instanceof Object) {
+    let objectKey = images.origin.split('/');
     garbageImage.push({
       Key: objectKey[3],
     });
+    objectKey = images.thumbnail.split('/');
     garbageImage.push({
-      Key: 'resized-' + objectKey[3]
+      Key: 'resized-' + objectKey[3],
+    });
+  } else {
+    let objectKey = image.split('/')
+    garbageImage.push({
+      Key: objectKey[3],
+    })
+    garbageImage.push({
+      key : 'resized-' + objectKey[3]
     })
   }
     s3.deleteObjects(
@@ -102,5 +112,8 @@ const userDataStorage = multerS3({
   },
 });
 
+export const thumbPathGen = (originPath) => {
+  return originPath[0] + '//' + 'resized-' + originPath[2] + '/resized-' + originPath[3]
+}
 export const uploadImage = multer({ storage: contentDataStorage });
 export const uploadUserImage = multer({ storage: userDataStorage });
