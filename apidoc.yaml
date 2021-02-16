@@ -1131,7 +1131,7 @@ paths:
         in: "query"
         required: true
         type: string
-      - name: "targetType"
+      - name: "type"
         in: "query"
         required: true
         description: 'all is get all like data, not save db data'
@@ -1140,7 +1140,6 @@ paths:
         - "Board"
         - "Feedback"
         - "Reply"
-        - "all"
       responses:
         200:
           description: OK

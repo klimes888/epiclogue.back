@@ -51,9 +51,7 @@ app.use(cors({ credentials: true, origin: true }))
 app.use(
   morgan('combined', {
     stream,
-    skip: (req, res) => {
-      return res.statusCode > 399
-    },
+    skip: (req, res) => res.statusCode > 399,
   })
 )
 app.use(express.json())
@@ -67,15 +65,15 @@ app.use('/', indexRouter)
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec))
 
 // catch 404 and forward to error handler
-app.use(function (req, res, next) {
+app.use((req, res, next) => {
   next(createError(404, '올바른 접근이 아닙니다.'))
 })
 
 // error handler
-app.use((err, req, res, next) => {
+app.use((err, req, res) => {
   // if (process.env.NODE_ENV !== 'production') { }
 
-  if (err.status === 500) {
+  if (!process.env.NODE_ENV === 'test' && err.status === 500) {
     // Only alert on 500 error
     const slack = new Slack()
     slack.setWebhook(process.env.SLACK_WEBHOOK)
@@ -83,8 +81,8 @@ app.use((err, req, res, next) => {
       {
         text: `*Message*: ${err.message} \n *Stack*: ${err.stack} \n *StatusCode*: ${err.status}`,
       },
-      (err, response) => {
-        if (err) console.error(err)
+      (webhookError) => {
+        if (webhookError) console.error(webhookError)
       }
     )
   }

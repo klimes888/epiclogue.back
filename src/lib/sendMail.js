@@ -1,18 +1,19 @@
-import mailer from 'nodemailer'
-import dotenv from 'dotenv'
-import aws from 'aws-sdk'
-dotenv.config()
+import 'dotenv/config';
+import mailer from 'nodemailer';
+import AWS from 'aws-sdk';
 
-aws.config.loadFromPath(__dirname + "/aws.config.json")
+const { AWS_SES_ID, AWS_SES_SECRET, AWA_SES_REGION } = process.env;
 
-const transporter = mailer.createTransport({
-  SES: new aws.SES({
-    apiVersion: '2010-12-01'
-  })
-})
+const SES = new AWS.SES({
+  apiVersion: '2010-12-01',
+  accessKeyId: AWS_SES_ID,
+  secretAccessKey: AWS_SES_SECRET,
+  region: AWA_SES_REGION,
+});
 
-export const emailText = (email, auth_token) => {
-  return `
+const transporter = mailer.createTransport({ SES });
+
+export const emailText = (email, authToken) => `
   <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
   <html html="" xmlns="http://www.w3.org/1999/xhtml" style="margin: 0; padding: 0;">
   
@@ -73,7 +74,7 @@ export const emailText = (email, auth_token) => {
                   </tr>
                                   <tr style="margin: 0; padding: 0;">
                       <td style="margin: 0; padding: 0;">
-                          <a href="https://www.epiclogue.com/auth/auth?email=${email}&token=${auth_token}" style="margin: 0; padding: 0;"><button class="button" style="margin: 0; padding: 0; all: unset; display: inline-block; width: 70%; height: 42px; background: rgba(21, 146, 230, 0.8); border-radius: 25px; font-size: 16px; font-weight: 700; line-height: 42px; text-decoration: none; color: #fff;">인증하기</button></a>
+                          <a href="https://www.epiclogue.com/auth/auth?email=${email}&token=${authToken}" style="margin: 0; padding: 0;"><button class="button" style="margin: 0; padding: 0; all: unset; display: inline-block; width: 70%; height: 42px; background: rgba(21, 146, 230, 0.8); border-radius: 25px; font-size: 16px; font-weight: 700; line-height: 42px; text-decoration: none; color: #fff;">인증하기</button></a>
                       </td>
                   </tr>
                                                   <tr style="margin: 0; padding: 0;">
@@ -87,11 +88,9 @@ export const emailText = (email, auth_token) => {
   </body>
   
   </html>
-`
-}
+`;
 
-export const findPassText = (email, authToken) => {
-    return `
+export const findPassText = (email, authToken) => `
     <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
     <html html="" xmlns="http://www.w3.org/1999/xhtml" style="margin: 0; padding: 0;">
     
@@ -151,7 +150,6 @@ export const findPassText = (email, authToken) => {
     </body>
     
     </html>
-  `
-}
+  `;
 
-export default transporter
+export default transporter;
