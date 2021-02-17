@@ -29,6 +29,7 @@ export const addFollow = async (req, res, next) => {
       );
       return next(createError(400, '이미 처리된 데이터입니다.'));
     }
+
     await session.withTransaction(async () => {
       const followSchema = new Follow(followData);
       await followSchema.save({ session });
@@ -43,9 +44,14 @@ export const addFollow = async (req, res, next) => {
         session
       );
 
+      const followCount = await Follow.countDocuments({
+        targetUserId: req.body.targetUserId,
+      }).session(session);
+
       console.log(`[INFO] 유저 ${res.locals.uid}가 ${followData.targetUserId}를 팔로우합니다.`);
       return res.status(201).json({
         result: 'ok',
+        data: { followCount },
       });
     });
   } catch (e) {
@@ -86,11 +92,15 @@ export const deleteFollow = async (req, res, next) => {
       const unfollow = await Follow.unfollow(followData).session(session);
 
       if (unfollow.ok === 1) {
+        const followCount = await Follow.countDocuments({
+          targetUserId: req.body.targetUserId,
+        }).session(session);
         console.log(
           `[INFO] 유저 ${res.locals.uid}가 ${followData.targetUserId}를 언팔로우했습니다.`
         );
         return res.status(200).json({
           result: 'ok',
+          data: { followCount },
         });
       }
       if (unfollow.ok === 0) {
