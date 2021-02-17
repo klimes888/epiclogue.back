@@ -18,6 +18,7 @@ const board = new mongoose.Schema({
   originUserId: { type: ObjectId, ref: 'User' },
   originBoardId: { type: ObjectId, ref: 'Board' },
   edited: { type: Boolean, default: false },
+  sourceUrl: { type: String, default: null },
 });
 
 board.statics.create = function (data) {
@@ -133,7 +134,7 @@ board.statics.searchByTitleOrTag = function (query) {
       uid: 1,
       pub: 1,
       category: 1,
-      boardImg: 1,
+      thumbnail: 1,
     }
   )
     .populate({

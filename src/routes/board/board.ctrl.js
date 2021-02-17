@@ -63,8 +63,9 @@ export const postBoard = async (req, res, next) => {
     language: req.body.language,
     allowSecondaryCreation: req.body.allowSecondaryCreation,
     boardImg: _boardImg,
-    thumbnail: thumbPathGen(_boardImg[0].split('/')),
+    thumbnail: thumbPathGen(_boardImg[0].split('/')), // 첫 번째 이미지를 썸네일로 만듦
     tags,
+    sourceUrl: req.body?.sourceUrl || null
   };
 
   const boardSchema = Joi.object({
