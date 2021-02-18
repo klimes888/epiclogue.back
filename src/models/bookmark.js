@@ -29,7 +29,7 @@ Bookmark.statics.getIdByUserId = function (userId) {
 Bookmark.statics.getByUserId = function (user) {
   return this.find({ user }, { user: 0 }).populate({
     path: 'board',
-    select: '_id boardTitle boardImg pub category',
+    select: '_id boardTitle thumbnail pub category',
     populate: { path: 'writer', select: '_id screenId nickname profile' },
   });
 };

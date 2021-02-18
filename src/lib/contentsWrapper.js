@@ -79,7 +79,7 @@ export const contentsWrapper = async (reqUserId, contentData, contentType, isFor
           targetContent.feedbacks = feedbacks;
           targetContent.feedbackCount = feedbacks.length;
           targetContent.reactCount = await React.countReacts(targetContent._id);
-          targetContent.heartCount = await Like.countHearts(targetContent._id, 'Board')
+          targetContent.heartCount = await Like.countHearts(targetContent._id, 'Board');
           resolve(targetContent);
         } else {
           // 메인페이지와 마이 보드에서 사용하는 *다수의 글 데이터*

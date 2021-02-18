@@ -104,7 +104,7 @@ board.statics.findAllOriginOrSecondary = function (userId, isExists) {
       uid: 1,
       pub: 1,
       category: 1,
-      boardImg: 1,
+      thumbnail: 1,
     }
   ).populate({
     path: 'writer',
