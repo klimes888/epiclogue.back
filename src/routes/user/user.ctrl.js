@@ -25,7 +25,8 @@ export const getUserEditInfo = async (req, res, next) => {
     const result = await User.getUserInfo(uid, {
       nickname: 1,
       intro: 1,
-      country: 1,
+      displayLanguage: 1,
+      availableLanguage: 1,
       screenId: 1,
       banner: 1,
       profile: 1,
@@ -57,8 +58,8 @@ export const postUserEditInfo = async function (req, res, next) {
   const originalImages = [originalData.banner, originalData.profile]
   const screenId = req.body['screenId'] || originalData.screenId
   const nickname = req.body['userNick'] || originalData.nickname
-  const country = parseInt(req.body['userCountry']) || originalData.country
-  const availableLanguage = req.body['userLang'] || originalData.availableLanguage
+  const displayLanguage = parseInt(req.body['userDisplayLang']) || originalData.displayLanguage
+  const availableLanguage = req.body['userAvailableLang'] || originalData.availableLanguage
   const intro = req.body['userIntro'] || originalData.intro
   let banner = {}
   let profile = {}
@@ -90,7 +91,7 @@ export const postUserEditInfo = async function (req, res, next) {
           screenId,
           nickname,
           availableLanguage,
-          country,
+          displayLanguage,
           intro,
           banner,
           profile,
