@@ -10,7 +10,6 @@ const user = new mongoose.Schema({
   email: { type: String, required: true },
   password: { type: String, required: true },
   screenId: { type: String },
-  country: { type: Number, default: 0 }, // 0: Korean, 1: Japanese, 2: English, 3: Chinese, 4: Taiwan
   displayLanguage: { type: Number, default: 0 }, // 0: Korean, 1: Japanese, 2: English, 3: Chinese(Simplified), 4: Chinese(Traditional)
   availableLanguage: { type: [String] },
   joinDate: { type: Date, required: true, default: Date.now },
@@ -117,7 +116,7 @@ user.statics.updateProfile = function (profile, session) {
     {
       nickname: profile.nickname,
       screenId: profile.screenId,
-      country: profile.country,
+      displayLanguage: profile.displayLanguage,
       availableLanguage: profile.availableLanguage,
       intro: profile.intro,
       banner: profile.banner,
