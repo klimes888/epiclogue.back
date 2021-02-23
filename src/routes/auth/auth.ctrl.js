@@ -33,7 +33,6 @@ const getFBProfile = async uid =>
  */
 export const snsLogin = async function (req, res, next) {
   const { snsData, snsType, userLang } = req.body;
-  console.log(snsData, snsType);
   const userData =
     snsType === 'google'
       ? {

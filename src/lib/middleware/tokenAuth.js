@@ -56,7 +56,8 @@ export const verifyToken = async (req, res, next) => {
       console.log(
         `[INFO] 인증 실패: 유저의 토큰이 누락되었거나 적절하지 않습니다. ip: ${
           req.headers['x-forwarded-for'] || req.connection.remoteAddress
-        } token: ${clientToken}`
+        } token: ${clientToken},
+        ${e}`
       );
       return next(createError(401, '인증 실패: 적절하지 않은 인증입니다.'));
     }
@@ -69,7 +70,8 @@ export const verifyToken = async (req, res, next) => {
       console.log(
         `[INFO] 인증 실패: 손상된 토큰을 사용하였습니다. ip: ${
           req.headers['x-forwarded-for'] || req.connection.remoteAddress
-        } token: ${clientToken}`
+        } token: ${clientToken},
+        ${e}`
       );
       return next(createError(401, '인증 실패: 적절하지 않은 인증입니다.'));
     }
