@@ -1,5 +1,5 @@
 import createError from 'http-errors';
-import { Board, Like, Bookmark, React, Follow } from '../models';
+import { Board, Like, Bookmark, React, Follow, Reply } from '../models';
 
 /**
  * 유저에 맞는 컨텐츠를 제공하기 위한 래퍼객체
@@ -64,7 +64,7 @@ export const contentsWrapper = async (reqUserId, contentData, contentType, isFor
           filteredFeedbacks.map(async feedback => {
             const feedbackData = feedback;
             feedbackData.heartCount = await Like.countHearts(feedbackData._id, 'Feedback');
-
+            feedbackData.replyCount = await Reply.countReplys(feedbackData._id)
             if (reqUserId) {
               feedbackData.liked = !!likeIdSet.includes(feedback._id.toString());
               feedbackData.writer.following =
@@ -160,10 +160,10 @@ export const contentsWrapper = async (reqUserId, contentData, contentType, isFor
             reqUserId === userData._id.toString()
               ? 'me'
               : !!followingIdSet.includes(userData.writer._id.toString());
-
+          userData.heartCount = await Like.countHearts(targetContent._id, 'Reply');
           return userData;
         });
-        resultSet.replyCount = resultSet.length;
+
         resolve(resultSet);
       }
     } else {

@@ -68,4 +68,8 @@ Reply.statics.getParentId = function (replyId) {
   return this.findOne({ _id: replyId }, { parentId: 1 });
 };
 
+Reply.statics.countReplys = function (parentId) {
+  return this.countDocuments({ parentId });
+}
+
 export default mongoose.model('Reply', Reply);
