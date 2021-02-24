@@ -79,7 +79,7 @@ export const verifyToken = async (req, res, next) => {
     if (decoded) {
       if (decoded.isConfirmed) {
         if(Date.now() / 1000 - decoded.iat > 60 * 60 * 24) {
-          // 하루가 지나면 갱신해준다.
+          // 하루이상 지나면 갱신해준다.
           const { uid, nick, isConfirmed } = decoded;
           const token = jwt.sign(
             {
@@ -93,7 +93,7 @@ export const verifyToken = async (req, res, next) => {
             }
           );
           res.cookie('access_token', token, {
-            maxAge: 1000 * 60 * 60 * 24 * 7, // 7days
+            maxAge: 1000 * 60 * 60 * 24 * 7, // 7days, refresh+access로 분리 필요
             httpOnly: true,
             secure: process.env.NODE_ENV === 'test' ? false : true
           });
