@@ -47,7 +47,7 @@ export const contentsWrapper = async (reqUserId, contentData, contentType, isFor
               targetContent.writer.following =
                 targetContent.writer._id.toString() === reqUserId
                   ? 'me'
-                  : !!followingIdSet.includes(targetContent.writer._id);
+                  : !!followingIdSet.includes(targetContent.writer._id.toString());
             }
             // 2차창작의 원작자에 대한 팔로잉 여부
             if (targetContent.originUserId) {
@@ -66,11 +66,11 @@ export const contentsWrapper = async (reqUserId, contentData, contentType, isFor
             feedbackData.heartCount = await Like.countHearts(feedbackData._id, 'Feedback');
 
             if (reqUserId) {
-              feedbackData.liked = !!likeIdSet.includes(feedback._id);
+              feedbackData.liked = !!likeIdSet.includes(feedback._id.toString());
               feedbackData.writer.following =
                 feedback.writer._id.toString() === reqUserId
                   ? 'me'
-                  : !!followingIdSet.includes(feedback.writer._id);
+                  : !!followingIdSet.includes(feedback.writer._id.toString());
             }
 
             feedbacks.push(feedback);
@@ -163,7 +163,7 @@ export const contentsWrapper = async (reqUserId, contentData, contentType, isFor
 
           return userData;
         });
-
+        resultSet.replyCount = resultSet.length;
         resolve(resultSet);
       }
     } else {
@@ -199,7 +199,7 @@ function getFollowingIdSet(userId) {
   return new Promise(async (resolve, reject) => {
     if (userId) {
       const followingList = await Follow.getFollowingIdList(userId);
-      const followingIdSet = followingList.map(eachUser => eachUser.userId.toString());
+      const followingIdSet = followingList.map(eachUser => eachUser.targetUserId.toString());
       resolve(followingIdSet);
     } else {
       reject(new Error('UserId is required.'));
@@ -211,7 +211,7 @@ function getFollowerIdSet(userId) {
   return new Promise(async (resolve, reject) => {
     if (userId) {
       const followerList = await Follow.getFollowerIdList(userId);
-      const followerIdSet = followerList.map(eachUser => eachUser.targetUserId.toString());
+      const followerIdSet = followerList.map(eachUser => eachUser.userId.toString());
       resolve(followerIdSet);
     } else {
       reject(new Error('UserId is required.'));
