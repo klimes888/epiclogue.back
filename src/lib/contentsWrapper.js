@@ -58,10 +58,9 @@ export const contentsWrapper = async (reqUserId, contentData, contentType, isFor
           }
 
           // 피드백의 팔로잉, 좋아요
-          const feedbacks = [];
           const filteredFeedbacks = targetContent.feedbacks.filter(each => each.writer !== null);
 
-          filteredFeedbacks.map(async feedback => {
+          const feedbacks = await Promise.all(filteredFeedbacks.map(async feedback => {
             const feedbackData = feedback;
             feedbackData.heartCount = await Like.countHearts(feedbackData._id, 'Feedback');
             feedbackData.replyCount = await Reply.countReplys(feedbackData._id)
@@ -73,8 +72,8 @@ export const contentsWrapper = async (reqUserId, contentData, contentType, isFor
                   : !!followingIdSet.includes(feedback.writer._id.toString());
             }
 
-            feedbacks.push(feedback);
-          });
+            return feedbackData;
+          }));
 
           targetContent.feedbacks = feedbacks;
           targetContent.feedbackCount = feedbacks.length;
