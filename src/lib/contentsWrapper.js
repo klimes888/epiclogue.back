@@ -153,16 +153,16 @@ export const contentsWrapper = async (reqUserId, contentData, contentType, isFor
           return resolve(filteredData);
         }
 
-        const resultSet = filteredData.map(data => {
+        const resultSet = await Promise.all(filteredData.map(async data => {
           const userData = data.toJSON();
           userData.liked = !!likeIdSet.includes(userData._id.toString());
           userData.writer.following =
             reqUserId === userData._id.toString()
               ? 'me'
               : !!followingIdSet.includes(userData.writer._id.toString());
-          userData.heartCount = await Like.countHearts(targetContent._id, 'Reply');
+          userData.heartCount = await Like.countHearts(userData._id, 'Reply');
           return userData;
-        });
+        }));
 
         resolve(resultSet);
       }
