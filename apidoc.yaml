@@ -67,14 +67,24 @@ paths:
                 type: string
               intro:
                 type: string
-              country:
+              displayLanguage:
                 type: string
               screenId:
                 type: string
               banner:
-                type: string
+                type: object
+                properties:
+                  origin:
+                    type: string
+                  thumbnail:
+                    type: string
               profile:
-                type: string
+                type: object
+                properties:
+                  origin:
+                    type: string
+                  thumbnail:
+                    type: string
               email:
                 type: string
       security:
@@ -97,10 +107,12 @@ paths:
               type: string
             userNick:
               type: string
-            userCountry:
+            userDisplayLang:
               type: string
-            userLang:
-              type: string
+            userAvailableLang:
+              type: array
+              items:
+                type: string
             userIntro:
               type: string
             userBannerImg:
@@ -1131,7 +1143,7 @@ paths:
         in: "query"
         required: true
         type: string
-      - name: "targetType"
+      - name: "type"
         in: "query"
         required: true
         description: 'all is get all like data, not save db data'
@@ -1140,7 +1152,6 @@ paths:
         - "Board"
         - "Feedback"
         - "Reply"
-        - "all"
       responses:
         200:
           description: OK
@@ -1523,9 +1534,9 @@ definitions:
       boardTitle:
         type: string
         example: 'latata'
-      boardImg:
+      thumbnail:
         type: array
-        example: ["link1", "link2"]
+        example: 'https://resized-thumbbucket.resized-image.jpg'
       category:
         type: number
         example: 0
@@ -1618,8 +1629,12 @@ definitions:
         type: string
         example: 'hippo'
       profile:
-        type: string
-        example: 'a_link'
+        type: object
+        properties:
+          origin:
+            type: string
+          thumbnail:
+            type: string
       following:
         type: boolean
         example: true
@@ -1670,20 +1685,30 @@ definitions:
         type: string
       screenId:
         type: string
-      country:
-        type: string
       joinDate:
         type: number
-      language:
+      displayLanguage:
+        type: string
+      availableLanguage:
         type: array
         items:
           type: string
       intro:
         type: string
       banner:
-        type: string
+        type: object
+        properties:
+          origin:
+            type: string
+          thumbnail:
+            type: string
       profile:
-        type: string
+        type: object
+        properties:
+          origin:
+            type: string
+          thumbnail:
+            type: string
       salt:
         type: string
       isConfirmed:

@@ -1,11 +1,12 @@
-import { Router } from 'express'
-const bookmark = new Router({ mergeParams: true })
-import * as bookmarkCtrl from './bookmark.ctrl'
-import { verifyToken } from '../../../lib/middleware/tokenAuth'
-import { checkExistence } from '../../../lib/middleware/checkExistence'
+import { Router } from 'express';
+import * as bookmarkCtrl from './bookmark.ctrl';
+import { verifyToken } from '../../../lib/middleware/tokenAuth';
+import { checkExistence } from '../../../lib/middleware/checkExistence';
 
-bookmark.get('/', verifyToken, bookmarkCtrl.getBookmarkList)
-bookmark.post('/', verifyToken, checkExistence, bookmarkCtrl.addBookmark)
-bookmark.delete('/', verifyToken, checkExistence, bookmarkCtrl.deleteBookmark)
+const bookmark = new Router({ mergeParams: true });
 
-export default bookmark
+bookmark.get('/', verifyToken, bookmarkCtrl.getBookmarkList);
+bookmark.post('/', verifyToken, checkExistence, bookmarkCtrl.addBookmark);
+bookmark.delete('/', verifyToken, checkExistence, bookmarkCtrl.deleteBookmark);
+
+export default bookmark;
