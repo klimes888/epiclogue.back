@@ -100,6 +100,7 @@ export const snsLogin = async function (req, res, next) {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'test' ? false : true,
     domain: process.env.NODE_ENV === 'test' ? 'localhost' : '.epiclogue.com',
+    sameSite: 'None',
   });
   console.log(`[INFO] SNS유저 ${result._id} 가 로그인했습니다.`);
   return res.status(200).json({
@@ -175,6 +176,7 @@ export const login = async function (req, res, next) {
           httpOnly: true,
           secure: process.env.NODE_ENV === 'test' ? false : true,
           domain: process.env.NODE_ENV === 'test' ? 'localhost' : '.epiclogue.com',
+          sameSite: 'None',
         });
         console.log(`[INFO] 유저 ${result._id} 가 로그인했습니다.`);
         return res.status(200).json({

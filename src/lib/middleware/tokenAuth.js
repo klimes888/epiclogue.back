@@ -29,7 +29,7 @@ const { SECRET_KEY } = process.env;
  */
 export const verifyToken = async (req, res, next) => {
   try {
-    const clientToken = req.cookie['access_token'];
+    const clientToken = req.cookies['access_token'];
 
     const { name: accessPath } = req.route.stack[req.route.stack.length - 1];
 
@@ -96,6 +96,7 @@ export const verifyToken = async (req, res, next) => {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'test' ? false : true,
             domain: process.env.NODE_ENV === 'test' ? 'localhost' : '.epiclogue.com',
+            sameSite: 'None',
           });
         }
         res.locals.uid = decoded.uid;
