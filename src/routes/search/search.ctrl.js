@@ -36,7 +36,7 @@ export const search = async (req, res, next) => {
     }
   }
 
-  console.log(`[INFO] 유저 ${res.locals.uid} 가 ${searchType} ${queryString} 을 검색했습니다.`);
+  console.log(`[INFO] 유저 ${res.locals.uid || '비회원유저'} 가 ${searchType} ${queryString} 을 검색했습니다.`);
   return res.status(200).json({
     result: 'ok',
     data: res.locals.uid

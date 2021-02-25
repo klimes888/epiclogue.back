@@ -30,6 +30,8 @@ const { SECRET_KEY } = process.env;
 export const verifyToken = async (req, res, next) => {
   try {
     const clientToken = req.headers['x-access-token'];
+    const clientTokenTemp = req.cookie['access_token']
+    console.log(clientTokenTemp)
     const { name: accessPath } = req.route.stack[req.route.stack.length - 1];
 
     if (!clientToken && authExceptions.includes(accessPath)) {
@@ -37,9 +39,10 @@ export const verifyToken = async (req, res, next) => {
       return next();
     }
 
-    /* 나머지 기능들에 대해 요청받은 토큰을 검사
-        비회원에게 접근이 허용된 페이지의 경우에는 유저의 로그인 상태에 따라 다르게 보이기 위해 필요
-    */
+    /* 
+     * 나머지 기능들에 대해 요청받은 토큰을 검사
+     * 비회원에게 접근이 허용된 페이지의 경우에는 유저의 로그인 상태에 따라 다르게 보이기 위해 필요
+     */
 
     const tokenSchema = Joi.object({
       token: Joi.string()
@@ -53,7 +56,8 @@ export const verifyToken = async (req, res, next) => {
       console.log(
         `[INFO] 인증 실패: 유저의 토큰이 누락되었거나 적절하지 않습니다. ip: ${
           req.headers['x-forwarded-for'] || req.connection.remoteAddress
-        } token: ${clientToken}`
+        } token: ${clientToken},
+        ${e}`
       );
       return next(createError(401, '인증 실패: 적절하지 않은 인증입니다.'));
     }
@@ -66,13 +70,34 @@ export const verifyToken = async (req, res, next) => {
       console.log(
         `[INFO] 인증 실패: 손상된 토큰을 사용하였습니다. ip: ${
           req.headers['x-forwarded-for'] || req.connection.remoteAddress
-        } token: ${clientToken}`
+        } token: ${clientToken},
+        ${e}`
       );
       return next(createError(401, '인증 실패: 적절하지 않은 인증입니다.'));
     }
 
     if (decoded) {
       if (decoded.isConfirmed) {
+        if(Date.now() / 1000 - decoded.iat > 60 * 60 * 24) {
+          // 하루이상 지나면 갱신해준다.
+          const { uid, nick, isConfirmed } = decoded;
+          const token = jwt.sign(
+            {
+              nick,
+              uid,
+              isConfirmed,
+            },
+            SECRET_KEY,
+            {
+              expiresIn: process.env.JWT_EXPIRES_IN,
+            }
+          );
+          res.cookie('access_token', token, {
+            maxAge: 1000 * 60 * 60 * 24 * 7, // 7days, refresh+access로 분리 필요
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'test' ? false : true
+          });
+        }
         res.locals.uid = decoded.uid;
         next();
       } else {

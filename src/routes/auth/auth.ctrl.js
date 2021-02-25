@@ -33,7 +33,6 @@ const getFBProfile = async uid =>
  */
 export const snsLogin = async function (req, res, next) {
   const { snsData, snsType, userLang } = req.body;
-  console.log(snsData, snsType);
   const userData =
     snsType === 'google'
       ? {
@@ -95,6 +94,11 @@ export const snsLogin = async function (req, res, next) {
       expiresIn: process.env.JWT_EXPIRES_IN,
     }
   );
+  res.cookie('access_token', token, {
+    maxAge: 1000 * 60 * 60 * 24 * 7, // 7days
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'test' ? false : true
+  });
   console.log(`[INFO] SNS유저 ${result._id} 가 로그인했습니다.`);
   return res.status(200).json({
     result: 'ok',
@@ -165,6 +169,11 @@ export const login = async function (req, res, next) {
             expiresIn: process.env.JWT_EXPIRES_IN,
           }
         );
+        res.cookie('access_token', token, {
+          maxAge: 1000 * 60 * 60 * 24 * 7, // 7days
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'test' ? false : true
+        });
         console.log(`[INFO] 유저 ${result._id} 가 로그인했습니다.`);
         return res.status(200).json({
           result: 'ok',

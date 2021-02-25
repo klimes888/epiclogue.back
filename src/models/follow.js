@@ -37,7 +37,7 @@ follow.statics.getFollowingList = function (userId) {
 };
 
 follow.statics.getFollowingIdList = function (userId) {
-  return this.find({ userId }, { userId: 1 });
+  return this.find({ userId }, { targetUserId: 1 });
 };
 
 // 유저의 팔로워 목록
@@ -49,7 +49,7 @@ follow.statics.getFollowerList = function (targetUserId) {
 };
 
 follow.statics.getFollowerIdList = function (targetUserId) {
-  return this.find({ targetUserId }, { targetUserId: 1 });
+  return this.find({ targetUserId }, { userId: 1 });
 };
 
 follow.statics.isFollowing = function (userId, targetUserId) {

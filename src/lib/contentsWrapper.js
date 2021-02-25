@@ -1,5 +1,5 @@
 import createError from 'http-errors';
-import { Board, Like, Bookmark, React, Follow } from '../models';
+import { Board, Like, Bookmark, React, Follow, Reply } from '../models';
 
 /**
  * 유저에 맞는 컨텐츠를 제공하기 위한 래퍼객체
@@ -47,7 +47,7 @@ export const contentsWrapper = async (reqUserId, contentData, contentType, isFor
               targetContent.writer.following =
                 targetContent.writer._id.toString() === reqUserId
                   ? 'me'
-                  : !!followingIdSet.includes(targetContent.writer._id);
+                  : !!followingIdSet.includes(targetContent.writer._id.toString());
             }
             // 2차창작의 원작자에 대한 팔로잉 여부
             if (targetContent.originUserId) {
@@ -58,23 +58,22 @@ export const contentsWrapper = async (reqUserId, contentData, contentType, isFor
           }
 
           // 피드백의 팔로잉, 좋아요
-          const feedbacks = [];
           const filteredFeedbacks = targetContent.feedbacks.filter(each => each.writer !== null);
 
-          filteredFeedbacks.map(async feedback => {
+          const feedbacks = await Promise.all(filteredFeedbacks.map(async feedback => {
             const feedbackData = feedback;
             feedbackData.heartCount = await Like.countHearts(feedbackData._id, 'Feedback');
-
+            feedbackData.replyCount = await Reply.countReplys(feedbackData._id)
             if (reqUserId) {
-              feedbackData.liked = !!likeIdSet.includes(feedback._id);
+              feedbackData.liked = !!likeIdSet.includes(feedback._id.toString());
               feedbackData.writer.following =
                 feedback.writer._id.toString() === reqUserId
                   ? 'me'
-                  : !!followingIdSet.includes(feedback.writer._id);
+                  : !!followingIdSet.includes(feedback.writer._id.toString());
             }
 
-            feedbacks.push(feedback);
-          });
+            return feedbackData;
+          }));
 
           targetContent.feedbacks = feedbacks;
           targetContent.feedbackCount = feedbacks.length;
@@ -153,16 +152,16 @@ export const contentsWrapper = async (reqUserId, contentData, contentType, isFor
           return resolve(filteredData);
         }
 
-        const resultSet = filteredData.map(data => {
+        const resultSet = await Promise.all(filteredData.map(async data => {
           const userData = data.toJSON();
           userData.liked = !!likeIdSet.includes(userData._id.toString());
           userData.writer.following =
             reqUserId === userData._id.toString()
               ? 'me'
               : !!followingIdSet.includes(userData.writer._id.toString());
-
+          userData.heartCount = await Like.countHearts(userData._id, 'Reply');
           return userData;
-        });
+        }));
 
         resolve(resultSet);
       }
@@ -199,7 +198,7 @@ function getFollowingIdSet(userId) {
   return new Promise(async (resolve, reject) => {
     if (userId) {
       const followingList = await Follow.getFollowingIdList(userId);
-      const followingIdSet = followingList.map(eachUser => eachUser.userId.toString());
+      const followingIdSet = followingList.map(eachUser => eachUser.targetUserId.toString());
       resolve(followingIdSet);
     } else {
       reject(new Error('UserId is required.'));
@@ -211,7 +210,7 @@ function getFollowerIdSet(userId) {
   return new Promise(async (resolve, reject) => {
     if (userId) {
       const followerList = await Follow.getFollowerIdList(userId);
-      const followerIdSet = followerList.map(eachUser => eachUser.targetUserId.toString());
+      const followerIdSet = followerList.map(eachUser => eachUser.userId.toString());
       resolve(followerIdSet);
     } else {
       reject(new Error('UserId is required.'));
