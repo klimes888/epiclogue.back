@@ -13,8 +13,8 @@ const randomBytesPromise = util.promisify(crypto.randomBytes);
 
 dotenv.config();
 
-const getFBProfile = async uid =>
-  new Promise(async (resolve, reject) => {
+const getFBProfile = async uid => {
+  return new Promise(async (resolve, reject) => {
     axios({
       url: `https://graph.facebook.com/v9.0/${uid}/picture`,
       method: 'GET',
@@ -22,6 +22,7 @@ const getFBProfile = async uid =>
       .then(res => resolve(res.request.res.responseUrl))
       .catch(err => reject(err));
   });
+}
 
 /**
  * @description SNS 로그인
@@ -97,12 +98,12 @@ export const snsLogin = async function (req, res, next) {
   res.cookie('access_token', token, {
     maxAge: 1000 * 60 * 60 * 24 * 7, // 7days
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'test' ? false : true
+    secure: process.env.NODE_ENV === 'test' ? false : true,
+    domain: process.env.NODE_ENV === 'test' ? 'localhost' : '.epiclogue.com',
   });
   console.log(`[INFO] SNS유저 ${result._id} 가 로그인했습니다.`);
   return res.status(200).json({
     result: 'ok',
-    token,
     nick: result.nickname,
     screenId: result.screenId,
     displayLanguage: result.displayLanguage,
@@ -172,12 +173,12 @@ export const login = async function (req, res, next) {
         res.cookie('access_token', token, {
           maxAge: 1000 * 60 * 60 * 24 * 7, // 7days
           httpOnly: true,
-          secure: process.env.NODE_ENV === 'test' ? false : true
+          secure: process.env.NODE_ENV === 'test' ? false : true,
+          domain: process.env.NODE_ENV === 'test' ? 'localhost' : '.epiclogue.com',
         });
         console.log(`[INFO] 유저 ${result._id} 가 로그인했습니다.`);
         return res.status(200).json({
           result: 'ok',
-          token,
           nick: result.nickname,
           screenId: result.screenId,
           displayLanguage: result.displayLanguage,

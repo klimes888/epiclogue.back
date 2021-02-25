@@ -29,9 +29,8 @@ const { SECRET_KEY } = process.env;
  */
 export const verifyToken = async (req, res, next) => {
   try {
-    const clientToken = req.headers['x-access-token'];
-    const clientTokenTemp = req.cookie['access_token']
-    console.log(clientTokenTemp)
+    const clientToken = req.cookie['access_token'];
+
     const { name: accessPath } = req.route.stack[req.route.stack.length - 1];
 
     if (!clientToken && authExceptions.includes(accessPath)) {
@@ -95,7 +94,8 @@ export const verifyToken = async (req, res, next) => {
           res.cookie('access_token', token, {
             maxAge: 1000 * 60 * 60 * 24 * 7, // 7days, refresh+access로 분리 필요
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'test' ? false : true
+            secure: process.env.NODE_ENV === 'test' ? false : true,
+            domain: process.env.NODE_ENV === 'test' ? 'localhost' : '.epiclogue.com',
           });
         }
         res.locals.uid = decoded.uid;
