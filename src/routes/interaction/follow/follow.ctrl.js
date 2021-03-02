@@ -30,7 +30,7 @@ export const addFollow = async (req, res, next) => {
       return next(createError(400, '이미 처리된 데이터입니다.'));
     }
 
-    await session.withTransaction(async () => {
+    await session.withTransaction(async () => { // session function must change direct use model to dao
       const followSchema = new Follow(followData);
       await followSchema.save({ session });
       await makeNotification(
@@ -88,7 +88,7 @@ export const deleteFollow = async (req, res, next) => {
       return next(createError(400, '이미 처리된 데이터입니다.'));
     }
 
-    await session.withTransaction(async () => {
+    await session.withTransaction(async () => { // session function must change direct use model to dao
       const unfollow = await Follow.unfollow(followData).session(session);
 
       if (unfollow.ok === 1) {

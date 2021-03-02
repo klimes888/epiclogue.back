@@ -6,6 +6,9 @@ import { deleteImage, thumbPathGen } from '../../lib/imageCtrl';
 import { contentsWrapper } from '../../lib/contentsWrapper';
 import makeNotification from '../../lib/makeNotification';
 
+// tag match reg
+const p = /#[^\{\}\[\]\/?.,;:|\)*~`!^\-+<>@\#$%&\\\=\(\'\"\s]+/g
+
 /**
  * @description 유저 피드
  * @access GET /boards?type=[Illust, Comic]
@@ -23,7 +26,7 @@ export const getBoards = async (req, res, next) => {
   }
 
   try {
-    const boardList = await Board.findAll(option); // 썸네일만 골라내는 작업 필요
+    const boardList = await Board.findAll(option);
     const filteredBoardList = boardList.filter(each => each.writer !== null);
     const wrappedData = await contentsWrapper(res.locals.uid, filteredBoardList, 'Board', false);
 
@@ -51,7 +54,7 @@ export const postBoard = async (req, res, next) => {
 
   let tags = '';
   if (req.body.boardBody) {
-    tags = req.body.boardBody.match(/#[^\{\}\[\]\/?.,;:|\)*~`!^\-+<>@\#$%&\\\=\(\'\"\s]+/g);
+    tags = req.body.boardBody.match(p);
   }
 
   const boardData = {
@@ -222,7 +225,7 @@ export const postEditInfo = async function (req, res, next) {
   let tags = '';
 
   if (req.body.boardBody) {
-    tags = req.body.boardBody.match(/#[^\{\}\[\]\/?.,;:|\)*~`!^\-+<>@\#$%&\\\=\(\'\"\s]+/g);
+    tags = req.body.boardBody.match(p);
   }
 
   try {
@@ -275,7 +278,7 @@ export const secPost = async (req, res, next) => {
 
   let tags = '';
   if (req.body.boardBody) {
-    tags = req.body.boardBody.match(/#[^\{\}\[\]\/?.,;:|\)*~`!^\-+<>@\#$%&\\\=\(\'\"\s]+/g);
+    tags = req.body.boardBody.match(p);
   }
 
   const boardData = {

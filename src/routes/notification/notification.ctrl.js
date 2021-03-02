@@ -39,7 +39,7 @@ export const getNoti = async (req, res, next) => {
  */
 export const setRead = async (req, res, next) => {
   try {
-    await Notification.updateMany({ _id: req.body.notiId, userId: res.locals.uid }, { read: true });
+    await Notification.updateMany({ _id: req.body.notiId, userId: res.locals.uid }, { read: true });// direct use model must change dao
     console.log(`[INFO] 유저 ${res.locals.uid} 가 알림을 ${req.body.notiId} 를 확인했습니다.`);
     return res.status(200).json({
       result: 'ok',
@@ -60,7 +60,7 @@ export const setRead = async (req, res, next) => {
  */
 export const setReadAll = async (req, res, next) => {
   try {
-    await Notification.updateMany({ userId: res.locals.uid }, { read: true });
+    await Notification.updateMany({ userId: res.locals.uid }, { read: true });// direct use model must change dao
     console.log(`[INFO] 유저 ${res.locals.uid} 가 알림을 모두 읽음처리 했습니다.`);
     return res.status(200).json({
       result: 'ok',
@@ -81,7 +81,7 @@ export const setReadAll = async (req, res, next) => {
  */
 export const checkNotified = async (req, res, next) => {
   try {
-    const notified = await Notification.find({ userId: res.locals.uid, read: false }, { _id: 1 });
+    const notified = await Notification.find({ userId: res.locals.uid, read: false }, { _id: 1 });// direct use model must change dao
     let notiCount = 0;
     if (notified) {
       notiCount = notified.length;
@@ -125,7 +125,7 @@ export const deleteNoti = async (req, res, next) => {
   }
 
   try {
-    await Notification.deleteOne({ _id: req.body.notiId });
+    await Notification.deleteOne({ _id: req.body.notiId });// direct use model must change dao
     console.log(`[INFO] 유저 ${res.locals.uid} 가 알림 ${req.body.notiId} 를 삭제했습니다.`);
     return res.status(200).json({
       result: 'ok',
@@ -146,7 +146,7 @@ export const deleteNoti = async (req, res, next) => {
  */
 export const deleteAll = async (req, res, next) => {
   try {
-    await Notification.deleteMany({ userId: res.locals.uid });
+    await Notification.deleteMany({ userId: res.locals.uid });// direct use model must change dao
     console.log(`[INFO] 유저 ${res.locals.uid} 가 모든 알림을 삭제했습니다.`);
     return res.status(200).json({ result: 'ok' });
   } catch (e) {

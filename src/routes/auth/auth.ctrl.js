@@ -7,6 +7,8 @@ import createError from 'http-errors';
 import axios from 'axios';
 import { User } from '../../models';
 import transporter, { emailText, findPassText } from '../../lib/sendMail';
+import { joinDataCrypt } from '../../lib/cryptoData'
+import {cookieOption} from '../../lib/options'
 
 const { SECRET_KEY } = process.env;
 const randomBytesPromise = util.promisify(crypto.randomBytes);
@@ -49,29 +51,16 @@ export const snsLogin = async function (req, res, next) {
           name: snsData.name,
         };
   let result = await User.isExistSns(userData.uid);
-
+  // 암호화 함수 생성해서 적용
   if (!result) {
-    const generatedId = crypto
-      .createHash('sha256')
-      .update(userData.email)
-      .digest('hex')
-      .slice(0, 14);
-    const salt = await randomBytesPromise(64);
-    const cryptedEmail = crypto.pbkdf2Sync(
-      userData.email,
-      salt.toString('base64'),
-      parseInt(process.env.EXEC_NUM, 10),
-      parseInt(process.env.RESULT_LENGTH, 10),
-      'sha512'
-    );
-    const authToken = cryptedEmail.toString('hex').slice(0, 24);
+    const {password, salt, screenId, token} = joinDataCrypt(userData.email, userData.email);
     result = await User.create({
       email: userData.email,
-      password: cryptedEmail,
-      salt: salt.toString('base64'),
+      password,
+      salt,
       nickname: userData.name,
-      token: authToken,
-      screenId: generatedId,
+      token,
+      screenId,
       displayLanguage: userLang,
       profile: userData.profile,
       snsId: userData.uid,
@@ -94,14 +83,8 @@ export const snsLogin = async function (req, res, next) {
     {
       expiresIn: process.env.JWT_EXPIRES_IN,
     }
-  );
-  res.cookie('access_token', token, {
-    maxAge: 1000 * 60 * 60 * 24 * 7, // 7days
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'test' ? false : true,
-    domain: process.env.NODE_ENV === 'test' ? 'localhost' : '.epiclogue.com',
-    sameSite: 'None',
-  });
+  ); // Separate cookie option 
+  res.cookie('access_token', token, cookieOption);
   console.log(`[INFO] SNS유저 ${result._id} 가 로그인했습니다.`);
   return res.status(200).json({
     result: 'ok',
@@ -171,13 +154,7 @@ export const login = async function (req, res, next) {
             expiresIn: process.env.JWT_EXPIRES_IN,
           }
         );
-        res.cookie('access_token', token, {
-          maxAge: 1000 * 60 * 60 * 24 * 7, // 7days
-          httpOnly: true,
-          secure: process.env.NODE_ENV === 'test' ? false : true,
-          domain: process.env.NODE_ENV === 'test' ? 'localhost' : '.epiclogue.com',
-          sameSite: 'None',
-        });
+        res.cookie('access_token', token, cookieOption);
         console.log(`[INFO] 유저 ${result._id} 가 로그인했습니다.`);
         return res.status(200).json({
           result: 'ok',
@@ -207,7 +184,8 @@ export const login = async function (req, res, next) {
  */
 export const join = async function (req, res, next) {
   const { email, userPw, userPwRe, userLang, userNick: nick } = req.body;
-  const check = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[$@$!%*#?&])[A-Za-z\d$@$!%*#?&]{8,}$/.test(userPw);
+  const p = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[$@$!%*#?&])[A-Za-z\d$@$!%*#?&]{8,}$/;
+  const check = p.test(userPw);
 
   const joinValidationSchema = Joi.object({
     email: Joi.string()
@@ -246,46 +224,35 @@ export const join = async function (req, res, next) {
           return next(createError(400, '중복된 이메일입니다. 다른 이메일로 가입해주세요.'));
         }
 
-        const generatedId = crypto.createHash('sha256').update(email).digest('hex').slice(0, 14);
-        const salt = await randomBytesPromise(64);
-        const cryptedPass = crypto.pbkdf2Sync(
-          userPw,
-          salt.toString('base64'),
-          parseInt(process.env.EXEC_NUM, 10),
-          parseInt(process.env.RESULT_LENGTH, 10),
-          'sha512'
-        );
-        const authToken = cryptedPass.toString('hex').slice(0, 24);
+        const {screenId, salt, password, token} = joinDataCrypt(email, userPw)
         const result = await User.create({
           email,
-          password: cryptedPass.toString('base64'),
-          salt: salt.toString('base64'),
+          password,
+          salt,
           nickname: nick,
-          token: authToken,
-          screenId: generatedId,
+          token,
+          screenId,
           displayLanguage: userLang,
         });
 
         if (result) {
-          const option = {
-            from: process.env.MAIL_USER,
-            to: email,
-            subject: '이메일 인증을 완료해주세요.',
-            html: emailText(email, authToken),
-          };
-          transporter.sendMail(option, (error, info) => {
-            if (error) {
-              console.error(
-                `[ERROR] ${email} 에게 메일을 보내는 도중 문제가 발생했습니다. ${error}`
-              );
-              return next(createError(500, '알 수 없는 오류가 발생했습니다.'));
-            }
+          try {
+            await transporter.sendMail({
+              from: process.env.MAIL_USER,
+              to: email,
+              subject: '이메일 인증을 완료해주세요.',
+              html: emailText(email, token),
+            });
             console.log(`[INFO] ${email} 에게 성공적으로 메일을 보냈습니다: ${info.response}`);
             return res.status(201).json({
               result: 'ok',
-              info: info.response,
             });
-          });
+          } catch(e) {
+            console.error(
+              `[ERROR] ${email} 에게 메일을 보내는 도중 문제가 발생했습니다. ${e}`
+            );
+            return next(createError(500, '알 수 없는 오류가 발생했습니다.'));
+          }
         } else {
           console.log(`[INFO] 이미 존재하는 이메일 ${email} 로 회원가입을 시도했습니다.`);
           return next(createError(400, '이미 존재하는 아이디입니다. 확인 후 시도해주세요.'));
@@ -315,16 +282,15 @@ export const join = async function (req, res, next) {
 export const mailToFindPass = async (req, res, next) => {
   const { email } = req.body;
   const userToken = await (await randomBytesPromise(24)).toString('hex');
-  const option = {
-    from: process.env.MAIL_USER,
-    to: email,
-    subject: '비밀번호 재설정을 위해 이메일 인증을 완료해주세요.',
-    html: findPassText(email, userToken),
-  };
 
   try {
-    await User.updateOne({ email }, { $set: { token: userToken } });
-    await transporter.sendMail(option);
+    await User.updateOne({ email }, { $set: { token: userToken } }); // remove
+    await transporter.sendMail({
+      from: process.env.MAIL_USER,
+      to: email,
+      subject: '비밀번호 재설정을 위해 이메일 인증을 완료해주세요.',
+      html: findPassText(email, userToken),
+    });
     console.log(`[INFO] ${email} 에게 성공적으로 메일을 보냈습니다`);
     return res.status(201).json({
       result: 'ok',
@@ -364,7 +330,7 @@ export const findPass = async (req, res, next) => {
 
   try {
     if (userPwNew === userPwNewRe) {
-      const authUser = await User.findOne({ email, token });
+      const authUser = await User.findOne({ email, token }); // remove
       if (authUser) {
         const newSalt = await (await randomBytesPromise(64)).toString('base64');
         const newPass = await (
@@ -377,7 +343,7 @@ export const findPass = async (req, res, next) => {
           )
         ).toString('base64');
 
-        await User.updateOne({ email }, { salt: newSalt, password: newPass });
+        await User.updateOne({ email }, { salt: newSalt, password: newPass }); // remove
 
         console.log(`[INFO] 유저 ${email} 가 비밀번호 변경에 성공했습니다.`);
         return res.status(200).json({

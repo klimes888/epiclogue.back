@@ -18,7 +18,7 @@ export const addLike = async (req, res, next) => {
     targetInfo: req.body.targetInfo,
   };
 
-  const { targetInfo, targetType } = req.body;
+  const { targetInfo, targetType } = req.body; // remove
   const session = await startSession();
 
   try {
@@ -31,7 +31,7 @@ export const addLike = async (req, res, next) => {
       return next(createError(400, '이미 처리된 데이터입니다.'));
     }
 
-    await session.withTransaction(async () => {
+    await session.withTransaction(async () => { // session function must change direct use model to dao
       await new Like(likeData).save({ session });
 
       const likeCount = await Like.countDocuments({ targetInfo, targetType }).session(session);
@@ -108,7 +108,7 @@ export const deleteLike = async (req, res, next) => {
       return next(createError(400, '이미 처리된 데이터입니다.'));
     }
 
-    await session.withTransaction(async () => {
+    await session.withTransaction(async () => { // session function must change direct use model to dao
       await Like.unlike(likeData).session(session);
 
       const likeCount = await Like.countDocuments({ targetInfo, targetType }).session(session);

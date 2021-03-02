@@ -6,7 +6,7 @@ import { deleteImage } from '../imageCtrl';
 const checkSecondaryAllow = async (req, res, next) => {
   const { originBoardId } = req.body;
 
-  const isAllowing = await Board.findOne({ _id: originBoardId }, { allowSecondaryCreation: 1 });
+  const isAllowing = await Board.findOne({ _id: originBoardId }, { allowSecondaryCreation: 1 }); // remove
   if (isAllowing.allowSecondaryCreation === 1) {
     next();
   } else {

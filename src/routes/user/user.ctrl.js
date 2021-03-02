@@ -58,7 +58,7 @@ export const postUserEditInfo = async function (req, res, next) {
   const originalImages = [originalData.banner, originalData.profile]
   const screenId = req.body['screenId'] || originalData.screenId
   const nickname = req.body['userNick'] || originalData.nickname
-  const displayLanguage = req.body['userDisplayLang'] ? parseInt(req.body['userDisplayLang']) : originalData.displayLanguage
+  const displayLanguage = parseInt(req.body['userDisplayLang'] || originalData.displayLanguage, 10)
   const availableLanguage = req.body['userAvailableLang'] || originalData.availableLanguage
   const intro = req.body['userIntro'] || originalData.intro
   let banner = {}
@@ -251,8 +251,7 @@ export const deleteUser = async (req, res, next) => {
       );
 
       // remove old images
-      const originalData = await User.getUserInfo(res.locals.uid);
-      const originalImages = [originalData.banner, originalData.profile];
+      const originalImages = [info.banner, info.profile];
       deleteImage(originalImages);
 
       const deletion = await User.deleteUser(uid, crpytedPass.toString('base64')).session(session);

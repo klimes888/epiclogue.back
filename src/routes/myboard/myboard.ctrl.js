@@ -27,7 +27,7 @@ export const getMyboard = async (req, res, next) => {
 
   try {
     const myBoardData = userData.toJSON();
-
+    // direct use model must change dao
     myBoardData.followerCount = await Follow.countDocuments({ targetUserId: userData._id });
     myBoardData.followingCount = await Follow.countDocuments({ userId: userData._id });
     console.log(res.locals.uid, userData._id);
@@ -60,7 +60,7 @@ export const getMyboard = async (req, res, next) => {
  * @returns Array of all works
  */
 export const allWorks = async (req, res, next) => {
-  const userId = await User.findOne({ screenId: req.params.screenId }, { _id: 1, screenId: 0 });
+  const userId = await User.findOne({ screenId: req.params.screenId }, { _id: 1, screenId: 0 });// direct use model must change dao
   try {
     const userAllWorks = await Board.findAll({ writer: userId._id });
     const wrappedWorks = res.locals?.uid

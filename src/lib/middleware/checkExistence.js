@@ -92,7 +92,7 @@ export const checkUserExistence = async (req, res, next) => {
   }
 
   try {
-    const existence = await User.findOne({ _id: userId });
+    const existence = await User.findOne({ _id: userId }); // remove
 
     if (existence && existence.deactivatedAt === null) {
       // left is Object, right is String.
