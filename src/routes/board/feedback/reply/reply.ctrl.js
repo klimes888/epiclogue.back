@@ -174,7 +174,7 @@ export const editReply = async (req, res, next) => {
 export const deleteReply = async (req, res, next) => {
   try {
     const deletion = await Reply.delete(req.params.replyId, { parentId: 1 });
-
+    // feedback에 있는 uid 삭제는?
     if (deletion.ok === 1) {
       const newerReplies = await Reply.getByParentId(req.params.feedbackId);
       const wrappedReplies = await contentsWrapper(res.locals.uid, newerReplies, 'Reply', false);

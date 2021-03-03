@@ -17,7 +17,7 @@ const s3 = new aws.S3({
 
 export const deleteImage = (images, location) => {
   const garbageImage = []
-  console.log(images)
+
   if(images === undefined) return false
   else if(images instanceof Array) {
     for (let image of images) {

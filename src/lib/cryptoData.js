@@ -4,7 +4,7 @@ import util from 'util'
 
 const randomBytesPromise = util.promisify(crypto.randomBytes)
 
-export const joinDataCrypt = (id, pass) => {
+export const joinDataCrypt = async (id, pass) => {
     const screenId = crypto
                         .createHash('sha256')
                         .update(id)

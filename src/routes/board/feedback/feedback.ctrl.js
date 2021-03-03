@@ -158,6 +158,7 @@ export const deleteFeedback = async (req, res, next) => {
     await session.withTransaction(async () => {
       const deletion = await Feedback.delete(req.params.feedbackId).session(session);
       if (deletion.ok === 1) {
+        // 삭제후 하위의 대댓글들 삭제는?
         const newerFeedbacks = await Feedback.getByBoardId(req.params.boardId).session(session);
         const wrappedFeedbacks = await contentsWrapper(
           res.locals.uid,

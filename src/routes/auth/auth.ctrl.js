@@ -334,7 +334,7 @@ export const findPass = async (req, res, next) => {
       if (authUser) {
         const newSalt = await (await randomBytesPromise(64)).toString('base64');
         const newPass = await (
-          await crypto.pbkdf2Sync(
+          crypto.pbkdf2Sync(
             userPwNew,
             newSalt.toString('base64'),
             parseInt(process.env.EXEC_NUM, 10),
