@@ -4,7 +4,6 @@ import util from 'util';
 import crypto from 'crypto';
 import Joi from 'joi';
 import createError from 'http-errors';
-import axios from 'axios';
 import { User } from '../../models';
 import transporter, { emailText, findPassText } from '../../lib/sendMail';
 import { joinDataCrypt } from '../../lib/cryptoData'
@@ -14,15 +13,6 @@ const { SECRET_KEY } = process.env;
 const randomBytesPromise = util.promisify(crypto.randomBytes);
 
 dotenv.config();
-
-const getFBProfile = async uid => new Promise((resolve, reject) => {
-    axios({
-      url: `https://graph.facebook.com/v9.0/${uid}/picture`,
-      method: 'GET',
-    })
-      .then(res => resolve(res.request.res.responseUrl))
-      .catch(err => reject(err));
-  })
 
 /**
  * @description SNS 로그인
@@ -34,20 +24,12 @@ const getFBProfile = async uid => new Promise((resolve, reject) => {
  */
 export const snsLogin = async function (req, res, next) {
   const { snsData, snsType, userLang } = req.body;
-  const userData =
-    snsType === 'google'
-      ? {
+  const userData = {
           uid: snsData.profileObj.googleId,
           email: snsData.profileObj.email,
           profile: snsData.profileObj.imageUrl,
           name: snsData.profileObj.name,
         }
-      : {
-          uid: snsData.id,
-          email: snsData.email,
-          profile: await getFBProfile(snsData.id),
-          name: snsData.name,
-        };
   let result = await User.isExistSns(userData.uid);
   // 암호화 함수 생성해서 적용
   if (!result) {
