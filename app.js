@@ -18,7 +18,7 @@ import indexRouter from './src/routes'
 
 
 // utils
-import Database from './src/lib/database'
+import {connect} from './src/lib/database'
 import { logger, stream } from './src/configs/winston'
 
 const app = express()
@@ -59,7 +59,7 @@ app.use(express.urlencoded({ extended: true }))
 app.use(cookieParser())
 app.use(helmet())
 
-Database.connect()
+connect()
 
 app.use('/', indexRouter)
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec))

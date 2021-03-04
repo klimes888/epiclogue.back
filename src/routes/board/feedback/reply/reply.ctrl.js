@@ -43,7 +43,6 @@ export const postReply = async (req, res, next) => {
   try {
     await session.withTransaction(async () => {
       const replyData = await replySchema.save({ session });
-      await Feedback.getReply(req.params.feedbackId, replyData._id).session(session);
       const newerReplies = await Reply.getByParentId(replyForm.parentId).session(session);
       const wrappedReplies = await contentsWrapper(res.locals.uid, newerReplies, 'Reply', false);
       const feedbackData = await Feedback.findOne({ _id: req.params.feedbackId }, { writer: 1 });
@@ -174,7 +173,7 @@ export const editReply = async (req, res, next) => {
 export const deleteReply = async (req, res, next) => {
   try {
     const deletion = await Reply.delete(req.params.replyId, { parentId: 1 });
-    // feedback에 있는 uid 삭제는?
+
     if (deletion.ok === 1) {
       const newerReplies = await Reply.getByParentId(req.params.feedbackId);
       const wrappedReplies = await contentsWrapper(res.locals.uid, newerReplies, 'Reply', false);

@@ -27,6 +27,7 @@ export const getBoards = async (req, res, next) => {
 
   try {
     const boardList = await Board.findAll(option);
+    console.log(boardList)
     const filteredBoardList = boardList.filter(each => each.writer !== null);
     const wrappedData = await contentsWrapper(res.locals.uid, filteredBoardList, 'Board', false);
 

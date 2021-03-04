@@ -8,7 +8,6 @@ const Feedback = new mongoose.Schema({
   feedbackBody: { type: String, required: true },
   writeDate: { type: Date, default: Date.now },
   edited: { type: Boolean, default: false },
-  replies: [{ type: ObjectId, ref: 'Reply' }],
 });
 
 // Create
@@ -59,10 +58,6 @@ Feedback.statics.deleteByBoardId = function (boardId) {
 
 Feedback.statics.getById = function (feedbackId, option) {
   return this.findOne({ _id: feedbackId }, option);
-};
-
-Feedback.statics.getReply = function (feedbackId, replyId) {
-  return this.updateOne({ _id: feedbackId }, { $push: { replies: replyId } });
 };
 
 export default mongoose.model('Feedback', Feedback);

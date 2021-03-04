@@ -1,5 +1,5 @@
 import createError from 'http-errors';
-import { Board, Like, Bookmark, React, Follow, Reply } from '../models';
+import { Board, Like, Bookmark, React, Follow, Reply, Feedback } from '../models';
 
 /**
  * 유저에 맞는 컨텐츠를 제공하기 위한 래퍼객체
@@ -56,9 +56,9 @@ export const contentsWrapper = async (reqUserId, contentData, contentType, isFor
               );
             }
           }
-
           // 피드백의 팔로잉, 좋아요
-          const filteredFeedbacks = targetContent.feedbacks.filter(each => each.writer !== null);
+          let filteredFeedbacks = await Feedback.getByBoardId(targetContent._id)
+          filteredFeedbacks = filteredFeedbacks.filter(each => each.writer !== null);
 
           const feedbacks = await Promise.all(filteredFeedbacks.map(async feedback => {
             const feedbackData = feedback;
@@ -131,7 +131,6 @@ export const contentsWrapper = async (reqUserId, contentData, contentType, isFor
         const filteredData = targetContent.filter(each => each.writer !== null);
 
         // 비회원일 경우 바로 리턴
-
         resultSet = !reqUserId ? filteredData : await Promise.all(filteredData.map(async data => {
           const userData = data.toJSON();
           userData.liked = !!likeIdSet.includes(userData._id.toString());

@@ -45,7 +45,6 @@ export const postFeedback = async (req, res, next) => {
       console.log(
         `[INFO] 유저 ${res.locals.uid} 가 피드백 ${postFeedbackResult._id} 을 작성했습니다.`
       );
-      await Board.getFeedback(req.params.boardId, postFeedbackResult._id).session(session);
       const newerFeedbacks = await Feedback.getByBoardId(req.params.boardId).session(session);
       const wrappedFeedbacks = await contentsWrapper(
         res.locals.uid,

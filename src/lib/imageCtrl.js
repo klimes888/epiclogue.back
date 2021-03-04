@@ -16,8 +16,10 @@ const s3 = new aws.S3({
 });
 
 const s3DeleteError = (err, data) => {
-  console.error(err, err.stack);
-  console.error('s3ObjectOutput',data)
+  if(err) {
+    console.error(err, err.stack);
+    console.error('s3DeleteObjectOutput',data)
+  }
   return false;
 }
 

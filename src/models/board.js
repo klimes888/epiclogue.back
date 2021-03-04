@@ -13,7 +13,6 @@ const board = new mongoose.Schema({
   writeDate: { type: Date, default: Date.now },
   language: { type: String, default: 0 }, // [on future] 0: Korean, 1: Japanese, 2: US, 3: China, 4: Taiwan
   allowSecondaryCreation: { type: Number, default: 1 }, // 0: not allow, 1: allow, 2: only allow on followers
-  feedbacks: [{ type: ObjectId, ref: 'Feedback' }],
   tags: { type: [String] },
   originUserId: { type: ObjectId, ref: 'User' },
   originBoardId: { type: ObjectId, ref: 'Board' },
@@ -29,11 +28,6 @@ board.statics.create = function (data) {
 
 board.statics.getById = function (boardId, option) {
   return this.findOne({ _id: boardId }, option || { __v: 0 })
-    .populate({
-      path: 'feedbacks',
-      select: '-replies',
-      populate: { path: 'writer', select: '_id screenId nickname profile' },
-    })
     .populate({ path: 'writer', select: '_id screenId nickname profile' })
     .populate({ path: 'originUserId', select: '_id screenId nickname profile' })
     .populate({ path: 'originBoardId', select: '_id boardTitle boardBody boardImg' });
@@ -110,10 +104,6 @@ board.statics.findAllOriginOrSecondary = function (userId, isExists) {
     path: 'writer',
     select: '_id screenId nickname profile',
   });
-};
-
-board.statics.getFeedback = function (boardId, feedbackId) {
-  return this.updateOne({ _id: boardId }, { $push: { feedbacks: feedbackId } });
 };
 
 board.statics.getTitlesByQuery = function (query) {

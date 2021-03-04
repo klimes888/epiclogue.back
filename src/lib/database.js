@@ -12,8 +12,8 @@ const options = {
   useCreateIndex: true,
 };
 
-class Database {
-  static async connect() {
+
+export const connect = async () => {
     const dbEnvironment =
       process.env.NODE_ENV === 'test' ? process.env.MONGO_TEST_URI : process.env.MONGO_URI_ALONE;
 
@@ -25,7 +25,7 @@ class Database {
     }
   }
 
-  static async disconnect() {
+export const disconnect = async () => {
     // mongoose ready state
     // 0: diconnected, 1: connected, 2: connecting, 3: disconnecting
     if (mongoose.Connection.readyState !== 0) {
@@ -40,7 +40,7 @@ class Database {
     }
   }
 
-  static async drop() {
+export const drop = async () => {
     try {
       await mongoose.connection.db.dropDatabase();
       console.log('[INFO] Test DB dropped');
@@ -48,6 +48,3 @@ class Database {
       console.error(e);
     }
   }
-}
-
-export default new Database();
