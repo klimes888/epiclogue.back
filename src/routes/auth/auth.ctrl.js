@@ -15,16 +15,14 @@ const randomBytesPromise = util.promisify(crypto.randomBytes);
 
 dotenv.config();
 
-const getFBProfile = async uid => {
-  return new Promise(async (resolve, reject) => {
+const getFBProfile = async uid => new Promise((resolve, reject) => {
     axios({
       url: `https://graph.facebook.com/v9.0/${uid}/picture`,
       method: 'GET',
     })
       .then(res => resolve(res.request.res.responseUrl))
       .catch(err => reject(err));
-  });
-}
+  })
 
 /**
  * @description SNS 로그인
@@ -237,7 +235,7 @@ export const join = async function (req, res, next) {
 
         if (result) {
           try {
-            await transporter.sendMail({
+            const info = await transporter.sendMail({
               from: process.env.MAIL_USER,
               to: email,
               subject: '이메일 인증을 완료해주세요.',

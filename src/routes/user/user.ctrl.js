@@ -55,25 +55,24 @@ export const getUserEditInfo = async (req, res, next) => {
 export const postUserEditInfo = async function (req, res, next) {
   // remove old images
   const originalData = await User.getUserInfo(res.locals.uid)
-  const originalImages = [originalData.banner, originalData.profile]
-  const screenId = req.body['screenId'] || originalData.screenId
-  const nickname = req.body['userNick'] || originalData.nickname
-  const displayLanguage = parseInt(req.body['userDisplayLang'] || originalData.displayLanguage, 10)
-  const availableLanguage = req.body['userAvailableLang'] || originalData.availableLanguage
-  const intro = req.body['userIntro'] || originalData.intro
+  const screenId = req.body.screenId || originalData.screenId
+  const nickname = req.body.userNick || originalData.nickname
+  const displayLanguage = parseInt(req.body.userDisplayLang || originalData.displayLanguage, 10)
+  const availableLanguage = req.body.userAvailableLang || originalData.availableLanguage
+  const intro = req.body.userIntro || originalData.intro
   let banner = {}
   let profile = {}
   if (req.files !== undefined && req.files.length !== 0) {
-      if (req.files[0].fieldname == 'banner') {
+      if (req.files[0].fieldname === 'banner') {
         banner.origin = req.files[0].location
         banner.thumbnail = thumbPathGen(req.files[0].location.split('/'))
-        profile = originalImages[1]
-        if(originalImages[0] !== null) deleteImage(originalImages[0], 'mypage')
+        profile = originalData.profile
+        if(originalData?.banner) deleteImage(originalData.banner, 'mypage')
       } else {
         profile.origin = req.files[0].location
         profile.thumbnail = thumbPathGen(req.files[0].location.split('/'))
-        banner = originalImages[0]
-        if(originalImages[1] !== null) deleteImage(originalImages[1], 'mypage')
+        banner = originalData.banner
+        if(originalData?.profile !== null) deleteImage(originalData.profile, 'mypage')
       }
   } else {
     banner = originalData.banner;

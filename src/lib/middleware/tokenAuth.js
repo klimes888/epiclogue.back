@@ -29,7 +29,7 @@ const { SECRET_KEY } = process.env;
  */
 export const verifyToken = async (req, res, next) => {
   try {
-    const clientToken = req.cookies['access_token'];
+    const clientToken = req.cookies.access_token;
 
     const { name: accessPath } = req.route.stack[req.route.stack.length - 1];
 
@@ -94,7 +94,7 @@ export const verifyToken = async (req, res, next) => {
           res.cookie('access_token', token, {
             maxAge: 1000 * 60 * 60 * 24 * 7, // 7days, refresh+access로 분리 필요
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'test' ? false : true,
+            secure: process.env.NODE_ENV !== 'test',
             domain: process.env.NODE_ENV === 'test' ? 'localhost' : '.epiclogue.com',
             sameSite: 'None',
           });

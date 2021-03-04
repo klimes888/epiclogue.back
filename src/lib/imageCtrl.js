@@ -15,22 +15,29 @@ const s3 = new aws.S3({
   region: process.env.AWS_REGION, // 지역설정
 });
 
-export const deleteImage = (images, location) => {
-  const garbageImage = []
+const s3DeleteError = (err, data) => {
+  console.error(err, err.stack);
+  console.error('s3ObjectOutput',data)
+  return false;
+}
 
+export const deleteImage = (images, location) => {
+  let garbageImage = []
+  let garbageThumb = []
   if(images === undefined) return false
-  else if(images instanceof Array) {
-    for (let image of images) {
-      if (image) {
-        let objectKey = image.split('/')
-        garbageImage.push({
-          Key: objectKey[3],
-        })
-        garbageImage.push({
-          Key : 'resized-' + objectKey[3]
-        })
+  if(images instanceof Array) {
+    garbageImage = images.map(image => {
+      const objectKey = image.split('/');
+      return {
+        Key: objectKey[3],
+      };;
+    });
+    garbageThumb = images.map(image => {
+      const objectKey = image.split('/');
+      return {
+        Key : `resized-${  objectKey[3]  }`
       }
-    }
+    })
   } else if(images instanceof Object) {
     if(images.origin === null) return false
     let objectKey = images.origin.split('/');
@@ -38,16 +45,16 @@ export const deleteImage = (images, location) => {
       Key: objectKey[3],
     });
     objectKey = images.thumbnail.split('/');
-    garbageImage.push({
-      Key: 'resized-' + objectKey[3],
+    garbageThumb.push({
+      Key: `resized-${  objectKey[3]}`,
     });
   } else {
-    let objectKey = image.split('/')
+    const objectKey = images.split('/')
     garbageImage.push({
       Key: objectKey[3],
     })
-    garbageImage.push({
-      Key : 'resized-' + objectKey[3]
+    garbageThumb.push({
+      Key : `resized-${  objectKey[3]}`
     })
   }
     s3.deleteObjects(
@@ -57,13 +64,17 @@ export const deleteImage = (images, location) => {
           Objects: garbageImage,
         },
       },
-    (err) => {
-      if (err) {
-        console.error(err, err.stack);
-        return false;
-      }
-    }
-  );
+      s3DeleteError
+    );
+    s3.deleteObjects(
+      {
+        Bucket: location === 'board' ? `resized-${process.env.AWS_DATA_BUCKET_NAME}` : `resized-${process.env.AWS_USERDATA_BUCKET_NAME}`,
+        Delete: {
+          Objects: garbageThumb,
+        },
+      },
+      s3DeleteError
+    );
   return true;
 };
 
@@ -85,8 +96,8 @@ const contentDataStorage = multerS3({
     const random = await randomBytesPromise(64)
     name += random.toString('hex').slice(0, 32)
     const type = file.mimetype.split('/')
-    name += ('.' + type[1])
-    cb(null, dayjs().format('YYYYMMDDHHmmss') + '_' + name)
+    name += (`.${  type[1]}`)
+    cb(null, `${dayjs().format('YYYYMMDDHHmmss')  }_${  name}`)
   },
 });
 
@@ -108,13 +119,11 @@ const userDataStorage = multerS3({
     const random = await randomBytesPromise(64)
     name += random.toString('hex').slice(0, 32)
     const type = file.mimetype.split('/')
-    name += ('.' + type[1])
-    cb(null, dayjs().format('YYYYMMDDHHmmss') + '_' + name)
+    name += (`.${  type[1]}`)
+    cb(null, `${dayjs().format('YYYYMMDDHHmmss')  }_${  name}`)
   },
 });
 
-export const thumbPathGen = (originPath) => {
-  return originPath[0] + '//' + 'resized-' + originPath[2] + '/resized-' + originPath[3]
-}
+export const thumbPathGen = (originPath) => `${  originPath[0]  }//resized-${  originPath[2]  }/resized-${  originPath[3]  }`
 export const uploadImage = multer({ storage: contentDataStorage });
 export const uploadUserImage = multer({ storage: userDataStorage });
