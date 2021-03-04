@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import 'dotend/config'
+import 'dotenv/config'
 import util from 'util'
 
 const randomBytesPromise = util.promisify(crypto.randomBytes)

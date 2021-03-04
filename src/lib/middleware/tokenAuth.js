@@ -2,6 +2,7 @@ import dotenv from 'dotenv';
 import createError from 'http-errors';
 import jwt from 'jsonwebtoken';
 import Joi from 'joi';
+import {cookieOption} from '../options'
 
 dotenv.config();
 
@@ -91,13 +92,7 @@ export const verifyToken = async (req, res, next) => {
               expiresIn: process.env.JWT_EXPIRES_IN,
             }
           );
-          res.cookie('access_token', token, {
-            maxAge: 1000 * 60 * 60 * 24 * 7, // 7days, refresh+access로 분리 필요
-            httpOnly: true,
-            secure: process.env.NODE_ENV !== 'test',
-            domain: process.env.NODE_ENV === 'test' ? 'localhost' : '.epiclogue.com',
-            sameSite: 'None',
-          });
+          res.cookie('access_token', token, cookieOption);
         }
         res.locals.uid = decoded.uid;
         next();

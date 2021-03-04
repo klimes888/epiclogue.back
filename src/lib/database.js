@@ -13,7 +13,7 @@ const options = {
 };
 
 class Database {
-  async connect() {
+  static async connect() {
     const dbEnvironment =
       process.env.NODE_ENV === 'test' ? process.env.MONGO_TEST_URI : process.env.MONGO_URI_ALONE;
 
@@ -25,7 +25,7 @@ class Database {
     }
   }
 
-  async disconnect() {
+  static async disconnect() {
     // mongoose ready state
     // 0: diconnected, 1: connected, 2: connecting, 3: disconnecting
     if (mongoose.Connection.readyState !== 0) {
@@ -40,7 +40,7 @@ class Database {
     }
   }
 
-  async drop() {
+  static async drop() {
     try {
       await mongoose.connection.db.dropDatabase();
       console.log('[INFO] Test DB dropped');
