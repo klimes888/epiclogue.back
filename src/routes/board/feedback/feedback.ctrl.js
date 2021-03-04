@@ -1,7 +1,7 @@
 import Joi from 'joi';
 import createError from 'http-errors';
 import { startSession } from 'mongoose';
-import { Board, Feedback } from '../../../models';
+import { Board, Feedback, Reply } from '../../../models';
 import { contentsWrapper } from '../../../lib/contentsWrapper';
 import makeNotification from '../../../lib/makeNotification';
 
@@ -159,6 +159,7 @@ export const deleteFeedback = async (req, res, next) => {
       const deletion = await Feedback.delete(req.params.feedbackId).session(session);
       if (deletion.ok === 1) {
         // 삭제후 하위의 대댓글들 삭제는?
+        Reply.deleteByParentId(req.params.feedbackId).session(session);
         const newerFeedbacks = await Feedback.getByBoardId(req.params.boardId).session(session);
         const wrappedFeedbacks = await contentsWrapper(
           res.locals.uid,

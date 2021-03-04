@@ -1,7 +1,7 @@
 import Joi from 'joi';
 import createError from 'http-errors';
 import { startSession } from 'mongoose';
-import { Board } from '../../models';
+import { Board, Feedback } from '../../models';
 import { deleteImage, thumbPathGen } from '../../lib/imageCtrl';
 import { contentsWrapper } from '../../lib/contentsWrapper';
 import makeNotification from '../../lib/makeNotification';
@@ -166,7 +166,7 @@ export const deleteBoard = async (req, res, next) => {
     deleteImage(query.boardImg, 'board')
 
     const deletion = await Board.delete(boardId);
-
+    Feedback.deleteByBoardId(boardId);
     if (deletion.ok === 1) {
       console.log(`[INFO] 글 ${boardId}가 삭제되었습니다.`);
       return res.status(200).json({
