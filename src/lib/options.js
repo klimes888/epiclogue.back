@@ -3,5 +3,5 @@ export const cookieOption = {
     httpOnly: true,
     secure: process.env.NODE_ENV !== 'test',
     domain: process.env.NODE_ENV === 'test' ? 'localhost' : '.epiclogue.com',
-    sameSite: 'None',
+    sameSite: process.env.NODE_ENV === 'test' ? 'Lax' : 'None',
 }
