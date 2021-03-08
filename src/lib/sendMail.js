@@ -152,4 +152,16 @@ export const findPassText = (email, authToken) => `
     </html>
   `;
 
-export default transporter;
+export const sendMail = async (email, subject, html) => {
+    try {
+        await transporter.sendMail({
+            from: `epiclogue <${process.env.MAIL_USER}>`,
+            to: email,
+            subject,
+            html,
+          })
+        console.log(`[INFO] ${email} 에게 성공적으로 메일을 보냈습니다`)
+    } catch(e) {
+        throw new Error('메일을 보내는 도중 오류가 발생했습니다.')
+    }
+}

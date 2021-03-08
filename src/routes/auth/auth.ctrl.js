@@ -1,18 +1,14 @@
-import jwt from 'jsonwebtoken';
-import dotenv from 'dotenv';
 import util from 'util';
 import crypto from 'crypto';
 import Joi from 'joi';
 import createError from 'http-errors';
 import { User } from '../../models';
-import transporter, { emailText, findPassText } from '../../lib/sendMail';
+import { sendMail, emailText, findPassText } from '../../lib/sendMail';
 import { joinDataCrypt } from '../../lib/cryptoData'
-import {cookieOption} from '../../lib/options'
+import { cookieOption } from '../../lib/options'
+import { generateToken } from '../../lib/tokenManager'
 
-const { SECRET_KEY } = process.env;
 const randomBytesPromise = util.promisify(crypto.randomBytes);
-
-dotenv.config();
 
 /**
  * @description SNS 로그인
@@ -31,7 +27,7 @@ export const snsLogin = async function (req, res, next) {
           name: snsData.profileObj.name,
         }
   let result = await User.isExistSns(userData.uid);
-  // 암호화 함수 생성해서 적용
+
   if (!result) {
     const {password, salt, screenId, token} = joinDataCrypt(userData.email, userData.email);
     result = await User.create({
@@ -53,17 +49,8 @@ export const snsLogin = async function (req, res, next) {
     return next(createError(404, '탈퇴한 계정입니다.'));
   }
 
-  const token = jwt.sign(
-    {
-      nick: result.nickname,
-      uid: result._id,
-      isConfirmed: result.isConfirmed,
-    },
-    SECRET_KEY,
-    {
-      expiresIn: process.env.JWT_EXPIRES_IN,
-    }
-  ); // Separate cookie option 
+  const token = await generateToken(result.nickname, result._id, result.isConfirmed)
+
   res.cookie('access_token', token, cookieOption);
   console.log(`[INFO] SNS유저 ${result._id} 가 로그인했습니다.`);
   return res.status(200).json({
@@ -123,17 +110,7 @@ export const login = async function (req, res, next) {
           return next(createError(404, '탈퇴한 계정입니다.'));
         }
 
-        const token = jwt.sign(
-          {
-            nick: result.nickname,
-            uid: result._id,
-            isConfirmed: result.isConfirmed,
-          },
-          SECRET_KEY,
-          {
-            expiresIn: process.env.JWT_EXPIRES_IN,
-          }
-        );
+        const token = await generateToken(result.nickname, result._id, result.isConfirmed)
         res.cookie('access_token', token, cookieOption);
         console.log(`[INFO] 유저 ${result._id} 가 로그인했습니다.`);
         return res.status(200).json({
@@ -217,13 +194,11 @@ export const join = async function (req, res, next) {
 
         if (result) {
           try {
-            const info = await transporter.sendMail({
-              from: process.env.MAIL_USER,
-              to: email,
-              subject: '이메일 인증을 완료해주세요.',
-              html: emailText(email, token),
-            });
-            console.log(`[INFO] ${email} 에게 성공적으로 메일을 보냈습니다: ${info.response}`);
+            await sendMail(
+              email,
+              '이메일 인증을 완료해주세요.',
+              emailText(email, token),
+            );
             return res.status(201).json({
               result: 'ok',
             });
@@ -265,13 +240,11 @@ export const mailToFindPass = async (req, res, next) => {
 
   try {
     await User.updateOne({ email }, { $set: { token: userToken } }); // remove
-    await transporter.sendMail({
-      from: process.env.MAIL_USER,
-      to: email,
-      subject: '비밀번호 재설정을 위해 이메일 인증을 완료해주세요.',
-      html: findPassText(email, userToken),
-    });
-    console.log(`[INFO] ${email} 에게 성공적으로 메일을 보냈습니다`);
+    await sendMail(
+      email,
+      '비밀번호 재설정을 위해 이메일 인증을 완료해주세요.',
+      findPassText(email, userToken),
+    );
     return res.status(201).json({
       result: 'ok',
     });
