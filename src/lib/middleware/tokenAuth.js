@@ -1,10 +1,7 @@
-import dotenv from 'dotenv';
 import createError from 'http-errors';
-import jwt from 'jsonwebtoken';
 import Joi from 'joi';
 import {cookieOption} from '../options'
-
-dotenv.config();
+import { generateToken, verifyToken } from '../tokenManager'
 
 // 예외 페이지들에 대한 route stack의 마지막 async function의 이름을 저장합니다.
 const authExceptions = [
@@ -20,15 +17,13 @@ const authExceptions = [
   'getReplys', // 대댓글 확인
 ];
 
-const { SECRET_KEY } = process.env;
-
 /**
  * @description JWT토큰으로 유저 인증 수행
  * @param {*} req HTTP request
  * @param {*} res HTTP response
  * @param {*} next ExpressJS middleware
  */
-export const verifyToken = async (req, res, next) => {
+export const authToken = async (req, res, next) => {
   try {
     const clientToken = req.cookies.access_token;
 
@@ -65,7 +60,7 @@ export const verifyToken = async (req, res, next) => {
     let decoded;
 
     try {
-      decoded = await jwt.verify(clientToken, SECRET_KEY);
+      decoded = await verifyToken(clientToken)
     } catch (e) {
       console.log(
         `[INFO] 인증 실패: 손상된 토큰을 사용하였습니다. ip: ${
@@ -79,19 +74,8 @@ export const verifyToken = async (req, res, next) => {
     if (decoded) {
       if (decoded.isConfirmed) {
         if(Date.now() / 1000 - decoded.iat > 60 * 60 * 24) {
-          // 하루이상 지나면 갱신해준다.
-          const { uid, nick, isConfirmed } = decoded;
-          const token = jwt.sign(
-            {
-              nick,
-              uid,
-              isConfirmed,
-            },
-            SECRET_KEY,
-            {
-              expiresIn: process.env.JWT_EXPIRES_IN,
-            }
-          );
+          // 하루이상 지나면 갱신
+          const token = generateToken(decoded.nick, decoded.uid, decoded.isConfirmed)
           res.cookie('access_token', token, cookieOption);
         }
         res.locals.uid = decoded.uid;

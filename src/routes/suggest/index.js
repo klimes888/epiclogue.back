@@ -1,9 +1,9 @@
 import express from 'express';
 import * as suggestCtrl from './suggest.ctrl';
-import { verifyToken } from '../../lib/middleware/tokenAuth';
+import { authToken } from '../../lib/middleware/tokenAuth';
 
 const suggest = express.Router();
 
-suggest.get('/', verifyToken, suggestCtrl.getSearchSuggest);
+suggest.get('/', authToken, suggestCtrl.getSearchSuggest);
 
 export default suggest;
