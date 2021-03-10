@@ -36,7 +36,7 @@ export const cryptoData = async (data, salt) =>
     .toString('base64')
 
 export const getRandomString = async () => {
-  const result = await randomBytesPromise()
+  const result = await randomBytesPromise(64)
   return result.toString('base64')
 }
 

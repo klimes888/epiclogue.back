@@ -9,7 +9,7 @@ export const createAndGetNewList = async function (replyForm) {
   try {
     await session.withTransaction(async () => {
       ;[replyData] = await Reply.create([replyForm], { session })
-      newerReplies = await Reply.getByParentId(replyForm.parentId).session(session)
+      newerReplies = await getByParentId(replyForm.parentId).session(session)
     })
   } catch (e) {
     throw new Error(`Error in Reply Transaction ${e}`)
@@ -48,7 +48,7 @@ export const updateAndGetNewList = async function (feedbackId, updateForm) {
         },
         { session }
       )
-      newerData = await Reply.getByParentId(feedbackId).session(session)
+      newerData = await getByParentId(feedbackId).session(session)
     })
   } catch (e) {
     throw new Error(`Error in Reply Transaction ${e}`)
@@ -61,7 +61,7 @@ export const updateAndGetNewList = async function (feedbackId, updateForm) {
 // Delete
 export const deleteReplyAndGetNewList = async function (replyId, parentId) {
   await Reply.deleteOne({ _id: replyId })
-  const result = await Reply.getByParentId(parentId)
+  const result = await getByParentId(parentId)
   return result
 }
 
@@ -82,6 +82,4 @@ export const getParentId = function (replyId) {
   return Reply.findOne({ _id: replyId }, { parentId: 1 })
 }
 
-export const countReplys = function (parentId) {
-  return Reply.countDocuments({ parentId })
-}
+export const countReplys = async (parentId) => Reply.countDocuments({ parentId })

@@ -61,17 +61,18 @@ export const contentsWrapper = async (reqUserId, contentData, contentType, isFor
 
         const feedbacks = await Promise.all(
           filteredFeedbacks.map(async feedback => {
-            const feedbackData = feedback
+            const feedbackData = feedback.toJSON()
             feedbackData.heartCount = await likeDAO.countHearts(feedbackData._id, 'Feedback')
             feedbackData.replyCount = await replyDAO.countReplys(feedbackData._id)
             if (reqUserId) {
+              console.log('in to liked add')
               feedbackData.liked = !!likeIdSet.includes(feedback._id.toString())
               feedbackData.writer.following =
                 feedback.writer._id.toString() === reqUserId
                   ? 'me'
                   : !!followingIdSet.includes(feedback.writer._id.toString())
             }
-
+            console.log(feedbackData)
             return feedbackData
           })
         )

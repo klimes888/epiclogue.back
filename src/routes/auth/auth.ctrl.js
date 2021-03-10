@@ -171,7 +171,7 @@ export const join = async function (req, res, next) {
           return next(createError(400, '중복된 이메일입니다. 다른 이메일로 가입해주세요.'))
         }
 
-        const { screenId, salt, password, token } = joinDataCrypt(email, userPw)
+        const { screenId, salt, password, token } = await joinDataCrypt(email, userPw)
         const result = await userDAO.create({
           email,
           password,
