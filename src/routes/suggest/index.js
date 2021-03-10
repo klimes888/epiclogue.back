@@ -1,9 +1,9 @@
-import express from 'express';
-import * as suggestCtrl from './suggest.ctrl';
-import { authToken } from '../../lib/middleware/tokenAuth';
+import express from 'express'
+import * as suggestCtrl from './suggest.ctrl'
+import { authToken } from '../../lib/middleware/tokenAuth'
 
-const suggest = express.Router();
+const suggest = express.Router()
 
-suggest.get('/', authToken, suggestCtrl.getSearchSuggest);
+suggest.get('/', authToken, suggestCtrl.getSearchSuggest)
 
-export default suggest;
+export default suggest

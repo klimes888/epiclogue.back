@@ -1,6 +1,6 @@
-import mongoose from 'mongoose';
+import mongoose from 'mongoose'
 
-const { ObjectId } = mongoose;
+const { ObjectId } = mongoose
 
 const Reply = new mongoose.Schema({
   writer: { type: ObjectId, required: true, ref: 'User' },
@@ -9,6 +9,6 @@ const Reply = new mongoose.Schema({
   replyBody: { type: String, required: true },
   writeDate: { type: Date, default: Date.now },
   edited: { type: Boolean, default: false },
-});
+})
 
-export default mongoose.model('Reply', Reply);
+export default mongoose.model('Reply', Reply)

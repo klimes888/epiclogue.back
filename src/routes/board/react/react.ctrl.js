@@ -1,5 +1,5 @@
-import createError from 'http-errors';
-import { reactDAO } from '../../../DAO';
+import createError from 'http-errors'
+import { reactDAO } from '../../../DAO'
 
 /**
  * @description 글의 반응 확인
@@ -11,19 +11,19 @@ import { reactDAO } from '../../../DAO';
  */
 export const getReact = async (req, res, next) => {
   try {
-    const reactData = await reactDAO.getByBoardId(req.params.boardId);
-    const filteredData = reactData.filter(data => data.user !== null);
+    const reactData = await reactDAO.getByBoardId(req.params.boardId)
+    const filteredData = reactData.filter(data => data.user !== null)
     console.log(
       `[INFO] 유저 ${res.locals.uid || '비회원유저'} 가 글 ${
         req.params.boardId
       } 의 반응내역을 확인합니다.`
-    );
+    )
     return res.status(200).json({
       result: 'ok',
       data: filteredData,
-    });
+    })
   } catch (e) {
-    console.error(`[Error] ${e}`);
-    return next(createError(500, '알 수 없는 오류가 발생했습니다.'));
+    console.error(`[Error] ${e}`)
+    return next(createError(500, '알 수 없는 오류가 발생했습니다.'))
   }
-};
+}

@@ -1,6 +1,6 @@
-import mongoose from 'mongoose';
+import mongoose from 'mongoose'
 
-const { ObjectId } = mongoose;
+const { ObjectId } = mongoose
 
 const Report = new mongoose.Schema({
   reportType: { type: Number, required: true },
@@ -20,6 +20,6 @@ const Report = new mongoose.Schema({
   link: { type: String },
   reportStatus: { type: Number, default: 0 }, // 0: submitted, 1: processing, 2: accepted, 3: rejected
   contentStatus: { type: Number, default: 0 }, // 0: public, 1: private, 2: deleted
-});
+})
 
-export default mongoose.model('Report', Report);
+export default mongoose.model('Report', Report)

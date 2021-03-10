@@ -1,7 +1,7 @@
-import Joi from 'joi';
-import createError from 'http-errors';
+import Joi from 'joi'
+import createError from 'http-errors'
 import { userDAO } from '../../DAO'
-import { sendMail, emailText, findPassText } from '../../lib/sendMail';
+import { sendMail, emailText, findPassText } from '../../lib/sendMail'
 import { joinDataCrypt, cryptoData, getRandomToken, getRandomString } from '../../lib/cryptoData'
 import { cookieOption } from '../../lib/options'
 import { generateToken } from '../../lib/tokenManager'
@@ -15,17 +15,17 @@ import { generateToken } from '../../lib/tokenManager'
  * @returns 로그인 정보 및 토큰
  */
 export const snsLogin = async function (req, res, next) {
-  const { snsData, snsType, userLang } = req.body;
+  const { snsData, snsType, userLang } = req.body
   const userData = {
-          uid: snsData.profileObj.googleId,
-          email: snsData.profileObj.email,
-          profile: snsData.profileObj.imageUrl,
-          name: snsData.profileObj.name,
-        }
-  let result = await userDAO.isExistSns(userData.uid);
+    uid: snsData.profileObj.googleId,
+    email: snsData.profileObj.email,
+    profile: snsData.profileObj.imageUrl,
+    name: snsData.profileObj.name,
+  }
+  let result = await userDAO.isExistSns(userData.uid)
 
   if (!result) {
-    const {password, salt, screenId, token} = joinDataCrypt(userData.email, userData.email);
+    const { password, salt, screenId, token } = joinDataCrypt(userData.email, userData.email)
     result = await userDAO.create({
       email: userData.email,
       password,
@@ -38,24 +38,24 @@ export const snsLogin = async function (req, res, next) {
       snsId: userData.uid,
       snsType,
       isConfirmed: true,
-    });
+    })
   }
 
   if (result.deactivatedAt != null) {
-    return next(createError(404, '탈퇴한 계정입니다.'));
+    return next(createError(404, '탈퇴한 계정입니다.'))
   }
 
   const token = await generateToken(result.nickname, result._id, result.isConfirmed)
 
-  res.cookie('access_token', token, cookieOption);
-  console.log(`[INFO] SNS유저 ${result._id} 가 로그인했습니다.`);
+  res.cookie('access_token', token, cookieOption)
+  console.log(`[INFO] SNS유저 ${result._id} 가 로그인했습니다.`)
   return res.status(200).json({
     result: 'ok',
     nick: result.nickname,
     screenId: result.screenId,
     displayLanguage: result.displayLanguage,
-  });
-};
+  })
+}
 
 /**
  * @description 로그인
@@ -66,60 +66,60 @@ export const snsLogin = async function (req, res, next) {
  * @returns 로그인 정보 및 토큰
  */
 export const login = async function (req, res, next) {
-  const { email, userPw } = req.body;
+  const { email, userPw } = req.body
 
   const loginValidationSchema = Joi.object({
     email: Joi.string()
       .regex(/^[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*.[a-zA-Z]{2,3}$/i)
       .required(),
     userPw: Joi.string().required(),
-  });
+  })
 
   try {
     try {
       // user input validation
-      await loginValidationSchema.validateAsync({ email, userPw });
+      await loginValidationSchema.validateAsync({ email, userPw })
     } catch (e) {
       console.log(
         `[INFO] ${
           req.headers['x-forwarded-for'] || req.connection.remoteAddress
         } 에서 적절하지 않은 로그인 데이터를 입력했습니다: email: ${email}, password: ${userPw}`
-      );
-      return next(createError(400, '적절하지 않은 값을 입력했습니다.'));
+      )
+      return next(createError(400, '적절하지 않은 값을 입력했습니다.'))
     }
 
-    const user = await userDAO.getSalt(email);
+    const user = await userDAO.getSalt(email)
 
     if (user) {
       const cryptedPass = await cryptoData(userPw, user.salt)
 
-      const result = await userDAO.findUser(email, cryptedPass);
+      const result = await userDAO.findUser(email, cryptedPass)
 
       if (result) {
         if (result.deactivatedAt != null) {
-          return next(createError(404, '탈퇴한 계정입니다.'));
+          return next(createError(404, '탈퇴한 계정입니다.'))
         }
 
         const token = await generateToken(result.nickname, result._id, result.isConfirmed)
-        res.cookie('access_token', token, cookieOption);
-        console.log(`[INFO] 유저 ${result._id} 가 로그인했습니다.`);
+        res.cookie('access_token', token, cookieOption)
+        console.log(`[INFO] 유저 ${result._id} 가 로그인했습니다.`)
         return res.status(200).json({
           result: 'ok',
           nick: result.nickname,
           screenId: result.screenId,
           displayLanguage: result.displayLanguage,
-        });
+        })
       }
-      console.log(`[INFO] 유저 ${email} 가 다른 비밀번호 ${userPw} 로 로그인을 시도했습니다.`);
-      return next(createError(400, '잘못된 비밀번호입니다.'));
+      console.log(`[INFO] 유저 ${email} 가 다른 비밀번호 ${userPw} 로 로그인을 시도했습니다.`)
+      return next(createError(400, '잘못된 비밀번호입니다.'))
     }
-    console.log(`[INFO] 존재하지 않는 유저 ${email} 가 로그인을 시도했습니다.`);
-    return next(createError(404, '존재하지 않는 유저입니다.'));
+    console.log(`[INFO] 존재하지 않는 유저 ${email} 가 로그인을 시도했습니다.`)
+    return next(createError(404, '존재하지 않는 유저입니다.'))
   } catch (e) {
-    console.log(`[Error] 알 수 없는 오류가 발생했습니다. ${e}`);
-    return next(createError(500, '알 수 없는 오류가 발생했습니다.'));
+    console.log(`[Error] 알 수 없는 오류가 발생했습니다. ${e}`)
+    return next(createError(500, '알 수 없는 오류가 발생했습니다.'))
   }
-};
+}
 
 /**
  * @description 회원가입
@@ -130,9 +130,9 @@ export const login = async function (req, res, next) {
  * @returns -
  */
 export const join = async function (req, res, next) {
-  const { email, userPw, userPwRe, userLang, userNick: nick } = req.body;
-  const p = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[$@$!%*#?&])[A-Za-z\d$@$!%*#?&]{8,}$/;
-  const check = p.test(userPw);
+  const { email, userPw, userPwRe, userLang, userNick: nick } = req.body
+  const p = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[$@$!%*#?&])[A-Za-z\d$@$!%*#?&]{8,}$/
+  const check = p.test(userPw)
 
   const joinValidationSchema = Joi.object({
     email: Joi.string()
@@ -142,7 +142,7 @@ export const join = async function (req, res, next) {
     userPwRe: Joi.string().required(),
     nick: Joi.string().trim().required(),
     userLang: Joi.number().required(),
-  });
+  })
 
   try {
     try {
@@ -157,21 +157,21 @@ export const join = async function (req, res, next) {
         userPwRe,
         nick,
         userLang,
-      });
+      })
     } catch (e) {
-      console.log(`[INFO] 유저 ${email} 가 적절하지 않은 데이터로 가입하려 했습니다. ${e}`);
-      return next(createError(400, '적절하지 않은 값을 입력했습니다.'));
+      console.log(`[INFO] 유저 ${email} 가 적절하지 않은 데이터로 가입하려 했습니다. ${e}`)
+      return next(createError(400, '적절하지 않은 값을 입력했습니다.'))
     }
 
     if (check) {
       if (userPw === userPwRe) {
         /* 중복 가입 이메일 처리 */
         if ((await userDAO.isExist(email)) != null) {
-          console.log(`[INFO] 중복된 이메일 ${email} 로 가입하려했습니다.`);
-          return next(createError(400, '중복된 이메일입니다. 다른 이메일로 가입해주세요.'));
+          console.log(`[INFO] 중복된 이메일 ${email} 로 가입하려했습니다.`)
+          return next(createError(400, '중복된 이메일입니다. 다른 이메일로 가입해주세요.'))
         }
 
-        const {screenId, salt, password, token} = joinDataCrypt(email, userPw)
+        const { screenId, salt, password, token } = joinDataCrypt(email, userPw)
         const result = await userDAO.create({
           email,
           password,
@@ -180,41 +180,35 @@ export const join = async function (req, res, next) {
           token,
           screenId,
           displayLanguage: userLang,
-        });
+        })
 
         if (result) {
           try {
-            await sendMail(
-              email,
-              '이메일 인증을 완료해주세요.',
-              emailText(email, token),
-            );
+            await sendMail(email, '이메일 인증을 완료해주세요.', emailText(email, token))
             return res.status(201).json({
               result: 'ok',
-            });
-          } catch(e) {
-            console.error(
-              `[ERROR] ${email} 에게 메일을 보내는 도중 문제가 발생했습니다. ${e}`
-            );
-            return next(createError(500, '알 수 없는 오류가 발생했습니다.'));
+            })
+          } catch (e) {
+            console.error(`[ERROR] ${email} 에게 메일을 보내는 도중 문제가 발생했습니다. ${e}`)
+            return next(createError(500, '알 수 없는 오류가 발생했습니다.'))
           }
         } else {
-          console.log(`[INFO] 이미 존재하는 이메일 ${email} 로 회원가입을 시도했습니다.`);
-          return next(createError(400, '이미 존재하는 아이디입니다. 확인 후 시도해주세요.'));
+          console.log(`[INFO] 이미 존재하는 이메일 ${email} 로 회원가입을 시도했습니다.`)
+          return next(createError(400, '이미 존재하는 아이디입니다. 확인 후 시도해주세요.'))
         }
       } else {
-        console.log('[INFO] 일치하지 않는 패스워드로 가입하려했습니다.');
-        return next(createError(400, '비밀번호가 일치하지 않습니다.'));
+        console.log('[INFO] 일치하지 않는 패스워드로 가입하려했습니다.')
+        return next(createError(400, '비밀번호가 일치하지 않습니다.'))
       }
     } else {
-      console.log('[INFO] 회원가입 비밀번호 규칙이 맞지 않습니다.');
-      return next(createError(400, '비밀번호 규칙을 다시 확인해주세요.'));
+      console.log('[INFO] 회원가입 비밀번호 규칙이 맞지 않습니다.')
+      return next(createError(400, '비밀번호 규칙을 다시 확인해주세요.'))
     }
   } catch (e) {
-    console.error(`[ERROR] 알 수 없는 에러가 발생했습니다. ${e}`);
-    return next(createError(500, '알 수 없는 에러가 발생했습니다.'));
+    console.error(`[ERROR] 알 수 없는 에러가 발생했습니다. ${e}`)
+    return next(createError(500, '알 수 없는 에러가 발생했습니다.'))
   }
-};
+}
 
 /**
  * @description 비밀번호 찾기를 위해 메일 전송
@@ -225,7 +219,7 @@ export const join = async function (req, res, next) {
  * @returns -
  */
 export const mailToFindPass = async (req, res, next) => {
-  const { email } = req.body;
+  const { email } = req.body
   const userToken = await getRandomToken()
 
   try {
@@ -233,16 +227,16 @@ export const mailToFindPass = async (req, res, next) => {
     await sendMail(
       email,
       '비밀번호 재설정을 위해 이메일 인증을 완료해주세요.',
-      findPassText(email, userToken),
-    );
+      findPassText(email, userToken)
+    )
     return res.status(201).json({
       result: 'ok',
-    });
+    })
   } catch (e) {
-    console.error(`[Error] ${e}`);
-    return next(createError(e));
+    console.error(`[Error] ${e}`)
+    return next(createError(e))
   }
-};
+}
 
 /**
  * @description 유저 비밀번호 변경
@@ -253,7 +247,7 @@ export const mailToFindPass = async (req, res, next) => {
  * @returns -
  */
 export const findPass = async (req, res, next) => {
-  const { email, userPwNew, userPwNewRe, token } = req.body;
+  const { email, userPwNew, userPwNewRe, token } = req.body
   const changePassSchema = Joi.object({
     userPwNew: Joi.string()
       .regex(/^(?=.*[A-Za-z])(?=.*\d)(?=.*[$@$!%*#?&])[A-Za-z\d$@$!%*#?&]{8,}$/)
@@ -261,14 +255,14 @@ export const findPass = async (req, res, next) => {
     userPwNewRe: Joi.string()
       .regex(/^(?=.*[A-Za-z])(?=.*\d)(?=.*[$@$!%*#?&])[A-Za-z\d$@$!%*#?&]{8,}$/)
       .required(),
-  });
+  })
 
   /* Check password validation */
   try {
-    await changePassSchema.validateAsync({ userPwNew, userPwNewRe });
+    await changePassSchema.validateAsync({ userPwNew, userPwNewRe })
   } catch (e) {
-    console.log(`[INFO] 유저 ${email} 의 비밀번호 변경 실패: ${e}`);
-    return next(createError(400, '비밀번호 규칙을 확인해주세요.'));
+    console.log(`[INFO] 유저 ${email} 의 비밀번호 변경 실패: ${e}`)
+    return next(createError(400, '비밀번호 규칙을 확인해주세요.'))
   }
 
   try {
@@ -286,9 +280,7 @@ export const findPass = async (req, res, next) => {
           message: '새로운 비밀번호로 로그인해주세요.',
         })
       }
-      console.log(
-        `[INFO] 유저 ${email} 가 잘못된 토큰 ${token} 으로 비밀번호 변경을 시도했습니다.`
-      )
+      console.log(`[INFO] 유저 ${email} 가 잘못된 토큰 ${token} 으로 비밀번호 변경을 시도했습니다.`)
       return next(createError(401, '적절하지 않은 인증입니다.'))
     }
     console.log(
@@ -299,7 +291,7 @@ export const findPass = async (req, res, next) => {
     console.error(`[Error] ${e}`)
     return next(createError('알 수 없는 에러가 발생했습니다.'))
   }
-};
+}
 
 /**
  * @description 유저의 메일 인증
@@ -310,21 +302,21 @@ export const findPass = async (req, res, next) => {
  * @returns -
  */
 export const mailAuth = async function (req, res, next) {
-  const { email, token } = req.query;
+  const { email, token } = req.query
 
   try {
-    const result = await userDAO.isConfirmed(email, token);
+    const result = await userDAO.isConfirmed(email, token)
     if (result) {
-      await userDAO.confirmUser(email);
-      console.log(`[INFO] 유저 ${email} 의 이메일 인증이 완료되었습니다.`);
+      await userDAO.confirmUser(email)
+      console.log(`[INFO] 유저 ${email} 의 이메일 인증이 완료되었습니다.`)
       return res.status(200).json({
         result: 'ok',
-      });
+      })
     }
-    console.log(`[INFO] 이메일 ${email} 의 이메일 인증이 실패했습니다.`);
-    return next(createError(401, '이메일 인증에 실패했습니다.'));
+    console.log(`[INFO] 이메일 ${email} 의 이메일 인증이 실패했습니다.`)
+    return next(createError(401, '이메일 인증에 실패했습니다.'))
   } catch (e) {
-    console.error(`[Error] ${e}`);
-    return next(createError(500, '알 수 없는 에러가 발생했습니다.'));
+    console.error(`[Error] ${e}`)
+    return next(createError(500, '알 수 없는 에러가 발생했습니다.'))
   }
-};
+}

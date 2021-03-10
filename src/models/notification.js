@@ -1,6 +1,6 @@
-import mongoose from 'mongoose';
+import mongoose from 'mongoose'
 
-const { ObjectId } = mongoose;
+const { ObjectId } = mongoose
 
 /**
  * Notification schema
@@ -32,6 +32,6 @@ const notification = new mongoose.Schema({
   highlightId: { type: ObjectId },
   createdAt: { type: Date, default: Date.now },
   read: { type: Boolean, default: false },
-});
+})
 
-export default mongoose.model('Notification', notification);
+export default mongoose.model('Notification', notification)

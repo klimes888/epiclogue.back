@@ -1,8 +1,8 @@
-import mongoose from 'mongoose';
+import mongoose from 'mongoose'
 
 const userImageSchema = {
   origin: { type: String, default: null },
-  thumbnail: { type: String, default: null }
+  thumbnail: { type: String, default: null },
 }
 
 const user = new mongoose.Schema({
@@ -23,6 +23,6 @@ const user = new mongoose.Schema({
   token: { type: String },
   snsId: { type: String },
   snsType: { type: String, default: 'normal' },
-});
+})
 
-export default mongoose.model('User', user);
+export default mongoose.model('User', user)

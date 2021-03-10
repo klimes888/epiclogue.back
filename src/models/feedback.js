@@ -1,6 +1,6 @@
-import mongoose from 'mongoose';
+import mongoose from 'mongoose'
 
-const { ObjectId } = mongoose;
+const { ObjectId } = mongoose
 
 const Feedback = new mongoose.Schema({
   writer: { type: ObjectId, required: true, ref: 'User' },
@@ -8,6 +8,6 @@ const Feedback = new mongoose.Schema({
   feedbackBody: { type: String, required: true },
   writeDate: { type: Date, default: Date.now },
   edited: { type: Boolean, default: false },
-});
+})
 
-export default mongoose.model('Feedback', Feedback);
+export default mongoose.model('Feedback', Feedback)

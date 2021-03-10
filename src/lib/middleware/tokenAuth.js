@@ -1,6 +1,6 @@
-import createError from 'http-errors';
-import Joi from 'joi';
-import {cookieOption} from '../options'
+import createError from 'http-errors'
+import Joi from 'joi'
+import { cookieOption } from '../options'
 import { generateToken, verifyToken } from '../tokenManager'
 
 // 예외 페이지들에 대한 route stack의 마지막 async function의 이름을 저장합니다.
@@ -15,7 +15,7 @@ const authExceptions = [
   'originals',
   'allWorks', // 마이보드 페이지 끝
   'getReplys', // 대댓글 확인
-];
+]
 
 /**
  * @description JWT토큰으로 유저 인증 수행
@@ -25,16 +25,16 @@ const authExceptions = [
  */
 export const authToken = async (req, res, next) => {
   try {
-    const clientToken = req.cookies.access_token;
+    const clientToken = req.cookies.access_token
 
-    const { name: accessPath } = req.route.stack[req.route.stack.length - 1];
+    const { name: accessPath } = req.route.stack[req.route.stack.length - 1]
 
     if (!clientToken && authExceptions.includes(accessPath)) {
       // 비회원에게 접근이 허용된 페이지
-      return next();
+      return next()
     }
 
-    /* 
+    /*
      * 나머지 기능들에 대해 요청받은 토큰을 검사
      * 비회원에게 접근이 허용된 페이지의 경우에는 유저의 로그인 상태에 따라 다르게 보이기 위해 필요
      */
@@ -43,21 +43,21 @@ export const authToken = async (req, res, next) => {
       token: Joi.string()
         .regex(/^[A-Za-z0-9-_=]+\.[A-Za-z0-9-_=]+\.?[A-Za-z0-9-_.+/=]*$/)
         .required(),
-    });
+    })
 
     try {
-      await tokenSchema.validateAsync({ token: clientToken });
+      await tokenSchema.validateAsync({ token: clientToken })
     } catch (e) {
       console.log(
         `[INFO] 인증 실패: 유저의 토큰이 누락되었거나 적절하지 않습니다. ip: ${
           req.headers['x-forwarded-for'] || req.connection.remoteAddress
         } token: ${clientToken},
         ${e}`
-      );
-      return next(createError(401, '인증 실패: 적절하지 않은 인증입니다.'));
+      )
+      return next(createError(401, '인증 실패: 적절하지 않은 인증입니다.'))
     }
 
-    let decoded;
+    let decoded
 
     try {
       decoded = await verifyToken(clientToken)
@@ -67,35 +67,35 @@ export const authToken = async (req, res, next) => {
           req.headers['x-forwarded-for'] || req.connection.remoteAddress
         } token: ${clientToken},
         ${e}`
-      );
-      return next(createError(401, '인증 실패: 적절하지 않은 인증입니다.'));
+      )
+      return next(createError(401, '인증 실패: 적절하지 않은 인증입니다.'))
     }
 
     if (decoded) {
       if (decoded.isConfirmed) {
-        if(Date.now() / 1000 - decoded.iat > 60 * 60 * 24) {
+        if (Date.now() / 1000 - decoded.iat > 60 * 60 * 24) {
           // 하루이상 지나면 갱신
           const token = await generateToken(decoded.nick, decoded.uid, decoded.isConfirmed)
-          res.cookie('access_token', token, cookieOption);
+          res.cookie('access_token', token, cookieOption)
         }
-        res.locals.uid = decoded.uid;
-        next();
+        res.locals.uid = decoded.uid
+        next()
       } else {
         console.log(
           `[INFO] 인증 실패: 유저 ${decoded.uid} 가 로그인을 시도했으나 이메일 인증이 완료되지 않았습니다.`
-        );
-        return next(createError(401, '이메일 인증이 완료되지 않았습니다.'));
+        )
+        return next(createError(401, '이메일 인증이 완료되지 않았습니다.'))
       }
     } else {
       console.log(
         `[INFO] 인증 실패: 유저 ${
           req.headers['x-forwarded-for'] || req.connection.remoteAddress
         } 가 로그인을 시도했으나 토큰의 유효기간이 만료되었거나 토큰이 없습니다.`
-      );
-      return next(createError(401, '인증 실패: 적절하지 않은 인증입니다.'));
+      )
+      return next(createError(401, '인증 실패: 적절하지 않은 인증입니다.'))
     }
   } catch (e) {
-    console.error(`[ERROR] ${e}`);
-    return next(createError(500, '알 수 없는 에러가 발생했습니다.'));
+    console.error(`[ERROR] ${e}`)
+    return next(createError(500, '알 수 없는 에러가 발생했습니다.'))
   }
-};
+}
