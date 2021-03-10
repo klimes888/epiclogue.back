@@ -22,21 +22,4 @@ const Report = new mongoose.Schema({
   contentStatus: { type: Number, default: 0 }, // 0: public, 1: private, 2: deleted
 });
 
-Report.statics.create = function (data) {
-  const reportData = new this(data);
-  return reportData.save();
-};
-
-Report.statics.onProcess = function (reportId) {
-  return this.updateOne({ _id: reportId }, { reportStatus: 1 });
-};
-
-Report.statics.accepted = function (reportId) {
-  return this.updateOne({ _id: reportId }, { reportStatus: 2 });
-};
-
-Report.statics.rejected = function (reportId) {
-  return this.updateOne({ _id: reportId }, { reportStatus: 3 });
-};
-
-module.exports = mongoose.model('Report', Report);
+export default mongoose.model('Report', Report);

@@ -19,6 +19,7 @@
         "no-console": "off",
         "import/prefer-default-export": "off",
         "no-useless-escape": "off",  // 정규식 예외
-        "consistent-return": "off"   // async function return 강제 해제
+        "consistent-return": "off",   // async function return 강제 해제
+        "import/named": "off"
     }
 }

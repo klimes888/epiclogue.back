@@ -7,3 +7,4 @@ export { default as Notification } from './notification';
 export { default as React } from './react';
 export { default as Reply } from './reply';
 export { default as User } from './user';
+export { default as Report } from './report'

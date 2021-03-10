@@ -1,14 +1,10 @@
-import util from 'util';
-import crypto from 'crypto';
 import Joi from 'joi';
 import createError from 'http-errors';
-import { User } from '../../models';
+import { userDAO } from '../../DAO'
 import { sendMail, emailText, findPassText } from '../../lib/sendMail';
-import { joinDataCrypt } from '../../lib/cryptoData'
+import { joinDataCrypt, cryptoData, getRandomToken, getRandomString } from '../../lib/cryptoData'
 import { cookieOption } from '../../lib/options'
 import { generateToken } from '../../lib/tokenManager'
-
-const randomBytesPromise = util.promisify(crypto.randomBytes);
 
 /**
  * @description SNS 로그인
@@ -26,11 +22,11 @@ export const snsLogin = async function (req, res, next) {
           profile: snsData.profileObj.imageUrl,
           name: snsData.profileObj.name,
         }
-  let result = await User.isExistSns(userData.uid);
+  let result = await userDAO.isExistSns(userData.uid);
 
   if (!result) {
     const {password, salt, screenId, token} = joinDataCrypt(userData.email, userData.email);
-    result = await User.create({
+    result = await userDAO.create({
       email: userData.email,
       password,
       salt,
@@ -92,18 +88,12 @@ export const login = async function (req, res, next) {
       return next(createError(400, '적절하지 않은 값을 입력했습니다.'));
     }
 
-    const user = await User.getSalt(email);
+    const user = await userDAO.getSalt(email);
 
     if (user) {
-      const cryptedPass = crypto.pbkdf2Sync(
-        userPw,
-        user.salt,
-        parseInt(process.env.EXEC_NUM, 10),
-        parseInt(process.env.RESULT_LENGTH, 10),
-        'sha512'
-      );
+      const cryptedPass = await cryptoData(userPw, user.salt)
 
-      const result = await User.findUser(email, cryptedPass.toString('base64'));
+      const result = await userDAO.findUser(email, cryptedPass);
 
       if (result) {
         if (result.deactivatedAt != null) {
@@ -176,13 +166,13 @@ export const join = async function (req, res, next) {
     if (check) {
       if (userPw === userPwRe) {
         /* 중복 가입 이메일 처리 */
-        if ((await User.isExist(email)) != null) {
+        if ((await userDAO.isExist(email)) != null) {
           console.log(`[INFO] 중복된 이메일 ${email} 로 가입하려했습니다.`);
           return next(createError(400, '중복된 이메일입니다. 다른 이메일로 가입해주세요.'));
         }
 
         const {screenId, salt, password, token} = joinDataCrypt(email, userPw)
-        const result = await User.create({
+        const result = await userDAO.create({
           email,
           password,
           salt,
@@ -236,10 +226,10 @@ export const join = async function (req, res, next) {
  */
 export const mailToFindPass = async (req, res, next) => {
   const { email } = req.body;
-  const userToken = await (await randomBytesPromise(24)).toString('hex');
+  const userToken = await getRandomToken()
 
   try {
-    await User.updateOne({ email }, { $set: { token: userToken } }); // remove
+    await userDAO.setTokenForAuth(email, userToken)
     await sendMail(
       email,
       '비밀번호 재설정을 위해 이메일 인증을 완료해주세요.',
@@ -283,39 +273,31 @@ export const findPass = async (req, res, next) => {
 
   try {
     if (userPwNew === userPwNewRe) {
-      const authUser = await User.findOne({ email, token }); // remove
+      const authUser = await userDAO.isConfirmed(email, token)
       if (authUser) {
-        const newSalt = await (await randomBytesPromise(64)).toString('base64');
-        const newPass = await (
-          crypto.pbkdf2Sync(
-            userPwNew,
-            newSalt.toString('base64'),
-            parseInt(process.env.EXEC_NUM, 10),
-            parseInt(process.env.RESULT_LENGTH, 10),
-            'sha512'
-          )
-        ).toString('base64');
+        const newSalt = await getRandomString()
+        const newPass = await cryptoData(userPwNew, newSalt)
 
-        await User.updateOne({ email }, { salt: newSalt, password: newPass }); // remove
+        await userDAO.resetPass(email, newSalt, newPass)
 
-        console.log(`[INFO] 유저 ${email} 가 비밀번호 변경에 성공했습니다.`);
+        console.log(`[INFO] 유저 ${email} 가 비밀번호 변경에 성공했습니다.`)
         return res.status(200).json({
           result: 'ok',
           message: '새로운 비밀번호로 로그인해주세요.',
-        });
+        })
       }
       console.log(
         `[INFO] 유저 ${email} 가 잘못된 토큰 ${token} 으로 비밀번호 변경을 시도했습니다.`
-      );
-      return next(createError(401, '적절하지 않은 인증입니다.'));
+      )
+      return next(createError(401, '적절하지 않은 인증입니다.'))
     }
     console.log(
       `[INFO] 유저 ${email} 서로 다른 비밀번호 ${userPwNew}, ${userPwNewRe} 로 비밀번호 변경을 시도했습니다.`
-    );
-    return next(createError(400, '비밀번호가 다릅니다.'));
+    )
+    return next(createError(400, '비밀번호가 다릅니다.'))
   } catch (e) {
-    console.error(`[Error] ${e}`);
-    return next(createError('알 수 없는 에러가 발생했습니다.'));
+    console.error(`[Error] ${e}`)
+    return next(createError('알 수 없는 에러가 발생했습니다.'))
   }
 };
 
@@ -331,9 +313,9 @@ export const mailAuth = async function (req, res, next) {
   const { email, token } = req.query;
 
   try {
-    const result = await User.isConfirmed(email, token);
+    const result = await userDAO.isConfirmed(email, token);
     if (result) {
-      await User.confirmUser(email);
+      await userDAO.confirmUser(email);
       console.log(`[INFO] 유저 ${email} 의 이메일 인증이 완료되었습니다.`);
       return res.status(200).json({
         result: 'ok',

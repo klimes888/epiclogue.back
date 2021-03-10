@@ -1,12 +1,12 @@
 /* eslint-disable no-underscore-dangle */
 import createError from 'http-errors';
-import { Board } from '../../models';
+import { boardDAO } from '../../DAO'
 import { deleteImage } from '../imageCtrl';
 
 const checkSecondaryAllow = async (req, res, next) => {
   const { originBoardId } = req.body;
 
-  const isAllowing = await Board.findOne({ _id: originBoardId }, { allowSecondaryCreation: 1 }); // remove
+  const isAllowing = await boardDAO.getSecondaryAllow(originBoardId);
   if (isAllowing.allowSecondaryCreation === 1) {
     next();
   } else {

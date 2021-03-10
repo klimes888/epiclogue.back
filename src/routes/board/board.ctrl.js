@@ -1,13 +1,9 @@
 import Joi from 'joi';
 import createError from 'http-errors';
-import { startSession } from 'mongoose';
-import { Board, Feedback } from '../../models';
+import { boardDAO, feedbackDAO, replyDAO, notificationDAO } from '../../DAO'
 import { deleteImage, thumbPathGen } from '../../lib/imageCtrl';
 import { contentsWrapper } from '../../lib/contentsWrapper';
-import makeNotification from '../../lib/makeNotification';
-
-// tag match reg
-const p = /#[^\{\}\[\]\/?.,;:|\)*~`!^\-+<>@\#$%&\\\=\(\'\"\s]+/g
+import {tagPattern} from '../../lib/options'
 
 /**
  * @description 유저 피드
@@ -26,8 +22,8 @@ export const getBoards = async (req, res, next) => {
   }
 
   try {
-    const boardList = await Board.findAll(option);
-    console.log(boardList)
+    const boardList = await boardDAO.findAll(option);
+
     const filteredBoardList = boardList.filter(each => each.writer !== null);
     const wrappedData = await contentsWrapper(res.locals.uid, filteredBoardList, 'Board', false);
 
@@ -51,11 +47,11 @@ export const getBoards = async (req, res, next) => {
  * @returns 생성된 글의 아이디
  */
 export const postBoard = async (req, res, next) => {
-  const _boardImg = req.files.map(file => file.location);
+  const boardImg = req.files.map(file => file.location);
 
   let tags = '';
   if (req.body.boardBody) {
-    tags = req.body.boardBody.match(p);
+    tags = req.body.boardBody.match(tagPattern);
   }
 
   const boardData = {
@@ -66,8 +62,8 @@ export const postBoard = async (req, res, next) => {
     pub: req.body.pub,
     language: req.body.language,
     allowSecondaryCreation: req.body.allowSecondaryCreation,
-    boardImg: _boardImg,
-    thumbnail: thumbPathGen(_boardImg[0].split('/')), // 첫 번째 이미지를 썸네일로 만듦
+    boardImg,
+    thumbnail: thumbPathGen(boardImg[0].split('/')), // 첫 번째 이미지를 썸네일로 만듦
     tags,
     sourceUrl: req.body?.sourceUrl || null
   };
@@ -103,7 +99,7 @@ export const postBoard = async (req, res, next) => {
   }
 
   try {
-    const createdBoard = await Board.create(boardData);
+    const createdBoard = await boardDAO.create(boardData);
 
     console.log(`[INFO] 유저 ${boardData.writer}가 글 ${createdBoard._id}를 작성했습니다.`);
     return res.status(201).json({
@@ -129,7 +125,7 @@ export const viewBoard = async (req, res, next) => {
   const { uid: userId } = res.locals;
 
   try {
-    const boardData = await Board.getById(boardId);
+    const boardData = await boardDAO.getById(boardId);
 
     const wrappedBoardData = await contentsWrapper(userId, boardData, 'Board', true);
 
@@ -157,7 +153,7 @@ export const deleteBoard = async (req, res, next) => {
   const { boardId } = req.params;
 
   try {
-    const query = await Board.getById(boardId, {
+    const query = await boardDAO.getById(boardId, {
       _id: 0,
       feedbacks: 0,
       writer: 0,
@@ -166,19 +162,17 @@ export const deleteBoard = async (req, res, next) => {
     // for non blocking, didn't use async-await
     deleteImage(query.boardImg, 'board')
 
-    const deletion = await Board.delete(boardId);
-    Feedback.deleteByBoardId(boardId);
-    if (deletion.ok === 1) {
-      console.log(`[INFO] 글 ${boardId}가 삭제되었습니다.`);
-      return res.status(200).json({
-        result: 'ok',
-      });
-    }
+    await boardDAO.deleteBoard(boardId);
+    feedbackDAO.deleteByBoardId(boardId)
+    replyDAO.deleteByBoardId(boardId)
+    console.log(`[INFO] 글 ${boardId}가 삭제되었습니다.`);
+    return res.status(200).json({
+      result: 'ok',
+    });
+  } catch (e) {
     console.error(
       `[ERROR] 글 ${boardId} 의 삭제가 실패했습니다: 데이터베이스 질의에 실패했습니다.`
     );
-    return next(createError(500, '알 수 없는 에러가 발생했습니다.'));
-  } catch (e) {
     console.error(`[ERROR] ${e}`);
     return next(createError(500, '알 수 없는 에러가 발생했습니다.'));
   }
@@ -196,7 +190,7 @@ export const getEditInfo = async (req, res, next) => {
   const { boardId } = req.params;
 
   try {
-    const previousData = await Board.getById(boardId);
+    const previousData = await boardDAO.getById(boardId);
 
     console.log(
       `[INFO] 유저 ${res.locals.uid}가 글 ${boardId}을 수정을 위해 데이터를 요청했습니다.`
@@ -222,15 +216,14 @@ export const getEditInfo = async (req, res, next) => {
  */
 export const postEditInfo = async function (req, res, next) {
   const boardImg = req.files ? req.files.map(file => file.location) : [];
-  const session = await startSession();
   let tags = '';
 
   if (req.body.boardBody) {
-    tags = req.body.boardBody.match(p);
+    tags = req.body.boardBody.match(tagPattern);
   }
 
   try {
-    const originalData = await Board.getById(req.params.boardId);
+    const originalData = await boardDAO.getById(req.params.boardId);
 
     deleteImage(originalData.boardImg, 'board')
 
@@ -238,31 +231,21 @@ export const postEditInfo = async function (req, res, next) {
       boardId: req.params.boardId,
       boardTitle: req.body.boardTitle || originalData.boardTitle,
       boardBody: req.body.boardBody || originalData.boardBody,
-      boardImg: boardImg || originalData.boardImg,
+      boardImg,
       category: parseInt(req.body.category || originalData.category, 10),
       pub: parseInt(req.body.pub || originalData.pub, 10),
       language: parseInt(req.body.language || originalData.language, 10),
-      thumbnail: thumbPathGen(boardImg[0].split('/')),
+      thumbnail: boardImg ? thumbPathGen(boardImg[0].split('/')) : originalData.thumbnail,
       tags,
     };
 
-    await session.withTransaction(async () => {
-      const patch = await Board.update(updateData).session(session);
-      if (patch.ok === 1) {
-        const updatedBoardData = await Board.getById(req.params.boardId).session(session);
-        console.log(`[INFO] 유저 ${res.locals.uid}가 글 ${req.params.boardId}을 수정했습니다.`);
-        return res.status(200).json({ result: 'ok', data: { _id: updatedBoardData._id } });
-      }
-      console.error(
-        `[ERROR] 글 ${req.params.boardId}의 수정이 실패했습니다: 데이터베이스 질의에 실패했습니다.`
-      );
-      return next(createError(500, '알 수 없는 에러가 발생했습니다.'));
-    });
+    const updatedBoardData = await boardDAO.update(updateData);
+    console.log(`[INFO] 유저 ${res.locals.uid}가 글 ${req.params.boardId}을 수정했습니다.`);
+    return res.status(200).json({ result: 'ok', data: { _id: updatedBoardData._id } });
+
   } catch (e) {
     console.error(`[ERROR] ${e}`);
     return next(createError(500, '알 수 없는 에러가 발생했습니다.'));
-  } finally {
-    session.endSession();
   }
 };
 
@@ -279,7 +262,7 @@ export const secPost = async (req, res, next) => {
 
   let tags = '';
   if (req.body.boardBody) {
-    tags = req.body.boardBody.match(p);
+    tags = req.body.boardBody.match(tagPattern);
   }
 
   const boardData = {
@@ -335,24 +318,22 @@ export const secPost = async (req, res, next) => {
   }
 
   try {
-    const session = await startSession();
-    await session.withTransaction(async () => {
-      const createdBoard = await new Board(boardData).save({ session });
-      await makeNotification(
+    const createdBoard = await boardDAO.createSec(boardData)
+    if(res.locals.uid !== boardData.originUserId) {
+      await notificationDAO.makeNotification(
         {
           targetUserId: req.body.originUserId,
           maker: res.locals.uid,
           notificationType: 'Secondary',
           targetType: 'Board',
           targetInfo: createdBoard._id,
-        },
-        session
-      );
-      console.log(`[INFO] 유저 ${boardData.writer}가 2차창작 ${createdBoard._id}를 작성했습니다.`);
-      return res.status(201).json({
-        result: 'ok',
-        data: { _id: createdBoard._id },
-      });
+        }
+      )
+    }
+    console.log(`[INFO] 유저 ${boardData.writer}가 2차창작 ${createdBoard._id}를 작성했습니다.`);
+    return res.status(201).json({
+      result: 'ok',
+      data: { _id: createdBoard._id },
     });
   } catch (e) {
     console.error(`[ERROR] ${e}`);

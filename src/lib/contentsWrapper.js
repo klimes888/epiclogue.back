@@ -1,5 +1,5 @@
 import createError from 'http-errors';
-import { Board, Like, Bookmark, React, Follow, Reply, Feedback } from '../models';
+import { boardDAO, feedbackDAO, replyDAO, likeDAO, reactDAO, followDAO, bookmarkDAO } from '../DAO'
 
 /**
  * 유저에 맞는 컨텐츠를 제공하기 위한 래퍼객체
@@ -57,13 +57,13 @@ export const contentsWrapper = async (reqUserId, contentData, contentType, isFor
             }
           }
           // 피드백의 팔로잉, 좋아요
-          let filteredFeedbacks = await Feedback.getByBoardId(targetContent._id)
+          let filteredFeedbacks = await feedbackDAO.getByBoardId(targetContent._id)
           filteredFeedbacks = filteredFeedbacks.filter(each => each.writer !== null);
 
           const feedbacks = await Promise.all(filteredFeedbacks.map(async feedback => {
             const feedbackData = feedback;
-            feedbackData.heartCount = await Like.countHearts(feedbackData._id, 'Feedback');
-            feedbackData.replyCount = await Reply.countReplys(feedbackData._id)
+            feedbackData.heartCount = await likeDAO.countHearts(feedbackData._id, 'Feedback');
+            feedbackData.replyCount = await replyDAO.countReplys(feedbackData._id)
             if (reqUserId) {
               feedbackData.liked = !!likeIdSet.includes(feedback._id.toString());
               feedbackData.writer.following =
@@ -77,8 +77,8 @@ export const contentsWrapper = async (reqUserId, contentData, contentType, isFor
 
           targetContent.feedbacks = feedbacks;
           targetContent.feedbackCount = feedbacks.length;
-          targetContent.reactCount = await React.countReacts(targetContent._id);
-          targetContent.heartCount = await Like.countHearts(targetContent._id, 'Board');
+          targetContent.reactCount = await reactDAO.countReacts(targetContent._id);
+          targetContent.heartCount = await likeDAO.countHearts(targetContent._id, 'Board');
           resultSet = targetContent
         } else {
           // 메인페이지와 마이 보드에서 사용하는 *다수의 글 데이터*
@@ -103,14 +103,14 @@ export const contentsWrapper = async (reqUserId, contentData, contentType, isFor
           targetContent.map(async data => {
             const userData = data.toJSON();
             // 작품 수
-            userData.illustCount = await Board.countByWriterAndCategory(userData._id, 0);
-            userData.comicCount = await Board.countByWriterAndCategory(userData._id, 1);
+            userData.illustCount = await boardDAO.countByWriterAndCategory(userData._id, 0);
+            userData.comicCount = await boardDAO.countByWriterAndCategory(userData._id, 1);
 
             if (reqUserId) {
               userData.isFollowing =
                 userData._id.toString() === reqUserId
                   ? 'me'
-                  : !!(await Follow.didFollow({
+                  : !!(await followDAO.didFollow({
                       userId: reqUserId,
                       targetUserId: userData._id,
                     }));
@@ -138,7 +138,7 @@ export const contentsWrapper = async (reqUserId, contentData, contentType, isFor
             reqUserId === userData._id.toString()
               ? 'me'
               : !!followingIdSet.includes(userData.writer._id.toString());
-          userData.heartCount = await Like.countHearts(userData._id, 'Reply');
+          userData.heartCount = await likeDAO.countHearts(userData._id, 'Reply');
           return userData;
         }));
       }
@@ -147,25 +147,25 @@ export const contentsWrapper = async (reqUserId, contentData, contentType, isFor
   };
 
 const getBookmarkIdSet = async (userId) => {
-  const bookmarkList = await Bookmark.getIdByUserId(userId);
+  const bookmarkList = await bookmarkDAO.getIdByUserId(userId);
   const bookmarkIdSet = bookmarkList.map(eachBookmark => eachBookmark.board.toString());
   return bookmarkIdSet;
 }
 
 const getLikeIdSet = async (userId) => {
-  const likeList = await Like.getByUserId(userId);
+  const likeList = await likeDAO.getByUserId(userId);
   const likeIdSet = likeList.map(eachLike => eachLike.targetInfo.toString());
   return likeIdSet;
 }
 
 const getFollowingIdSet = async (userId) => {
-  const followingList = await Follow.getFollowingIdList(userId);
+  const followingList = await followDAO.getFollowingIdList(userId);
   const followingIdSet = followingList.map(eachUser => eachUser.targetUserId.toString());
   return followingIdSet;
 }
 
 const getFollowerIdSet = async (userId) => {
-  const followerList = await Follow.getFollowerIdList(userId);
+  const followerList = await followDAO.getFollowerIdList(userId);
   const followerIdSet = followerList.map(eachUser => eachUser.userId.toString());
   return followerIdSet;
 };

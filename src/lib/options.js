@@ -8,3 +8,9 @@ export const cookieOption = {
 
 // tag extraction pattern
 export const tagPattern = /#[^\{\}\[\]\/?.,;:|\)*~`!^\-+<>@\#$%&\\\=\(\'\"\s]+/g
+
+export const dbOption = {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    useCreateIndex: true,
+  };

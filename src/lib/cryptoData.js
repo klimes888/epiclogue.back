@@ -10,10 +10,10 @@ export const joinDataCrypt = async (id, pass) => {
                         .update(id)
                         .digest('hex')
                         .slice(0, 14);
-    const salt = await randomBytesPromise(64);
+    const salt = await getRandomString();
     const password = crypto.pbkdf2Sync(
         pass,
-        salt.toString('base64'),
+        salt,
         parseInt(process.env.EXEC_NUM, 10),
         parseInt(process.env.RESULT_LENGTH, 10),
         'sha512'
@@ -22,8 +22,26 @@ export const joinDataCrypt = async (id, pass) => {
 
   return {
       screenId,
-      salt: salt.toString('base64'),
+      salt,
       password: password.toString('base64'),
       token
   }
+}
+
+export const cryptoData = async (data, salt) => crypto.pbkdf2Sync(
+        data,
+        salt,
+        parseInt(process.env.EXEC_NUM, 10),
+        parseInt(process.env.RESULT_LENGTH, 10),
+        'sha512'
+    ).toString('base64')
+
+export const getRandomString = async () => {
+    const result = await randomBytesPromise()
+    return result.toString('base64')
+}
+
+export const getRandomToken = async () => {
+    const result = await randomBytesPromise(24)
+    return result.toString('hex')
 }

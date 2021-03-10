@@ -1,7 +1,6 @@
 import createError from 'http-errors';
 import Joi from 'joi';
-import { startSession } from 'mongoose';
-import { Notification } from '../../models';
+import {notificationDAO} from '../../DAO'
 
 /**
  * @description 모든 알림 확인
@@ -12,16 +11,12 @@ import { Notification } from '../../models';
  * @returns 사용자의 모든 알림
  */
 export const getNoti = async (req, res, next) => {
-  const session = await startSession();
-
   try {
-    await session.withTransaction(async () => {
-      const notiData = await Notification.getNotiList(res.locals.uid).session(session);
-      console.log(`[INFO] 유저 ${res.locals.uid} 가 알림을 확인했습니다.`);
-      return res.status(200).json({
-        result: 'ok',
-        data: notiData,
-      });
+    const notiData = await notificationDAO.getNotiList(res.locals.uid)
+    console.log(`[INFO] 유저 ${res.locals.uid} 가 알림을 확인했습니다.`);
+    return res.status(200).json({
+      result: 'ok',
+      data: notiData,
     });
   } catch (e) {
     console.error(`[Error] ${e}`);
@@ -39,7 +34,7 @@ export const getNoti = async (req, res, next) => {
  */
 export const setRead = async (req, res, next) => {
   try {
-    await Notification.updateMany({ _id: req.body.notiId, userId: res.locals.uid }, { read: true });// direct use model must change dao
+    await notificationDAO.setReadOne(req.body.notiId, res.locals.uid)
     console.log(`[INFO] 유저 ${res.locals.uid} 가 알림을 ${req.body.notiId} 를 확인했습니다.`);
     return res.status(200).json({
       result: 'ok',
@@ -60,7 +55,7 @@ export const setRead = async (req, res, next) => {
  */
 export const setReadAll = async (req, res, next) => {
   try {
-    await Notification.updateMany({ userId: res.locals.uid }, { read: true });// direct use model must change dao
+    await notificationDAO.setReadAll(res.locals.uid)
     console.log(`[INFO] 유저 ${res.locals.uid} 가 알림을 모두 읽음처리 했습니다.`);
     return res.status(200).json({
       result: 'ok',
@@ -81,11 +76,7 @@ export const setReadAll = async (req, res, next) => {
  */
 export const checkNotified = async (req, res, next) => {
   try {
-    const notified = await Notification.find({ userId: res.locals.uid, read: false }, { _id: 1 });// direct use model must change dao
-    let notiCount = 0;
-    if (notified) {
-      notiCount = notified.length;
-    }
+    const notiCount = notificationDAO.getUnreadNotiCount(res.locals.uid)
 
     console.log(`[INFO] 유저 ${res.locals.uid} 가 알림유무를 확인했습니다.`);
     return res.status(200).json({
@@ -125,7 +116,7 @@ export const deleteNoti = async (req, res, next) => {
   }
 
   try {
-    await Notification.deleteOne({ _id: req.body.notiId });// direct use model must change dao
+    await notificationDAO.deleteNoti(req.body.notiId)
     console.log(`[INFO] 유저 ${res.locals.uid} 가 알림 ${req.body.notiId} 를 삭제했습니다.`);
     return res.status(200).json({
       result: 'ok',
@@ -146,7 +137,7 @@ export const deleteNoti = async (req, res, next) => {
  */
 export const deleteAll = async (req, res, next) => {
   try {
-    await Notification.deleteMany({ userId: res.locals.uid });// direct use model must change dao
+    await notificationDAO.deleteNotiAll(res.locals.uid)
     console.log(`[INFO] 유저 ${res.locals.uid} 가 모든 알림을 삭제했습니다.`);
     return res.status(200).json({ result: 'ok' });
   } catch (e) {

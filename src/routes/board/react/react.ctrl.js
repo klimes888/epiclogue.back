@@ -1,5 +1,5 @@
 import createError from 'http-errors';
-import { React } from '../../../models';
+import { reactDAO } from '../../../DAO';
 
 /**
  * @description 글의 반응 확인
@@ -11,7 +11,7 @@ import { React } from '../../../models';
  */
 export const getReact = async (req, res, next) => {
   try {
-    const reactData = await React.getByBoardId(req.params.boardId);
+    const reactData = await reactDAO.getByBoardId(req.params.boardId);
     const filteredData = reactData.filter(data => data.user !== null);
     console.log(
       `[INFO] 유저 ${res.locals.uid || '비회원유저'} 가 글 ${

@@ -75,7 +75,7 @@ export const authToken = async (req, res, next) => {
       if (decoded.isConfirmed) {
         if(Date.now() / 1000 - decoded.iat > 60 * 60 * 24) {
           // 하루이상 지나면 갱신
-          const token = generateToken(decoded.nick, decoded.uid, decoded.isConfirmed)
+          const token = await generateToken(decoded.nick, decoded.uid, decoded.isConfirmed)
           res.cookie('access_token', token, cookieOption);
         }
         res.locals.uid = decoded.uid;

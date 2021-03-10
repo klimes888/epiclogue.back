@@ -1,5 +1,5 @@
 import createError from 'http-errors';
-import { Board, Reply, Feedback, User } from '../../models';
+import { boardDAO, replyDAO, feedbackDAO, userDAO } from '../../DAO'
 
 // 작성자에 대한 인증 미들웨어
 export const checkWriter = async (req, res, next) => {
@@ -9,7 +9,7 @@ export const checkWriter = async (req, res, next) => {
 
   try {
     // 어드민이면 통과
-    const isAdmin = await User.isAdmin(res.locals.uid);
+    const isAdmin = await userDAO.isAdmin(res.locals.uid);
     console.log(res.locals.uid, '의 admin 여부: ', isAdmin);
     if (isAdmin) {
       return next();
@@ -18,15 +18,15 @@ export const checkWriter = async (req, res, next) => {
     if (req.params.replyId !== undefined) {
       type = '댓글';
       id = req.params.replyId;
-      isWriter = await Reply.isWriter(res.locals.uid, req.params.replyId);
+      isWriter = await replyDAO.isWriter(res.locals.uid, req.params.replyId);
     } else if (req.params.feedbackId !== undefined) {
       type = '피드백';
       id = req.params.feedbackId;
-      isWriter = await Feedback.isWriter(res.locals.uid, req.params.feedbackId);
+      isWriter = await feedbackDAO.isWriter(res.locals.uid, req.params.feedbackId);
     } else if (req.params.boardId !== undefined) {
       type = '글';
       id = req.params.boardId;
-      isWriter = await Board.isWriter(res.locals.uid, req.params.boardId);
+      isWriter = await boardDAO.isWriter(res.locals.uid, req.params.boardId);
     }
 
     if (isWriter !== null) {

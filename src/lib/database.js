@@ -1,24 +1,18 @@
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 import dotenvExpand from 'dotenv-expand';
+import { dbOption } from './options'
 
 dotenvExpand(dotenv.config());
 
 mongoose.Promise = global.Promise;
-
-const options = {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-  useCreateIndex: true,
-};
-
 
 export const connect = async () => {
     const dbEnvironment =
       process.env.NODE_ENV === 'test' ? process.env.MONGO_TEST_URI : process.env.MONGO_URI_ALONE;
 
     try {
-      await mongoose.connect(dbEnvironment, options);
+      await mongoose.connect(dbEnvironment, dbOption);
       console.log('[INFO] Database connected properly');
     } catch (e) {
       console.error(e);

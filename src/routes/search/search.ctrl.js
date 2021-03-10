@@ -1,5 +1,5 @@
 import createError from 'http-errors';
-import { User, Board } from '../../models';
+import { userDAO, boardDAO } from '../../DAO';
 import { contentsWrapper } from '../../lib/contentsWrapper';
 
 /**
@@ -18,7 +18,7 @@ export const search = async (req, res, next) => {
   if (searchType === 'Board') {
     // 글 제목으로 검색
     try {
-      searchResult = await Board.searchByTitleOrTag(queryString);
+      searchResult = await boardDAO.searchByTitleOrTag(queryString);
     } catch (e) {
       console.error(e);
       return next(createError('글 검색에 실패했습니다.'));
@@ -28,8 +28,8 @@ export const search = async (req, res, next) => {
     try {
       searchResult =
         queryString[0] === '@'
-          ? await User.searchByScreenId(queryString.substr(1))
-          : await User.searchByNickname(queryString);
+          ? await userDAO.searchByScreenId(queryString.substr(1))
+          : await userDAO.searchByNickname(queryString);
     } catch (e) {
       console.error(e);
       return next(createError('유저 검색에 실패했습니다.'));

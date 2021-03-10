@@ -1,7 +1,7 @@
 /* eslint-disable no-underscore-dangle */
 import createError from 'http-errors';
 import Joi from 'joi';
-import { User, Board, Reply, Feedback } from '../../models';
+import {userDAO, boardDAO, replyDAO, feedbackDAO} from '../../DAO'
 
 // to patch, delete, like, bookmark on board, feedback, reply
 export const checkExistence = async (req, res, next) => {
@@ -40,11 +40,11 @@ export const checkExistence = async (req, res, next) => {
     }
 
     if (type === '글') {
-      existence = await Board.getById(targetId);
+      existence = await boardDAO.getById(targetId);
     } else if (type === '피드백') {
-      existence = await Feedback.getById(targetId);
+      existence = await feedbackDAO.getById(targetId);
     } else if (type === '댓글') {
-      existence = await Reply.getById(targetId);
+      existence = await replyDAO.getById(targetId);
     }
 
     if (existence !== null) {
@@ -68,7 +68,7 @@ export const checkUserExistence = async (req, res, next) => {
   if (userId === undefined) {
     // query: follow, params: myboard
     const screenId = req.query.screenId || req.params.screenId;
-    const userCheck = await User.findByScreenId(screenId);
+    const userCheck = await userDAO.findByScreenId(screenId);
 
     if (userCheck && userCheck.deactivatedAt === null) {
       return next();
@@ -92,7 +92,7 @@ export const checkUserExistence = async (req, res, next) => {
   }
 
   try {
-    const existence = await User.findOne({ _id: userId }); // remove
+    const existence = await userDAO.getById(userId);
 
     if (existence && existence.deactivatedAt === null) {
       // left is Object, right is String.

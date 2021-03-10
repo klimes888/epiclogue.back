@@ -1,5 +1,5 @@
 import createError from 'http-errors';
-import { User, Board, Follow } from '../../models';
+import { userDAO, boardDAO, followDAO } from '../../DAO'
 import { getBookmarkList } from '../interaction/bookmark/bookmark.ctrl';
 import { contentsWrapper } from '../../lib/contentsWrapper';
 
@@ -23,19 +23,19 @@ export const getMyboard = async (req, res, next) => {
     joinDate: 1,
   };
 
-  const userData = await User.getByScreenId(screenId, projectionOpt);
+  const userData = await userDAO.getByScreenId(screenId, projectionOpt);
 
   try {
     const myBoardData = userData.toJSON();
     // direct use model must change dao
-    myBoardData.followerCount = await Follow.countDocuments({ targetUserId: userData._id });
-    myBoardData.followingCount = await Follow.countDocuments({ userId: userData._id });
-    console.log(res.locals.uid, userData._id);
+    myBoardData.followerCount = await followDAO.getFollowerCount(userData._id)
+    myBoardData.followingCount = await followDAO.getFollowingCount(userData._id)
+
     if (res.locals?.uid) {
       myBoardData.isFollowing =
         res.locals.uid === userData._id.toString()
           ? 'me'
-          : !!(await Follow.isFollowing(res.locals.uid, userData._id));
+          : !!(await followDAO.isFollowing(res.locals.uid, userData._id));
     }
 
     console.log(
@@ -60,9 +60,9 @@ export const getMyboard = async (req, res, next) => {
  * @returns Array of all works
  */
 export const allWorks = async (req, res, next) => {
-  const userId = await User.findOne({ screenId: req.params.screenId }, { _id: 1, screenId: 0 });// direct use model must change dao
+  const userId = await userDAO.getIdByScreenId(req.params.screenId);
   try {
-    const userAllWorks = await Board.findAll({ writer: userId._id });
+    const userAllWorks = await boardDAO.findAll({ writer: userId._id });
     const wrappedWorks = res.locals?.uid
       ? await contentsWrapper(res.locals.uid, userAllWorks, 'Board', false)
       : userAllWorks;
@@ -88,8 +88,8 @@ export const allWorks = async (req, res, next) => {
  */
 export const originals = async (req, res, next) => {
   try {
-    const targetUser = await User.getIdByScreenId(req.params.screenId);
-    const myContents = await Board.findAllOriginOrSecondary(targetUser._id, false);
+    const targetUser = await userDAO.getIdByScreenId(req.params.screenId);
+    const myContents = await boardDAO.findAllOriginOrSecondary(targetUser._id, false);
     const wrappedContents = await contentsWrapper(res.locals.uid, myContents, 'Board', false);
 
     console.log(
@@ -117,8 +117,8 @@ export const originals = async (req, res, next) => {
  */
 export const secondaryWorks = async (req, res, next) => {
   try {
-    const targetUser = await User.findOne({ screenId: req.params.screenId }, { _id: 1 });
-    const userSecondaryWorks = await Board.findAllOriginOrSecondary(targetUser._id, true);
+    const targetUser = await userDAO.findOne({ screenId: req.params.screenId }, { _id: 1 });
+    const userSecondaryWorks = await boardDAO.findAllOriginOrSecondary(targetUser._id, true);
     const wrappedContents = res.locals?.uid
       ? await contentsWrapper(res.locals.uid, userSecondaryWorks, 'Board', false)
       : userSecondaryWorks;
