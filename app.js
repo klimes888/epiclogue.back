@@ -1,4 +1,5 @@
 // external modules
+import './src/env/env'
 import createError from 'http-errors'
 import express from 'express'
 import cookieParser from 'cookie-parser'
@@ -7,8 +8,6 @@ import cors from 'cors'
 import helmet from 'helmet'
 import swaggerJSDoc from 'swagger-jsdoc'
 import swaggerUi from 'swagger-ui-express'
-import dotenv from 'dotenv'
-import dotenvExpand from 'dotenv-expand'
 import dayjs from 'dayjs'
 import dayjsPluginUTC from 'dayjs-plugin-utc'
 import Slack from 'slack-node'
@@ -16,13 +15,11 @@ import Slack from 'slack-node'
 // routers
 import indexRouter from './src/routes'
 
-
 // utils
 import {connect} from './src/lib/database'
 import { logger, stream } from './src/configs/winston'
 
 const app = express()
-dotenvExpand(dotenv.config())
 dayjs.extend(dayjsPluginUTC)
 
 // Swagger setting

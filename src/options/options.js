@@ -1,3 +1,5 @@
+import '../env/env'
+
 export const cookieOption = {
   maxAge: 1000 * 60 * 60 * 24 * 7, // 7days
   httpOnly: true,

@@ -4,10 +4,9 @@ import multerS3 from 'multer-s3'
 import dayjs from 'dayjs'
 import crypto from 'crypto'
 import util from 'util'
-import dotenv from 'dotenv'
+import '../env/env'
 
 const randomBytesPromise = util.promisify(crypto.randomBytes)
-dotenv.config()
 
 const s3 = new aws.S3({
   accessKeyId: process.env.AWS_ACCESS_ID, // 생성한 s3의 accesskey

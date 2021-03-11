@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken'
-import 'dotenv/config'
+import '../env/env'
 
 const { SECRET_KEY, JWT_EXPIRES_IN } = process.env
 

@@ -3,7 +3,7 @@ import createError from 'http-errors'
 import { userDAO } from '../../DAO'
 import { sendMail, emailText, findPassText } from '../../lib/sendMail'
 import { joinDataCrypt, cryptoData, getRandomToken, getRandomString } from '../../lib/cryptoData'
-import { cookieOption } from '../../lib/options'
+import { cookieOption } from '../../options/options'
 import { generateToken } from '../../lib/tokenManager'
 
 /**

@@ -1,6 +1,6 @@
 import crypto from 'crypto'
-import 'dotenv/config'
 import util from 'util'
+import '../env/env'
 
 const randomBytesPromise = util.promisify(crypto.randomBytes)
 

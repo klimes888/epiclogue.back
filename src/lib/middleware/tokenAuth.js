@@ -1,6 +1,6 @@
 import createError from 'http-errors'
 import Joi from 'joi'
-import { cookieOption } from '../options'
+import { cookieOption } from '../../options/options'
 import { generateToken, verifyToken } from '../tokenManager'
 
 // 예외 페이지들에 대한 route stack의 마지막 async function의 이름을 저장합니다.

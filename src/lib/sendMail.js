@@ -1,4 +1,4 @@
-import 'dotenv/config'
+import '../env/env'
 import mailer from 'nodemailer'
 import AWS from 'aws-sdk'
 

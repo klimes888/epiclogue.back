@@ -1,9 +1,6 @@
-import dotenv from 'dotenv'
+import '../env/env'
 import mongoose from 'mongoose'
-import dotenvExpand from 'dotenv-expand'
-import { dbOption } from './options'
-
-dotenvExpand(dotenv.config())
+import { dbOption } from '../options/options'
 
 mongoose.Promise = global.Promise
 

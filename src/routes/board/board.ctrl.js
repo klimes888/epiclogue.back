@@ -3,7 +3,7 @@ import createError from 'http-errors'
 import { boardDAO, feedbackDAO, replyDAO, notificationDAO } from '../../DAO'
 import { deleteImage, thumbPathGen } from '../../lib/imageCtrl'
 import { contentsWrapper } from '../../lib/contentsWrapper'
-import { tagPattern } from '../../lib/options'
+import { tagPattern } from '../../options/options'
 
 /**
  * @description 유저 피드
