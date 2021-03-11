@@ -1,5 +1,6 @@
 import createError from 'http-errors'
 import Joi from 'joi'
+import '../../env/env'
 import { cookieOption } from '../../options/options'
 import { generateToken, verifyToken } from '../tokenManager'
 

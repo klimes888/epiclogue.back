@@ -1,5 +1,6 @@
 import Joi from 'joi'
 import createError from 'http-errors'
+import '../../env/env'
 import { userDAO } from '../../DAO'
 import { sendMail, emailText, findPassText } from '../../lib/sendMail'
 import { joinDataCrypt, cryptoData, getRandomToken, getRandomString } from '../../lib/cryptoData'
