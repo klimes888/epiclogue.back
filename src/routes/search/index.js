@@ -1,9 +1,9 @@
-import express from 'express';
-import * as searchCtrl from './search.ctrl';
-import { verifyToken } from '../../lib/middleware/tokenAuth';
+import express from 'express'
+import * as searchCtrl from './search.ctrl'
+import { authToken } from '../../lib/middleware/tokenAuth'
 
-const search = express.Router();
+const search = express.Router()
 
-search.get('/', verifyToken, searchCtrl.search);
+search.get('/', authToken, searchCtrl.search)
 
-export default search;
+export default search

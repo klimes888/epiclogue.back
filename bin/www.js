@@ -4,12 +4,13 @@
  * Module dependencies.
  */
 
-import app from '../app.js'
 import debug from 'debug'
-debug('lunacat-api:server')
 import http from 'http'
-import dotenv from 'dotenv'
-dotenv.config()
+import '../src/env/env'
+import app from '../app'
+
+debug('lunacat-api:server')
+
 /**
  * Get port from environment and store in Express.
  */
@@ -37,16 +38,16 @@ server.on('close', onClose)
  */
 
 function normalizePort(val) {
-  const port = parseInt(val, 10)
+  const normalizedPort = parseInt(val, 10)
 
-  if (isNaN(port)) {
+  if (Number.isNaN(normalizedPort)) {
     // named pipe
     return val
   }
 
-  if (port >= 0) {
+  if (normalizedPort >= 0) {
     // port number
-    return port
+    return normalizedPort
   }
 
   return false
@@ -61,16 +62,16 @@ function onError(error) {
     throw error
   }
 
-  const bind = typeof port === 'string' ? 'Pipe ' + port : 'Port ' + port
+  const bind = typeof port === 'string' ? `Pipe ${ port }` : `Port ${ port }`
 
   // handle specific listen errors with friendly messages
   switch (error.code) {
     case 'EACCES':
-      console.error(bind + ' requires elevated privileges')
+      console.error(`${bind  } requires elevated privileges`)
       process.exit(1)
       break
     case 'EADDRINUSE':
-      console.error(bind + ' is already in use')
+      console.error(`${bind  } is already in use`)
       process.exit(1)
       break
     default:
@@ -84,8 +85,8 @@ function onError(error) {
 
 function onListening() {
   const addr = server.address()
-  const bind = typeof addr === 'string' ? 'pipe ' + addr : 'port ' + addr.port
-  debug('Listening on ' + bind)
+  const bind = typeof addr === 'string' ? `pipe ${  addr}` : `port ${  addr.port}`
+  debug(`Listening on ${  bind}`)
 }
 
 function onClose() {

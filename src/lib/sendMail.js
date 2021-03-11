@@ -1,17 +1,17 @@
-import 'dotenv/config';
-import mailer from 'nodemailer';
-import AWS from 'aws-sdk';
+import '../env/env'
+import mailer from 'nodemailer'
+import AWS from 'aws-sdk'
 
-const { AWS_SES_ID, AWS_SES_SECRET, AWA_SES_REGION } = process.env;
+const { AWS_SES_ID, AWS_SES_SECRET, AWA_SES_REGION } = process.env
 
 const SES = new AWS.SES({
   apiVersion: '2010-12-01',
   accessKeyId: AWS_SES_ID,
   secretAccessKey: AWS_SES_SECRET,
   region: AWA_SES_REGION,
-});
+})
 
-const transporter = mailer.createTransport({ SES });
+const transporter = mailer.createTransport({ SES })
 
 export const emailText = (email, authToken) => `
   <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -88,7 +88,7 @@ export const emailText = (email, authToken) => `
   </body>
   
   </html>
-`;
+`
 
 export const findPassText = (email, authToken) => `
     <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -150,6 +150,18 @@ export const findPassText = (email, authToken) => `
     </body>
     
     </html>
-  `;
+  `
 
-export default transporter;
+export const sendMail = async (email, subject, html) => {
+  try {
+    await transporter.sendMail({
+      from: `epiclogue <${process.env.MAIL_USER}>`,
+      to: email,
+      subject,
+      html,
+    })
+    console.log(`[INFO] ${email} 에게 성공적으로 메일을 보냈습니다`)
+  } catch (e) {
+    throw new Error('메일을 보내는 도중 오류가 발생했습니다.')
+  }
+}

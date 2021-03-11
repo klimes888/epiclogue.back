@@ -1,13 +1,13 @@
-import express from 'express';
-import { verifyToken } from '../../lib/middleware/tokenAuth';
-import * as userCtrl from './user.ctrl';
-import { uploadUserImage } from '../../lib/imageCtrl';
+import express from 'express'
+import { authToken } from '../../lib/middleware/tokenAuth'
+import * as userCtrl from './user.ctrl'
+import { uploadUserImage } from '../../lib/imageCtrl'
 
-const user = express.Router();
+const user = express.Router()
 
-user.get('/editProfile', verifyToken, userCtrl.getUserEditInfo);
-user.post('/editProfile', verifyToken, uploadUserImage.any(), userCtrl.postUserEditInfo);
-user.patch('/changePass', verifyToken, userCtrl.changePass);
-user.delete('/', verifyToken, userCtrl.deleteUser);
+user.get('/editProfile', authToken, userCtrl.getUserEditInfo)
+user.post('/editProfile', authToken, uploadUserImage.any(), userCtrl.postUserEditInfo)
+user.patch('/changePass', authToken, userCtrl.changePass)
+user.delete('/', authToken, userCtrl.deleteUser)
 
-export default user;
+export default user
