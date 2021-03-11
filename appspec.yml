@@ -3,3 +3,8 @@ os: linux
 files:
         - source: /
           destination: /home/ubuntu/build/
+permissions:
+  - object: /
+    pattern: "**"
+    owner: ubuntu
+    group: ubuntu
