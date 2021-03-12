@@ -7,7 +7,7 @@ export const create = async (bookmarkData, reactData, boardId) => {
   try {
     await session.withTransaction(async () => {
       await Bookmark.create([bookmarkData], { session })
-      await React.craete([reactData], { session })
+      await React.create([reactData], { session })
       bookmarkCount = await Bookmark.countDocuments({ board: boardId }).session(session)
     })
   } catch (e) {

@@ -163,7 +163,7 @@ const getBookmarkIdSet = async userId => {
 }
 
 const getLikeIdSet = async userId => {
-  const likeList = await likeDAO.getByUserId(userId)
+  const likeList = await likeDAO.getIdByUserId(userId)
   const likeIdSet = likeList.map(eachLike => eachLike.targetInfo.toString())
   return likeIdSet
 }

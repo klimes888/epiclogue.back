@@ -74,4 +74,8 @@ export const getByUserId = async function (userId, targetType) {
     })
 }
 
+export const getIdByUserId = async function (userId) {
+  return Like.find({userId}, {targetInfo:1})
+}
+
 export const countHearts = async (targetInfo, targetType) => Like.countDocuments({ targetInfo, targetType })
