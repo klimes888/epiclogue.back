@@ -156,7 +156,7 @@ export const changePass = async (req, res, next) => {
         console.log(
           `[INFO] 유저 ${res.locals.uid} 의 비밀번호 변경이 실패했습니다: 기존 비밀번호 미일치`
         )
-        return next(createError(400, '비밀번호과 재입력이 다릅니다.'))
+        return next(createError(400, '기존 비밀번호가 아닙니다.'))
       } catch (e) {
         console.error(
           `[ERROR] 유저 ${res.locals.uid} 의 비밀번호 변경이 실패했습니다: 데이터베이스 질의에 실패했습니다.`
