@@ -153,14 +153,9 @@ export const deleteBoard = async (req, res, next) => {
   const { boardId } = req.params
 
   try {
-    const query = await boardDAO.getById(boardId, {
-      _id: 0,
-      feedbacks: 0,
-      writer: 0,
-      boardImg: 1,
-    })
+    const targetBoard = await boardDAO.getById(boardId, { boardImg: 1 })
     // for non blocking, didn't use async-await
-    deleteImage(query.boardImg, 'board')
+    deleteImage(targetBoard.boardImg, 'board')
 
     await boardDAO.deleteBoard(boardId)
     feedbackDAO.deleteByBoardId(boardId)
