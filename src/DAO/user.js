@@ -7,7 +7,7 @@ export const create = function (data) {
 }
 
 export const isScreenIdUnique = async function (uid, screenId) {
-  const result = await User.findOne({ screenId, $ne: { uid } })
+  const result = await User.findOne({ screenId, _id: { $ne: uid } })
 
   return result === null
 }
