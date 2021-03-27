@@ -213,7 +213,7 @@ export const join = async function (req, res, next) {
 
 /**
  * @description 비밀번호 찾기를 위해 메일 전송
- * @access POST /auth/findPass
+ * @access POST /auth/findpass
  * @param {*} req HTTP request
  * @param {*} res HTTP response
  * @param {*} next ExpressJS next middleware
@@ -241,7 +241,7 @@ export const mailToFindPass = async (req, res, next) => {
 
 /**
  * @description 유저 비밀번호 변경
- * @access PATCH /auth/findPass
+ * @access PATCH /auth/findpass
  * @param {*} req HTTP request
  * @param {*} res HTTP response
  * @param {*} next ExpressJS next middleware
