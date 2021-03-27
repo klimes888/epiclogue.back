@@ -6,8 +6,8 @@ export const create = function (data) {
   return userinfo.save()
 }
 
-export const isScreenIdUnique = async function (screenId) {
-  const result = await User.findOne({ screenId })
+export const isScreenIdUnique = async function (uid, screenId) {
+  const result = await User.findOne({ screenId, $ne: { uid } })
 
   return result === null
 }

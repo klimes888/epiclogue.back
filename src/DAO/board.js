@@ -53,6 +53,7 @@ export const findAll = function (option) {
     boardTitle: 1,
     uid: 1,
     pub: 1,
+    language: 1,
     category: 1,
     thumbnail: 1,
     originUserId: 1,

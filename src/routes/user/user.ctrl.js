@@ -73,7 +73,7 @@ export const postUserEditInfo = async function (req, res, next) {
   }
 
   try {
-    const isScreenIdUnique = await userDAO.isScreenIdUnique(screenId)
+    const isScreenIdUnique = await userDAO.isScreenIdUnique(originalData._id, screenId)
     const newerUserData = {
       userId: res.locals.uid,
       screenId,
@@ -84,7 +84,7 @@ export const postUserEditInfo = async function (req, res, next) {
       banner,
       profile,
     }
-    if(isScreenIdUnique) {
+    if (isScreenIdUnique) {
       await userDAO.updateProfile(newerUserData)
     } else {
       throw new Error(`screenId is not Unique, isScreenIdUnique: ${isScreenIdUnique}`)
