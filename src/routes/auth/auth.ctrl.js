@@ -26,7 +26,7 @@ export const snsLogin = async function (req, res, next) {
   let result = await userDAO.isExistSns(userData.uid)
 
   if (!result) {
-    const { password, salt, screenId, token } = joinDataCrypt(userData.email, userData.email)
+    const { password, salt, screenId, token } = await joinDataCrypt(userData.email, userData.email)
     result = await userDAO.create({
       email: userData.email,
       password,
@@ -296,7 +296,7 @@ export const findPass = async (req, res, next) => {
 
 /**
  * @description 유저의 메일 인증
- * @access PATCH /auth/mailAuth
+ * @access GET /auth/mailAuth
  * @param {*} req HTTP request
  * @param {*} res HTTP response
  * @param {*} next ExpressJS next middleware
