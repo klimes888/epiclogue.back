@@ -122,14 +122,14 @@ export const postBoard = async (req, res, next) => {
  */
 export const viewBoard = async (req, res, next) => {
   const { boardId } = req.params
-  const { uid: userId } = res.locals
+  const { uid } = res.locals
 
   try {
     const boardData = await boardDAO.getById(boardId)
 
-    const wrappedBoardData = await contentsWrapper(userId, boardData, 'Board', true)
+    const wrappedBoardData = await contentsWrapper(uid, boardData, 'Board', true)
 
-    console.log(`[INFO] 유저 ${userId || '비회원유저'}가 글 ${boardId}를 접근했습니다.`)
+    console.log(`[INFO] 유저 ${uid || '비회원유저'}가 글 ${boardId}를 접근했습니다.`)
 
     return res.status(200).json({
       result: 'ok',

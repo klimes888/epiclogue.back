@@ -117,7 +117,7 @@ export const originals = async (req, res, next) => {
  */
 export const secondaryWorks = async (req, res, next) => {
   try {
-    const targetUser = await userDAO.findOne({ screenId: req.params.screenId }, { _id: 1 })
+    const targetUser = await userDAO.getIdByScreenId(req.params.screenId)
     const userSecondaryWorks = await boardDAO.findAllOriginOrSecondary(targetUser._id, true)
     const wrappedContents = res.locals?.uid
       ? await contentsWrapper(res.locals.uid, userSecondaryWorks, 'Board', false)

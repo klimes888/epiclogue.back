@@ -76,7 +76,7 @@ export const setReadAll = async (req, res, next) => {
  */
 export const checkNotified = async (req, res, next) => {
   try {
-    const notiCount = notificationDAO.getUnreadNotiCount(res.locals.uid)
+    const notiCount = await notificationDAO.getUnreadNotiCount(res.locals.uid)
 
     console.log(`[INFO] 유저 ${res.locals.uid} 가 알림유무를 확인했습니다.`)
     return res.status(200).json({
