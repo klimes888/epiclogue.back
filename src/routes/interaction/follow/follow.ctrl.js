@@ -91,9 +91,8 @@ export const deleteFollow = async (req, res, next) => {
  * @returns 팔로잉 또는 팔로워 리스트
  */
 export const getFollow = async (req, res, next) => {
-  const { screenId } = req.query
+  const { screenId, type } = req.query
   const userId = await userDAO.getIdByScreenId(screenId)
-  const { type } = req.query
 
   try {
     const requestedData =
