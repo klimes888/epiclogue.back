@@ -78,7 +78,10 @@ export const postUserEditInfo = async function (req, res, next) {
       userId: res.locals.uid,
       screenId,
       nickname,
-      availableLanguage,
+      availableLanguage: 
+        availableLanguage instanceof Array 
+        ? availableLanguage 
+        : availableLanguage.split(','),
       displayLanguage,
       intro,
       banner,
