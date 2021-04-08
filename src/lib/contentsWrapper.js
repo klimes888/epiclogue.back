@@ -128,7 +128,9 @@ export const contentsWrapper = async (reqUserId, contentData, contentType, isFor
         ? contentData
         : targetContent.map(data => {
             const userData = data.toJSON()
-            const targetId = userData?.userId ? userData.userId._id.toString() : userData.targetUserId._id.toString()
+            const targetId = userData?.userId
+              ? userData.userId._id.toString()
+              : userData.targetUserId._id.toString()
             userData.following = !!followingIdSet.includes(targetId)
             userData.follower = !!followerIdSet.includes(targetId)
             return userData
