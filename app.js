@@ -44,7 +44,7 @@ const options = {
 
 const swaggerSpec = swaggerJSDoc(options)
 
-app.use(cors({ credentials: true, origin: true }))
+app.use(cors({ credentials: true, origin: process.env.NODE_ENV === 'production' ? '.epiclogue.com' : true }))
 app.use(
   morgan('combined', {
     stream,

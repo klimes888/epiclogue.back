@@ -3,7 +3,7 @@ import * as myboardCtrl from './myboard.ctrl'
 import { authToken } from '../../lib/middleware/tokenAuth'
 import { checkUserExistence } from '../../lib/middleware/checkExistence'
 
-const myboard = new Router({ mergeParams: true })
+const myboard = Router({ mergeParams: true })
 
 myboard.get('/:screenId/all', authToken, checkUserExistence, myboardCtrl.allWorks)
 myboard.get('/:screenId/originals', authToken, checkUserExistence, myboardCtrl.originals)
