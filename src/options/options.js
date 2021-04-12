@@ -6,6 +6,13 @@ export const cookieOption = {
   sameSite: process.env.NODE_ENV === 'production' ? 'Lax' : 'None',
 }
 
+export const cookieClearOption = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV !== 'test',
+  domain: process.env.NODE_ENV === 'test' ? 'localhost' : '.epiclogue.com',
+  sameSite: process.env.NODE_ENV === 'production' ? 'Lax' : 'None',
+}
+
 // tag extraction pattern
 export const tagPattern = /#[^\{\}\[\]\/?.,;:|\)*~`!^\-+<>@\#$%&\\\=\(\'\"\s]+/g
 
