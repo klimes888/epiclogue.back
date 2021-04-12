@@ -78,13 +78,14 @@ export const postUserEditInfo = async function (req, res, next) {
       userId: res.locals.uid,
       screenId,
       nickname,
-      availableLanguage,
+      availableLanguage:
+        availableLanguage instanceof Array ? availableLanguage : availableLanguage.split(','),
       displayLanguage,
       intro,
       banner,
       profile,
     }
-    if(isScreenIdUnique || screenId === originalData.screenId) {
+    if (isScreenIdUnique || screenId === originalData.screenId) {
       await userDAO.updateProfile(newerUserData)
     } else {
       throw new Error(`screenId is not Unique, isScreenIdUnique: ${isScreenIdUnique}`)

@@ -8,7 +8,7 @@ import { checkExistence } from '../../lib/middleware/checkExistence'
 import { uploadImage } from '../../lib/imageCtrl'
 import checkSecondaryAllow from '../../lib/middleware/checkSecondaryAllow'
 
-const board = new Router({ mergeParams: true })
+const board = Router({ mergeParams: true })
 
 board.get('/', authToken, boardCtrl.getBoards)
 board.post('/', authToken, uploadImage.any(), boardCtrl.postBoard)

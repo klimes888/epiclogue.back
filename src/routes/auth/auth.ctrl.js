@@ -57,6 +57,28 @@ export const snsLogin = async function (req, res, next) {
     displayLanguage: result.displayLanguage,
   })
 }
+/**
+ * @description 로그아웃
+ * @access POST /auth/logout
+ * @param {*} req HTTP request
+ * @param {*} res HTTP response
+ * @param {*} next ExpressJS next middleware
+ * @returns 로그아웃 여부 응답
+ */
+
+export const logout = async (req, res, next) => {
+  const { uid } = res.locals
+  if(uid) {
+    console.log(`${ uid } 유저가 로그아웃 했습니다.`)
+    res.clearCookie('access_token')
+  } else {
+    console.error(`${ req.headers['x-forwarded-for'] }에서 비정상적인 로그아웃 요청을 했습니다.`)
+    next(createError(400, '비정상적 요청입니다.'))
+  }
+  return res.status(200).json({
+    result: 'ok'
+  })
+}
 
 /**
  * @description 로그인
