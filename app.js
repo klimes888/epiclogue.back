@@ -8,19 +8,18 @@ import cors from 'cors'
 import helmet from 'helmet'
 import swaggerJSDoc from 'swagger-jsdoc'
 import swaggerUi from 'swagger-ui-express'
-import dayjs from 'dayjs'
-import dayjsPluginUTC from 'dayjs-plugin-utc'
+import session from 'express-session'
 import Slack from 'slack-node'
 
 // routers
 import indexRouter from './src/routes'
 
 // utils
-import {connect} from './src/lib/database'
+import { connect } from './src/lib/database'
 import { logger, stream } from './src/configs/winston'
+import { apiResponser } from './src/lib/apiResponser'
 
 const app = express()
-dayjs.extend(dayjsPluginUTC)
 
 // Swagger setting
 const swaggerDefinition = {
@@ -45,12 +44,16 @@ const options = {
 const swaggerSpec = swaggerJSDoc(options)
 
 app.use(cors({ credentials: true, origin: true }))
-app.use(
-  morgan('combined', {
-    stream,
-    skip: (req, res) => res.statusCode > 399,
-  })
-)
+if (process.env.NODE_ENV === 'production') {
+  app.use(morgan('combined', { stream }));
+} else if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test') {
+  app.use(morgan('dev', { stream }));
+}
+app.use(session({
+  secret: process.env.SECRET_KEY,
+  resave: false,
+  saveUninitialized: true
+}))
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(cookieParser())
@@ -68,7 +71,8 @@ app.use((req, res, next) => {
 
 // error handler
 app.use((err, req, res) => {
-  // if (process.env.NODE_ENV !== 'production') { }
+  const statusCode = err.status || 500
+  const errorMessage = err.message || 'Internal server error'
 
   if (!process.env.NODE_ENV === 'test' && err.status === 500) {
     // Only alert on 500 error
@@ -78,28 +82,18 @@ app.use((err, req, res) => {
       {
         text: `*Message*: ${err.message} \n *Stack*: ${err.stack} \n *StatusCode*: ${err.status}`,
       },
-      (webhookError) => {
+      webhookError => {
         if (webhookError) console.error(webhookError)
       }
     )
   }
 
-  const errObject = {
-    req: { route: req.route, url: req.url, method: req.method, headers: req.headers },
-    err: { message: err.message, stack: err.stack, status: err.status },
-    user: res.locals.uid,
-  }
-
-  logger.error(`${dayjs().local().format('YYYY-MM-DD HH:mm:ss')}`, errObject)
+  logger.error(`StatusCode: ${statusCode}, Message: ${errorMessage}`)
 
   res.locals.message = err.message
   res.locals.error = err
 
-  return res.status(err.status || 500).json({
-    result: 'error',
-    message: err.message || 'Internal server error',
-    data: err.properties,
-  })
+  return apiResponser(res, statusCode, errorMessage)
 })
 
 export default app

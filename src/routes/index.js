@@ -14,9 +14,17 @@ const router = express.Router({
 })
 
 router.get('/', (req, res) => {
+  if (req.session.views) {
+    req.session.views += 1
+  } else {
+    req.session.views = 1
+  }
+
   res.status(200).json({
     result: 'ok',
     comment: 'server is ok',
+    message: req.session.id,
+    views: req.session.views
   })
 })
 router.use('/auth', authRouter)
