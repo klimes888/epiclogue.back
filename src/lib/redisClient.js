@@ -5,7 +5,7 @@ import { promisify } from 'util'
 const { REDIS_URL } = process.env
 
 const redisClient = redis.createClient({
-  url: REDIS_URL,
+  url: process.env.REDIS_URL,
 })
 
 redisClient.on('connect', () => {
@@ -14,7 +14,6 @@ redisClient.on('connect', () => {
 
 redisClient.on('error', err => {
   console.error(err)
-  process.exit(1)
 })
 
 export default {

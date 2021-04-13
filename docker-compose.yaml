@@ -118,9 +118,12 @@ services:
     volumes:
       - ./data/redis:/data
       - ./docker/redis/redis.conf:/etc/redis.conf
+      - ./docker/redis/initRedis.sh:/docker-entrypoint-initdb.d/initRedis.sh:ro
+    environment:
+      REDIS_AUTH_PASS: ${REDIS_AUTH_PASS}
     networks:
       - backend
     ports:
       - 6379:6379
-    command: ["redis-server", "/etc/redis.conf"]
+    command: ["redis-server", "/etc/redis.conf", "--requirepass", "$REDIS_AUTH_PASS"]
     restart: always
