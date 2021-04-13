@@ -2,14 +2,14 @@ export const cookieOption = {
   maxAge: 1000 * 60 * 60 * 24 * 7, // 7days
   httpOnly: true,
   secure: process.env.NODE_ENV !== 'test',
-  domain: process.env.NODE_ENV === 'test' ? 'localhost' : '.epiclogue.com',
+  domain: process.env.NODE_ENV === 'test' ? 'localhost:3000' : '.epiclogue.com',
   sameSite: process.env.NODE_ENV === 'production' ? 'Lax' : 'None',
 }
 
 export const cookieClearOption = {
   httpOnly: true,
   secure: process.env.NODE_ENV !== 'test',
-  domain: process.env.NODE_ENV === 'test' ? 'localhost' : '.epiclogue.com',
+  domain: process.env.NODE_ENV === 'test' ? 'localhost:3000' : '.epiclogue.com',
   sameSite: process.env.NODE_ENV === 'production' ? 'Lax' : 'None',
 }
 

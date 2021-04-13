@@ -4,7 +4,7 @@ import '../../env/env'
 import { userDAO } from '../../DAO'
 import { sendMail, emailText, findPassText } from '../../lib/sendMail'
 import { joinDataCrypt, cryptoData, getRandomToken, getRandomString } from '../../lib/cryptoData'
-import { cookieOption, cookieClearOption } from '../../options/options'
+import { cookieClearOption, cookieOption } from '../../options/options'
 import { generateToken } from '../../lib/tokenManager'
 
 /**
@@ -67,9 +67,8 @@ export const snsLogin = async function (req, res, next) {
  */
 
 export const logout = async (req, res, next) => {
-  const { uid } = res.locals
-  if(uid) {
-    console.log(`${ uid } 유저가 로그아웃 했습니다.`)
+  if(req.cookies?.access_token) {
+    console.log(`${ req.cookies.access_token } 유저가 로그아웃 했습니다.`)
     res.clearCookie('access_token', cookieClearOption)
   } else {
     console.error(`${ req.headers['x-forwarded-for'] }에서 비정상적인 로그아웃 요청을 했습니다.`)
