@@ -52,7 +52,10 @@ if (process.env.NODE_ENV === 'production') {
 app.use(session({
   secret: process.env.SECRET_KEY,
   resave: false,
-  saveUninitialized: true
+  saveUninitialized: true,
+  cookie: {
+    maxAge: 60 * 60 * 1000 // 1h
+  }
 }))
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))

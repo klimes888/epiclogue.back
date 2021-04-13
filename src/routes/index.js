@@ -1,4 +1,5 @@
 import express from 'express'
+import redisClient from '../lib/redisClient'
 
 import usersRouter from './user'
 import boardRouter from './board'
@@ -9,16 +10,20 @@ import authRouter from './auth'
 import notiRouter from './notification'
 import myboardRouter from './myboard'
 
+import { apiResponser } from '../lib/apiResponser'
+
 const router = express.Router({
   mergeParams: true,
 })
 
-router.get('/', (req, res) => {
+router.get('/', async (req, res) => {
   if (req.session.views) {
     req.session.views += 1
   } else {
     req.session.views = 1
   }
+
+  redisClient.setAsync(req.sessionID, req.session.views)
 
   res.status(200).json({
     result: 'ok',
@@ -26,6 +31,10 @@ router.get('/', (req, res) => {
     message: req.session.id,
     views: req.session.views
   })
+})
+router.get('/views', async (req, res) => {
+  const views = await redisClient.getAsync(req.session.id)
+  apiResponser({ res, statusCode: 200, data: views })
 })
 router.use('/auth', authRouter)
 router.use('/user', usersRouter)

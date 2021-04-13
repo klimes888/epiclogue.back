@@ -5,12 +5,12 @@ import { dbOption } from '../options/options'
 mongoose.Promise = global.Promise
 
 export const connect = async () => {
-  const dbEnvironment =
+  const dbUrl =
     process.env.NODE_ENV === 'test' ? process.env.MONGO_TEST_URI : process.env.MONGO_URI_ALONE
 
   try {
-    await mongoose.connect(dbEnvironment, dbOption)
-    console.log('[INFO] Database connected properly')
+    await mongoose.connect(dbUrl, dbOption)
+    console.log(`[INFO] Successfully connected database server ${dbUrl}`)
   } catch (e) {
     console.error(e)
   }
