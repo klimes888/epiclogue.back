@@ -2,7 +2,7 @@ export const apiResponser = ({ res, statusCode = 200, data, message }) => {
   let output = {
     result: 'ok',
     status: statusCode,
-    data
+    data,
   }
 
   if (statusCode > 399) {

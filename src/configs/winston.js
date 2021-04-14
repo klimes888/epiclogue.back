@@ -1,24 +1,20 @@
-import fs from 'fs';
-import winston from 'winston';
-import WinstonDaily from 'winston-daily-rotate-file';
+import fs from 'fs'
+import winston from 'winston'
+import WinstonDaily from 'winston-daily-rotate-file'
 
 // logs dir
-const logDir = `${__dirname}/../../logs`;
+const logDir = `${__dirname}/../../logs`
 
 if (!fs.existsSync(logDir)) {
-  fs.mkdirSync(logDir);
+  fs.mkdirSync(logDir)
 }
 
 // winston format
-const { combine, timestamp, printf } = winston.format;
+const { combine, timestamp, printf } = winston.format
 
-// Define log format
-const timezone = () =>
-  new Date().toLocaleString('ko-KR', {
-    timeZone: 'UTC',
-  })
-
-const logFormat = printf(({ timestamp, level, message }) => `${timezone} ${level}: ${message}`);
+// timestamp에 빨간줄이 그어지나 없으면 로그가 이상하게 출력됨
+// eslint-disable-next-line no-shadow
+const logFormat = printf(({ timestamp, level, message }) => `${timestamp} ${level}: ${message}`)
 
 /*
  * Log Level
@@ -54,7 +50,7 @@ const logger = winston.createLogger({
       zippedArchive: true,
     }),
   ],
-});
+})
 
 logger.add(
   new winston.transports.Console({
@@ -64,12 +60,12 @@ logger.add(
       winston.format.simple()
     ),
   })
-);
+)
 
 const stream = {
   write: message => {
-    logger.info(message.substring(0, message.lastIndexOf('\n')));
+    logger.info(message.substring(0, message.lastIndexOf('\n')))
   },
-};
+}
 
-export { logger, stream };
+export { logger, stream }

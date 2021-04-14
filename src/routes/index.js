@@ -29,7 +29,7 @@ router.get('/', async (req, res) => {
     result: 'ok',
     comment: 'server is ok',
     message: req.session.id,
-    views: req.session.views
+    views: req.session.views,
   })
 })
 router.get('/views', async (req, res) => {
