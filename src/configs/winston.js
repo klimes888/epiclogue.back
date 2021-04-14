@@ -9,44 +9,35 @@ if (!fs.existsSync(logDir)) {
   fs.mkdirSync(logDir)
 }
 
-// winston format
-const { combine, timestamp, printf } = winston.format
-
-// timestamp에 빨간줄이 그어지나 없으면 로그가 이상하게 출력됨
-// eslint-disable-next-line no-shadow
-const logFormat = printf(({ timestamp, level, message }) => `${timestamp} ${level}: ${message}`)
+const { combine, printf } = winston.format
+const logFormat = printf(({ level, message }) => `${level}: ${message}`)
 
 /*
  * Log Level
  * error: 0, warn: 1, info: 2, http: 3, verbose: 4, debug: 5, silly: 6
  */
 const logger = winston.createLogger({
-  format: combine(
-    timestamp({
-      format: 'YYYY-MM-DD HH:mm:ss',
-    }),
-    logFormat
-  ),
+  format: combine(logFormat),
   transports: [
     // info log setting
     new WinstonDaily({
       level: 'info',
       datePattern: 'YYYY-MM-DD',
-      dirname: `${logDir}/info`, // log file /logs/info/*.log in save
+      dirname: `${logDir}/info`,
       filename: `%DATE%.log`,
       maxFiles: 30, // 30 Days saved
-      json: false,
+      json: true,
       zippedArchive: true,
     }),
     // error log setting
     new WinstonDaily({
       level: 'error',
       datePattern: 'YYYY-MM-DD',
-      dirname: `${logDir}/error`, // log file /logs/error/*.log in save
+      dirname: `${logDir}/error`,
       filename: `%DATE%.error.log`,
       maxFiles: 30, // 30 Days saved
       handleExceptions: true,
-      json: false,
+      json: true,
       zippedArchive: true,
     }),
   ],
@@ -63,9 +54,14 @@ logger.add(
 )
 
 const stream = {
+  // write는 app.js에서 morgan 모듈과 함께 사용
   write: message => {
     logger.info(message.substring(0, message.lastIndexOf('\n')))
   },
+  // writeDetail은 sessionAndTokenLogger.js 에서 HttpRequest logging을 위해 사용
+  writeDetail: (message) => {
+    logger.info(`${message}`)
+  }
 }
 
 export { logger, stream }

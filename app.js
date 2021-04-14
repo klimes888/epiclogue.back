@@ -18,15 +18,16 @@ import { connect } from './src/lib/database'
 import { logger, stream } from './src/configs/winston'
 import { swaggerSpec } from './src/configs/apiDoc'
 import { apiResponser } from './src/lib/apiResponser'
+import { apiRequestLogger } from './src/lib/middleware/apiRequestLogger'
 
 const app = express()
 
 app.use(cors({ credentials: true, origin: true }))
-if (process.env.NODE_ENV === 'production') {
-  app.use(morgan('combined', { stream }));
-} else if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test') {
-  app.use(morgan('dev', { stream }));
-}
+// if (process.env.NODE_ENV === 'production') {
+//   app.use(morgan('combined', { stream }));
+// } else if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test') {
+//   app.use(morgan('dev', { stream }));
+// }
 app.use(session({
   secret: process.env.SECRET_KEY,
   resave: false,
@@ -40,6 +41,8 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(cookieParser())
 app.use(helmet())
+
+app.use(apiRequestLogger)
 
 connect()
 

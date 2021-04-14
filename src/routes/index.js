@@ -17,14 +17,6 @@ const router = express.Router({
 })
 
 router.get('/', async (req, res) => {
-  if (req.session.views) {
-    req.session.views += 1
-  } else {
-    req.session.views = 1
-  }
-
-  redisClient.setAsync(req.sessionID, req.session.views)
-
   res.status(200).json({
     result: 'ok',
     comment: 'server is ok',
