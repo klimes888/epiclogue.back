@@ -230,6 +230,7 @@ export const postEditInfo = async function (req, res, next) {
       language: parseInt(req.body.language || originalData.language, 10),
       thumbnail: boardImg ? thumbPathGen(boardImg[0].split('/')) : originalData.thumbnail,
       tags,
+      sourceUrl: req.body?.sourceUrl || null,
     }
 
     const updatedBoardData = await boardDAO.update(updateData)
