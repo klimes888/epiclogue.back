@@ -1,12 +1,11 @@
 // external modules
 import './src/env/env'
-import createError from 'http-errors'
 import express from 'express'
 import cookieParser from 'cookie-parser'
 import morgan from 'morgan'
 import cors from 'cors'
 import helmet from 'helmet'
-import swaggerJSDoc from 'swagger-jsdoc'
+import hpp from 'hpp'
 import swaggerUi from 'swagger-ui-express'
 import session from 'express-session'
 import Slack from 'slack-node'
@@ -17,31 +16,10 @@ import indexRouter from './src/routes'
 // utils
 import { connect } from './src/lib/database'
 import { logger, stream } from './src/configs/winston'
+import { swaggerSpec } from './src/configs/apiDoc'
 import { apiResponser } from './src/lib/apiResponser'
 
 const app = express()
-
-// Swagger setting
-const swaggerDefinition = {
-  info: {
-    // API informations (required)
-    title: 'epiclogue API', // Title (required)
-    version: '1.0.0', // Version (required)
-    description: 'epiclogue service API', // Description (optional)
-  },
-  host: 'api.epiclogue.com', // Host (optional)
-  basePath: '/', // Base path (optional)
-  schemes: ['https'],
-}
-
-const options = {
-  // Import swaggerDefinitions
-  swaggerDefinition,
-  // Path to the API docs
-  apis: ['./apidoc.yaml'],
-}
-
-const swaggerSpec = swaggerJSDoc(options)
 
 app.use(cors({ credentials: true, origin: true }))
 if (process.env.NODE_ENV === 'production') {
@@ -57,6 +35,7 @@ app.use(session({
     maxAge: 60 * 60 * 1000 // 1h
   }
 }))
+app.use(hpp())
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(cookieParser())
@@ -69,7 +48,11 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec))
 
 // catch 404 and forward to error handler
 app.use((req, res, next) => {
-  next(createError(404, '올바른 접근이 아닙니다.'))
+  const notFoundError = new Error()
+  notFoundError.status = 404
+  notFoundError.name = "NotFoundException"
+  notFoundError.message = "올바른 접근이 아닙니다."
+  next(notFoundError)
 })
 
 // error handler
