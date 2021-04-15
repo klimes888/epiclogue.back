@@ -4,7 +4,7 @@ import { dbOption } from '../options/options'
 
 mongoose.Promise = global.Promise
 
-export const connect = async () => {
+export const connectDatabase = async () => {
   const dbUrl =
     process.env.NODE_ENV === 'test' ? process.env.MONGO_TEST_URI : process.env.MONGO_URI_ALONE
 
@@ -16,7 +16,7 @@ export const connect = async () => {
   }
 }
 
-export const disconnect = async () => {
+export const disconnectDatabase = async () => {
   // mongoose ready state
   // 0: diconnected, 1: connected, 2: connecting, 3: disconnecting
   if (mongoose.Connection.readyState !== 0) {
@@ -31,7 +31,7 @@ export const disconnect = async () => {
   }
 }
 
-export const drop = async () => {
+export const dropDatabase = async () => {
   try {
     await mongoose.connection.db.dropDatabase()
     console.log('[INFO] Test DB dropped')

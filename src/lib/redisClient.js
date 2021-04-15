@@ -19,5 +19,11 @@ redisClient.on('error', err => {
 export default {
   ...redisClient,
   getAsync: promisify(redisClient.get).bind(redisClient),
-  setAsync: promisify(redisClient.set).bind(redisClient),
+  // setAsync: promisify(redisClient.set).bind(redisClient),
+  /**
+   * setWithTtl: 세션을 1시간동안 유지하고 재요청시 1시간으로 갱신.
+   * 사용방법: setWithTtl(key, time(s), value)
+   */
+  setWithTtl: promisify(redisClient.setex).bind(redisClient),
+  flushAll: promisify(redisClient.flushall).bind(redisClient),
 }

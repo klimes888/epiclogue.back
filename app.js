@@ -2,23 +2,22 @@
 import './src/env/env'
 import express from 'express'
 import cookieParser from 'cookie-parser'
-import morgan from 'morgan'
 import cors from 'cors'
 import helmet from 'helmet'
 import hpp from 'hpp'
 import swaggerUi from 'swagger-ui-express'
 import session from 'express-session'
-import Slack from 'slack-node'
 
 // routers
 import indexRouter from './src/routes'
 
 // utils
-import { connect } from './src/lib/database'
-import { logger, stream } from './src/configs/winston'
+import { connectDatabase } from './src/lib/database'
 import { swaggerSpec } from './src/configs/apiDoc'
 import { apiResponser } from './src/lib/apiResponser'
 import { apiRequestLogger } from './src/lib/middleware/apiRequestLogger'
+import { apiResponseLogger } from './src/lib/middleware/apiResponseLogger'
+import { errorLogger } from './src/lib/middleware/errorLogger'
 
 const app = express()
 
@@ -42,14 +41,13 @@ app.use(express.urlencoded({ extended: true }))
 app.use(cookieParser())
 app.use(helmet())
 
-app.use(apiRequestLogger)
+connectDatabase()
 
-connect()
+// HttpRequestLogger
+app.use(apiRequestLogger)
 
 app.use('/', indexRouter)
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec))
-
-// catch 404 and forward to error handler
 app.use((req, res, next) => {
   const notFoundError = new Error()
   notFoundError.status = 404
@@ -58,31 +56,6 @@ app.use((req, res, next) => {
   next(notFoundError)
 })
 
-// error handler
-app.use((err, req, res) => {
-  const statusCode = err.status || 500
-  const errorMessage = err.message || 'Internal server error'
-
-  if (!process.env.NODE_ENV === 'test' && err.status === 500) {
-    // Only alert on 500 error
-    const slack = new Slack()
-    slack.setWebhook(process.env.SLACK_WEBHOOK)
-    slack.webhook(
-      {
-        text: `*Message*: ${err.message} \n *Stack*: ${err.stack} \n *StatusCode*: ${err.status}`,
-      },
-      webhookError => {
-        if (webhookError) console.error(webhookError)
-      }
-    )
-  }
-
-  logger.error(`StatusCode: ${statusCode}, Message: ${errorMessage}`)
-
-  res.locals.message = err.message
-  res.locals.error = err
-
-  return apiResponser(res, statusCode, errorMessage)
-})
+app.use(errorLogger)
 
 export default app

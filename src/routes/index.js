@@ -16,15 +16,16 @@ const router = express.Router({
   mergeParams: true,
 })
 
-router.get('/', async (req, res) => {
-  res.status(200).json({
-    result: 'ok',
+router.get('/', async (req, res, next) => {
+  const data = {
     comment: 'server is ok',
     message: req.session.id,
     views: req.session.views,
-  })
+  }
+
+  apiResponser({ res, data })
 })
-router.get('/views', async (req, res) => {
+router.get('/views', async (req, res, next) => {
   const views = await redisClient.getAsync(req.session.id)
   apiResponser({ res, statusCode: 200, data: views })
 })
