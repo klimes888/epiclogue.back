@@ -66,7 +66,7 @@ export const findAll = function (option) {
     })
 }
 
-export const getFeed = function (option, size = 35) {
+export const getFeed = function (option, size) {
   // 들어오는 id를 기준으로 이후 size만큼 반환
   return Board.find(option, {
     _id: 1,
@@ -79,12 +79,12 @@ export const getFeed = function (option, size = 35) {
     thumbnail: 1,
     originUserId: 1,
   })
+  .limit(size)
   .sort({ writeDate: -1 })
   .populate({
     path: 'writer',
     select: '_id screenId nickname profile',
   })
-  .limit(size)
 }
 
 

@@ -15,6 +15,7 @@ import { tagPattern } from '../../options/options'
  */
 export const getBoards = async (req, res, next) => {
   const { type: requestType, latestId, size } = req.query
+  const requestSize = size ? parseInt(size, 10) : 35
   const option = {
     pub: 1
   }
@@ -24,11 +25,11 @@ export const getBoards = async (req, res, next) => {
   }
 
   if (latestId) {
-    option._id = {$gt: latestId}
+    option._id = {$lt: latestId}
   }
 
   try {
-    const boardList = await boardDAO.getFeed(option, size ? parseInt(size, 10) : undefined)
+    const boardList = await boardDAO.getFeed(option, requestSize)
 
     const filteredBoardList = boardList.filter(each => each.writer !== null)
     const wrappedData = await contentsWrapper(res.locals.uid, filteredBoardList, 'Board', false)
