@@ -1,7 +1,8 @@
-import createError from 'http-errors'
 import { userDAO, boardDAO, followDAO } from '../../DAO'
 import { getBookmarkList } from '../interaction/bookmark/bookmark.ctrl'
 import { contentsWrapper } from '../../lib/contentsWrapper'
+import { apiResponser } from '../../lib/middleware/apiResponser'
+import { apiErrorGenerator } from '../../lib/apiErrorGenerator'
 
 /**
  * @description 마이보드 - 유저의 프로필 정보 요청
@@ -38,16 +39,9 @@ export const getMyboard = async (req, res, next) => {
           : !!(await followDAO.isFollowing(res.locals.uid, userData._id))
     }
 
-    console.log(
-      `[INFO] ${res.locals?.uid || '비회원 유저'} 가 @${screenId} 의 마이보드를 열람합니다.`
-    )
-    return res.status(200).json({
-      result: 'ok',
-      data: myBoardData,
-    })
+    return apiResponser({ req, res, data: myBoardData })
   } catch (e) {
-    console.error(`[Error] ${e}`)
-    return next(createError(500, '알 수 없는 오류가 발생했습니다.'))
+    return next(apiErrorGenerator(500, '알 수 없는 오류가 발생했습니다.', e))
   }
 }
 
@@ -67,14 +61,9 @@ export const allWorks = async (req, res, next) => {
       ? await contentsWrapper(res.locals.uid, userAllWorks, 'Board', false)
       : userAllWorks
 
-    console.log(`[INFO] ${res.locals.uid || '비회원유저'} 가 ${userId._id} 의 글들을 확인합니다.`)
-    return res.status(200).json({
-      result: 'ok',
-      data: wrappedWorks,
-    })
+    return apiResponser({ req, res, data: wrappedWorks })
   } catch (e) {
-    console.error(`[Error] ${e}`)
-    next(createError(500, '알 수 없는 오류가 발생했습니다.'))
+    next(apiErrorGenerator(500, '알 수 없는 오류가 발생했습니다.', e))
   }
 }
 
@@ -92,18 +81,9 @@ export const originals = async (req, res, next) => {
     const myContents = await boardDAO.findAllOriginOrSecondary(targetUser._id, false)
     const wrappedContents = await contentsWrapper(res.locals.uid, myContents, 'Board', false)
 
-    console.log(
-      `[INFO] 유저 ${res.locals.uid || '비회원유저'} 가 유저 ${
-        targetUser._id
-      } 의 원작들을 확인합니다.`
-    )
-    return res.status(200).json({
-      result: 'ok',
-      data: wrappedContents,
-    })
+    return apiResponser({ req, res, data: wrappedContents })
   } catch (e) {
-    console.error(`[Error] ${e}`)
-    return next(createError(500, '알 수 없는 에러가 발생했습니다.'))
+    return next(apiErrorGenerator(500, '알 수 없는 에러가 발생했습니다.', e))
   }
 }
 
@@ -123,18 +103,9 @@ export const secondaryWorks = async (req, res, next) => {
       ? await contentsWrapper(res.locals.uid, userSecondaryWorks, 'Board', false)
       : userSecondaryWorks
 
-    console.log(
-      `[INFO] 유저 ${res.locals.uid || '비회원유저'} 가 유저 ${
-        targetUser._id
-      } 의 2차창작들을 확인합니다.`
-    )
-    return res.status(200).json({
-      result: 'ok',
-      data: wrappedContents,
-    })
+    return apiResponser({ req, res, data: wrappedContents })
   } catch (e) {
-    console.error(`[Error] ${e}`)
-    return next(createError(500, '알 수 없는 에러가 발생했습니다.'))
+    return next(apiErrorGenerator(500, '알 수 없는 에러가 발생했습니다.', e))
   }
 }
 
