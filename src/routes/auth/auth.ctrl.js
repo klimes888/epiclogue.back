@@ -6,6 +6,8 @@ import { sendMail, emailText, findPassText } from '../../lib/sendMail'
 import { joinDataCrypt, cryptoData, getRandomToken, getRandomString } from '../../lib/cryptoData'
 import { cookieOption } from '../../options/options'
 import { generateToken } from '../../lib/tokenManager'
+import { apiResponser } from '../../lib/middleware/apiResponser'
+import { errorGenerator } from '../../lib/errorGenerator'
 
 /**
  * @description SNS 로그인
@@ -103,21 +105,17 @@ export const login = async function (req, res, next) {
 
         const token = await generateToken(result.nickname, result._id, result.isConfirmed)
         res.cookie('access_token', token, cookieOption)
-        console.log(`[INFO] 유저 ${result._id} 가 로그인했습니다.`)
-        return res.status(200).json({
-          result: 'ok',
+        const responseObject = {
           nick: result.nickname,
           screenId: result.screenId,
           displayLanguage: result.displayLanguage,
-        })
+        }
+        return apiResponser({ req, res, data: responseObject, message: 'Login'})
       }
-      console.log(`[INFO] 유저 ${email} 가 다른 비밀번호 ${userPw} 로 로그인을 시도했습니다.`)
       return next(createError(400, '잘못된 비밀번호입니다.'))
     }
-    console.log(`[INFO] 존재하지 않는 유저 ${email} 가 로그인을 시도했습니다.`)
     return next(createError(404, '존재하지 않는 유저입니다.'))
   } catch (e) {
-    console.log(`[Error] 알 수 없는 오류가 발생했습니다. ${e}`)
     return next(createError(500, '알 수 없는 오류가 발생했습니다.'))
   }
 }
@@ -160,15 +158,13 @@ export const join = async function (req, res, next) {
         userLang,
       })
     } catch (e) {
-      console.log(`[INFO] 유저 ${email} 가 적절하지 않은 데이터로 가입하려 했습니다. ${e}`)
-      return next(createError(400, '적절하지 않은 값을 입력했습니다.'))
+      return next(errorGenerator(400, e, '적절하지 않은 값을 입력했습니다.'))
     }
 
     if (check) {
       if (userPw === userPwRe) {
         /* 중복 가입 이메일 처리 */
         if ((await userDAO.isExist(email)) != null) {
-          console.log(`[INFO] 중복된 이메일 ${email} 로 가입하려했습니다.`)
           return next(createError(400, '중복된 이메일입니다. 다른 이메일로 가입해주세요.'))
         }
 
@@ -186,28 +182,21 @@ export const join = async function (req, res, next) {
         if (result) {
           try {
             await sendMail(email, '이메일 인증을 완료해주세요.', emailText(email, token))
-            return res.status(201).json({
-              result: 'ok',
-            })
+            return apiResponser({ req, res, message: '회원가입 성공. 이메일 인증을 완료해주세요.'})
           } catch (e) {
-            console.error(`[ERROR] ${email} 에게 메일을 보내는 도중 문제가 발생했습니다. ${e}`)
-            return next(createError(500, '알 수 없는 오류가 발생했습니다.'))
+            return next(createError(500, e))
           }
         } else {
-          console.log(`[INFO] 이미 존재하는 이메일 ${email} 로 회원가입을 시도했습니다.`)
           return next(createError(400, '이미 존재하는 아이디입니다. 확인 후 시도해주세요.'))
         }
       } else {
-        console.log('[INFO] 일치하지 않는 패스워드로 가입하려했습니다.')
         return next(createError(400, '비밀번호가 일치하지 않습니다.'))
       }
     } else {
-      console.log('[INFO] 회원가입 비밀번호 규칙이 맞지 않습니다.')
       return next(createError(400, '비밀번호 규칙을 다시 확인해주세요.'))
     }
   } catch (e) {
-    console.error(`[ERROR] 알 수 없는 에러가 발생했습니다. ${e}`)
-    return next(createError(500, '알 수 없는 에러가 발생했습니다.'))
+    return next(createError(500, e))
   }
 }
 
