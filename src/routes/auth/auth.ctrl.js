@@ -49,12 +49,13 @@ export const snsLogin = async function (req, res, next) {
 
   const token = await generateToken(result.nickname, result._id, result.isConfirmed)
 
-  res.cookie('access_token', token, cookieOption)
   const responseObject = {
     nick: result.nickname,
     screenId: result.screenId,
     displayLanguage: result.displayLanguage,
   }
+  
+  res.cookie('access_token', token, cookieOption)
   return apiResponser({ req, res, data: responseObject, message: 'SNS Login' })
 }
 
@@ -169,7 +170,7 @@ export const join = async function (req, res, next) {
         if (result) {
           try {
             await sendMail(email, '이메일 인증을 완료해주세요.', emailText(email, token))
-            return apiResponser({ req, res, message: '회원가입 성공. 이메일 인증을 완료해주세요.' })
+            return apiResponser({ req, res, statusCode: 201, message: '회원가입 성공. 이메일 인증을 완료해주세요.' })
           } catch (e) {
             return next(apiErrorGenerator(500, '회원가입에 실패했습니다.', e))
           }

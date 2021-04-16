@@ -1,9 +1,10 @@
 import Joi from 'joi'
-import createError from 'http-errors'
 import { boardDAO, feedbackDAO, replyDAO, notificationDAO } from '../../DAO'
 import { deleteImage, thumbPathGen } from '../../lib/imageCtrl'
 import { contentsWrapper } from '../../lib/contentsWrapper'
 import { tagPattern } from '../../options/options'
+import { apiErrorGenerator } from '../../lib/apiErrorGenerator'
+import { apiResponser } from '../../lib/middleware/apiResponser'
 
 /**
  * @description 유저 피드
@@ -27,14 +28,9 @@ export const getBoards = async (req, res, next) => {
     const filteredBoardList = boardList.filter(each => each.writer !== null)
     const wrappedData = await contentsWrapper(res.locals.uid, filteredBoardList, 'Board', false)
 
-    console.log(`[INFO] 유저 ${res.locals.uid || '비회원유저'} 가 자신의 피드를 확인했습니다.`)
-    return res.status(200).json({
-      result: 'ok',
-      data: wrappedData,
-    })
+    return apiResponser({ req, res, data: wrappedData})
   } catch (e) {
-    console.error(`[ERROR] ${e}`)
-    return next(createError(500, '알 수 없는 에러가 발생했습니다.'))
+    return next(apiErrorGenerator(500, '알 수 없는 에러가 발생했습니다.', e))
   }
 }
 
@@ -92,23 +88,14 @@ export const postBoard = async (req, res, next) => {
       deleteImage(boardData.boardImg, 'board')
     }
 
-    console.log(
-      `[INFO] 유저 ${res.locals.uid} 가 적절하지 않은 데이터로 글을 작성하려 했습니다. ${e}`
-    )
-    return next(createError(400, '입력값이 적절하지 않습니다.'))
+    return next(apiErrorGenerator(400, '입력값이 적절하지 않습니다.', e))
   }
 
   try {
     const createdBoard = await boardDAO.create(boardData)
-
-    console.log(`[INFO] 유저 ${boardData.writer}가 글 ${createdBoard._id}를 작성했습니다.`)
-    return res.status(201).json({
-      result: 'ok',
-      data: { _id: createdBoard._id },
-    })
+    return apiResponser({ req, res, data: { _id: createdBoard._id }})
   } catch (e) {
-    console.error(`[ERROR] ${e}`)
-    return next(createError(500, '알 수 없는 에러가 발생했습니다.'))
+    return next(apiErrorGenerator(500, '알 수 없는 에러가 발생했습니다.', e))
   }
 }
 
@@ -126,18 +113,11 @@ export const viewBoard = async (req, res, next) => {
 
   try {
     const boardData = await boardDAO.getById(boardId)
-
     const wrappedBoardData = await contentsWrapper(uid, boardData, 'Board', true)
 
-    console.log(`[INFO] 유저 ${uid || '비회원유저'}가 글 ${boardId}를 접근했습니다.`)
-
-    return res.status(200).json({
-      result: 'ok',
-      data: wrappedBoardData,
-    })
+    return apiResponser({ req, res, data: wrappedBoardData})
   } catch (e) {
-    console.error(`[ERROR] ${e}`)
-    return next(createError(500, '알 수 없는 에러가 발생했습니다.'))
+    return next(apiErrorGenerator(500, '알 수 없는 에러가 발생했습니다.', e))
   }
 }
 
@@ -154,20 +134,15 @@ export const deleteBoard = async (req, res, next) => {
 
   try {
     const targetBoard = await boardDAO.getById(boardId, { boardImg: 1 })
-    // for non blocking, didn't use async-await
     deleteImage(targetBoard.boardImg, 'board')
 
     await boardDAO.deleteBoard(boardId)
     feedbackDAO.deleteByBoardId(boardId)
     replyDAO.deleteByBoardId(boardId)
-    console.log(`[INFO] 글 ${boardId}가 삭제되었습니다.`)
-    return res.status(200).json({
-      result: 'ok',
-    })
+
+    return apiResponser({ req, res, message: '성공적으로 삭제했습니다.'})
   } catch (e) {
-    console.error(`[ERROR] 글 ${boardId} 의 삭제가 실패했습니다: 데이터베이스 질의에 실패했습니다.`)
-    console.error(`[ERROR] ${e}`)
-    return next(createError(500, '알 수 없는 에러가 발생했습니다.'))
+    return next(apiErrorGenerator(500, '알 수 없는 에러가 발생했습니다.', e))
   }
 }
 
@@ -185,17 +160,9 @@ export const getEditInfo = async (req, res, next) => {
   try {
     const previousData = await boardDAO.getById(boardId)
 
-    console.log(
-      `[INFO] 유저 ${res.locals.uid}가 글 ${boardId}을 수정을 위해 데이터를 요청했습니다.`
-    )
-
-    return res.status(200).json({
-      result: 'ok',
-      data: previousData,
-    })
+    return apiResponser({ req, res, data: previousData })
   } catch (e) {
-    console.error(`[ERROR] ${e}`)
-    return next(createError(500, '알 수 없는 에러가 발생했습니다.'))
+    return next(apiErrorGenerator(500, '알 수 없는 에러가 발생했습니다.', e))
   }
 }
 
@@ -233,11 +200,10 @@ export const postEditInfo = async function (req, res, next) {
     }
 
     const updatedBoardData = await boardDAO.update(updateData)
-    console.log(`[INFO] 유저 ${res.locals.uid}가 글 ${req.params.boardId}을 수정했습니다.`)
-    return res.status(200).json({ result: 'ok', data: { _id: updatedBoardData._id } })
+
+    return apiResponser({ req, res, data: { _id: updatedBoardData._id } })
   } catch (e) {
-    console.error(`[ERROR] ${e}`)
-    return next(createError(500, '알 수 없는 에러가 발생했습니다.'))
+    return next(apiErrorGenerator(500, '알 수 없는 에러가 발생했습니다.', e))
   }
 }
 
@@ -303,10 +269,7 @@ export const secPost = async (req, res, next) => {
       deleteImage(boardData.boardImg, 'board')
     }
 
-    console.log(
-      `[INFO] 유저 ${res.locals.uid} 가 적절하지 않은 데이터로 글을 작성하려 했습니다. ${e}`
-    )
-    return next(createError(400, '입력값이 적절하지 않습니다.'))
+    return next(apiErrorGenerator(400, '입력값이 적절하지 않습니다.', e))
   }
 
   try {
@@ -320,13 +283,9 @@ export const secPost = async (req, res, next) => {
         targetInfo: createdBoard._id,
       })
     }
-    console.log(`[INFO] 유저 ${boardData.writer}가 2차창작 ${createdBoard._id}를 작성했습니다.`)
-    return res.status(201).json({
-      result: 'ok',
-      data: { _id: createdBoard._id },
-    })
+    
+    return apiResponser({ req, res, statusCode: 201, data: { _id: createdBoard._id } })
   } catch (e) {
-    console.error(`[ERROR] ${e}`)
-    return next(createError(500, '알 수 없는 에러가 발생했습니다.'))
+    return next(apiErrorGenerator(500, '알 수 없는 에러가 발생했습니다.', e))
   }
 }
