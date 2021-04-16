@@ -1,5 +1,5 @@
 import express from 'express'
-import redisClient from '../lib/redisClient'
+import createError from 'http-errors'
 
 import usersRouter from './user'
 import boardRouter from './board'
@@ -27,6 +27,9 @@ router.get('/', async (req, res, next) => {
 })
 router.get('/error', async (req, res, next) => {
   next(new Error('views Error'))
+})
+router.get('/data', (req, res, next) => {
+  next(createError(404, 'Creative not found error'))
 })
 router.use('/auth', authRouter)
 router.use('/user', usersRouter)

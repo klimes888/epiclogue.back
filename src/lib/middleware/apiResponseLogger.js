@@ -17,9 +17,9 @@ export const apiResponseLogger = async (req, res) => {
   if (res.error) {
     loggingObject = {
       ...loggingObject,
-      stack: res.error?.stack,
-      errName: res.error.name,
+      errorName: res.error.name,
       errorMessage: res.error.message,
+      stack: res.error?.stack,
     }
   }
 
