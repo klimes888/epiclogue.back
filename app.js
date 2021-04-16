@@ -15,10 +15,14 @@ import indexRouter from './src/routes'
 import { connectDatabase } from './src/lib/database'
 import { swaggerSpec } from './src/configs/apiDoc'
 import { apiRequestLogger } from './src/lib/middleware/apiRequestLogger'
-import { errorResponser } from './src/lib/middleware/errorHandler'
+import { errorHandler } from './src/lib/middleware/errorHandler'
+import { apiResponser } from './src/lib/middleware/apiResponser'
 
 const app = express()
 
+/**
+ * Initialize middlewares
+ */
 app.use(cors({ credentials: true, origin: true }))
 app.use(session({
   secret: process.env.SECRET_KEY,
@@ -35,21 +39,31 @@ app.use(cookieParser())
 app.use(helmet())
 
 connectDatabase()
-
-// HttpRequestLogger
 app.use(apiRequestLogger)
 
+/**
+ * Routers
+ */
 app.use('/', indexRouter)
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec))
 
-app.use(errorResponser)
+/**
+ * Error handler
+ */
+app.use((err, req, res, next) => {
+  if (err) {
+    return errorHandler(err, req, res)  
+  }
 
-app.use((req, res, next) => {
-  const notFoundError = new Error()
-  notFoundError.status = 404
-  notFoundError.name = "NotFoundException"
-  notFoundError.message = "올바른 접근이 아닙니다."
-  next(notFoundError)
+  next()
 })
+
+/**
+ * catch 404 Error
+ */
+app.use((req, res) => {
+  apiResponser({ req, res, statusCode: 404, message: "올바른 접근이 아닙니다.", })
+})
+
 
 export default app

@@ -10,7 +10,7 @@ import authRouter from './auth'
 import notiRouter from './notification'
 import myboardRouter from './myboard'
 
-import { apiResponser } from '../lib/apiResponser'
+import { apiResponser } from '../lib/middleware/apiResponser'
 
 const router = express.Router({
   mergeParams: true,
@@ -25,9 +25,8 @@ router.get('/', async (req, res, next) => {
 
   apiResponser({ res, data })
 })
-router.get('/views', async (req, res, next) => {
-  const views = await redisClient.getAsync(req.session.id)
-  apiResponser({ res, statusCode: 200, data: views })
+router.get('/error', async (req, res, next) => {
+  next(new Error('views Error'))
 })
 router.use('/auth', authRouter)
 router.use('/user', usersRouter)

@@ -1,4 +1,4 @@
-import { apiResponseLogger } from './middleware/apiResponseLogger'
+import { apiResponseLogger } from './apiResponseLogger'
 
 export const apiResponser = ({ req, res, statusCode = 200, data, message }) => {
   let output = {
@@ -15,9 +15,11 @@ export const apiResponser = ({ req, res, statusCode = 200, data, message }) => {
     output = { ...output, message }
   }
 
+  /**
+   * response 오브젝트 내재화
+   */
   res.data = data
   res.statusCode = statusCode
-
-  apiResponseLogger(req, res)
   res.status(statusCode).json(output)
+  apiResponseLogger(req, res)
 }

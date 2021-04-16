@@ -14,8 +14,21 @@ export const apiResponseLogger = async (req, res) => {
     resData: res.data,
   }
 
+  if (res.error) {
+    loggingObject = {
+      ...loggingObject,
+      stack: res.error?.stack,
+      errName: res.error.name,
+      errorMessage: res.error.message,
+    }
+  }
+
   if (res.accessToken) {
     loggingObject = { ...loggingObject, accessToken: res.accessToken }
+  }
+
+  if (res.statusCode > 499) {
+    return stream.writeDetailError(JSON.stringify(loggingObject))
   }
 
   stream.writeDetailInfo(JSON.stringify(loggingObject))
