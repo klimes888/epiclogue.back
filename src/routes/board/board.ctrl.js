@@ -14,15 +14,18 @@ import { tagPattern } from '../../options/options'
  * @returns 요청한 글 배열
  */
 export const getBoards = async (req, res, next) => {
-  const { type: requestType } = req.query
-  const option = { pub: 1 }
+  const { type: requestType, latestId, size } = req.query
+  const option = { 
+    _id: {$gt: latestId},
+    pub: 1
+  }
   // 특정 카테고리만 요청할 경우
   if (requestType) {
     option.category = requestType === 'Illust' ? 0 : 1
   }
 
   try {
-    const boardList = await boardDAO.findAll(option)
+    const boardList = await boardDAO.getFeed(option, size)
 
     const filteredBoardList = boardList.filter(each => each.writer !== null)
     const wrappedData = await contentsWrapper(res.locals.uid, filteredBoardList, 'Board', false)

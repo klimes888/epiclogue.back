@@ -66,6 +66,28 @@ export const findAll = function (option) {
     })
 }
 
+export const getFeed = function (option, size) {
+  // 들어오는 id를 기준으로 이후 size만큼 반환
+  return Board.find(option, {
+    _id: 1,
+    writer: 1,
+    boardTitle: 1,
+    uid: 1,
+    pub: 1,
+    language: 1,
+    category: 1,
+    thumbnail: 1,
+    originUserId: 1,
+  })
+  .sort({ writeDate: -1 })
+  .populate({
+    path: 'writer',
+    select: '_id screenId nickname profile',
+  })
+  .limit(size)
+}
+
+
 export const findAllOriginOrSecondary = function (userId, isExists) {
   return Board.find(
     { writer: userId, originUserId: { $exists: isExists } },
