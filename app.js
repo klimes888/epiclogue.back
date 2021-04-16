@@ -62,7 +62,7 @@ app.use((err, req, res, next) => {
  * catch 404 Error
  */
 app.use((req, res) => {
-  apiResponser({ req, res, statusCode: 404, message: "올바른 접근이 아닙니다.", })
+  apiResponser({ req, res, statusCode: 404, message: '올바른 접근이 아닙니다.', })
 })
 
 

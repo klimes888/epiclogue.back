@@ -85,7 +85,7 @@ export const postUserEditInfo = async function (req, res, next) {
     if (isScreenIdUnique || screenId === originalData.screenId) {
       await userDAO.updateProfile(newerUserData)
     } else {
-      throw new Error(`screenId is not Unique, isScreenIdUnique: ${isScreenIdUnique}`)
+      return next(apiErrorGenerator(400, 'ScreenId가 중복됩니다.'))
     }
     return apiResponser({ req, res, data: newerUserData })
   } catch (e) {

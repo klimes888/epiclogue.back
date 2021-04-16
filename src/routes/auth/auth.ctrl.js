@@ -56,7 +56,7 @@ export const snsLogin = async function (req, res, next) {
   }
 
   res.cookie('access_token', token, cookieOption)
-  return apiResponser({ req, res, data: responseObject, message: 'SNS Login' })
+  return apiResponser({ req, res, data: responseObject, message: 'SNS 로그인에 성공했습니다.' })
 }
 
 /**
@@ -103,7 +103,7 @@ export const login = async function (req, res, next) {
           screenId: result.screenId,
           displayLanguage: result.displayLanguage,
         }
-        return apiResponser({ req, res, data: responseObject, message: 'Login' })
+        return apiResponser({ req, res, data: responseObject, message: '로그인에 성공했습니다.' })
       }
       return next(apiErrorGenerator(400, '잘못된 비밀번호입니다.'))
     }
