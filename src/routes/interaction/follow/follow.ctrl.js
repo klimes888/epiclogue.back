@@ -21,7 +21,7 @@ export const addFollow = async (req, res, next) => {
     const didFollow = await followDAO.didFollow(followData)
 
     if (didFollow) {
-      return next(apiErrorGenerator(400, '이미 처리된 데이터입니다.'))
+      return next(apiErrorGenerator(400, '이미 처리된 요청입니다.'))
     }
     const followCount = await followDAO.follow(followData)
     await notificationDAO.makeNotification({
@@ -55,7 +55,7 @@ export const deleteFollow = async (req, res, next) => {
     const didFollow = await followDAO.didFollow(followData)
 
     if (!didFollow) {
-      return next(apiErrorGenerator(400, '팔로우하지 않은 유저에게 언팔로우는 불가능합니다.'))
+      return next(apiErrorGenerator(400, '이미 처리된 요청입니다.'))
     }
     const followCount = await followDAO.unfollow(followData)
 

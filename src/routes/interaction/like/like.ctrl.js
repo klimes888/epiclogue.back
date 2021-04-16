@@ -1,5 +1,7 @@
-import createError from 'http-errors'
 import { likeDAO, reactDAO, userDAO, notificationDAO } from '../../../DAO'
+import { apiErrorGenerator } from '../../../lib/apiErrorGenerator'
+import { apiResponser } from '../../../lib/middleware/apiResponser'
+
 /**
  * @description 좋아요 추가
  * @access POST /interaction/like
@@ -21,10 +23,7 @@ export const addLike = async (req, res, next) => {
     const didLike = await likeDAO.didLike(likeData)
 
     if (didLike) {
-      console.log(
-        `[INFO] 유저 ${res.locals.uid} 가 이미 좋아요 한 ${likeData.targetType}:${targetInfo} 에 좋아요를 요청했습니다.`
-      )
-      return next(createError(400, '이미 처리된 데이터입니다.'))
+      return next(apiErrorGenerator(400, '이미 처리된 요청입니다.'))
     }
     const { likeCount, targetData } = await likeDAO.like(
       likeData,
@@ -42,14 +41,10 @@ export const addLike = async (req, res, next) => {
         targetInfo,
       })
     }
-    console.log(`[INFO] 유저 ${res.locals.uid}가 ${targetType}: ${targetInfo}를 좋아합니다.`)
-    return res.status(201).json({
-      result: 'ok',
-      data: { heartCount: likeCount },
-    })
+
+    return apiResponser({ req, res, statusCode: 201, data: { heartCount: likeCount } })
   } catch (e) {
-    console.error(`[Error] ${e}`)
-    return next(createError(500, '알 수 없는 에러가 발생했습니다.'))
+    return next(apiErrorGenerator(500, '알 수 없는 에러가 발생했습니다.', e))
   }
 }
 
@@ -74,25 +69,16 @@ export const deleteLike = async (req, res, next) => {
     const didLike = await likeDAO.didLike(likeData)
 
     if (!didLike) {
-      console.log(
-        `[INFO] 유저 ${res.locals.uid} 가 좋아요 하지 않은 ${targetType}:${targetInfo}에 대해 좋아요를 해제하려 했습니다.`
-      )
-      return next(createError(400, '이미 처리된 데이터입니다.'))
+      return next(apiErrorGenerator(400, '이미 처리된 요청입니다.'))
     }
     const likeCount = await likeDAO.unlike(likeData, targetInfo, targetType)
     if (targetType === 'Board') {
       await reactDAO.deleteReact(likeData.userId, targetInfo)
     }
-    console.log(
-      `[INFO] 유저 ${res.locals.uid}가 ${targetType}: ${targetInfo}의 좋아요를 해제했습니다.`
-    )
-    return res.status(200).json({
-      result: 'ok',
-      data: { heartCount: likeCount },
-    })
+
+    return apiResponser({ req, res, data: { heartCount: likeCount } })
   } catch (e) {
-    console.error(`[Error] ${e}`)
-    return next(createError(500, '알 수 없는 에러가 발생했습니다.'))
+    return next(apiErrorGenerator(500, '알 수 없는 에러가 발생했습니다.', e))
   }
 }
 
@@ -112,13 +98,8 @@ export const getLikeList = async (req, res, next) => {
     const userId = await userDAO.getIdByScreenId(screenId)
     const likeObjectIdList = await likeDAO.getByUserId(userId, targetType)
 
-    console.log(`[INFO] 유저 ${res.locals.uid}가 유저 ${userId} 의 좋아요 리스트를 확인했습니다.`)
-    return res.status(200).json({
-      result: 'ok',
-      data: likeObjectIdList,
-    })
+    return apiResponser({ req, res, data: likeObjectIdList })
   } catch (e) {
-    console.error(`[Error] ${e}`)
-    return next(createError(500, '알 수 없는 에러가 발생했습니다.'))
+    return next(apiErrorGenerator(500, '알 수 없는 에러가 발생했습니다.', e))
   }
 }
