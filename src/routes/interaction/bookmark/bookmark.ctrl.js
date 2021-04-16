@@ -1,6 +1,7 @@
-import createError from 'http-errors'
 import { userDAO, boardDAO, bookmarkDAO, notificationDAO } from '../../../DAO'
+import { apiErrorGenerator } from '../../../lib/apiErrorGenerator'
 import { contentsWrapper } from '../../../lib/contentsWrapper'
+import { apiResponser } from '../../../lib/middleware/apiResponser'
 
 /**
  * @description 유저 북마크 리스트 확인
@@ -21,18 +22,10 @@ export const getBookmarkList = async (req, res, next) => {
     const wrappedBookmarks = res.locals?.uid
       ? await contentsWrapper(res.locals.uid, extractionSet, 'Board', false)
       : extractionSet
-    console.log(
-      `[INFO] 유저 ${res.locals.uid || '비회원유저'}가 ${
-        userInfo._id
-      }의 북마크 리스트를 확인했습니다.`
-    )
-    return res.status(200).json({
-      result: 'ok',
-      data: wrappedBookmarks,
-    })
+    
+    return apiResponser({ req, res, data: wrappedBookmarks })
   } catch (e) {
-    console.error(`[Error] ${e}`)
-    return next(createError(500, '알 수 없는 에러가 발생했습니다.'))
+    return next(apiErrorGenerator(500, '알 수 없는 에러가 발생했습니다.', e))
   }
 }
 
@@ -60,10 +53,7 @@ export const addBookmark = async function (req, res, next) {
     const didBookmark = await bookmarkDAO.didBookmark(res.locals.uid, req.body.boardId)
 
     if (didBookmark) {
-      console.log(
-        `[INFO] 유저 ${res.locals.uid} 가 이미 북마크한 글 ${req.body.boardId} 에 북마크를 시도했습니다.`
-      )
-      return next(createError(400, '입력값이 적절하지 않습니다.'))
+      return next(apiErrorGenerator(400, '입력값이 적절하지 않습니다.'))
     }
 
     const targetData = await boardDAO.getWriter(req.body.boardId)
@@ -79,14 +69,9 @@ export const addBookmark = async function (req, res, next) {
       })
     }
 
-    console.log(`[INFO] 유저 ${res.locals.uid}가 북마크에 ${req.body.boardId}를 추가했습니다.`)
-    return res.status(201).json({
-      result: 'ok',
-      data: { bookmarkCount },
-    })
+    return apiResponser({ req, res, statusCode: 201, data: { bookmarkCount } })
   } catch (e) {
-    console.error(`[Error] ${e}`)
-    return next(createError(500, '알 수 없는 에러가 발생했습니다.'))
+    return next(apiErrorGenerator(500, '알 수 없는 에러가 발생했습니다.', e))
   }
 }
 
@@ -106,19 +91,11 @@ export const deleteBookmark = async (req, res, next) => {
     const didBookmark = await bookmarkDAO.didBookmark(userId, boardId)
 
     if (!didBookmark) {
-      console.log(
-        `[INFO] 유저 ${userId} 가 북마크 하지 않은 글 ${boardId} 에 북마크 해제를 시도했습니다.`
-      )
-      return next(createError(400, '입력값이 적절하지 않습니다.'))
+      return next(apiErrorGenerator(400, '입력값이 적절하지 않습니다.'))
     }
     const bookmarkCount = await bookmarkDAO.deleteBookmark(userId, boardId)
-    console.log(`[INFO] 유저 ${userId}가 북마크에 ${boardId}를 해제했습니다.`)
-    return res.status(200).json({
-      result: 'ok',
-      data: { bookmarkCount },
-    })
+    return apiResponser({ req, res, data: { bookmarkCount }})
   } catch (e) {
-    console.error(`[Error] ${e}`)
-    return next(createError(500, '알 수 없는 에러가 발생했습니다.'))
+    return next(apiErrorGenerator(500, '알 수 없는 에러가 발생했습니다.', e))
   }
 }
