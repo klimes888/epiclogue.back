@@ -60,7 +60,7 @@ const stream = {
   },
   // writeDetail은 sessionAndTokenLogger.js 에서 HttpRequest logging을 위해 사용
   writeDetailInfo: message => logger.info(`${message}`),
-  writeDetailError: message => logger.error(`${message}`)
+  writeDetailError: message => logger.error(`${message}`),
 }
 
 export { logger, stream }

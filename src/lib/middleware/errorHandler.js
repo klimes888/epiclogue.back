@@ -6,7 +6,7 @@ import { apiResponser } from './apiResponser'
 
 export const errorHandler = (err, req, res) => {
   const apiError = err
-  
+
   const statusCode = apiError.status || 500
   const errorMessage = apiError.message || 'Internal server error'
   const errorObject = {

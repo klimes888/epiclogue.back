@@ -28,7 +28,7 @@ export const getBoards = async (req, res, next) => {
     const filteredBoardList = boardList.filter(each => each.writer !== null)
     const wrappedData = await contentsWrapper(res.locals.uid, filteredBoardList, 'Board', false)
 
-    return apiResponser({ req, res, data: wrappedData})
+    return apiResponser({ req, res, data: wrappedData })
   } catch (e) {
     return next(apiErrorGenerator(500, '알 수 없는 에러가 발생했습니다.', e))
   }
@@ -93,7 +93,7 @@ export const postBoard = async (req, res, next) => {
 
   try {
     const createdBoard = await boardDAO.create(boardData)
-    return apiResponser({ req, res, data: { _id: createdBoard._id }})
+    return apiResponser({ req, res, data: { _id: createdBoard._id } })
   } catch (e) {
     return next(apiErrorGenerator(500, '알 수 없는 에러가 발생했습니다.', e))
   }
@@ -115,7 +115,7 @@ export const viewBoard = async (req, res, next) => {
     const boardData = await boardDAO.getById(boardId)
     const wrappedBoardData = await contentsWrapper(uid, boardData, 'Board', true)
 
-    return apiResponser({ req, res, data: wrappedBoardData})
+    return apiResponser({ req, res, data: wrappedBoardData })
   } catch (e) {
     return next(apiErrorGenerator(500, '알 수 없는 에러가 발생했습니다.', e))
   }
@@ -140,7 +140,7 @@ export const deleteBoard = async (req, res, next) => {
     feedbackDAO.deleteByBoardId(boardId)
     replyDAO.deleteByBoardId(boardId)
 
-    return apiResponser({ req, res, message: '성공적으로 삭제했습니다.'})
+    return apiResponser({ req, res, message: '성공적으로 삭제했습니다.' })
   } catch (e) {
     return next(apiErrorGenerator(500, '알 수 없는 에러가 발생했습니다.', e))
   }
@@ -283,7 +283,7 @@ export const secPost = async (req, res, next) => {
         targetInfo: createdBoard._id,
       })
     }
-    
+
     return apiResponser({ req, res, statusCode: 201, data: { _id: createdBoard._id } })
   } catch (e) {
     return next(apiErrorGenerator(500, '알 수 없는 에러가 발생했습니다.', e))

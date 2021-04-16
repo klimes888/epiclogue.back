@@ -87,7 +87,7 @@ export const postUserEditInfo = async function (req, res, next) {
     } else {
       throw new Error(`screenId is not Unique, isScreenIdUnique: ${isScreenIdUnique}`)
     }
-    return apiResponser({ req, res, data: newerUserData})
+    return apiResponser({ req, res, data: newerUserData })
   } catch (e) {
     return next(apiErrorGenerator(500, `알 수 없는 에러가 발생했습니다.`, e))
   }
@@ -135,7 +135,7 @@ export const changePass = async (req, res, next) => {
 
           await userDAO.changePass(uid, crpytedPass, crpytedPassNew, saltNew)
 
-          return apiResponser({ req, res, message: '비밀번호 변경이 완료되었습니다.'})
+          return apiResponser({ req, res, message: '비밀번호 변경이 완료되었습니다.' })
         }
         return next(apiErrorGenerator(400, '기존 비밀번호와 입력이 다릅니다.'))
       } catch (e) {
@@ -180,8 +180,8 @@ export const deleteUser = async (req, res, next) => {
     deleteImage(info.profile)
 
     await userDAO.deleteUser(uid, crpytedPass)
-    
-    return apiResponser({ req, res, message: '유저 탈퇴에 성공했습니다.'})
+
+    return apiResponser({ req, res, message: '유저 탈퇴에 성공했습니다.' })
   } catch (e) {
     return next(apiErrorGenerator(500, '알 수 없는 에러가 발생했습니다.', e))
   }

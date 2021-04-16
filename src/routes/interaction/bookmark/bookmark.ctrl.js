@@ -22,7 +22,7 @@ export const getBookmarkList = async (req, res, next) => {
     const wrappedBookmarks = res.locals?.uid
       ? await contentsWrapper(res.locals.uid, extractionSet, 'Board', false)
       : extractionSet
-    
+
     return apiResponser({ req, res, data: wrappedBookmarks })
   } catch (e) {
     return next(apiErrorGenerator(500, '알 수 없는 에러가 발생했습니다.', e))
@@ -94,7 +94,7 @@ export const deleteBookmark = async (req, res, next) => {
       return next(apiErrorGenerator(400, '입력값이 적절하지 않습니다.'))
     }
     const bookmarkCount = await bookmarkDAO.deleteBookmark(userId, boardId)
-    return apiResponser({ req, res, data: { bookmarkCount }})
+    return apiResponser({ req, res, data: { bookmarkCount } })
   } catch (e) {
     return next(apiErrorGenerator(500, '알 수 없는 에러가 발생했습니다.', e))
   }
