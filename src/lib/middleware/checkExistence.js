@@ -1,7 +1,6 @@
-/* eslint-disable no-underscore-dangle */
-import createError from 'http-errors'
 import Joi from 'joi'
 import { userDAO, boardDAO, replyDAO, feedbackDAO } from '../../DAO'
+import { apiErrorGenerator } from '../apiErrorGenerator'
 
 // to patch, delete, like, bookmark on board, feedback, reply
 export const checkExistence = async (req, res, next) => {
@@ -33,10 +32,7 @@ export const checkExistence = async (req, res, next) => {
     try {
       await checkSchema.validateAsync({ targetId, type })
     } catch (e) {
-      console.log(
-        `[INFO] 유저 ${res.locals.uid} 가 ${type} ObjectId에 적절하지 않은 값 ${targetId} 를 입력했습니다. ${e}`
-      )
-      return next(createError(400, '입력값이 적절하지 않습니다.'))
+      return next(apiErrorGenerator(400, '입력값이 적절하지 않습니다.', e))
     }
 
     if (type === '글') {
@@ -50,14 +46,10 @@ export const checkExistence = async (req, res, next) => {
     if (existence !== null) {
       next()
     } else {
-      console.log(
-        `[INFO] 유저 ${res.locals.uid}가 존재하지 않는 ${type} ${targetId} 를 접근하려 했습니다.`
-      )
-      return next(createError(404, '존재하지 않는 데이터입니다.'))
+      return next(apiErrorGenerator(404, '존재하지 않는 데이터입니다.'))
     }
   } catch (e) {
-    console.error(`[ERROR] 게시글 존재 여부를 확인하는 중에 문제가 발생 했습니다. ${e}`)
-    return next(createError(500, '알 수 없는 오류가 발생했습니다.'))
+    return next(apiErrorGenerator(500, '알 수 없는 오류가 발생했습니다.', e))
   }
 }
 
@@ -73,7 +65,7 @@ export const checkUserExistence = async (req, res, next) => {
     if (userCheck && userCheck.deactivatedAt === null) {
       return next()
     }
-    return next(createError(404, '존재하지 않는 screenId를 입력했습니다.'))
+    return next(apiErrorGenerator(404, '존재하지 않는 screenId를 입력했습니다.'))
   }
 
   const userSchema = Joi.object({
@@ -85,10 +77,7 @@ export const checkUserExistence = async (req, res, next) => {
   try {
     await userSchema.validateAsync({ userId })
   } catch (e) {
-    console.log(
-      `[INFO] 유저 ${res.locals.uid} 가 유저 ObjectId에 적절하지 않은 값 ${userId} 을 입력했습니다.`
-    )
-    return next(createError(400, '입력값이 적절하지 않습니다.'))
+    return next(apiErrorGenerator(400, '입력값이 적절하지 않습니다.', e))
   }
 
   try {
@@ -97,18 +86,13 @@ export const checkUserExistence = async (req, res, next) => {
     if (existence && existence.deactivatedAt === null) {
       // left is Object, right is String.
       if (existence._id.toString() === res.locals.uid) {
-        console.log(`[INFO] 유저 ${res.locals.uid} 가 자신에게 데이터를 요청했습니다.`)
-        return next(createError(400, '입력값이 적절하지 않습니다.'))
+        return next(apiErrorGenerator(400, '입력값이 적절하지 않습니다.'))
       }
       next()
     } else {
-      console.log(
-        `[INFO] 유저 ${res.locals.uid}가 존재하지 않거나 탈퇴한 유저 ${userId} 에게 접근하려 했습니다.`
-      )
-      return next(createError(404, '존재하지 않거나 탈퇴한 유저입니다.'))
+      return next(apiErrorGenerator(404, '존재하지 않거나 탈퇴한 유저입니다.'))
     }
   } catch (e) {
-    console.error(`[ERROR] 유저 존재 여부를 확인하는 중에 문제가 발생 했습니다. ${e}`)
-    return next(createError(500, '알 수 없는 오류가 발생했습니다.'))
+    return next(apiErrorGenerator(500, '알 수 없는 오류가 발생했습니다.', e))
   }
 }

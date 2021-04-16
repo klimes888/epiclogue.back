@@ -1,5 +1,5 @@
-import createError from 'http-errors'
 import { boardDAO, replyDAO, feedbackDAO, userDAO } from '../../DAO'
+import { apiErrorGenerator } from '../apiErrorGenerator'
 
 // 작성자에 대한 인증 미들웨어
 export const checkWriter = async (req, res, next) => {
@@ -33,10 +33,10 @@ export const checkWriter = async (req, res, next) => {
       next()
     } else {
       console.log(`[INFO] 유저 ${res.locals.uid} 가 권한없이 ${type} ${id} 에 접근하려했습니다.`)
-      return next(createError(401, `${type} 작성자가 아닙니다.`))
+      return next(apiErrorGenerator(401, `${type} 작성자가 아닙니다.`))
     }
   } catch (e) {
     console.error(`[Error!] ${e}`)
-    return next(createError(500, '알 수 없는 에러가 발생했습니다.'))
+    return next(apiErrorGenerator(500, '알 수 없는 에러가 발생했습니다.', e))
   }
 }

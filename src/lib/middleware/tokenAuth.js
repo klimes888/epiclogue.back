@@ -1,7 +1,7 @@
-import createError from 'http-errors'
 import Joi from 'joi'
 import '../../env/env'
 import { cookieOption } from '../../options/options'
+import { apiErrorGenerator } from '../apiErrorGenerator'
 import { generateToken, verifyToken } from '../tokenManager'
 
 // 예외 페이지들에 대한 route stack의 마지막 async function의 이름을 저장합니다.
@@ -49,13 +49,7 @@ export const authToken = async (req, res, next) => {
     try {
       await tokenSchema.validateAsync({ token: clientToken })
     } catch (e) {
-      console.log(
-        `[INFO] 인증 실패: 유저의 토큰이 누락되었거나 적절하지 않습니다. ip: ${
-          req.headers['x-forwarded-for'] || req.connection.remoteAddress
-        } token: ${clientToken},
-        ${e}`
-      )
-      return next(createError(401, '인증 실패: 적절하지 않은 인증입니다.'))
+      return next(apiErrorGenerator(401, '인증 실패: 적절하지 않은 인증입니다.', e))
     }
 
     let decoded
@@ -63,13 +57,7 @@ export const authToken = async (req, res, next) => {
     try {
       decoded = await verifyToken(clientToken)
     } catch (e) {
-      console.log(
-        `[INFO] 인증 실패: 손상된 토큰을 사용하였습니다. ip: ${
-          req.headers['x-forwarded-for'] || req.connection.remoteAddress
-        } token: ${clientToken},
-        ${e}`
-      )
-      return next(createError(401, '인증 실패: 적절하지 않은 인증입니다.'))
+      return next(apiErrorGenerator(401, '인증 실패: 적절하지 않은 인증입니다.'))
     }
 
     if (decoded) {
@@ -82,21 +70,12 @@ export const authToken = async (req, res, next) => {
         res.locals.uid = decoded.uid
         next()
       } else {
-        console.log(
-          `[INFO] 인증 실패: 유저 ${decoded.uid} 가 로그인을 시도했으나 이메일 인증이 완료되지 않았습니다.`
-        )
-        return next(createError(401, '이메일 인증이 완료되지 않았습니다.'))
+        return next(apiErrorGenerator(401, '이메일 인증이 완료되지 않았습니다.'))
       }
     } else {
-      console.log(
-        `[INFO] 인증 실패: 유저 ${
-          req.headers['x-forwarded-for'] || req.connection.remoteAddress
-        } 가 로그인을 시도했으나 토큰의 유효기간이 만료되었거나 토큰이 없습니다.`
-      )
-      return next(createError(401, '인증 실패: 적절하지 않은 인증입니다.'))
+      return next(apiErrorGenerator(401, '인증 실패: 적절하지 않은 인증입니다.'))
     }
   } catch (e) {
-    console.error(`[ERROR] ${e}`)
-    return next(createError(500, '알 수 없는 에러가 발생했습니다.'))
+    return next(apiErrorGenerator(500, '알 수 없는 에러가 발생했습니다.', e))
   }
 }
