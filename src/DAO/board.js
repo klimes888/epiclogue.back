@@ -66,7 +66,7 @@ export const findAll = function (option) {
     })
 }
 
-export const getFeed = function (option, size) {
+export const getFeed = function (option, size = 35) {
   // 들어오는 id를 기준으로 이후 size만큼 반환
   return Board.find(option, {
     _id: 1,

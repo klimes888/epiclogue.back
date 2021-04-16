@@ -15,13 +15,16 @@ import { tagPattern } from '../../options/options'
  */
 export const getBoards = async (req, res, next) => {
   const { type: requestType, latestId, size } = req.query
-  const option = { 
-    _id: {$gt: latestId},
+  const option = {
     pub: 1
   }
   // 특정 카테고리만 요청할 경우
   if (requestType) {
     option.category = requestType === 'Illust' ? 0 : 1
+  }
+
+  if (latestId) {
+    option._id = {$gt: latestId}
   }
 
   try {
