@@ -10,6 +10,7 @@ export const apiResponseLogger = async (req, res) => {
     timestamp: dayjs(new Date()).format('YYYY-MM-DD HH:mm:ss Z'),
     sessionId: res.sessionId,
     type: 'response',
+    isMember: false,
     statusCode: res.statusCode,
     resData: res.data,
   }
@@ -25,6 +26,7 @@ export const apiResponseLogger = async (req, res) => {
 
   if (res.accessToken) {
     loggingObject = { ...loggingObject, accessToken: res.accessToken }
+    loggingObject.isMember = true
   }
 
   if (res.statusCode > 499) {

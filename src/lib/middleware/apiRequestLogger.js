@@ -13,12 +13,14 @@ export const apiRequestLogger = async (req, res, next) => {
     type: 'request',
     reqMethod: req.method,
     originalUrl: req.originalUrl,
+    isMember: false,
     reqHeaders: req.headers,
     reqBody: req.body,
   }
 
   if (req.cookies.access_token) {
     loggingObject = { ...loggingObject, accessToken: req.cookies.access_token }
+    loggingObject.isMember = true
   }
 
   const sessionViews = await redisClient.getAsync(req.session.id)
