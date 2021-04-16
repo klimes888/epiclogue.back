@@ -3,7 +3,7 @@ import dayjs from 'dayjs'
 import { stream } from '../../configs/winston'
 
 /**
- * API response를 logging을 하는 미들웨어
+ * API response logging middleware
  */
 export const apiResponseLogger = async (req, res) => {
   let loggingObject = {
@@ -18,5 +18,5 @@ export const apiResponseLogger = async (req, res) => {
     loggingObject = { ...loggingObject, accessToken: res.accessToken }
   }
 
-  stream.writeDetail(JSON.stringify(loggingObject))
+  stream.writeDetailInfo(JSON.stringify(loggingObject))
 }

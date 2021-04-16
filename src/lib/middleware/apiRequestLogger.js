@@ -35,6 +35,6 @@ export const apiRequestLogger = async (req, res, next) => {
   res.sessionId = req.session.id
   res.accessToken = req.cookies.access_token
 
-  stream.writeDetail(JSON.stringify(loggingObject))
+  stream.writeDetailInfo(JSON.stringify(loggingObject))
   next()
 }
