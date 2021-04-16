@@ -1,5 +1,4 @@
 import Joi from 'joi'
-import createError from 'http-errors'
 import '../../env/env'
 import { userDAO } from '../../DAO'
 import { sendMail, emailText, findPassText } from '../../lib/sendMail'
@@ -7,7 +6,7 @@ import { joinDataCrypt, cryptoData, getRandomToken, getRandomString } from '../.
 import { cookieOption } from '../../options/options'
 import { generateToken } from '../../lib/tokenManager'
 import { apiResponser } from '../../lib/middleware/apiResponser'
-import { errorGenerator } from '../../lib/errorGenerator'
+import { apiErrorGenerator } from '../../lib/apiErrorGenerator'
 
 /**
  * @description SNS 로그인
@@ -45,19 +44,18 @@ export const snsLogin = async function (req, res, next) {
   }
 
   if (result.deactivatedAt != null) {
-    return next(createError(404, '탈퇴한 계정입니다.'))
+    return next(apiErrorGenerator(404, '탈퇴한 계정입니다.'))
   }
 
   const token = await generateToken(result.nickname, result._id, result.isConfirmed)
 
   res.cookie('access_token', token, cookieOption)
-  console.log(`[INFO] SNS유저 ${result._id} 가 로그인했습니다.`)
-  return res.status(200).json({
-    result: 'ok',
+  const responseObject = {
     nick: result.nickname,
     screenId: result.screenId,
     displayLanguage: result.displayLanguage,
-  })
+  }
+  return apiResponser({ req, res, data: responseObject, message: 'SNS Login' })
 }
 
 /**
@@ -80,15 +78,9 @@ export const login = async function (req, res, next) {
 
   try {
     try {
-      // user input validation
       await loginValidationSchema.validateAsync({ email, userPw })
     } catch (e) {
-      console.log(
-        `[INFO] ${
-          req.headers['x-forwarded-for'] || req.connection.remoteAddress
-        } 에서 적절하지 않은 로그인 데이터를 입력했습니다: email: ${email}, password: ${userPw}`
-      )
-      return next(createError(400, '적절하지 않은 값을 입력했습니다.'))
+      return next(apiErrorGenerator(400, '적절하지 않은 값을 입력했습니다.', e))
     }
 
     const user = await userDAO.getSalt(email)
@@ -100,7 +92,7 @@ export const login = async function (req, res, next) {
 
       if (result) {
         if (result.deactivatedAt != null) {
-          return next(createError(404, '탈퇴한 계정입니다.'))
+          return next(apiErrorGenerator(404, '탈퇴한 계정입니다.'))
         }
 
         const token = await generateToken(result.nickname, result._id, result.isConfirmed)
@@ -110,13 +102,13 @@ export const login = async function (req, res, next) {
           screenId: result.screenId,
           displayLanguage: result.displayLanguage,
         }
-        return apiResponser({ req, res, data: responseObject, message: 'Login'})
+        return apiResponser({ req, res, data: responseObject, message: 'Login' })
       }
-      return next(createError(400, '잘못된 비밀번호입니다.'))
+      return next(apiErrorGenerator(400, '잘못된 비밀번호입니다.'))
     }
-    return next(createError(404, '존재하지 않는 유저입니다.'))
+    return next(apiErrorGenerator(404, '존재하지 않는 유저입니다.'))
   } catch (e) {
-    return next(createError(500, '알 수 없는 오류가 발생했습니다.'))
+    return next(apiErrorGenerator(500, '알 수 없는 오류가 발생했습니다.'))
   }
 }
 
@@ -145,11 +137,6 @@ export const join = async function (req, res, next) {
 
   try {
     try {
-      // user input validation
-      /*
-        validate를 사용하면 try-catch를 사용할 수 없고
-        await 를 붙이지 않으면 unhandled promise error 가 나온다...
-      */
       await joinValidationSchema.validateAsync({
         email,
         userPw,
@@ -158,14 +145,14 @@ export const join = async function (req, res, next) {
         userLang,
       })
     } catch (e) {
-      return next(errorGenerator(400, e, '적절하지 않은 값을 입력했습니다.'))
+      return next(apiErrorGenerator(400, '적절하지 않은 값을 입력했습니다.', e))
     }
 
     if (check) {
       if (userPw === userPwRe) {
         /* 중복 가입 이메일 처리 */
         if ((await userDAO.isExist(email)) != null) {
-          return next(createError(400, '중복된 이메일입니다. 다른 이메일로 가입해주세요.'))
+          return next(apiErrorGenerator(400, '중복된 이메일입니다. 다른 이메일로 가입해주세요.'))
         }
 
         const { screenId, salt, password, token } = await joinDataCrypt(email, userPw)
@@ -182,21 +169,21 @@ export const join = async function (req, res, next) {
         if (result) {
           try {
             await sendMail(email, '이메일 인증을 완료해주세요.', emailText(email, token))
-            return apiResponser({ req, res, message: '회원가입 성공. 이메일 인증을 완료해주세요.'})
+            return apiResponser({ req, res, message: '회원가입 성공. 이메일 인증을 완료해주세요.' })
           } catch (e) {
-            return next(createError(500, e))
+            return next(apiErrorGenerator(500, '회원가입에 실패했습니다.', e))
           }
         } else {
-          return next(createError(400, '이미 존재하는 아이디입니다. 확인 후 시도해주세요.'))
+          return next(apiErrorGenerator(400, '이미 존재하는 아이디입니다. 확인 후 시도해주세요.'))
         }
       } else {
-        return next(createError(400, '비밀번호가 일치하지 않습니다.'))
+        return next(apiErrorGenerator(400, '비밀번호가 일치하지 않습니다.'))
       }
     } else {
-      return next(createError(400, '비밀번호 규칙을 다시 확인해주세요.'))
+      return next(apiErrorGenerator(400, '비밀번호 규칙을 다시 확인해주세요.'))
     }
   } catch (e) {
-    return next(createError(500, e))
+    return next(apiErrorGenerator(500, '알 수 없는 오류가 발생했습니다.', e))
   }
 }
 
@@ -219,12 +206,13 @@ export const mailToFindPass = async (req, res, next) => {
       '비밀번호 재설정을 위해 이메일 인증을 완료해주세요.',
       findPassText(email, userToken)
     )
-    return res.status(201).json({
-      result: 'ok',
+    return apiResponser({
+      req,
+      res,
+      message: '비밀번호 재설정을 위해 메일을 발송했습니다. 이메일 인증을 완료해주세요.',
     })
   } catch (e) {
-    console.error(`[Error] ${e}`)
-    return next(createError(e))
+    return next(apiErrorGenerator(500, e))
   }
 }
 
@@ -251,8 +239,7 @@ export const findPass = async (req, res, next) => {
   try {
     await changePassSchema.validateAsync({ userPwNew, userPwNewRe })
   } catch (e) {
-    console.log(`[INFO] 유저 ${email} 의 비밀번호 변경 실패: ${e}`)
-    return next(createError(400, '비밀번호 규칙을 확인해주세요.'))
+    return next(apiErrorGenerator(400, '비밀번호 규칙을 확인해주세요.', e))
   }
 
   try {
@@ -264,22 +251,13 @@ export const findPass = async (req, res, next) => {
 
         await userDAO.resetPass(email, newSalt, newPass)
 
-        console.log(`[INFO] 유저 ${email} 가 비밀번호 변경에 성공했습니다.`)
-        return res.status(200).json({
-          result: 'ok',
-          message: '새로운 비밀번호로 로그인해주세요.',
-        })
+        return apiResponser({ req, res, message: '새로운 비밀번호로 로그인해주세요.' })
       }
-      console.log(`[INFO] 유저 ${email} 가 잘못된 토큰 ${token} 으로 비밀번호 변경을 시도했습니다.`)
-      return next(createError(401, '적절하지 않은 인증입니다.'))
+      return next(apiErrorGenerator(401, '적절하지 않은 인증입니다.'))
     }
-    console.log(
-      `[INFO] 유저 ${email} 서로 다른 비밀번호 ${userPwNew}, ${userPwNewRe} 로 비밀번호 변경을 시도했습니다.`
-    )
-    return next(createError(400, '비밀번호가 다릅니다.'))
+    return next(apiErrorGenerator(400, '비밀번호가 다릅니다.'))
   } catch (e) {
-    console.error(`[Error] ${e}`)
-    return next(createError('알 수 없는 에러가 발생했습니다.'))
+    return next(apiErrorGenerator(500, '알 수 없는 에러가 발생했습니다.'))
   }
 }
 
@@ -298,15 +276,10 @@ export const mailAuth = async function (req, res, next) {
     const result = await userDAO.isConfirmed(email, token)
     if (result) {
       await userDAO.confirmUser(email)
-      console.log(`[INFO] 유저 ${email} 의 이메일 인증이 완료되었습니다.`)
-      return res.status(200).json({
-        result: 'ok',
-      })
+      return apiResponser({ req, res, message: '메일 인증에 성공했습니다.' })
     }
-    console.log(`[INFO] 이메일 ${email} 의 이메일 인증이 실패했습니다.`)
-    return next(createError(401, '이메일 인증에 실패했습니다.'))
+    return next(apiErrorGenerator(401, '이메일 인증에 실패했습니다.'))
   } catch (e) {
-    console.error(`[Error] ${e}`)
-    return next(createError(500, '알 수 없는 에러가 발생했습니다.'))
+    return next(apiErrorGenerator(500, '알 수 없는 에러가 발생했습니다.', e))
   }
 }
