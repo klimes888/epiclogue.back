@@ -1,5 +1,5 @@
-import Joi from 'joi'
 import '../../env/env'
+import Joi from 'joi'
 import { cookieOption } from '../../options/options'
 import { apiErrorGenerator } from '../apiErrorGenerator'
 import { generateToken, verifyToken } from '../tokenManager'
@@ -26,8 +26,7 @@ const authExceptions = [
  */
 export const authToken = async (req, res, next) => {
   try {
-    const clientToken = req.cookies.access_token
-
+    const clientToken = req.user?.accessToken
     const { name: accessPath } = req.route.stack[req.route.stack.length - 1]
 
     if (!clientToken && authExceptions.includes(accessPath)) {
@@ -35,42 +34,41 @@ export const authToken = async (req, res, next) => {
       return next()
     }
 
-    /*
-     * 나머지 기능들에 대해 요청받은 토큰을 검사
-     * 비회원에게 접근이 허용된 페이지의 경우에는 유저의 로그인 상태에 따라 다르게 보이기 위해 필요
-     */
-
     const tokenSchema = Joi.object({
       token: Joi.string()
-        .regex(/^[A-Za-z0-9-_=]+\.[A-Za-z0-9-_=]+\.?[A-Za-z0-9-_.+/=]*$/)
+        .regex(/^[A-Za-z0-9-_=]+\.[A-Za-z0-9-_=]+\.[A-Za-z0-9-_.+/=]*$/)
         .required(),
     })
 
     try {
       await tokenSchema.validateAsync({ token: clientToken })
     } catch (e) {
-      return next(apiErrorGenerator(401, '인증 실패: 적절하지 않은 인증입니다.', e))
+      return next(apiErrorGenerator(401, '인증 실패: 토큰 형식이 아닙니다', e))
     }
 
-    let decoded
-
+    /*
+     * 나머지 기능들에 대해 요청받은 토큰을 검사
+     * 비회원에게 접근이 허용된 페이지의 경우에는 유저의 로그인 상태에 따라 다르게 보이기 위해 필요
+     */
+    let decodedToken
     try {
-      decoded = await verifyToken(clientToken)
+      decodedToken = await verifyToken(clientToken)
     } catch (e) {
-      return next(apiErrorGenerator(401, '인증 실패: 적절하지 않은 인증입니다.'))
+      return next(apiErrorGenerator(401, '인증 실패: 토큰이 손상되었습니다.', e))
     }
 
-    if (decoded) {
-      if (decoded.isConfirmed) {
-        if (Date.now() / 1000 - decoded.iat > 60 * 60 * 24) {
+    console.warn(decodedToken)
+
+    if (decodedToken) {
+      if (decodedToken.isConfirmed) {
+        if (Date.now() / 1000 - decodedToken.iat > 60 * 60 * 24) {
           // 하루이상 지나면 갱신
-          const token = await generateToken(decoded.nick, decoded.uid, decoded.isConfirmed)
-          res.cookie('access_token', token, cookieOption)
+          const newToken = await generateToken(decodedToken.nick, decodedToken.uid, decodedToken.isConfirmed)
+          res.cookie('access_token', newToken, cookieOption)
         }
-        res.locals.uid = decoded.uid
         next()
       } else {
-        return next(apiErrorGenerator(401, '이메일 인증이 완료되지 않았습니다.'))
+        return next(apiErrorGenerator(403, '이메일 인증이 완료되지 않았습니다.'))
       }
     } else {
       return next(apiErrorGenerator(401, '인증 실패: 적절하지 않은 인증입니다.'))

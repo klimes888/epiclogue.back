@@ -33,8 +33,8 @@ server.listen(port)
 server.on('error', onError)
 server.on('listening', onListening)
 server.on('close', onClose)
-server.on('uncaughtException', (err) => {
-  logger.error(err)
+process.on('uncaughtException', (err) => {
+  logger.error(`***UNCAUGHT EXCEPTION: ${err.stack}`)
   process.exit(1)
 })
 /**

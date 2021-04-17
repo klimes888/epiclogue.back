@@ -51,10 +51,14 @@ export const apiRequestHandler = async (req, res, next) => {
     if (accessToken) {
       // 캐싱된 세션은 없으나 토큰은 있다 = 만료된 세션(추정)을 가진 회원
       userData.accessToken = accessToken
+      /**
+       * Format of decodedToken: { uid, nick, isConfirmed }
+       */
       const decodedToken = await verifyToken(accessToken)
       if (decodedToken) {
         userData.isMember = true
         userData.id = decodedToken.uid
+        res.locals.uid = decodedToken.uid
       }
     }
     // else {

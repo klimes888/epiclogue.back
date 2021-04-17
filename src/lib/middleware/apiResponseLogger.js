@@ -1,6 +1,6 @@
 import dayjs from 'dayjs'
 
-import { logger, stream } from '../../configs/winston'
+import { logger } from '../../configs/winston'
 
 /**
  * Reponse logging middleware
