@@ -16,6 +16,11 @@ redisClient.on('error', err => {
   console.error(err)
 })
 
+/**
+ * Get/Set
+ *  K: req.session.id
+ *  V: JSON.stringify({ userObjectId, isMember, accessCount, accessToken })
+ */
 export default {
   ...redisClient,
   getAsync: promisify(redisClient.get).bind(redisClient),

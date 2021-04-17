@@ -14,7 +14,7 @@ import indexRouter from './src/routes'
 // utils
 import { connectDatabase } from './src/lib/database'
 import { swaggerSpec } from './src/configs/apiDoc'
-import { apiRequestLogger } from './src/lib/middleware/apiRequestLogger'
+import { apiRequestHandler } from './src/lib/middleware/apiRequestHandler'
 import { errorHandler } from './src/lib/middleware/errorHandler'
 import { apiResponser } from './src/lib/middleware/apiResponser'
 
@@ -39,7 +39,7 @@ app.use(cookieParser())
 app.use(helmet())
 
 connectDatabase()
-app.use(apiRequestLogger)
+app.use(apiRequestHandler)
 
 /**
  * Routers

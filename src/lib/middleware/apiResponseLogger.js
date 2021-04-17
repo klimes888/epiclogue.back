@@ -10,9 +10,14 @@ export const apiResponseLogger = async (req, res) => {
     timestamp: dayjs(new Date()).format('YYYY-MM-DD HH:mm:ss Z'),
     sessionId: res.sessionId,
     type: 'response',
-    isMember: false,
+    isMember: req.user.isMember || false,
+    requestUserId: req.user.id || null,
+    accessToken: req.user.accessToken || null,
+    accessCount: req.user.accessCount || 1,
     statusCode: res.statusCode,
-    resData: res.data,
+    resData: res.data || null,
+    resDataKiloBytes: (JSON.stringify(res.data).length / 1000).valueOf() || 0,
+    resposneTimeMs: new Date().getTime() - req.time || null
   }
 
   if (res.error) {
@@ -22,11 +27,6 @@ export const apiResponseLogger = async (req, res) => {
       errorMessage: res.error.message,
       stack: res.error?.stack,
     }
-  }
-
-  if (res.accessToken) {
-    loggingObject = { ...loggingObject, accessToken: res.accessToken }
-    loggingObject.isMember = true
   }
 
   if (res.statusCode > 499) {

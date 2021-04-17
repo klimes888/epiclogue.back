@@ -15,14 +15,8 @@ const router = express.Router({
   mergeParams: true,
 })
 
-router.get('/', async (req, res) => {
-  const data = {
-    comment: 'server is ok',
-    message: req.session.id,
-    views: req.session.views,
-  }
-
-  apiResponser({ res, data })
+router.get('/', (req, res) => {
+  apiResponser({ req, res, message: 'server is ok' })
 })
 router.use('/auth', authRouter)
 router.use('/user', usersRouter)
