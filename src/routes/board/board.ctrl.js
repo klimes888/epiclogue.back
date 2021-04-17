@@ -15,15 +15,22 @@ import { apiResponser } from '../../lib/middleware/apiResponser'
  * @returns 요청한 글 배열
  */
 export const getBoards = async (req, res, next) => {
-  const { type: requestType } = req.query
-  const option = { pub: 1 }
+  const { type: requestType, latestId, size } = req.query
+  const requestSize = size ? parseInt(size, 10) : 35
+  const option = {
+    pub: 1
+  }
   // 특정 카테고리만 요청할 경우
   if (requestType) {
     option.category = requestType === 'Illust' ? 0 : 1
   }
 
+  if (latestId) {
+    option._id = {$lt: latestId}
+  }
+
   try {
-    const boardList = await boardDAO.findAll(option)
+    const boardList = await boardDAO.getFeed(option, requestSize)
 
     const filteredBoardList = boardList.filter(each => each.writer !== null)
     const wrappedData = await contentsWrapper(res.locals.uid, filteredBoardList, 'Board', false)
@@ -197,6 +204,7 @@ export const postEditInfo = async function (req, res, next) {
       language: parseInt(req.body.language || originalData.language, 10),
       thumbnail: boardImg ? thumbPathGen(boardImg[0].split('/')) : originalData.thumbnail,
       tags,
+      sourceUrl: req.body?.sourceUrl || null,
     }
 
     const updatedBoardData = await boardDAO.update(updateData)

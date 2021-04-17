@@ -26,7 +26,7 @@ const RedisStore = connectRedis(session)
 /**
  * Initialize middlewares
  */
-app.use(cors({ credentials: true, origin: true }))
+app.use(cors({ credentials: true, origin: process.env.NODE_ENV === 'production' ? '.epiclogue.com' : true }))
 app.use(
   session({
     secret: process.env.SECRET_KEY,

@@ -3,7 +3,7 @@ import '../../env/env'
 import { userDAO } from '../../DAO'
 import { sendMail, emailText, findPassText } from '../../lib/sendMail'
 import { joinDataCrypt, cryptoData, getRandomToken, getRandomString } from '../../lib/cryptoData'
-import { cookieOption } from '../../options/options'
+import { cookieClearOption, cookieOption } from '../../options/options'
 import { generateToken } from '../../lib/tokenManager'
 import { apiResponser } from '../../lib/middleware/apiResponser'
 import { apiErrorGenerator } from '../../lib/apiErrorGenerator'
@@ -57,6 +57,27 @@ export const snsLogin = async function (req, res, next) {
 
   res.cookie('access_token', token, cookieOption)
   return apiResponser({ req, res, data: responseObject, message: 'SNS 로그인에 성공했습니다.' })
+}
+/**
+ * @description 로그아웃
+ * @access POST /auth/logout
+ * @param {*} req HTTP request
+ * @param {*} res HTTP response
+ * @param {*} next ExpressJS next middleware
+ * @returns 로그아웃 여부 응답
+ */
+
+export const logout = async (req, res, next) => {
+  if(req.cookies?.access_token) {
+    console.log(`${ req.cookies.access_token } 유저가 로그아웃 했습니다.`)
+    res.clearCookie('access_token', cookieClearOption)
+  } else {
+    console.error(`${ req.headers['x-forwarded-for'] }에서 비정상적인 로그아웃 요청을 했습니다.`)
+    next(createError(400, '비정상적 요청입니다.'))
+  }
+  return res.status(200).json({
+    result: 'ok'
+  })
 }
 
 /**

@@ -4,7 +4,7 @@ import { authToken } from '../../../../lib/middleware/tokenAuth'
 import { checkWriter } from '../../../../lib/middleware/checkPermission'
 import { checkExistence } from '../../../../lib/middleware/checkExistence'
 
-const reply = new Router({ mergeParams: true })
+const reply = Router({ mergeParams: true })
 
 reply.get('/', authToken, checkExistence, replyCtrl.getReplys)
 reply.post('/', authToken, checkExistence, replyCtrl.postReply)
