@@ -1,7 +1,7 @@
 import dayjs from 'dayjs'
 import Slack from 'slack-node'
 
-import { stream } from '../../configs/winston'
+import { logger } from '../../configs/winston'
 import { apiResponser } from './apiResponser'
 
 /**
@@ -24,7 +24,7 @@ export const errorHandler = (err, req, res) => {
     const slack = new Slack()
     slack.setWebhook(process.env.SLACK_WEBHOOK)
     slack.webhook(JSON.stringify(errorObject), webhookError => {
-      if (webhookError) stream.writeDetailError(webhookError)
+      if (webhookError) logger.error(webhookError)
     })
   }
 

@@ -8,7 +8,7 @@ const redisClient = redis.createClient({
 })
 
 redisClient.on('connect', () => {
-  logger.info(`[RedisConnect] Successfully connected cache server`)
+  console.log(`[RedisConnect] Successfully connected cache server`)
 })
 
 redisClient.on('error', err => {

@@ -11,7 +11,7 @@ export const connectDatabase = async () => {
 
   try {
     await mongoose.connect(dbUrl, dbOption)
-    logger.info(`[MongoDBConnect] Successfully connected database server.`)
+    console.log(`[MongoDBConnect] Successfully connected database server.`)
   } catch (e) {
     logger.error(`[MongoConnectError] ${e}`)
   }
@@ -23,7 +23,7 @@ export const disconnectDatabase = async () => {
   if (mongoose.Connection.readyState !== 0) {
     try {
       await mongoose.disconnect()
-      logger.info('[MongoDB] Database disconnected successfully')
+      console.log('[MongoDB] Database disconnected successfully')
     } catch (e) {
       logger.error(`[MongoDBError] ${e}`)
     }
@@ -37,7 +37,7 @@ export const disconnectDatabase = async () => {
 export const dropDatabase = async () => {
   try {
     await mongoose.connection.db.dropDatabase()
-    logger.info('[MongoDBDropDatabase] Database dropped successfully')
+    console.log('[MongoDBDropDatabase] Database dropped successfully')
   } catch (e) {
     logger.error(`[DropDatabaseError] ${e}`)
   }

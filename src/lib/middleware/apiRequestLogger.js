@@ -1,6 +1,6 @@
 import dayjs from 'dayjs'
 
-import { stream } from '../../configs/winston'
+import { logger } from '../../configs/winston'
 
 /**
  * Access logging middleware
@@ -16,15 +16,15 @@ export const apiRequestLogger = (req, res) => {
     reqMethod: req.method,
     reqHeaders: req.headers,
     reqBody: req.body,
-    isMember: req.user.isMember || false,
-    requestUserId: req.user.id || null,
-    accessToken: req.user.accessToken || null,
-    accessCount: req.user.accessCount || 1,
+    isMember: req.user?.isMember || false,
+    requestUserId: req.user?.id || null,
+    accessToken: req.user?.accessToken || null,
+    accessCount: req.user?.accessCount || 1,
   }
 
   req.time = requestTime
   res.sessionId = req.session.id
   res.accessToken = req.cookies.access_token
 
-  stream.writeDetailInfo(JSON.stringify(loggingObject))
+  logger.info(JSON.stringify(loggingObject))
 }
