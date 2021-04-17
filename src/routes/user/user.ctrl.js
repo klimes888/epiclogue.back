@@ -14,7 +14,7 @@ import { apiResponser } from '../../lib/middleware/apiResponser'
  * @returns 수정할 유저 프로필
  */
 export const getUserEditInfo = async (req, res, next) => {
-  const { uid } = res.locals
+  const { uid } = req.user
   try {
     const result = await userDAO.getUserInfo(uid, {
       nickname: 1,
@@ -44,7 +44,7 @@ export const getUserEditInfo = async (req, res, next) => {
 
 export const postUserEditInfo = async function (req, res, next) {
   // remove old images
-  const originalData = await userDAO.getUserInfo(res.locals.uid)
+  const originalData = await userDAO.getUserInfo(req.user.id)
   const screenId = req.body.screenId || originalData.screenId
   const nickname = req.body.userNick || originalData.nickname
   const displayLanguage = parseInt(req.body.userDisplayLang || originalData.displayLanguage, 10)
@@ -72,7 +72,7 @@ export const postUserEditInfo = async function (req, res, next) {
   try {
     const isScreenIdUnique = await userDAO.isScreenIdUnique(originalData._id, screenId)
     const newerUserData = {
-      userId: res.locals.uid,
+      userId: req.user.id,
       screenId,
       nickname,
       availableLanguage:
@@ -102,7 +102,7 @@ export const postUserEditInfo = async function (req, res, next) {
  * @returns 비밀번호 변경 여부 메세지(문자열)
  */
 export const changePass = async (req, res, next) => {
-  const { uid } = res.locals
+  const { uid } = req.user
   const { userPw, userPwNew, userPwNewRe } = req.body
 
   try {
@@ -158,7 +158,7 @@ export const changePass = async (req, res, next) => {
  * @returns -
  */
 export const deleteUser = async (req, res, next) => {
-  const { uid } = res.locals
+  const { uid } = req.user
   const { userPw } = req.body
 
   const deleteSchema = Joi.object({

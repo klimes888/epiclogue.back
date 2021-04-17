@@ -36,8 +36,8 @@ app.use(
     cookie: {
       httpOnly: true,
       maxAge: 3600000, // 1h to ms
-      sameSite: true,
-      secure: process.env.NODE_ENV === 'production'
+      sameSite: process.env.NODE_ENV === 'test' ? 'None' : 'Lax',
+      domain: process.env.NODE_ENV === 'test' ? 'localhost:3000' : '.epiclogue.com',
     },
   })
 )

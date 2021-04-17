@@ -19,8 +19,8 @@ export const getBookmarkList = async (req, res, next) => {
     const userInfo = await userDAO.getIdByScreenId(screenId)
     const bookmarkSet = await bookmarkDAO.getByUserId(userInfo._id)
     const extractionSet = bookmarkSet.filter(each => each.board !== null).map(each => each.board)
-    const wrappedBookmarks = res.locals?.uid
-      ? await contentsWrapper(res.locals.uid, extractionSet, 'Board', false)
+    const wrappedBookmarks = req.user?.id
+      ? await contentsWrapper(req.user.id, extractionSet, 'Board', false)
       : extractionSet
 
     return apiResponser({ req, res, data: wrappedBookmarks })
@@ -39,18 +39,18 @@ export const getBookmarkList = async (req, res, next) => {
  */
 export const addBookmark = async function (req, res, next) {
   const bookmarkSchema = {
-    user: res.locals.uid,
+    user: req.user.id,
     board: req.body.boardId,
   }
 
   const reactSchema = {
-    user: res.locals.uid,
+    user: req.user.id,
     boardId: req.body.boardId,
     type: 'bookmark',
   }
 
   try {
-    const didBookmark = await bookmarkDAO.didBookmark(res.locals.uid, req.body.boardId)
+    const didBookmark = await bookmarkDAO.didBookmark(req.user.id, req.body.boardId)
 
     if (didBookmark) {
       return next(apiErrorGenerator(400, '입력값이 적절하지 않습니다.'))
@@ -59,10 +59,10 @@ export const addBookmark = async function (req, res, next) {
     const targetData = await boardDAO.getWriter(req.body.boardId)
     const bookmarkCount = await bookmarkDAO.create(bookmarkSchema, reactSchema, req.params.boardId)
     // Make notification if requester is not a writer
-    if (targetData.writer.toString() !== res.locals.uid) {
+    if (targetData.writer.toString() !== req.user.id) {
       await notificationDAO.makeNotification({
         targetUserId: targetData.writer,
-        maker: res.locals.uid,
+        maker: req.user.id,
         notificationType: 'Bookmark',
         targetType: 'Board',
         targetInfo: req.body.boardId,
@@ -84,7 +84,7 @@ export const addBookmark = async function (req, res, next) {
  * @returns 글 북마크 수
  */
 export const deleteBookmark = async (req, res, next) => {
-  const userId = res.locals.uid
+  const userId = req.user.id
   const { boardId } = req.body
 
   try {

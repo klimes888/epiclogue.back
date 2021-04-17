@@ -13,7 +13,7 @@ import { apiResponser } from '../../lib/middleware/apiResponser'
  */
 export const getNoti = async (req, res, next) => {
   try {
-    const notiData = await notificationDAO.getNotiList(res.locals.uid)
+    const notiData = await notificationDAO.getNotiList(req.user.id)
     return apiResponser({ req, res, data: notiData })
   } catch (e) {
     return next(apiErrorGenerator(500, '알 수 없는 오류가 발생했습니다.', e))
@@ -30,7 +30,7 @@ export const getNoti = async (req, res, next) => {
  */
 export const setRead = async (req, res, next) => {
   try {
-    await notificationDAO.setReadOne(req.body.notiId, res.locals.uid)
+    await notificationDAO.setReadOne(req.body.notiId, req.user.id)
     return apiResponser({ req, res, message: '알림 한 개를 읽음처리 했습니다.' })
   } catch (e) {
     return next(apiErrorGenerator(500, '알 수 없는 오류가 발생했습니다.', e))
@@ -47,7 +47,7 @@ export const setRead = async (req, res, next) => {
  */
 export const setReadAll = async (req, res, next) => {
   try {
-    await notificationDAO.setReadAll(res.locals.uid)
+    await notificationDAO.setReadAll(req.user.id)
     return apiResponser({ req, res, message: '모든 알림을 읽음처리 했습니다.' })
   } catch (e) {
     return next(apiErrorGenerator(500, '알 수 없는 오류가 발생했습니다.', e))
@@ -64,7 +64,7 @@ export const setReadAll = async (req, res, next) => {
  */
 export const checkNotified = async (req, res, next) => {
   try {
-    const notiCount = await notificationDAO.getUnreadNotiCount(res.locals.uid)
+    const notiCount = await notificationDAO.getUnreadNotiCount(req.user.id)
     return apiResponser({ req, res, data: { notiCount } })
   } catch (e) {
     return next(apiErrorGenerator(500, '알 수 없는 오류가 발생했습니다.', e))
@@ -112,7 +112,7 @@ export const deleteNoti = async (req, res, next) => {
  */
 export const deleteAll = async (req, res, next) => {
   try {
-    await notificationDAO.deleteNotiAll(res.locals.uid)
+    await notificationDAO.deleteNotiAll(req.user.id)
     return apiResponser({ req, res, message: '모든 알림을 삭제했습니다.' })
   } catch (e) {
     return next(apiErrorGenerator('알 수 없는 오류가 발생했습니다.', e))

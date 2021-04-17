@@ -85,7 +85,7 @@ export const checkUserExistence = async (req, res, next) => {
 
     if (existence && existence.deactivatedAt === null) {
       // left is Object, right is String.
-      if (existence._id.toString() === res.locals.uid) {
+      if (existence._id.toString() === req.user.id) {
         return next(apiErrorGenerator(400, '입력값이 적절하지 않습니다.'))
       }
       next()

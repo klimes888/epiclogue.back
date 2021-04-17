@@ -9,7 +9,7 @@ export const checkWriter = async (req, res, next) => {
 
   try {
     // 어드민이면 통과
-    const isAdmin = await userDAO.isAdmin(res.locals.uid)
+    const isAdmin = await userDAO.isAdmin(req.user.id)
     if (isAdmin) {
       return next()
     }
@@ -17,15 +17,15 @@ export const checkWriter = async (req, res, next) => {
     if (req.params.replyId !== undefined) {
       type = '댓글'
       id = req.params.replyId
-      isWriter = await replyDAO.isWriter(res.locals.uid, req.params.replyId)
+      isWriter = await replyDAO.isWriter(req.user.id, req.params.replyId)
     } else if (req.params.feedbackId !== undefined) {
       type = '피드백'
       id = req.params.feedbackId
-      isWriter = await feedbackDAO.isWriter(res.locals.uid, req.params.feedbackId)
+      isWriter = await feedbackDAO.isWriter(req.user.id, req.params.feedbackId)
     } else if (req.params.boardId !== undefined) {
       type = '글'
       id = req.params.boardId
-      isWriter = await boardDAO.isWriter(res.locals.uid, req.params.boardId)
+      isWriter = await boardDAO.isWriter(req.user.id, req.params.boardId)
     }
 
     if (isWriter !== null) {

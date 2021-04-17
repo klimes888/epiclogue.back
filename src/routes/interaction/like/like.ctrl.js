@@ -12,7 +12,7 @@ import { apiResponser } from '../../../lib/middleware/apiResponser'
  */
 export const addLike = async (req, res, next) => {
   const likeData = {
-    userId: res.locals.uid,
+    userId: req.user.id,
     targetType: req.body.targetType,
     targetInfo: req.body.targetInfo,
   }
@@ -29,13 +29,13 @@ export const addLike = async (req, res, next) => {
       likeData,
       targetInfo,
       targetType,
-      res.locals.uid
+      req.user.id
     )
     /* 자기 자신에게는 알림을 보내지 않음 */
-    if (targetData.writer.toString() !== res.locals.uid) {
+    if (targetData.writer.toString() !== req.user.id) {
       await notificationDAO.makeNotification({
         targetUserId: targetData.writer,
-        maker: res.locals.uid,
+        maker: req.user.id,
         notificationType: 'Like',
         targetType,
         targetInfo,
@@ -58,7 +58,7 @@ export const addLike = async (req, res, next) => {
  */
 export const deleteLike = async (req, res, next) => {
   const likeData = {
-    userId: res.locals.uid,
+    userId: req.user.id,
     targetInfo: req.body.targetInfo,
     targetType: req.body.targetType,
   }

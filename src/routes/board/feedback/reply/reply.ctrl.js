@@ -14,7 +14,7 @@ import { apiResponser } from '../../../../lib/middleware/apiResponser'
  */
 export const postReply = async (req, res, next) => {
   const replyForm = {
-    writer: res.locals.uid,
+    writer: req.user.id,
     boardId: req.params.boardId,
     parentId: req.params.feedbackId,
     replyBody: req.body.replyBody,
@@ -35,16 +35,16 @@ export const postReply = async (req, res, next) => {
   try {
     const { replyData, newerReplies } = await replyDAO.createAndGetNewList(
       replyForm,
-      res.locals.uid,
+      req.user.id,
       req.params.feedbackId
     )
-    const wrappedReplies = await contentsWrapper(res.locals.uid, newerReplies, 'Reply', false)
+    const wrappedReplies = await contentsWrapper(req.user.id, newerReplies, 'Reply', false)
     const feedbackData = await feedbackDAO.getWriter(req.params.feedbackId)
     /* 자기 자신에게는 알림을 보내지 않음 */
-    if (feedbackData.writer.toString() !== res.locals.uid) {
+    if (feedbackData.writer.toString() !== req.user.id) {
       await notificationDAO.makeNotification({
         targetUserId: feedbackData.writer,
-        maker: res.locals.uid,
+        maker: req.user.id,
         notificationType: 'Reply',
         targetType: 'Feedback',
         targetInfo: req.params.feedbackId,
@@ -70,7 +70,7 @@ export const getReplys = async (req, res, next) => {
 
   try {
     const replyData = await replyDAO.getByParentId(feedbackId)
-    const wrappedReplies = await contentsWrapper(res.locals?.uid, replyData, 'Reply', false)
+    const wrappedReplies = await contentsWrapper(req.user?.uid, replyData, 'Reply', false)
 
     return apiResponser({ req, res, data: wrappedReplies })
   } catch (e) {
@@ -106,7 +106,7 @@ export const editReply = async (req, res, next) => {
 
   try {
     const newerData = await replyDAO.updateAndGetNewList(req.params.feedbackId, newForm)
-    const wrappedReplies = await contentsWrapper(res.locals.uid, newerData, 'Reply', false)
+    const wrappedReplies = await contentsWrapper(req.user.id, newerData, 'Reply', false)
 
     return apiResponser({ req, res, data: wrappedReplies })
   } catch (e) {
@@ -128,7 +128,7 @@ export const deleteReply = async (req, res, next) => {
       req.params.replyId,
       req.params.feedbackId
     )
-    const wrappedReplies = await contentsWrapper(res.locals.uid, newerReplies, 'Reply', false)
+    const wrappedReplies = await contentsWrapper(req.user.id, newerReplies, 'Reply', false)
 
     return apiResponser({ req, res, data: wrappedReplies })
   } catch (e) {

@@ -32,11 +32,11 @@ export const getMyboard = async (req, res, next) => {
     myBoardData.followerCount = await followDAO.getFollowerCount(userData._id)
     myBoardData.followingCount = await followDAO.getFollowingCount(userData._id)
 
-    if (res.locals?.uid) {
+    if (req.user?.id) {
       myBoardData.isFollowing =
-        res.locals.uid === userData._id.toString()
+        req.user.id === userData._id.toString()
           ? 'me'
-          : !!(await followDAO.isFollowing(res.locals.uid, userData._id))
+          : !!(await followDAO.isFollowing(req.user.id, userData._id))
     }
 
     return apiResponser({ req, res, data: myBoardData })
@@ -57,8 +57,8 @@ export const allWorks = async (req, res, next) => {
   const userId = await userDAO.getIdByScreenId(req.params.screenId)
   try {
     const userAllWorks = await boardDAO.findAll({ writer: userId._id })
-    const wrappedWorks = res.locals?.uid
-      ? await contentsWrapper(res.locals.uid, userAllWorks, 'Board', false)
+    const wrappedWorks = req.user?.uid
+      ? await contentsWrapper(req.user.id, userAllWorks, 'Board', false)
       : userAllWorks
 
     return apiResponser({ req, res, data: wrappedWorks })
@@ -79,7 +79,7 @@ export const originals = async (req, res, next) => {
   try {
     const targetUser = await userDAO.getIdByScreenId(req.params.screenId)
     const myContents = await boardDAO.findAllOriginOrSecondary(targetUser._id, false)
-    const wrappedContents = await contentsWrapper(res.locals.uid, myContents, 'Board', false)
+    const wrappedContents = await contentsWrapper(req.user.id, myContents, 'Board', false)
 
     return apiResponser({ req, res, data: wrappedContents })
   } catch (e) {
@@ -99,8 +99,8 @@ export const secondaryWorks = async (req, res, next) => {
   try {
     const targetUser = await userDAO.getIdByScreenId(req.params.screenId)
     const userSecondaryWorks = await boardDAO.findAllOriginOrSecondary(targetUser._id, true)
-    const wrappedContents = res.locals?.uid
-      ? await contentsWrapper(res.locals.uid, userSecondaryWorks, 'Board', false)
+    const wrappedContents = req.user?.uid
+      ? await contentsWrapper(req.user.id, userSecondaryWorks, 'Board', false)
       : userSecondaryWorks
 
     return apiResponser({ req, res, data: wrappedContents })

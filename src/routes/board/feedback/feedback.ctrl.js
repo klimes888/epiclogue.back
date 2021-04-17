@@ -141,8 +141,8 @@ export const deleteFeedback = async (req, res, next) => {
 export const getFeedback = async (req, res, next) => {
   try {
     const feedbackData = await feedbackDAO.getById(req.params.feedbackId)
-
-    return apiResponser({ req, res, data: feedbackData })
+    const wrappedData = await contentsWrapper(req.user.id, feedbackData, 'Feedback', false)
+    return apiResponser({ req, res, data: wrappedData })
   } catch (e) {
     return next(apiErrorGenerator(500, '알 수 없는 에러가 발생했습니다.', e))
   }

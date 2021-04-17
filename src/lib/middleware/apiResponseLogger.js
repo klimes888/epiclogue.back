@@ -25,7 +25,7 @@ export const apiResponseLogger = async (req, res) => {
       ...loggingObject,
       errorName: res.error.name,
       errorMessage: res.error.message,
-      stack: res.error?.stack,
+      errorStack: res.error?.stack,
     }
   }
 

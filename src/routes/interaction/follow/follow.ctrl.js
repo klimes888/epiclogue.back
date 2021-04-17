@@ -13,7 +13,7 @@ import { apiResponser } from '../../../lib/middleware/apiResponser'
  */
 export const addFollow = async (req, res, next) => {
   const followData = {
-    userId: res.locals.uid,
+    userId: req.user.id,
     targetUserId: req.body.targetUserId,
   }
 
@@ -26,10 +26,10 @@ export const addFollow = async (req, res, next) => {
     const followCount = await followDAO.follow(followData)
     await notificationDAO.makeNotification({
       targetUserId: req.body.targetUserId,
-      maker: res.locals.uid,
+      maker: req.user.id,
       notificationType: 'Follow',
       targetType: 'User',
-      targetInfo: res.locals.uid,
+      targetInfo: req.user.id,
     })
     return apiResponser({ req, res, statusCode: 201, data: { followCount } })
   } catch (e) {
@@ -47,7 +47,7 @@ export const addFollow = async (req, res, next) => {
  */
 export const deleteFollow = async (req, res, next) => {
   const followData = {
-    userId: res.locals.uid,
+    userId: req.user.id,
     targetUserId: req.body.targetUserId,
   }
 
@@ -83,7 +83,7 @@ export const getFollow = async (req, res, next) => {
         ? await followDAO.getFollowingList(userId._id)
         : await followDAO.getFollowerList(userId._id)
 
-    const wrappedFollowData = await contentsWrapper(res.locals?.uid, requestedData, 'Follow', false)
+    const wrappedFollowData = await contentsWrapper(req.user?.id, requestedData, 'Follow', false)
 
     return apiResponser({ req, res, data: wrappedFollowData })
   } catch (e) {

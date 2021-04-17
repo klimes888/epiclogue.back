@@ -1,8 +1,7 @@
 import '../../env/env'
 import Joi from 'joi'
-import { cookieOption } from '../../options/options'
 import { apiErrorGenerator } from '../apiErrorGenerator'
-import { generateToken, verifyToken } from '../tokenManager'
+import { tokenExpirationChecker } from './tokenExpirationChecker'
 
 // 예외 페이지들에 대한 route stack의 마지막 async function의 이름을 저장합니다.
 const authExceptions = [
@@ -29,44 +28,26 @@ export const authToken = async (req, res, next) => {
     const clientToken = req.user?.accessToken
     const { name: accessPath } = req.route.stack[req.route.stack.length - 1]
 
+    // 비회원에게 접근이 허용된 페이지
     if (!clientToken && authExceptions.includes(accessPath)) {
-      // 비회원에게 접근이 허용된 페이지
       return next()
     }
 
-    const tokenSchema = Joi.object({
-      token: Joi.string()
-        .regex(/^[A-Za-z0-9-_=]+\.[A-Za-z0-9-_=]+\.[A-Za-z0-9-_.+/=]*$/)
-        .required(),
-    })
-
+    // 토큰 형식 확인
     try {
+      const tokenSchema = Joi.object({
+        token: Joi.string()
+          .regex(/^[A-Za-z0-9-_=]+\.[A-Za-z0-9-_=]+\.?[A-Za-z0-9-_.+/=]*$/)
+          .required(),
+      })
       await tokenSchema.validateAsync({ token: clientToken })
     } catch (e) {
       return next(apiErrorGenerator(401, '인증 실패: 토큰 형식이 아닙니다', e))
     }
 
-    /*
-     * 나머지 기능들에 대해 요청받은 토큰을 검사
-     * 비회원에게 접근이 허용된 페이지의 경우에는 유저의 로그인 상태에 따라 다르게 보이기 위해 필요
-     */
-    let decodedToken
-    try {
-      decodedToken = await verifyToken(clientToken)
-    } catch (e) {
-      return next(apiErrorGenerator(401, '인증 실패: 토큰이 손상되었습니다.', e))
-    }
-
-    console.warn(decodedToken)
-
-    if (decodedToken) {
-      if (decodedToken.isConfirmed) {
-        if (Date.now() / 1000 - decodedToken.iat > 60 * 60 * 24) {
-          // 하루이상 지나면 갱신
-          const newToken = await generateToken(decodedToken.nick, decodedToken.uid, decodedToken.isConfirmed)
-          res.cookie('access_token', newToken, cookieOption)
-        }
-        next()
+    if (req.user) {
+      if (req.user.isConfirmed === true) {
+        await tokenExpirationChecker(req, res, next)
       } else {
         return next(apiErrorGenerator(403, '이메일 인증이 완료되지 않았습니다.'))
       }

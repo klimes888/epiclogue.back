@@ -72,7 +72,7 @@ export const logout = async (req, res, next) => {
   } else {
     return next(apiErrorGenerator(400, '비정상적 요청입니다.'))
   }
-  
+
   return apiResponser({ req, res, message: '성공적으로 로그아웃했습니다.' })
 }
 

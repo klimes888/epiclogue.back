@@ -18,7 +18,7 @@ export const getBoards = async (req, res, next) => {
   const { type: requestType, latestId, size } = req.query
   const requestSize = size ? parseInt(size, 10) : 35
   const option = {
-    pub: 1
+    pub: 1,
   }
   // 특정 카테고리만 요청할 경우
   if (requestType) {
@@ -26,14 +26,14 @@ export const getBoards = async (req, res, next) => {
   }
 
   if (latestId) {
-    option._id = {$lt: latestId}
+    option._id = { $lt: latestId }
   }
 
   try {
     const boardList = await boardDAO.getFeed(option, requestSize)
 
     const filteredBoardList = boardList.filter(each => each.writer !== null)
-    const wrappedData = await contentsWrapper(res.locals.uid, filteredBoardList, 'Board', false)
+    const wrappedData = await contentsWrapper(req.user.id, filteredBoardList, 'Board', false)
 
     return apiResponser({ req, res, data: wrappedData })
   } catch (e) {
@@ -58,7 +58,7 @@ export const postBoard = async (req, res, next) => {
   }
 
   const boardData = {
-    writer: res.locals.uid,
+    writer: req.user.id,
     boardTitle: req.body.boardTitle,
     boardBody: req.body.boardBody,
     category: req.body.category,
@@ -116,7 +116,7 @@ export const postBoard = async (req, res, next) => {
  */
 export const viewBoard = async (req, res, next) => {
   const { boardId } = req.params
-  const { uid } = res.locals
+  const { uid } = req.user
 
   try {
     const boardData = await boardDAO.getById(boardId)
@@ -232,7 +232,7 @@ export const secPost = async (req, res, next) => {
   }
 
   const boardData = {
-    writer: res.locals.uid,
+    writer: req.user.id,
     boardTitle: req.body.boardTitle,
     boardBody: req.body.boardBody,
     category: req.body.category,
@@ -282,10 +282,10 @@ export const secPost = async (req, res, next) => {
 
   try {
     const createdBoard = await boardDAO.createSec(boardData)
-    if (res.locals.uid !== boardData.originUserId) {
+    if (req.user.id !== boardData.originUserId) {
       await notificationDAO.makeNotification({
         targetUserId: req.body.originUserId,
-        maker: res.locals.uid,
+        maker: req.user.id,
         notificationType: 'Secondary',
         targetType: 'Board',
         targetInfo: createdBoard._id,

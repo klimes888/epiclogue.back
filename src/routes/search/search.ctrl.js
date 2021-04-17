@@ -38,8 +38,8 @@ export const search = async (req, res, next) => {
   return apiResponser({
     req,
     res,
-    data: res.locals.uid
-      ? await contentsWrapper(res.locals.uid, searchResult, searchType, false)
+    data: req.user.id
+      ? await contentsWrapper(req.user.id, searchResult, searchType, false)
       : searchResult,
   })
 }
