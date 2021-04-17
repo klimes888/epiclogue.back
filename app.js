@@ -7,6 +7,7 @@ import helmet from 'helmet'
 import hpp from 'hpp'
 import swaggerUi from 'swagger-ui-express'
 import session from 'express-session'
+import connectRedis from 'connect-redis'
 
 // routers
 import indexRouter from './src/routes'
@@ -17,21 +18,29 @@ import { swaggerSpec } from './src/configs/apiDoc'
 import { apiRequestHandler } from './src/lib/middleware/apiRequestHandler'
 import { errorHandler } from './src/lib/middleware/errorHandler'
 import { apiResponser } from './src/lib/middleware/apiResponser'
+import redisClient from './src/lib/redisClient'
 
 const app = express()
+const RedisStore = connectRedis(session)
 
 /**
  * Initialize middlewares
  */
 app.use(cors({ credentials: true, origin: true }))
-app.use(session({
-  secret: process.env.SECRET_KEY,
-  resave: false,
-  saveUninitialized: true,
-  cookie: {
-    maxAge: 60 * 60 * 1000, // 1h
-  }
-}))
+app.use(
+  session({
+    secret: process.env.SECRET_KEY,
+    resave: false,
+    saveUninitialized: true,
+    store: new RedisStore({ client: redisClient.getClient, url: process.env.REDIS_URL }),
+    cookie: {
+      httpOnly: true,
+      maxAge: 3600000, // 1h to ms
+      sameSite: true,
+      secure: process.env.NODE_ENV === 'production'
+    },
+  })
+)
 app.use(hpp())
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))

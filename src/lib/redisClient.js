@@ -21,7 +21,7 @@ redisClient.on('error', err => {
  *  V: JSON.stringify({ userObjectId, isMember, accessCount, accessToken })
  */
 export default {
-  ...redisClient,
+  getClient: redisClient,
   getAsync: promisify(redisClient.get).bind(redisClient),
   // setAsync: promisify(redisClient.set).bind(redisClient),
   /**

@@ -1,6 +1,6 @@
 import dayjs from 'dayjs'
 
-import { stream } from '../../configs/winston'
+import { logger, stream } from '../../configs/winston'
 
 /**
  * Reponse logging middleware
@@ -16,7 +16,7 @@ export const apiResponseLogger = async (req, res) => {
     accessCount: req.user.accessCount || 1,
     statusCode: res.statusCode,
     resData: res.data || null,
-    resDataKiloBytes: (JSON.stringify(res.data).length / 1000).valueOf() || 0,
+    resDataKiloBytes: res.data ? (JSON.stringify(res.data).length / 1000).valueOf() : 0,
     resposneTimeMs: new Date().getTime() - req.time || null,
   }
 
@@ -30,8 +30,8 @@ export const apiResponseLogger = async (req, res) => {
   }
 
   if (res.statusCode > 499) {
-    return stream.writeDetailError(JSON.stringify(loggingObject))
+    return logger.error(JSON.stringify(loggingObject))
   }
 
-  stream.writeDetailInfo(JSON.stringify(loggingObject))
+  logger.info(JSON.stringify(loggingObject))
 }
