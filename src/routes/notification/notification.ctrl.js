@@ -16,7 +16,6 @@ export const getNoti = async (req, res, next) => {
     const notiData = await notificationDAO.getNotiList(res.locals.uid)
     return apiResponser({ req, res, data: notiData })
   } catch (e) {
-    console.error(`[Error] ${e}`)
     return next(apiErrorGenerator(500, '알 수 없는 오류가 발생했습니다.', e))
   }
 }

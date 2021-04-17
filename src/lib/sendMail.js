@@ -1,6 +1,7 @@
 import '../env/env'
 import mailer from 'nodemailer'
 import AWS from 'aws-sdk'
+import { logger } from '../configs/winston'
 
 const { AWS_SES_ID, AWS_SES_SECRET, AWA_SES_REGION } = process.env
 
@@ -160,7 +161,7 @@ export const sendMail = async (email, subject, html) => {
       subject,
       html,
     })
-    console.log(`[INFO] ${email} 에게 성공적으로 메일을 보냈습니다`)
+    logger.info(`[SendMail] ${email} 에게 성공적으로 메일을 보냈습니다`)
   } catch (e) {
     throw new Error('메일을 보내는 도중 오류가 발생했습니다.')
   }

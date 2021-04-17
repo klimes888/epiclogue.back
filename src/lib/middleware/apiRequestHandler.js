@@ -2,6 +2,10 @@ import redisClient from '../redisClient'
 import { verifyToken } from '../tokenManager'
 import { apiRequestLogger } from './apiRequestLogger'
 
+/**
+ *  요청한 클라이언트의 데이터를 express.Request 객체에 내재화하고
+ *  세션에 따라 캐싱하는 미들웨어
+ */
 export const apiRequestHandler = async (req, res, next) => {
   const userSessionId = req.session.id
   const userCache = await redisClient.getAsync(userSessionId)

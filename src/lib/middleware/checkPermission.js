@@ -10,7 +10,6 @@ export const checkWriter = async (req, res, next) => {
   try {
     // 어드민이면 통과
     const isAdmin = await userDAO.isAdmin(res.locals.uid)
-    console.log(res.locals.uid, '의 admin 여부: ', isAdmin)
     if (isAdmin) {
       return next()
     }
@@ -32,11 +31,9 @@ export const checkWriter = async (req, res, next) => {
     if (isWriter !== null) {
       next()
     } else {
-      console.log(`[INFO] 유저 ${res.locals.uid} 가 권한없이 ${type} ${id} 에 접근하려했습니다.`)
-      return next(apiErrorGenerator(401, `${type} 작성자가 아닙니다.`))
+      return next(apiErrorGenerator(401, `유저 ${req.user.id}는 ${type} ${id}작성자가 아닙니다.`))
     }
   } catch (e) {
-    console.error(`[Error!] ${e}`)
     return next(apiErrorGenerator(500, '알 수 없는 에러가 발생했습니다.', e))
   }
 }

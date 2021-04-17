@@ -1,19 +1,18 @@
 import '../env/env'
 import redis from 'redis'
 import { promisify } from 'util'
-
-const { REDIS_URL } = process.env
+import { logger } from '../configs/winston'
 
 const redisClient = redis.createClient({
   url: process.env.REDIS_URL,
 })
 
 redisClient.on('connect', () => {
-  console.log(`[INFO] Successfully connected cache server ${REDIS_URL}`)
+  logger.info(`[RedisConnect] Successfully connected cache server`)
 })
 
 redisClient.on('error', err => {
-  console.error(err)
+  logger.error(`[RedisError] ${err}`)
 })
 
 /**

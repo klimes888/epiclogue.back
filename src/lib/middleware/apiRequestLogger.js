@@ -3,7 +3,7 @@ import dayjs from 'dayjs'
 import { stream } from '../../configs/winston'
 
 /**
- * API로 요청한 클라이언트의 세션과 토큰을 검사하여 로그를 남기는 미들웨어
+ * Access logging middleware
  */
 export const apiRequestLogger = (req, res) => {
   const requestTime = new Date().getTime()

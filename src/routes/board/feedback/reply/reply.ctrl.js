@@ -107,7 +107,6 @@ export const editReply = async (req, res, next) => {
   try {
     const newerData = await replyDAO.updateAndGetNewList(req.params.feedbackId, newForm)
     const wrappedReplies = await contentsWrapper(res.locals.uid, newerData, 'Reply', false)
-    console.log(`[INFO] 유저 ${res.locals.uid} 가 댓글 ${req.params.replyId} 을 수정했습니다.`)
 
     return apiResponser({ req, res, data: wrappedReplies })
   } catch (e) {
@@ -130,7 +129,6 @@ export const deleteReply = async (req, res, next) => {
       req.params.feedbackId
     )
     const wrappedReplies = await contentsWrapper(res.locals.uid, newerReplies, 'Reply', false)
-    console.log(`[INFO] 유저 ${res.locals.uid} 가 댓글 ${req.params.replyId} 을 삭제했습니다.`)
 
     return apiResponser({ req, res, data: wrappedReplies })
   } catch (e) {

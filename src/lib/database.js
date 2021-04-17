@@ -1,6 +1,7 @@
 import '../env/env'
 import mongoose from 'mongoose'
 import { dbOption } from '../options/options'
+import { logger } from '../configs/winston'
 
 mongoose.Promise = global.Promise
 
@@ -10,9 +11,9 @@ export const connectDatabase = async () => {
 
   try {
     await mongoose.connect(dbUrl, dbOption)
-    console.log(`[INFO] Successfully connected database server ${dbUrl}`)
+    logger.info(`[MongoDBConnect] Successfully connected database server.`)
   } catch (e) {
-    console.error(e)
+    logger.error(`[MongoConnectError] ${e}`)
   }
 }
 
@@ -22,20 +23,22 @@ export const disconnectDatabase = async () => {
   if (mongoose.Connection.readyState !== 0) {
     try {
       await mongoose.disconnect()
-      console.log('[INFO] Database disconnected properly')
+      logger.info('[MongoDB] Database disconnected successfully')
     } catch (e) {
-      console.error(e)
+      logger.error(`[MongoDBError] ${e}`)
     }
   } else {
-    console.warn("[WARN] Disconnecting database requested while there's no connection")
+    logger.warn(
+      "[MongoDBDisconnectException] Disconnecting database requested while there's no connection"
+    )
   }
 }
 
 export const dropDatabase = async () => {
   try {
     await mongoose.connection.db.dropDatabase()
-    console.log('[INFO] Test DB dropped')
+    logger.info('[MongoDBDropDatabase] Database dropped successfully')
   } catch (e) {
-    console.error(e)
+    logger.error(`[DropDatabaseError] ${e}`)
   }
 }
