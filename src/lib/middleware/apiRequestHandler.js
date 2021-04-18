@@ -41,7 +41,7 @@ export const apiRequestHandler = async (req, res, next) => {
         } else {
           // 캐싱된 세션(1h 이내) + 손상된 토큰 = 비회원 유저로 처리
           userCacheValue.accessCount += 1
-          userCacheValue.accessToken = req.cookies.accessToken
+          userCacheValue.accessToken = accessToken
           userCacheValue.isMember = false
           userCacheValue.id = null
         }
