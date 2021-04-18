@@ -8,6 +8,7 @@ import debug from 'debug'
 import http from 'http'
 import '../src/env/env'
 import app from '../app'
+import { logger } from '../src/configs/winston'
 
 debug('lunacat-api:server')
 
@@ -32,7 +33,10 @@ server.listen(port)
 server.on('error', onError)
 server.on('listening', onListening)
 server.on('close', onClose)
-
+process.on('uncaughtException', (err) => {
+  logger.error(`***UNCAUGHT EXCEPTION: ${err.stack}`)
+  process.exit(1)
+})
 /**
  * Normalize a port into a number, string, or false.
  */
@@ -58,6 +62,8 @@ function normalizePort(val) {
  */
 
 function onError(error) {
+  logger.error(error)
+
   if (error.syscall !== 'listen') {
     throw error
   }

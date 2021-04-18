@@ -1,7 +1,8 @@
 import Joi from 'joi'
-import createError from 'http-errors'
 import { contentsWrapper } from '../../../../lib/contentsWrapper'
 import { replyDAO, notificationDAO, feedbackDAO } from '../../../../DAO'
+import { apiErrorGenerator } from '../../../../lib/apiErrorGenerator'
+import { apiResponser } from '../../../../lib/middleware/apiResponser'
 
 /**
  * @description 대댓글 작성
@@ -13,7 +14,7 @@ import { replyDAO, notificationDAO, feedbackDAO } from '../../../../DAO'
  */
 export const postReply = async (req, res, next) => {
   const replyForm = {
-    writer: res.locals.uid,
+    writer: req.user.id,
     boardId: req.params.boardId,
     parentId: req.params.feedbackId,
     replyBody: req.body.replyBody,
@@ -28,39 +29,31 @@ export const postReply = async (req, res, next) => {
       replyBody: replyForm.replyBody,
     })
   } catch (e) {
-    console.log(
-      `[INFO] 유저 ${res.locals.uid} 가 적절하지 않은 데이터로 댓글을 작성하려 했습니다. ${e}`
-    )
-    return next(createError(400, '입력값이 적절하지 않습니다.'))
+    return next(apiErrorGenerator(400, '입력값이 적절하지 않습니다.', e))
   }
 
   try {
     const { replyData, newerReplies } = await replyDAO.createAndGetNewList(
       replyForm,
-      res.locals.uid,
+      req.user.id,
       req.params.feedbackId
     )
-    const wrappedReplies = await contentsWrapper(res.locals.uid, newerReplies, 'Reply', false)
+    const wrappedReplies = await contentsWrapper(req.user.id, newerReplies, 'Reply', false)
     const feedbackData = await feedbackDAO.getWriter(req.params.feedbackId)
     /* 자기 자신에게는 알림을 보내지 않음 */
-    if (feedbackData.writer.toString() !== res.locals.uid) {
+    if (feedbackData.writer.toString() !== req.user.id) {
       await notificationDAO.makeNotification({
         targetUserId: feedbackData.writer,
-        maker: res.locals.uid,
+        maker: req.user.id,
         notificationType: 'Reply',
         targetType: 'Feedback',
         targetInfo: req.params.feedbackId,
       })
     }
 
-    console.log(`[INFO] 유저 ${res.locals.uid} 가 댓글 ${replyData._id} 를 작성했습니다.`)
-    return res.status(201).json({
-      result: 'ok',
-      data: wrappedReplies,
-    })
+    return apiResponser({ req, res, statusCode: 201, data: wrappedReplies })
   } catch (e) {
-    console.error(`[Error] ${e}`)
-    return next(createError(500, '알 수 없는 에러가 발생했습니다.'))
+    return next(apiErrorGenerator(500, '알 수 없는 에러가 발생했습니다.', e))
   }
 }
 
@@ -77,20 +70,11 @@ export const getReplys = async (req, res, next) => {
 
   try {
     const replyData = await replyDAO.getByParentId(feedbackId)
-    const wrappedReplies = await contentsWrapper(res.locals?.uid, replyData, 'Reply', false)
+    const wrappedReplies = await contentsWrapper(req.user?.uid, replyData, 'Reply', false)
 
-    console.log(
-      `[INFO] 유저 ${
-        res.locals.uid || '비회원유저'
-      } 가 피드백 ${feedbackId} 하위의 댓글(들)을 열람합니다.`
-    )
-    return res.status(200).json({
-      result: 'ok',
-      data: wrappedReplies,
-    })
+    return apiResponser({ req, res, data: wrappedReplies })
   } catch (e) {
-    console.error(`[Error] ${e}`)
-    return next(createError(500, '알 수 없는 에러가 발생했습니다.'))
+    return next(apiErrorGenerator(500, '알 수 없는 에러가 발생했습니다.', e))
   }
 }
 
@@ -117,26 +101,16 @@ export const editReply = async (req, res, next) => {
       newReplyBody: newForm.newReplyBody,
     })
   } catch (e) {
-    console.log(
-      `[INFO] 유저 ${res.locals.uid} 가 적절하지 않은 데이터로 댓글을 작성하려 했습니다. ${e}`
-    )
-    return next(createError(400, '입력값이 적절하지 않습니다.'))
+    return next(apiErrorGenerator(400, '입력값이 적절하지 않습니다.', e))
   }
 
   try {
     const newerData = await replyDAO.updateAndGetNewList(req.params.feedbackId, newForm)
-    const wrappedReplies = await contentsWrapper(res.locals.uid, newerData, 'Reply', false)
-    console.log(`[INFO] 유저 ${res.locals.uid} 가 댓글 ${req.params.replyId} 을 수정했습니다.`)
-    return res.status(200).json({
-      result: 'ok',
-      data: wrappedReplies,
-    })
+    const wrappedReplies = await contentsWrapper(req.user.id, newerData, 'Reply', false)
+
+    return apiResponser({ req, res, data: wrappedReplies })
   } catch (e) {
-    console.log(
-      `[INFO] 유저 ${res.locals.uid}가 댓글 ${req.params.replyId} 의 수정을 시도했으나 실패했습니다.`
-    )
-    console.error(`[Error] ${e}`)
-    return next(createError(500, '알 수 없는 에러가 발생했습니다.'))
+    return next(apiErrorGenerator(500, '알 수 없는 에러가 발생했습니다.', e))
   }
 }
 
@@ -154,17 +128,10 @@ export const deleteReply = async (req, res, next) => {
       req.params.replyId,
       req.params.feedbackId
     )
-    const wrappedReplies = await contentsWrapper(res.locals.uid, newerReplies, 'Reply', false)
-    console.log(`[INFO] 유저 ${res.locals.uid} 가 댓글 ${req.params.replyId} 을 삭제했습니다.`)
-    return res.status(200).json({
-      result: 'ok',
-      data: wrappedReplies,
-    })
+    const wrappedReplies = await contentsWrapper(req.user.id, newerReplies, 'Reply', false)
+
+    return apiResponser({ req, res, data: wrappedReplies })
   } catch (e) {
-    console.error(
-      `[Error] 데이터베이스 질의에 실패했습니다: ${req.params.replyId} 의 삭제를 시도했으나 존재하지 않습니다.`
-    )
-    console.error(`[Error] ${e}`)
-    return next(createError(500, '알 수 없는 에러가 발생했습니다.'))
+    return next(apiErrorGenerator(500, '알 수 없는 에러가 발생했습니다.', e))
   }
 }
