@@ -33,7 +33,7 @@ export const postReply = async (req, res, next) => {
   }
 
   try {
-    const { replyData, newerReplies } = await replyDAO.createAndGetNewList(
+    const newerReplies = await replyDAO.createAndGetNewList(
       replyForm,
       req.user.id,
       req.params.feedbackId
