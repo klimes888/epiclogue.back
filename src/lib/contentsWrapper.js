@@ -5,7 +5,7 @@ import { boardDAO, feedbackDAO, replyDAO, likeDAO, reactDAO, followDAO, bookmark
  * 유저에 맞는 컨텐츠를 제공하기 위한 래퍼객체
  * @param {string}  reqUserId   - 요청한 유저의 MongoDB ID
  * @param {Array}   contentData - 감싸질 데이터. 뷰어에서 요청했을 경우 Object 타입이어야 한다.
- * @param {string}  contentType     - 컨텐츠의 타입.
+ * @param {string}  contentType - 컨텐츠의 타입. enum ["Board", "Feedback", "Reply"]
  * @param {Boolean} isForViewer - 데이터가 컨텐츠 뷰어에서 사용될 것인지 여부
  */
 export const contentsWrapper = async (reqUserId, contentData, contentType, isForViewer) => {
@@ -65,14 +65,12 @@ export const contentsWrapper = async (reqUserId, contentData, contentType, isFor
             feedbackData.heartCount = await likeDAO.countHearts(feedbackData._id, 'Feedback')
             feedbackData.replyCount = await replyDAO.countReplys(feedbackData._id)
             if (reqUserId) {
-              console.log('in to liked add')
               feedbackData.liked = !!likeIdSet.includes(feedback._id.toString())
               feedbackData.writer.following =
                 feedback.writer._id.toString() === reqUserId
                   ? 'me'
                   : !!followingIdSet.includes(feedback.writer._id.toString())
             }
-            console.log(feedbackData)
             return feedbackData
           })
         )
@@ -136,6 +134,15 @@ export const contentsWrapper = async (reqUserId, contentData, contentType, isFor
             return userData
           })
     } else {
+      if (!Array.isArray(contentData)) {
+        const jsonConvertedData = contentData.toJSON()
+        jsonConvertedData.liked = !!likeIdSet.includes(jsonConvertedData._id)
+        jsonConvertedData.writer.following = 
+          reqUserId === jsonConvertedData._id
+            ? 'me'
+            : !!followingIdSet.includes(jsonConvertedData.writer._id)
+        return jsonConvertedData
+      }
       /* 피드백과 대댓글에서 팔로우, 좋아요 여부 확인 */
       const filteredData = targetContent.filter(each => each.writer !== null)
 

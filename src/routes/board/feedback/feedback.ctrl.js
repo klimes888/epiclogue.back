@@ -1,7 +1,8 @@
 import Joi from 'joi'
-import createError from 'http-errors'
 import { contentsWrapper } from '../../../lib/contentsWrapper'
 import { feedbackDAO, replyDAO, notificationDAO } from '../../../DAO'
+import { apiErrorGenerator } from '../../../lib/apiErrorGenerator'
+import { apiResponser } from '../../../lib/middleware/apiResponser'
 
 /**
  * @description 피드백 작성
@@ -27,10 +28,7 @@ export const postFeedback = async (req, res, next) => {
       feedbackBody: feedbackData.feedbackBody,
     })
   } catch (e) {
-    console.log(
-      `[INFO] 유저 ${res.locals.uid} 가 피드백 작성 중 적절하지 않은 데이터를 입력했습니다. ${e}`
-    )
-    return next(createError(400, '입력값이 적절하지 않습니다.'))
+    return next(apiErrorGenerator(400, '입력값이 적절하지 않습니다.', e))
   }
 
   try {
@@ -49,9 +47,7 @@ export const postFeedback = async (req, res, next) => {
         targetInfo: req.params.boardId,
       })
     }
-    console.log(
-      `[INFO] 유저 ${res.locals.uid} 가 피드백 ${postFeedbackResult._id} 을 작성했습니다.`
-    )
+
     const wrappedFeedbacks = await contentsWrapper(
       res.locals.uid,
       newerFeedbacks,
@@ -59,13 +55,9 @@ export const postFeedback = async (req, res, next) => {
       false
     )
 
-    return res.status(201).json({
-      result: 'ok',
-      data: wrappedFeedbacks,
-    })
+    return apiResponser({ req, res, statusCode: 201, data: wrappedFeedbacks })
   } catch (e) {
-    console.error(`[Error] ${e}`)
-    return next(createError(500, '알 수 없는 에러가 발생했습니다.'))
+    return next(apiErrorGenerator(500, '알 수 없는 에러가 발생했습니다.', e))
   }
 }
 
@@ -92,10 +84,7 @@ export const editFeedback = async (req, res, next) => {
       newFeedbackBody: newForm.newFeedbackBody,
     })
   } catch (e) {
-    console.log(
-      `[INFO] 유저 ${res.locals.uid} 가 피드백 작성 중 적절하지 않은 데이터를 입력했습니다. ${e}`
-    )
-    return next(createError(400, '입력값이 적절하지 않습니다.'))
+    return next(apiErrorGenerator(400, '입력값이 적절하지 않습니다.', e))
   }
 
   try {
@@ -106,17 +95,10 @@ export const editFeedback = async (req, res, next) => {
       'Feedback',
       false
     )
-    console.log(`[INFO] 피드백 ${req.params.feedbackId} 가 정상적으로 수정되었습니다.`)
-    return res.status(200).json({
-      result: 'ok',
-      data: wrappedFeedbacks,
-    })
+
+    return apiResponser({ req, res, data: wrappedFeedbacks })
   } catch (e) {
-    console.error(
-      `[ERROR] 피드백 ${req.params.feedbackId} 의 수정이 정상적으로 처리되지 않았습니다: 데이터베이스 질의에 실패했습니다.`
-    )
-    console.error(`[ERROR] ${e}`)
-    return next(createError(500, '알 수 없는 에러가 발생했습니다.'))
+    return next(apiErrorGenerator(500, '알 수 없는 에러가 발생했습니다.', e))
   }
 }
 
@@ -140,18 +122,11 @@ export const deleteFeedback = async (req, res, next) => {
       'Feedback',
       false
     )
-    console.log(`[INFO] 피드백 ${req.params.feedbackId} 가 정상적으로 삭제되었습니다.`)
     replyDAO.deleteByParentId(req.params.feedbackId)
-    return res.status(200).json({
-      result: 'ok',
-      data: wrappedFeedbacks,
-    })
+
+    return apiResponser({ req, res, data: wrappedFeedbacks })
   } catch (e) {
-    console.error(
-      `[ERROR] 피드백 ${req.params.feedbackId} 의 삭제가 정상적으로 처리되지 않았습니다: 데이터베이스 질의에 실패했습니다.`
-    )
-    console.error(`[Error] ${e}`)
-    return next(createError(500, '알 수 없는 에러가 발생했습니다.'))
+    return next(apiErrorGenerator(500, '알 수 없는 에러가 발생했습니다.', e))
   }
 }
 
@@ -166,13 +141,9 @@ export const deleteFeedback = async (req, res, next) => {
 export const getFeedback = async (req, res, next) => {
   try {
     const feedbackData = await feedbackDAO.getById(req.params.feedbackId)
-    console.log(`[INFO] 유저 ${feedbackData.writer} 가 피드백 ${feedbackData._id} 를 조회했습니다.`)
-    return res.status(200).json({
-      result: 'ok',
-      data: feedbackData,
-    })
+    const wrappedData = await contentsWrapper(req.user.id, feedbackData, 'Feedback', false)
+    return apiResponser({ req, res, data: wrappedData })
   } catch (e) {
-    console.log(`[ERROR] ${e.message}`)
-    return next(createError(500, '알 수 없는 에러가 발생했습니다.'))
+    return next(apiErrorGenerator(500, '알 수 없는 에러가 발생했습니다.', e))
   }
 }

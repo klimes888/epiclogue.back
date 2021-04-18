@@ -9,7 +9,7 @@ export const createAndGetNewList = async function (boardId, feedbackData) {
   const session = await startSession()
   try {
     await session.withTransaction(async () => {
-      [postFeedbackResult] = await Feedback.create([feedbackData], { session })
+      ;[postFeedbackResult] = await Feedback.create([feedbackData], { session })
       targetData = await Board.findOne({ _id: boardId }, { writer: 1 }).session(session)
       newerFeedbacks = await getByBoardId(boardId).session(session)
     })
@@ -91,7 +91,10 @@ export const deleteByBoardId = function (boardId) {
 }
 
 export const getById = function (feedbackId, option) {
-  return Feedback.findOne({ _id: feedbackId }, option)
+  return Feedback.findOne({ _id: feedbackId }, option).populate({
+    path: 'writer',
+    select: '_id screenId nickname profile',
+  })
 }
 
 export const getWriter = async feedbackId => Feedback.findOne({ _id: feedbackId }, { writer: 1 })
