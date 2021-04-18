@@ -30,7 +30,7 @@ services:
     volumes:
       - ./data/db-01:/data/db
       - ./docker/mongodb/dbinit.sh:/docker-entrypoint-initdb.d/dbinit.sh:ro
-      # - ./mongodb.key:/keys/mongodb.key:ro
+      - ./mongodb.key:/keys/mongodb.key:ro
     ports:
       - 27017:27017
     environment:
