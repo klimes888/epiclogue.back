@@ -2,7 +2,7 @@
 
 if [ -f mongodb.key ];
 then
-    echo 'Delted old key!'
+    echo ' ***Deleted old key!*** '
     sudo rm mongodb.key
 fi
 
