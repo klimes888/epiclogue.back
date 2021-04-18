@@ -1,41 +1,44 @@
 import '../env/env'
 import mongoose from 'mongoose'
 import { dbOption } from '../options/options'
+import { logger } from '../configs/winston'
 
 mongoose.Promise = global.Promise
 
-export const connect = async () => {
-  const dbEnvironment =
+export const connectDatabase = async () => {
+  const dbUrl =
     process.env.NODE_ENV === 'test' ? process.env.MONGO_TEST_URI : process.env.MONGO_URI_ALONE
 
   try {
-    await mongoose.connect(dbEnvironment, dbOption)
-    console.log('[INFO] Database connected properly')
+    await mongoose.connect(dbUrl, dbOption)
+    console.log(`[MongoDBConnect] Successfully connected database server.`)
   } catch (e) {
-    console.error(e)
+    logger.error(`[MongoConnectError] ${e}`)
   }
 }
 
-export const disconnect = async () => {
+export const disconnectDatabase = async () => {
   // mongoose ready state
   // 0: diconnected, 1: connected, 2: connecting, 3: disconnecting
   if (mongoose.Connection.readyState !== 0) {
     try {
       await mongoose.disconnect()
-      console.log('[INFO] Database disconnected properly')
+      console.log('[MongoDB] Database disconnected successfully')
     } catch (e) {
-      console.error(e)
+      logger.error(`[MongoDBError] ${e}`)
     }
   } else {
-    console.warn("[WARN] Disconnecting database requested while there's no connection")
+    logger.warn(
+      "[MongoDBDisconnectException] Disconnecting database requested while there's no connection"
+    )
   }
 }
 
-export const drop = async () => {
+export const dropDatabase = async () => {
   try {
     await mongoose.connection.db.dropDatabase()
-    console.log('[INFO] Test DB dropped')
+    console.log('[MongoDBDropDatabase] Database dropped successfully')
   } catch (e) {
-    console.error(e)
+    logger.error(`[DropDatabaseError] ${e}`)
   }
 }

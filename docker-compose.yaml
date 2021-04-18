@@ -8,11 +8,10 @@ services:
   server:
     container_name: server
     build:
-      context: ./
+      context: ./docker/server
       dockerfile: Dockerfile.dev
     volumes:
       - ./:/usr/src/app  
-      - /usr/src/app/node_modules      
     env_file:
       - ./.env
     networks:
@@ -30,8 +29,8 @@ services:
       - backend
     volumes:
       - ./data/db-01:/data/db
-      - ./dbinit.sh:/docker-entrypoint-initdb.d/dbinit.sh:ro
-      # - ./mongodb.key:/keys/mongodb.key:ro
+      - ./docker/mongodb/dbinit.sh:/docker-entrypoint-initdb.d/dbinit.sh:ro
+      - ./mongodb.key:/keys/mongodb.key:ro
     ports:
       - 27017:27017
     environment:
@@ -39,7 +38,7 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
       MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
       MONGO_TEST_DATABASE: ${MONGO_TEST_DATABASE}
-    command: ["mongod", "--bind_ip_all", "--replSet", "rs0"]
+    command: ["mongod", "--bind_ip_all", "--replSet", "rs0", "--keyFile", "/keys/mongodb.key"]
     restart: unless-stopped
 
   # mongodb2:
@@ -84,7 +83,7 @@ services:
     container_name: repl-helper
     image: repl-helper
     build:
-      context: ./
+      context: ./docker/mongodb
       dockerfile: Dockerfile.repl
     networks:
       - backend
@@ -109,3 +108,22 @@ services:
       - backend
     depends_on:
       - server
+
+  redis:
+    container_name: redis
+    image: redis:latest
+    build:
+      context: ./docker/redis
+      dockerfile: Dockerfile.redis
+    volumes:
+      - ./data/redis:/data
+      - ./docker/redis/redis.conf:/etc/redis.conf
+      - ./docker/redis/initRedis.sh:/docker-entrypoint-initdb.d/initRedis.sh:ro
+    environment:
+      REDIS_AUTH_PASS: ${REDIS_AUTH_PASS}
+    networks:
+      - backend
+    ports:
+      - 6379:6379
+    command: ["redis-server", "/etc/redis.conf", "--requirepass", "$REDIS_AUTH_PASS"]
+    restart: always

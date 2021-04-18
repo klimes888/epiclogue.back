@@ -9,15 +9,14 @@ import authRouter from './auth'
 import notiRouter from './notification'
 import myboardRouter from './myboard'
 
+import { apiResponser } from '../lib/middleware/apiResponser'
+
 const router = express.Router({
   mergeParams: true,
 })
 
 router.get('/', (req, res) => {
-  res.status(200).json({
-    result: 'ok',
-    comment: 'server is ok',
-  })
+  apiResponser({ req, res, message: 'server is ok' })
 })
 router.use('/auth', authRouter)
 router.use('/user', usersRouter)

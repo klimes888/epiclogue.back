@@ -79,14 +79,13 @@ export const getFeed = function (option, size) {
     thumbnail: 1,
     originUserId: 1,
   })
-  .limit(size)
-  .sort({ writeDate: -1 })
-  .populate({
-    path: 'writer',
-    select: '_id screenId nickname profile',
-  })
+    .limit(size)
+    .sort({ writeDate: -1 })
+    .populate({
+      path: 'writer',
+      select: '_id screenId nickname profile',
+    })
 }
-
 
 export const findAllOriginOrSecondary = function (userId, isExists) {
   return Board.find(

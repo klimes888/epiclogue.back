@@ -5,6 +5,7 @@ import dayjs from 'dayjs'
 import crypto from 'crypto'
 import util from 'util'
 import '../env/env'
+import { logger } from '../configs/winston'
 
 const randomBytesPromise = util.promisify(crypto.randomBytes)
 
@@ -16,8 +17,7 @@ const s3 = new aws.S3({
 
 const s3DeleteError = (err, data) => {
   if (err) {
-    console.error(err, err.stack)
-    console.error('s3DeleteObjectOutput', data)
+    logger.error(`[S3DeleteObjectError] Error: ${err}, Data: ${data}`)
   }
   return false
 }
