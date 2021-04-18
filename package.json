@@ -6,7 +6,7 @@
     "start": "node ./bin/www",
     "dev": "nodemon ./bin/www --exec babel-node",
     "babel": "babel-node ./bin/www",
-    "docker": "yarn install && nodemon ./bin/www --exec babel-node",
+    "docker": "yarn && nodemon ./bin/www --exec babel-node",
     "format": "prettier --write \"src/**/*.js\" \"__tests__/**/*.js\"",
     "lint": "eslint --fix \"src/**/*.js\" \"__tests__/**/*.test.js\"",
     "lint:init": "eslint --init",
