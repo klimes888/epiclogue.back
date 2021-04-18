@@ -46,7 +46,7 @@ export const authToken = async (req, res, next) => {
     }
 
     if (req.user) {
-      if (req.user.isConfirmed === true) {
+      if (req.user.isConfirmed) {
         await tokenExpirationChecker(req, res, next)
       } else {
         return next(apiErrorGenerator(403, '이메일 인증이 완료되지 않았습니다.'))
