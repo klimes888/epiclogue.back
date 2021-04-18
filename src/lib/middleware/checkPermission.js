@@ -8,11 +8,6 @@ export const checkWriter = async (req, res, next) => {
   let id
 
   try {
-    // 어드민이면 통과
-    const isAdmin = await userDAO.isAdmin(req.user.id)
-    if (isAdmin) {
-      return next()
-    }
     // 검사 전에 해당 게시물(댓글, 피드백, 글)이 존재하는지 먼저 검사하지 않으면 auth error 발생
     if (req.params.replyId !== undefined) {
       type = '댓글'
@@ -37,3 +32,11 @@ export const checkWriter = async (req, res, next) => {
     return next(apiErrorGenerator(500, '알 수 없는 에러가 발생했습니다.', e))
   }
 }
+
+export const checkAdmin = skipTarget => async (req, res, next) => {
+    const isAdmin = await userDAO.isAdmin(req.user.id)
+    if (isAdmin) {
+      return next(skipTarget)
+    } 
+    return next()
+  }
