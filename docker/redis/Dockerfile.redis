@@ -1,0 +1,4 @@
+FROM redis:latest
+
+# vm.overcommit_memory warning 제거
+RUN echo "vm.overcommit_memory=1" >> /etc/sysctl.conf

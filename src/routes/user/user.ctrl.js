@@ -1,8 +1,9 @@
 import Joi from 'joi'
-import createError from 'http-errors'
 import { deleteImage, thumbPathGen } from '../../lib/imageCtrl'
 import { userDAO } from '../../DAO'
 import { cryptoData, getRandomString } from '../../lib/cryptoData'
+import { apiErrorGenerator } from '../../lib/apiErrorGenerator'
+import { apiResponser } from '../../lib/middleware/apiResponser'
 
 /**
  * @description 수정할 유저의 프로필 정보 반환
@@ -13,7 +14,7 @@ import { cryptoData, getRandomString } from '../../lib/cryptoData'
  * @returns 수정할 유저 프로필
  */
 export const getUserEditInfo = async (req, res, next) => {
-  const { uid } = res.locals
+  const { uid } = req.user
   try {
     const result = await userDAO.getUserInfo(uid, {
       nickname: 1,
@@ -26,13 +27,9 @@ export const getUserEditInfo = async (req, res, next) => {
       email: 1,
     })
 
-    return res.status(200).json({
-      result: 'ok',
-      data: result,
-    })
+    return apiResponser({ req, res, data: result })
   } catch (e) {
-    console.error(`[Error] ${e}`)
-    return next(createError('알 수 없는 에러가 발생했습니다.'))
+    return next(apiErrorGenerator(500, '알 수 없는 에러가 발생했습니다.', e))
   }
 }
 
@@ -47,7 +44,7 @@ export const getUserEditInfo = async (req, res, next) => {
 
 export const postUserEditInfo = async function (req, res, next) {
   // remove old images
-  const originalData = await userDAO.getUserInfo(res.locals.uid)
+  const originalData = await userDAO.getUserInfo(req.user.id)
   const screenId = req.body.screenId || originalData.screenId
   const nickname = req.body.userNick || originalData.nickname
   const displayLanguage = parseInt(req.body.userDisplayLang || originalData.displayLanguage, 10)
@@ -75,29 +72,24 @@ export const postUserEditInfo = async function (req, res, next) {
   try {
     const isScreenIdUnique = await userDAO.isScreenIdUnique(originalData._id, screenId)
     const newerUserData = {
-      userId: res.locals.uid,
+      userId: req.user.id,
       screenId,
       nickname,
-      availableLanguage,
+      availableLanguage:
+        availableLanguage instanceof Array ? availableLanguage : availableLanguage.split(','),
       displayLanguage,
       intro,
       banner,
       profile,
     }
-    if(isScreenIdUnique || screenId === originalData.screenId) {
+    if (isScreenIdUnique || screenId === originalData.screenId) {
       await userDAO.updateProfile(newerUserData)
     } else {
-      throw new Error(`screenId is not Unique, isScreenIdUnique: ${isScreenIdUnique}`)
+      return next(apiErrorGenerator(400, 'ScreenId가 중복됩니다.'))
     }
-    console.log(`[INGO] 유저 ${res.locals.uid}가 프로필을 수정했습니다.`)
-    return res.status(200).json({
-      result: 'ok',
-      data: newerUserData,
-    })
+    return apiResponser({ req, res, data: newerUserData })
   } catch (e) {
-    console.error(`[Error] 유저 ${res.locals.uid} 가 프로필 변경에 실패했습니다`)
-    console.error(`[Error] ${e}`)
-    return next(createError(400, `프로필 변경중 에러가 발생했습니다. ${e}`))
+    return next(apiErrorGenerator(500, `알 수 없는 에러가 발생했습니다.`, e))
   }
 }
 
@@ -110,7 +102,7 @@ export const postUserEditInfo = async function (req, res, next) {
  * @returns 비밀번호 변경 여부 메세지(문자열)
  */
 export const changePass = async (req, res, next) => {
-  const { uid } = res.locals
+  const { uid } = req.user
   const { userPw, userPwNew, userPwNewRe } = req.body
 
   try {
@@ -128,8 +120,7 @@ export const changePass = async (req, res, next) => {
 
     await changePassSchema.validateAsync({ userPw, userPwNew, userPwNewRe })
   } catch (e) {
-    console.log(`[INFO] 유저 ${res.locals.uid} 의 비밀번호 변경 실패: ${e}`)
-    return next(createError(400, '비밀번호 규칙을 확인해주세요.'))
+    return next(apiErrorGenerator(400, '비밀번호 규칙을 확인해주세요.', e))
   }
 
   if (userPw !== userPwNew) {
@@ -144,35 +135,17 @@ export const changePass = async (req, res, next) => {
 
           await userDAO.changePass(uid, crpytedPass, crpytedPassNew, saltNew)
 
-          console.log(`[INFO] 유저 ${res.locals.uid} 가 비밀번호를 변경했습니다.`)
-          return res.status(200).json({
-            result: 'ok',
-            message: '비밀번호 변경 완료',
-          })
+          return apiResponser({ req, res, message: '비밀번호 변경이 완료되었습니다.' })
         }
-
-        console.log(
-          `[INFO] 유저 ${res.locals.uid} 의 비밀번호 변경이 실패했습니다: 기존 비밀번호 미일치`
-        )
-        return next(createError(400, '기존 비밀번호가 아닙니다.'))
+        return next(apiErrorGenerator(400, '기존 비밀번호와 입력이 다릅니다.'))
       } catch (e) {
-        console.error(
-          `[ERROR] 유저 ${res.locals.uid} 의 비밀번호 변경이 실패했습니다: 데이터베이스 질의에 실패했습니다.`
-        )
-        console.error(`[Error] ${e}`)
-        return next(createError(500, '알 수 없는 에러가 발생했습니다.'))
+        return next(apiErrorGenerator(500, '알 수 없는 에러가 발생했습니다.', e))
       }
     } else {
-      console.log(
-        `[INFO] 유저 ${res.locals.uid} 의 비밀번호 변경이 실패했습니다: 새로운 비밀번호 미일치`
-      )
-      return next(createError(400, '비밀번호과 재입력이 다릅니다.'))
+      return next(apiErrorGenerator(400, '입력한 비밀번호가 일치하지 않습니다.'))
     }
   } else {
-    console.log(
-      `[INFO] 유저 ${res.locals.uid} 의 비밀번호 변경이 실패했습니다: 기존 비밀번호와 동일`
-    )
-    return next(createError(400, '기존 비밀번호과 같은 비밀번호는 사용할 수 없습니다.'))
+    return next(apiErrorGenerator(400, '기존 비밀번호와 같은 비밀번호로 변경할 수 없습니다.'))
   }
 }
 
@@ -185,7 +158,7 @@ export const changePass = async (req, res, next) => {
  * @returns -
  */
 export const deleteUser = async (req, res, next) => {
-  const { uid } = res.locals
+  const { uid } = req.user
   const { userPw } = req.body
 
   const deleteSchema = Joi.object({
@@ -195,8 +168,7 @@ export const deleteUser = async (req, res, next) => {
   try {
     await deleteSchema.validateAsync({ userPw })
   } catch (e) {
-    console.log(`[INFO] 유저 ${uid} 가 탈퇴에 실패했습니다: 비밀번호 미입력`)
-    return next(createError(400, '비밀번호를 입력해주세요.'))
+    return next(apiErrorGenerator(400, '비밀번호를 입력해주세요.', e))
   }
 
   try {
@@ -208,15 +180,9 @@ export const deleteUser = async (req, res, next) => {
     deleteImage(info.profile)
 
     await userDAO.deleteUser(uid, crpytedPass)
-    console.log(`[INFO] 유저 ${res.locals.uid} 가 탈퇴했습니다.`)
-    return res.status(200).json({
-      result: 'ok',
-    })
+
+    return apiResponser({ req, res, message: '유저 탈퇴에 성공했습니다.' })
   } catch (e) {
-    console.error(
-      `[ERROR] 유저 ${res.locals.uid} 가 탈퇴에 실패했습니다: 데이터베이스 질의에 실패했습니다.`
-    )
-    console.error(`[Error] ${e}`)
-    return next(createError(500, '알 수 없는 에러가 발생했습니다. 입력정보를 다시 확인해주세요.'))
+    return next(apiErrorGenerator(500, '알 수 없는 에러가 발생했습니다.', e))
   }
 }

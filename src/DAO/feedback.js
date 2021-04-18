@@ -91,7 +91,10 @@ export const deleteByBoardId = function (boardId) {
 }
 
 export const getById = function (feedbackId, option) {
-  return Feedback.findOne({ _id: feedbackId }, option)
+  return Feedback.findOne({ _id: feedbackId }, option).populate({
+    path: 'writer',
+    select: '_id screenId nickname profile',
+  })
 }
 
 export const getWriter = async feedbackId => Feedback.findOne({ _id: feedbackId }, { writer: 1 })

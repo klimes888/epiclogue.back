@@ -5,7 +5,7 @@ import { authToken } from '../../../lib/middleware/tokenAuth'
 import { checkWriter } from '../../../lib/middleware/checkPermission'
 import { checkExistence } from '../../../lib/middleware/checkExistence'
 
-const feedback = new Router({ mergeParams: true })
+const feedback = Router({ mergeParams: true })
 
 feedback.post('/', authToken, feedbackCtrl.postFeedback)
 feedback.get('/:feedbackId', authToken, checkExistence, feedbackCtrl.getFeedback)

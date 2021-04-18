@@ -83,3 +83,7 @@ export const getParentId = function (replyId) {
 }
 
 export const countReplys = async parentId => Reply.countDocuments({ parentId })
+
+export const isWriter = function (userId, replyId) {
+  return Reply.findOne({ _id: replyId, writer: userId })
+}

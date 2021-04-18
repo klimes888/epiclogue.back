@@ -1,105 +1,81 @@
 // external modules
 import './src/env/env'
-import createError from 'http-errors'
 import express from 'express'
 import cookieParser from 'cookie-parser'
-import morgan from 'morgan'
 import cors from 'cors'
 import helmet from 'helmet'
-import swaggerJSDoc from 'swagger-jsdoc'
+import hpp from 'hpp'
 import swaggerUi from 'swagger-ui-express'
-import dayjs from 'dayjs'
-import dayjsPluginUTC from 'dayjs-plugin-utc'
-import Slack from 'slack-node'
+import session from 'express-session'
+import connectRedis from 'connect-redis'
 
 // routers
 import indexRouter from './src/routes'
 
 // utils
-import {connect} from './src/lib/database'
-import { logger, stream } from './src/configs/winston'
+import { connectDatabase } from './src/lib/database'
+import { swaggerSpec } from './src/configs/apiDoc'
+import { apiRequestHandler } from './src/lib/middleware/apiRequestHandler'
+import { errorHandler } from './src/lib/middleware/errorHandler'
+import { apiResponser } from './src/lib/middleware/apiResponser'
+import redisClient from './src/lib/redisClient'
 
 const app = express()
-dayjs.extend(dayjsPluginUTC)
+const RedisStore = connectRedis(session)
 
-// Swagger setting
-const swaggerDefinition = {
-  info: {
-    // API informations (required)
-    title: 'epiclogue API', // Title (required)
-    version: '1.0.0', // Version (required)
-    description: 'epiclogue service API', // Description (optional)
-  },
-  host: 'api.epiclogue.com', // Host (optional)
-  basePath: '/', // Base path (optional)
-  schemes: ['https'],
-}
-
-const options = {
-  // Import swaggerDefinitions
-  swaggerDefinition,
-  // Path to the API docs
-  apis: ['./apidoc.yaml'],
-}
-
-const swaggerSpec = swaggerJSDoc(options)
-
-app.use(cors({ credentials: true, origin: true }))
+/**
+ * Initialize middlewares
+ */
+app.use(cors({ credentials: true, origin: process.env.NODE_ENV === 'production' ? '.epiclogue.com' : true }))
 app.use(
-  morgan('combined', {
-    stream,
-    skip: (req, res) => res.statusCode > 399,
+  session({
+    secret: process.env.SECRET_KEY,
+    resave: false,
+    saveUninitialized: true,
+    store: new RedisStore({ client: redisClient.getClient, url: process.env.REDIS_URL }),
+    cookie: {
+      httpOnly: true,
+      maxAge: 3600000, // 1h to ms
+      sameSite: process.env.NODE_ENV === 'test' ? 'None' : 'Lax',
+      domain: process.env.NODE_ENV === 'test' ? 'localhost:3000' : '.epiclogue.com',
+    },
   })
 )
+app.use(hpp())
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(cookieParser())
 app.use(helmet())
 
-connect()
+connectDatabase()
+app.use(apiRequestHandler)
 
+/**
+ * Routers
+ */
 app.use('/', indexRouter)
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec))
 
-// catch 404 and forward to error handler
-app.use((req, res, next) => {
-  next(createError(404, '올바른 접근이 아닙니다.'))
-})
-
-// error handler
-app.use((err, req, res) => {
-  // if (process.env.NODE_ENV !== 'production') { }
-
-  if (!process.env.NODE_ENV === 'test' && err.status === 500) {
-    // Only alert on 500 error
-    const slack = new Slack()
-    slack.setWebhook(process.env.SLACK_WEBHOOK)
-    slack.webhook(
-      {
-        text: `*Message*: ${err.message} \n *Stack*: ${err.stack} \n *StatusCode*: ${err.status}`,
-      },
-      (webhookError) => {
-        if (webhookError) console.error(webhookError)
-      }
-    )
+/**
+ * Error handler
+ */
+app.use((err, req, res, next) => {
+  if (err) {
+    return errorHandler(err, req, res)  
   }
 
-  const errObject = {
-    req: { route: req.route, url: req.url, method: req.method, headers: req.headers },
-    err: { message: err.message, stack: err.stack, status: err.status },
-    user: res.locals.uid,
-  }
-
-  logger.error(`${dayjs().local().format('YYYY-MM-DD HH:mm:ss')}`, errObject)
-
-  res.locals.message = err.message
-  res.locals.error = err
-
-  return res.status(err.status || 500).json({
-    result: 'error',
-    message: err.message || 'Internal server error',
-    data: err.properties,
-  })
+  next()
 })
+
+/**
+ * catch 404 Error.
+ * 
+ * ExpressJS 문서(https://expressjs.com/en/starter/faq.html)에서
+ * 미들웨어 최하단에 404 에러를 핸들링하도록 권장
+ */
+app.use((req, res) => {
+  apiResponser({ req, res, statusCode: 404, message: '올바른 접근이 아닙니다.', })
+})
+
 
 export default app
