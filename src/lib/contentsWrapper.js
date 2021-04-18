@@ -1,5 +1,5 @@
-import createError from 'http-errors'
 import { boardDAO, feedbackDAO, replyDAO, likeDAO, reactDAO, followDAO, bookmarkDAO } from '../DAO'
+import { apiErrorGenerator } from './apiErrorGenerator'
 
 /**
  * 유저에 맞는 컨텐츠를 제공하기 위한 래퍼객체
@@ -13,7 +13,7 @@ export const contentsWrapper = async (reqUserId, contentData, contentType, isFor
   // 회원에게만 필요한 데이터: 해당 컨텐츠(글/댓글/대댓글)의 좋아요/북마크 여부
   let resultSet
   if (!contentType) {
-    createError(400, '컨텐츠 타입이 존재하지 않습니다.')
+    throw apiErrorGenerator(400, '컨텐츠 타입이 존재하지 않습니다.')
   } else if (contentData) {
     // MongoDB JSON을 pure JSON 으로 변환
     let targetContent = contentData
