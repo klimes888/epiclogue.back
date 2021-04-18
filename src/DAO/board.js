@@ -115,9 +115,11 @@ export const getTitlesByQuery = function (query) {
   ).sort({ boardTitle: 'asc' })
 }
 
-export const searchByTitleOrTag = function (query) {
+export const searchByTitleOrTag = function (query, size = 35, latestId) {
   return Board.find(
-    { $or: [{ boardTitle: { $regex: query } }, { tags: query }] },
+    latestId ? { $or: [{ boardTitle: { $regex: query } }, { tags: query }],
+  _id: {$lt: latestId} }
+    : { $or: [{ boardTitle: { $regex: query } }, { tags: query }] },
     {
       _id: 1,
       boardTitle: 1,
@@ -127,11 +129,12 @@ export const searchByTitleOrTag = function (query) {
       thumbnail: 1,
     }
   )
+    .sort({ writeDate: -1 })
+    .limit(size)
     .populate({
       path: 'writer',
       select: '_id screenId nickname profile',
     })
-    .sort({ writeDate: 1 })
 }
 
 export const countByWriterAndCategory = function (userId, category) {

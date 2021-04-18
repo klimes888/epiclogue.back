@@ -98,9 +98,11 @@ export const getProfile = function (screenId) {
   return User.find({ _id: screenId }, { _id: 1, screenId: 1, nickname: 1 })
 }
 
-export const searchByScreenId = function (query) {
+export const searchByScreenIdOrNickname = function (query, size = 35, latestId) {
   return User.find(
-    { screenId: { $regex: query } },
+    latestId ? { $or: [{ screenId: { $regex: query } }, { nickname: { $regex: query } }],
+    _id: {$lt: latestId} }
+      : { $or: [{ screenId: { $regex: query } }, { nickname: { $regex: query } }] },
     {
       nickname: 1,
       screenId: 1,
@@ -108,20 +110,8 @@ export const searchByScreenId = function (query) {
       banner: 1,
       intro: 1,
     }
-  ).sort({ screenId: 1 })
-}
-
-export const searchByNickname = function (query) {
-  return User.find(
-    { nickname: { $regex: query } },
-    {
-      nickname: 1,
-      screenId: 1,
-      profile: 1,
-      banner: 1,
-      intro: 1,
-    }
-  ).sort({ nickname: 1 })
+  ).sort({ screenId: 1, nickname: 1 })
+  .limit(size)
 }
 
 export const isExistSns = function (snsId) {

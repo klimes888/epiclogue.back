@@ -11,14 +11,14 @@ import { contentsWrapper } from '../../lib/contentsWrapper'
  * @returns 검색 결과 array
  */
 export const search = async (req, res, next) => {
-  const { q: queryString, type: searchType } = req.query
+  const { q: queryString, type: searchType, latestId, size } = req.query
 
   let searchResult
 
   if (searchType === 'Board') {
     // 글 제목으로 검색
     try {
-      searchResult = await boardDAO.searchByTitleOrTag(queryString)
+      searchResult = await boardDAO.searchByTitleOrTag(queryString, size, latestId)
     } catch (e) {
       console.error(e)
       return next(createError('글 검색에 실패했습니다.'))
@@ -28,8 +28,8 @@ export const search = async (req, res, next) => {
     try {
       searchResult =
         queryString[0] === '@'
-          ? await userDAO.searchByScreenId(queryString.substr(1))
-          : await userDAO.searchByNickname(queryString)
+          ? await userDAO.searchByScreenIdOrNickname(queryString.substr(1), size, latestId)
+          : await userDAO.searchByScreenIdOrNickname(queryString, size, latestId)
     } catch (e) {
       console.error(e)
       return next(createError('유저 검색에 실패했습니다.'))
