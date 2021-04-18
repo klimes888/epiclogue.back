@@ -38,7 +38,7 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
       MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
       MONGO_TEST_DATABASE: ${MONGO_TEST_DATABASE}
-      command: ["mongod", "--bind_ip_all", "--replSet", "rs0", "--keyFile", "/keys/mongodb.key"]
+    command: ["mongod", "--bind_ip_all", "--replSet", "rs0", "--keyFile", "/keys/mongodb.key"]
     restart: unless-stopped
 
   # mongodb2:
