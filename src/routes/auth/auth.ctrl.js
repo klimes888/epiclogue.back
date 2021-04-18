@@ -3,7 +3,7 @@ import '../../env/env'
 import { userDAO } from '../../DAO'
 import { sendMail, emailText, findPassText } from '../../lib/sendMail'
 import { joinDataCrypt, cryptoData, getRandomToken, getRandomString } from '../../lib/cryptoData'
-import { cookieClearOption, cookieOption } from '../../options/options'
+import { cookieOption } from '../../options/options'
 import { generateToken } from '../../lib/tokenManager'
 import { apiResponser } from '../../lib/middleware/apiResponser'
 import { apiErrorGenerator } from '../../lib/apiErrorGenerator'
@@ -68,7 +68,7 @@ export const snsLogin = async function (req, res, next) {
  */
 export const logout = async (req, res, next) => {
   if (req.cookies?.access_token) {
-    res.clearCookie('access_token', cookieClearOption)
+    res.cookie('access_token', '', {expires: new Date(0)})
   } else {
     return next(apiErrorGenerator(400, '비정상적 요청입니다.'))
   }

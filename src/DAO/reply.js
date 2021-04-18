@@ -3,12 +3,11 @@ import { Reply } from '../models'
 
 // Create
 export const createAndGetNewList = async function (replyForm) {
-  let replyData
   let newerReplies
   const session = await startSession()
   try {
     await session.withTransaction(async () => {
-      ;[replyData] = await Reply.create([replyForm], { session })
+      await Reply.create([replyForm], { session })
       newerReplies = await getByParentId(replyForm.parentId).session(session)
     })
   } catch (e) {
@@ -16,10 +15,7 @@ export const createAndGetNewList = async function (replyForm) {
   } finally {
     session.endSession()
   }
-  return {
-    replyData,
-    newerReplies,
-  }
+  return newerReplies
 }
 
 // Read
