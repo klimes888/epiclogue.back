@@ -37,18 +37,20 @@ export const apiRequestHandler = async (req, res, next) => {
         }
         if (decodedToken) {
           // 캐싱된 세션 + 정상적인 토큰 = 회원 유저의 다회 접근
-          userCacheValue.accessCount += 1
+          userCacheValue.isMember = true
+          userCacheValue.id = decodedToken.uid
         } else {
           // 캐싱된 세션(1h 이내) + 손상된 토큰 = 비회원 유저로 처리
-          userCacheValue.accessCount += 1
-          userCacheValue.accessToken = accessToken
           userCacheValue.isMember = false
           userCacheValue.id = null
         }
+        userCacheValue.accessCount += 1
+        userCacheValue.accessToken = accessToken
         req.user = decodedToken
       } else {
         // 캐싱된 세션이 있지만 토큰은 없다 = 비회원 유저의 다회 접근
         userCacheValue.accessCount += 1
+        userCacheValue.isMember = false
       }
       redisClient.setWithTtl(userSessionId, 3600, JSON.stringify(userCacheValue))
       req.user = { ...req.user, ...userCacheValue }
