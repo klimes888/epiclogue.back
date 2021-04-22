@@ -12,14 +12,15 @@ import { apiResponser } from '../../lib/middleware/apiResponser'
  * @returns 검색 결과 array
  */
 export const search = async (req, res, next) => {
-  const { q: queryString, type: searchType, latestId, size } = req.query
-  const querySize = size ? parseInt(size, 10) : 35
+  const { q: queryString, type: searchType, latestId, category } = req.query
+  const size = parseInt(req.query.size, 10)
+  const querySize = Number.isNaN(size) ? size : 35
   let searchResult
 
   if (searchType === 'Board') {
     // 글 제목으로 검색
     try {
-      searchResult = await boardDAO.searchByTitleOrTag(queryString, querySize, latestId)
+      searchResult = await boardDAO.searchByTitleOrTag(queryString, querySize, latestId, category)
     } catch (e) {
       return next(apiErrorGenerator(500, '글 검색에 실패했습니다.', e))
     }
