@@ -3,9 +3,9 @@
 if [ -f mongodb.key ];
 then
     echo ' ***Deleted old key!*** '
-    sudo rm mongodb.key
+    rm -rf mongodb.key
 fi
-
+echo ' ***create new key!*** '
 openssl rand -base64 756 > mongodb.key
-sudo chown 999:999 mongodb.key
-sudo chmod 400 mongodb.key
+chown 999:999 mongodb.key
+chmod 400 mongodb.key
