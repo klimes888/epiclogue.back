@@ -114,11 +114,19 @@ export const getTitlesByQuery = function (query) {
   ).sort({ boardTitle: 'asc' })
 }
 
-export const searchByTitleOrTag = function (query, size = 35, latestId) {
+export const searchByTitleOrTag = function (query, size = 35, latestId, category) {
+  const option = {
+    $or: [{ boardTitle: { $regex: query } }, { tags: query }],
+    pub: 1,
+  }
+  if(latestId) {
+    option._id = { $lt: latestId }
+  }
+  if(category) {
+    option.category = category
+  }
   return Board.find(
-    latestId ? { $or: [{ boardTitle: { $regex: query } }, { tags: query }],
-  _id: {$lt: latestId} }
-    : { $or: [{ boardTitle: { $regex: query } }, { tags: query }] },
+    option,
     {
       _id: 1,
       boardTitle: 1,

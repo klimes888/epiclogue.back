@@ -99,10 +99,14 @@ export const getProfile = function (screenId) {
 }
 
 export const searchByScreenIdOrNickname = function (query, size = 35, latestId) {
+  const option = {
+    $or: [{ screenId: { $regex: query } }, { nickname: { $regex: query } }],
+  }
+  if(latestId) {
+    option._id = { $lt: latestId }
+  }
   return User.find(
-    latestId ? { $or: [{ screenId: { $regex: query } }, { nickname: { $regex: query } }],
-    _id: {$lt: latestId} }
-      : { $or: [{ screenId: { $regex: query } }, { nickname: { $regex: query } }] },
+    option,
     {
       nickname: 1,
       screenId: 1,

@@ -15,8 +15,9 @@ import { apiResponser } from '../../lib/middleware/apiResponser'
  * @returns 요청한 글 배열
  */
 export const getBoards = async (req, res, next) => {
-  const { type: requestType, latestId, size } = req.query
-  const requestSize = size ? parseInt(size, 10) : 35
+  const { type: requestType, latestId } = req.query
+  const size = parseInt(req.query.size, 10)
+  const requestSize = Number.isNaN(size) ? 35 : size
   const option = {
     pub: 1,
   }

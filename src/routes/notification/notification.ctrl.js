@@ -13,7 +13,10 @@ import { apiResponser } from '../../lib/middleware/apiResponser'
  */
 export const getNoti = async (req, res, next) => {
   try {
-    const notiData = await notificationDAO.getNotiList(req.user.id)
+    const notiData = await notificationDAO.getNotiList(req.user.id, 
+      req.query.latestId, 
+      Number.isNaN(req.query.size) ? 15 : req.query.size
+    )
     return apiResponser({ req, res, data: notiData })
   } catch (e) {
     return next(apiErrorGenerator(500, '알 수 없는 오류가 발생했습니다.', e))

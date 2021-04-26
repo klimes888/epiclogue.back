@@ -4,12 +4,11 @@ import { Feedback, Board } from '../models'
 // Create
 export const createAndGetNewList = async function (boardId, feedbackData) {
   let newerFeedbacks
-  let postFeedbackResult
   let targetData
   const session = await startSession()
   try {
     await session.withTransaction(async () => {
-      ;[postFeedbackResult] = await Feedback.create([feedbackData], { session })
+      await Feedback.create([feedbackData], { session })
       targetData = await Board.findOne({ _id: boardId }, { writer: 1 }).session(session)
       newerFeedbacks = await getByBoardId(boardId).session(session)
     })
@@ -19,7 +18,6 @@ export const createAndGetNewList = async function (boardId, feedbackData) {
     session.endSession()
   }
   return {
-    postFeedbackResult,
     targetData,
     newerFeedbacks,
   }

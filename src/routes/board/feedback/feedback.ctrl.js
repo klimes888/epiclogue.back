@@ -14,7 +14,7 @@ import { apiResponser } from '../../../lib/middleware/apiResponser'
  */
 export const postFeedback = async (req, res, next) => {
   const feedbackData = {
-    writer: res.locals.uid,
+    writer: req.user.id,
     boardId: req.params.boardId,
     feedbackBody: req.body.feedbackBody,
   }
@@ -33,7 +33,6 @@ export const postFeedback = async (req, res, next) => {
 
   try {
     const {
-      postFeedbackResult,
       newerFeedbacks,
       targetData,
     } = await feedbackDAO.createAndGetNewList(req.params.boardId, feedbackData)
