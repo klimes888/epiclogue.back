@@ -1,11 +1,13 @@
 #!/bin/bash
-
+cd /home/ubuntu/build
 if [ -f mongodb.key ];
 then
-    echo ' ***Deleted old key!*** '
-    rm -rf mongodb.key
+    echo ' ***already exist key!*** '
+    docker-compose restart
+else
+    echo ' ***create new key!*** '
+    openssl rand -base64 756 > mongodb.key
+    chown 999:999 mongodb.key
+    chmod 400 mongodb.key
+    docker-compose up --build -d
 fi
-echo ' ***create new key!*** '
-openssl rand -base64 756 > mongodb.key
-chown 999:999 mongodb.key
-chmod 400 mongodb.key
