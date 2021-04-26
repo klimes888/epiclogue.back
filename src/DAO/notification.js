@@ -45,8 +45,16 @@ export const makeNotification = async ({
 }
 
 // 알림목록
-export const getNotiList = function (userId) {
-  return Notification.find({ userId })
+export const getNotiList = function (userId, latestId, size=15) {
+  const query = {
+    userId
+  }
+  if(latestId) {
+    query._id = { $lt: latestId }
+  }
+  return Notification.find(query)
+    .sort({ createdAt: -1 })
+    .limit(size)
     .populate({
       path: 'maker',
       select: '_id screenId nickname profile',
@@ -55,7 +63,6 @@ export const getNotiList = function (userId) {
       path: 'targetInfo',
       select: 'screenId nickname profile boardTitle feedbackBody replyBody boardId parentId',
     })
-    .sort({ createdAt: -1 })
 }
 
 // 전체 읽음

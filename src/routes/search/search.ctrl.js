@@ -14,7 +14,7 @@ import { apiResponser } from '../../lib/middleware/apiResponser'
 export const search = async (req, res, next) => {
   const { q: queryString, type: searchType, latestId, category } = req.query
   const size = parseInt(req.query.size, 10)
-  const querySize = Number.isNaN(size) ? size : 35
+  const querySize = Number.isNaN(size) ? 35 : size
   let searchResult
 
   if (searchType === 'Board') {
