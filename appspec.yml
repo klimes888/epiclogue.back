@@ -5,7 +5,7 @@ files:
     destination: /home/ubuntu/build/
 hooks:
   AfterInstall:
-  - location: /afterInstall.sh
+  - location: ./afterInstall.sh
     timeout: 300 # 5 mins
     runas: root
 permissions:
