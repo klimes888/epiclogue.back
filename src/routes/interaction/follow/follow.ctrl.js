@@ -74,14 +74,16 @@ export const deleteFollow = async (req, res, next) => {
  * @returns 팔로잉 또는 팔로워 리스트
  */
 export const getFollow = async (req, res, next) => {
-  const { screenId, type } = req.query
+  const { screenId, type, latestId } = req.query
+  const size = parseInt(req.query.size, 10)
+  const requestSize = Number.isNaN(size) ? 15 : size
   const userId = await userDAO.getIdByScreenId(screenId)
 
   try {
     const requestedData =
       type === 'following'
-        ? await followDAO.getFollowingList(userId._id)
-        : await followDAO.getFollowerList(userId._id)
+        ? await followDAO.getFollowingList(userId._id, latestId, requestSize)
+        : await followDAO.getFollowerList(userId._id, latestId, requestSize)
 
     const wrappedFollowData = await contentsWrapper(req.user?.id, requestedData, 'Follow', false)
 
