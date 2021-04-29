@@ -12,10 +12,12 @@ import { apiResponser } from '../../lib/middleware/apiResponser'
  * @returns 사용자의 모든 알림
  */
 export const getNoti = async (req, res, next) => {
+  const size = parseInt(req.query.size, 10)
+  const querySize = Number.isNaN(size) ? 15 : size
   try {
     const notiData = await notificationDAO.getNotiList(req.user.id, 
       req.query.latestId, 
-      Number.isNaN(req.query.size) ? 15 : req.query.size
+      querySize
     )
     return apiResponser({ req, res, data: notiData })
   } catch (e) {

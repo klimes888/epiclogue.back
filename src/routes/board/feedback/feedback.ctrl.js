@@ -40,7 +40,7 @@ export const postFeedback = async (req, res, next) => {
     if (res.locals.uid !== targetData.writer.toString()) {
       await notificationDAO.makeNotification({
         targetUserId: targetData.writer,
-        maker: res.locals.uid,
+        maker: req.user.id,
         notificationType: 'Feedback',
         targetType: 'Board',
         targetInfo: req.params.boardId,
