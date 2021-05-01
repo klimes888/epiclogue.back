@@ -55,7 +55,7 @@ export const getFollowingList = function (userId, latestId, size) {
   if(latestId) {
     query._id = {$gt : latestId}
   }
-  return Follow.find({ userId }, { _id: 0, userId: 0, __v: 0 })
+  return Follow.find(query, { userId: 0, __v: 0 })
   .limit(size)
   .populate({
     path: 'targetUserId',
@@ -73,7 +73,7 @@ export const getFollowerList = function (targetUserId, latestId, size) {
   if(latestId) {
     query._id = {$gt : latestId}
   }
-  return Follow.find(query, { _id: 0, targetUserId: 0, __v: 0 })
+  return Follow.find(query, { targetUserId: 0, __v: 0 })
   .limit(size)
   .populate({
     path: 'userId',

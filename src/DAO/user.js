@@ -103,7 +103,7 @@ export const searchByScreenIdOrNickname = function (query, size = 35, latestId) 
     $or: [{ screenId: { $regex: query } }, { nickname: { $regex: query } }],
   }
   if(latestId) {
-    option._id = { $lt: latestId }
+    option._id = { $gt: latestId }
   }
   return User.find(
     option,
