@@ -72,9 +72,20 @@ export const findAll = function (writer, latestId, size) {
     })
 }
 
-export const getFeed = function (option, size) {
+export const getFeed = function (requestType, latestId, size) {
+  const query = {
+    pub: 1,
+  }
+  // 특정 카테고리만 요청할 경우
+  if (requestType) {
+    query.category = requestType === 'Illust' ? 0 : 1
+  }
+
+  if (latestId) {
+    query._id = { $lt: latestId }
+  }
   // 들어오는 id를 기준으로 이후 size만큼 반환
-  return Board.find(option, {
+  return Board.find(query, {
     _id: 1,
     writer: 1,
     boardTitle: 1,

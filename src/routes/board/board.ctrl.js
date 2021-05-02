@@ -17,20 +17,9 @@ import { parseIntParam } from '../../lib/parseParams'
  */
 export const getBoards = async (req, res, next) => {
   const { type: requestType, latestId, size } = req.query
-  const option = {
-    pub: 1,
-  }
-  // 특정 카테고리만 요청할 경우
-  if (requestType) {
-    option.category = requestType === 'Illust' ? 0 : 1
-  }
-
-  if (latestId) {
-    option._id = { $lt: latestId }
-  }
 
   try {
-    const boardList = await boardDAO.getFeed(option, await parseIntParam(size, 35))
+    const boardList = await boardDAO.getFeed(requestType, latestId, await parseIntParam(size, 35))
 
     const filteredBoardList = boardList.filter(each => each.writer !== null)
     const wrappedData = await contentsWrapper(req.user.id, filteredBoardList, 'Board', false)

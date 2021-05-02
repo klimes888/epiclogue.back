@@ -77,12 +77,12 @@ export const deleteFollow = async (req, res, next) => {
 export const getFollow = async (req, res, next) => {
   const { screenId, type, latestId, size } = req.query
   const userId = await userDAO.getIdByScreenId(screenId)
-
+  const requestSize = await parseIntParam(size, 15)
   try {
     const requestedData =
       type === 'following'
-        ? await followDAO.getFollowingList(userId._id, latestId, await parseIntParam(size, 15))
-        : await followDAO.getFollowerList(userId._id, latestId, await parseIntParam(size, 15))
+        ? await followDAO.getFollowingList(userId._id, latestId, requestSize)
+        : await followDAO.getFollowerList(userId._id, latestId, requestSize)
 
     const wrappedFollowData = await contentsWrapper(req.user?.id, requestedData, 'Follow', false)
 
