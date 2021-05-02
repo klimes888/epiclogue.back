@@ -123,7 +123,7 @@ export const searchByTitleOrTag = function (query, size = 35, latestId, category
     option._id = { $lt: latestId }
   }
   if(category) {
-    option.category = category
+    option.category = category === 'Comic' ? 1 : 0
   }
   return Board.find(
     option,
