@@ -2,6 +2,7 @@ import Joi from 'joi'
 import { notificationDAO } from '../../DAO'
 import { apiErrorGenerator } from '../../lib/apiErrorGenerator'
 import { apiResponser } from '../../lib/middleware/apiResponser'
+import { parseIntParam } from '../../lib/parseParams'
 
 /**
  * @description 모든 알림 확인
@@ -12,12 +13,10 @@ import { apiResponser } from '../../lib/middleware/apiResponser'
  * @returns 사용자의 모든 알림
  */
 export const getNoti = async (req, res, next) => {
-  const size = parseInt(req.query.size, 10)
-  const querySize = Number.isNaN(size) ? 15 : size
   try {
     const notiData = await notificationDAO.getNotiList(req.user.id, 
       req.query.latestId, 
-      querySize
+      parseIntParam(req.params.size, 15)
     )
     return apiResponser({ req, res, data: notiData })
   } catch (e) {
