@@ -81,8 +81,8 @@ export const getFollow = async (req, res, next) => {
   try {
     const requestedData =
       type === 'following'
-        ? await followDAO.getFollowingList(userId._id, latestId, parseIntParam(size, 15))
-        : await followDAO.getFollowerList(userId._id, latestId, parseIntParam(size, 15))
+        ? await followDAO.getFollowingList(userId._id, latestId, await parseIntParam(size, 15))
+        : await followDAO.getFollowerList(userId._id, latestId, await parseIntParam(size, 15))
 
     const wrappedFollowData = await contentsWrapper(req.user?.id, requestedData, 'Follow', false)
 

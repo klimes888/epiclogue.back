@@ -30,7 +30,7 @@ export const getBoards = async (req, res, next) => {
   }
 
   try {
-    const boardList = await boardDAO.getFeed(option, parseIntParam(size, 35))
+    const boardList = await boardDAO.getFeed(option, await parseIntParam(size, 35))
 
     const filteredBoardList = boardList.filter(each => each.writer !== null)
     const wrappedData = await contentsWrapper(req.user.id, filteredBoardList, 'Board', false)

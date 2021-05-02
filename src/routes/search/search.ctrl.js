@@ -19,7 +19,7 @@ export const search = async (req, res, next) => {
   if (searchType === 'Board') {
     // 글 제목으로 검색
     try {
-      searchResult = await boardDAO.searchByTitleOrTag(queryString, parseIntParam(size, 25), latestId, category)
+      searchResult = await boardDAO.searchByTitleOrTag(queryString, await parseIntParam(size, 25), latestId, category)
     } catch (e) {
       return next(apiErrorGenerator(500, '글 검색에 실패했습니다.', e))
     }
@@ -28,8 +28,8 @@ export const search = async (req, res, next) => {
     try {
       searchResult =
         queryString[0] === '@'
-          ? await userDAO.searchByScreenIdOrNickname(queryString.substr(1), parseIntParam(size, 25), latestId)
-          : await userDAO.searchByScreenIdOrNickname(queryString, parseIntParam(size, 25), latestId)
+          ? await userDAO.searchByScreenIdOrNickname(queryString.substr(1), await parseIntParam(size, 25), latestId)
+          : await userDAO.searchByScreenIdOrNickname(queryString, await parseIntParam(size, 25), latestId)
     } catch (e) {
       return next(apiErrorGenerator(500, '유저 검색에 실패했습니다.', e))
     }

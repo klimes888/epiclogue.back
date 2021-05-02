@@ -57,7 +57,7 @@ export const allWorks = async (req, res, next) => {
   const {latestId, screenId, size} = req.params
   const userId = await userDAO.getIdByScreenId(screenId)
   try {
-    const userAllWorks = await boardDAO.findAll(userId._id, latestId, parseIntParam(size, 25))
+    const userAllWorks = await boardDAO.findAll(userId._id, latestId, await parseIntParam(size, 25))
     const wrappedWorks = req.user?.uid
       ? await contentsWrapper(req.user.id, userAllWorks, 'Board', false)
       : userAllWorks
@@ -79,7 +79,7 @@ export const allWorks = async (req, res, next) => {
 export const originals = async (req, res, next) => {
   try {
     const targetUser = await userDAO.getIdByScreenId(req.params.screenId)
-    const myContents = await boardDAO.findAllOriginOrSecondary(targetUser._id, false, req.params.latestId, parseIntParam(req.params.size, 25))
+    const myContents = await boardDAO.findAllOriginOrSecondary(targetUser._id, false, req.params.latestId, await parseIntParam(req.params.size, 25))
     const wrappedContents = await contentsWrapper(req.user.id, myContents, 'Board', false)
 
     return apiResponser({ req, res, data: wrappedContents })
@@ -99,7 +99,7 @@ export const originals = async (req, res, next) => {
 export const secondaryWorks = async (req, res, next) => {
   try {
     const targetUser = await userDAO.getIdByScreenId(req.params.screenId)
-    const userSecondaryWorks = await boardDAO.findAllOriginOrSecondary(targetUser._id, true, req.params.latestId, parseIntParam(req.params.size, 25))
+    const userSecondaryWorks = await boardDAO.findAllOriginOrSecondary(targetUser._id, true, req.params.latestId, await parseIntParam(req.params.size, 25))
     const wrappedContents = req.user?.uid
       ? await contentsWrapper(req.user.id, userSecondaryWorks, 'Board', false)
       : userSecondaryWorks

@@ -16,7 +16,7 @@ export const getNoti = async (req, res, next) => {
   try {
     const notiData = await notificationDAO.getNotiList(req.user.id, 
       req.query.latestId, 
-      parseIntParam(req.params.size, 15)
+      await parseIntParam(req.params.size, 15)
     )
     return apiResponser({ req, res, data: notiData })
   } catch (e) {
