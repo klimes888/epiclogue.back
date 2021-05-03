@@ -9,8 +9,7 @@ module.exports = {
       env_production: {
         NODE_ENV: 'production',
       },
-      exec_interpreter: "babel-node", // This configuration is to use the babel-node to execute the nodejs file
-      exec_mode: "fork",
+      exec_mode: 'cluster',
       instances: 'max',
     },
   ],

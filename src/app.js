@@ -1,5 +1,5 @@
 // external modules
-import './src/env/env'
+import './env/env'
 import express from 'express'
 import cookieParser from 'cookie-parser'
 import cors from 'cors'
@@ -10,15 +10,15 @@ import session from 'express-session'
 import connectRedis from 'connect-redis'
 
 // routers
-import indexRouter from './src/routes'
+import indexRouter from './routes'
 
 // utils
-import { connectDatabase } from './src/lib/database'
-import { swaggerSpec } from './src/configs/apiDoc'
-import { apiRequestHandler } from './src/lib/middleware/apiRequestHandler'
-import { errorHandler } from './src/lib/middleware/errorHandler'
-import { apiResponser } from './src/lib/middleware/apiResponser'
-import redisClient from './src/lib/redisClient'
+import { connectDatabase } from './lib/database'
+import { swaggerSpec } from './configs/apiDoc'
+import { apiRequestHandler } from './lib/middleware/apiRequestHandler'
+import { errorHandler } from './lib/middleware/errorHandler'
+import { apiResponser } from './lib/middleware/apiResponser'
+import redisClient from './lib/redisClient'
 
 const app = express()
 const RedisStore = connectRedis(session)

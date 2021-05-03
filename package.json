@@ -6,7 +6,7 @@
     "start:prod": "yarn build && pm2-runtime start ecosystem.config.js",
     "dev": "nodemon ./bin/www --exec babel-node",
     "babel": "babel-node ./bin/www",
-    "build": "yarn install && babel \"src/\" -d \"build/\"",
+    "build": "babel \"src/\" -d \"build/\"",
     "docker": "yarn && yarn build && nodemon build/bin/www --exec babel-node",
     "format": "prettier --write \"src/**/*.js\" \"__tests__/**/*.js\"",
     "lint": "eslint --fix \"src/**/*.js\" \"__tests__/**/*.test.js\"",

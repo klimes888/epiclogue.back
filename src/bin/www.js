@@ -10,7 +10,7 @@ import dayjs from 'dayjs'
 import Slack from 'slack-node'
 
 import '../env/env'
-import app from '../../app'
+import app from '../app'
 import { logger } from '../configs/winston'
 
 debug('lunacat-api:server')
