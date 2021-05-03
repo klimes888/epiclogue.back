@@ -4,10 +4,10 @@
   "private": true,
   "scripts": {
     "start:prod": "yarn build && pm2-runtime start ecosystem.config.js",
-    "dev": "nodemon ./bin/www --exec babel-node",
+    "dev": "yarn build && nodemon build/bin/www",
     "babel": "babel-node ./bin/www",
     "build": "babel \"src/\" -d \"build/\"",
-    "docker": "yarn && yarn build && nodemon build/bin/www --exec babel-node",
+    "docker": "yarn build && nodemon build/bin/www",
     "format": "prettier --write \"src/**/*.js\" \"__tests__/**/*.js\"",
     "lint": "eslint --fix \"src/**/*.js\" \"__tests__/**/*.test.js\"",
     "lint:init": "eslint --init",
@@ -49,7 +49,6 @@
     "winston-daily-rotate-file": "^4.5.2"
   },
   "devDependencies": {
-    "@babel/node": "^7.13.13",
     "@babel/preset-env": "^7.13.15",
     "@jest/globals": "^26.6.2",
     "@shelf/jest-mongodb": "^1.2.2",
