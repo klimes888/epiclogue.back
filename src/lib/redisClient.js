@@ -1,4 +1,5 @@
 import '../env/env'
+import dayjs from 'dayjs'
 import redis from 'redis'
 import { promisify } from 'util'
 import { logger } from '../configs/winston'
@@ -12,7 +13,7 @@ redisClient.on('connect', () => {
 })
 
 redisClient.on('error', err => {
-  logger.error(`[RedisError] ${err}`)
+  logger.error(`[RedisError] ${dayjs(new Date()).format('YYYY-MM-DD HH:mm:ss Z')} ${err}`)
 })
 
 /**

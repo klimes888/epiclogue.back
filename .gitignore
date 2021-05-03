@@ -1,6 +1,10 @@
 # modules
 node_modules
 
+# builds
+dist
+build
+
 # setting files
 .env
 .node-version

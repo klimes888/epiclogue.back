@@ -1,14 +1,9 @@
-FROM node
+FROM node:14
 
 WORKDIR /usr/src/app
+VOLUME /usr/src/app
 
-COPY ./package.json ./
-COPY ./yarn.lock ./
-
-RUN yarn install
-
-COPY . .
-
+ENV NODE_ENV=production
 EXPOSE 3000
 
-CMD ["yarn","babel"]
+CMD ["yarn", "start:prod"]

@@ -1,5 +1,7 @@
 import '../env/env'
 import mongoose from 'mongoose'
+import dayjs from 'dayjs'
+
 import { dbOption } from '../options/options'
 import { logger } from '../configs/winston'
 
@@ -13,7 +15,7 @@ export const connectDatabase = async () => {
     await mongoose.connect(dbUrl, dbOption)
     console.log(`[MongoDBConnect] Successfully connected database server.`)
   } catch (e) {
-    logger.error(`[MongoConnectError] ${e}`)
+    logger.error(`[MongoConnectError] ${dayjs(new Date()).format('YYYY-MM-DD HH:mm:ss Z')} ${e}`)
   }
 }
 
@@ -25,7 +27,7 @@ export const disconnectDatabase = async () => {
       await mongoose.disconnect()
       console.log('[MongoDB] Database disconnected successfully')
     } catch (e) {
-      logger.error(`[MongoDBError] ${e}`)
+      logger.error(`[MongoDBError] ${dayjs(new Date()).format('YYYY-MM-DD HH:mm:ss Z')} ${e}`)
     }
   } else {
     logger.warn(
@@ -39,6 +41,6 @@ export const dropDatabase = async () => {
     await mongoose.connection.db.dropDatabase()
     console.log('[MongoDBDropDatabase] Database dropped successfully')
   } catch (e) {
-    logger.error(`[DropDatabaseError] ${e}`)
+    logger.error(`[DropDatabaseError] ${dayjs(new Date()).format('YYYY-MM-DD HH:mm:ss Z')} ${e}`)
   }
 }

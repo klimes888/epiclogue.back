@@ -9,9 +9,9 @@ import http from 'http'
 import dayjs from 'dayjs'
 import Slack from 'slack-node'
 
-import '../src/env/env'
-import app from '../app'
-import { logger } from '../src/configs/winston'
+import '../env/env'
+import app from '../../app'
+import { logger } from '../configs/winston'
 
 debug('lunacat-api:server')
 
@@ -38,21 +38,22 @@ server.on('listening', onListening)
 server.on('close', onClose)
 process.on('uncaughtException', err => {
   logger.error(`***UNCAUGHT EXCEPTION: ${err}`)
-  const errorObjectForSlack = {
-    timestamp: dayjs(new Date()).format('YYYY-MM-DD HH:mm:ss Z'),
-    message: err.message,
-    statusCode: err.status,
-    stack: err?.stack,
-  }
-
+  
   if (process.env.NODE_ENV !== 'test') {
     const slack = new Slack()
+    const errorObjectForSlack = {
+      timestamp: dayjs(new Date()).format('YYYY-MM-DD HH:mm:ss Z'),
+      message: err.message,
+      statusCode: err?.status,
+      stack: err?.stack,
+    }
+
     slack.setWebhook(process.env.SLACK_WEBHOOK)
     slack.webhook(JSON.stringify(errorObjectForSlack), webhookError => {
       if (webhookError) logger.error(`[SlackWebhookError] ${webhookError}`)
     })
   }
-  
+
   process.exit(1)
 })
 /**
