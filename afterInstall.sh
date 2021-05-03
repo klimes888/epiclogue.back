@@ -1,5 +1,7 @@
 #!/bin/bash
-cd /home/ubuntu/build
+
+#cd if env key "deployPath" is defined, then use it. else use default "build"
+cd /home/ubuntu/${deployPath:-"build"}
 if [ -f mongodb.key ];
 then
     echo ' ***already exist key!*** '
