@@ -6,6 +6,9 @@
 
 import debug from 'debug'
 import http from 'http'
+import dayjs from 'dayjs'
+import Slack from 'slack-node'
+
 import '../src/env/env'
 import app from '../app'
 import { logger } from '../src/configs/winston'
@@ -33,8 +36,23 @@ server.listen(port)
 server.on('error', onError)
 server.on('listening', onListening)
 server.on('close', onClose)
-process.on('uncaughtException', (err) => {
-  logger.error(`***UNCAUGHT EXCEPTION: ${err.stack}`)
+process.on('uncaughtException', err => {
+  logger.error(`***UNCAUGHT EXCEPTION: ${err}`)
+  const errorObjectForSlack = {
+    timestamp: dayjs(new Date()).format('YYYY-MM-DD HH:mm:ss Z'),
+    message: err.message,
+    statusCode: err.status,
+    stack: err?.stack,
+  }
+
+  if (process.env.NODE_ENV !== 'test') {
+    const slack = new Slack()
+    slack.setWebhook(process.env.SLACK_WEBHOOK)
+    slack.webhook(JSON.stringify(errorObjectForSlack), webhookError => {
+      if (webhookError) logger.error(`[SlackWebhookError] ${webhookError}`)
+    })
+  }
+  
   process.exit(1)
 })
 /**
@@ -68,16 +86,16 @@ function onError(error) {
     throw error
   }
 
-  const bind = typeof port === 'string' ? `Pipe ${ port }` : `Port ${ port }`
+  const bind = typeof port === 'string' ? `Pipe ${port}` : `Port ${port}`
 
   // handle specific listen errors with friendly messages
   switch (error.code) {
     case 'EACCES':
-      console.error(`${bind  } requires elevated privileges`)
+      console.error(`${bind} requires elevated privileges`)
       process.exit(1)
       break
     case 'EADDRINUSE':
-      console.error(`${bind  } is already in use`)
+      console.error(`${bind} is already in use`)
       process.exit(1)
       break
     default:
@@ -91,8 +109,8 @@ function onError(error) {
 
 function onListening() {
   const addr = server.address()
-  const bind = typeof addr === 'string' ? `pipe ${  addr}` : `port ${  addr.port}`
-  debug(`Listening on ${  bind}`)
+  const bind = typeof addr === 'string' ? `pipe ${addr}` : `port ${addr.port}`
+  debug(`Listening on ${bind}`)
 }
 
 function onClose() {
