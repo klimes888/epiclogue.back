@@ -102,20 +102,18 @@ export const searchByScreenIdOrNickname = function (query, size = 35, latestId) 
   const option = {
     $or: [{ screenId: { $regex: query } }, { nickname: { $regex: query } }],
   }
-  if(latestId) {
+  if (latestId) {
     option._id = { $lt: latestId }
   }
-  return User.find(
-    option,
-    {
-      nickname: 1,
-      screenId: 1,
-      profile: 1,
-      banner: 1,
-      intro: 1,
-    }
-  ).sort({ screenId: 1, nickname: 1 })
-  .limit(size)
+  return User.find(option, {
+    nickname: 1,
+    screenId: 1,
+    profile: 1,
+    banner: 1,
+    intro: 1,
+  })
+    .sort({ screenId: 1, nickname: 1 })
+    .limit(size)
 }
 
 export const isExistSns = function (snsId) {

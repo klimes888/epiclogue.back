@@ -137,7 +137,7 @@ export const contentsWrapper = async (reqUserId, contentData, contentType, isFor
       if (!Array.isArray(contentData)) {
         const jsonConvertedData = contentData.toJSON()
         jsonConvertedData.liked = !!likeIdSet.includes(jsonConvertedData._id)
-        jsonConvertedData.writer.following = 
+        jsonConvertedData.writer.following =
           reqUserId === jsonConvertedData._id
             ? 'me'
             : !!followingIdSet.includes(jsonConvertedData.writer._id)

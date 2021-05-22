@@ -9,8 +9,22 @@ const feedback = Router({ mergeParams: true })
 
 feedback.post('/', authToken, feedbackCtrl.postFeedback)
 feedback.get('/:feedbackId', authToken, checkExistence, feedbackCtrl.getFeedback)
-feedback.patch('/:feedbackId', authToken, checkExistence, checkAdmin(feedbackCtrl.editFeedback), checkWriter, feedbackCtrl.editFeedback)
-feedback.delete('/:feedbackId', authToken, checkExistence, checkAdmin(feedbackCtrl.deleteFeedback), checkWriter, feedbackCtrl.deleteFeedback)
+feedback.patch(
+  '/:feedbackId',
+  authToken,
+  checkExistence,
+  checkAdmin(feedbackCtrl.editFeedback),
+  checkWriter,
+  feedbackCtrl.editFeedback
+)
+feedback.delete(
+  '/:feedbackId',
+  authToken,
+  checkExistence,
+  checkAdmin(feedbackCtrl.deleteFeedback),
+  checkWriter,
+  feedbackCtrl.deleteFeedback
+)
 feedback.use('/:feedbackId/reply', reply)
 
 export default feedback

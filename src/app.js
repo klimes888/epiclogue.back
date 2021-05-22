@@ -26,7 +26,12 @@ const RedisStore = connectRedis(session)
 /**
  * Initialize middlewares
  */
-app.use(cors({ credentials: true, origin: process.env.NODE_ENV === 'production' ? '.epiclogue.com' : true }))
+app.use(
+  cors({
+    credentials: true,
+    origin: process.env.NODE_ENV === 'production' ? '.epiclogue.com' : true,
+  })
+)
 app.use(
   session({
     secret: process.env.SECRET_KEY,
@@ -61,7 +66,7 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec))
  */
 app.use((err, req, res, next) => {
   if (err) {
-    return errorHandler(err, req, res)  
+    return errorHandler(err, req, res)
   }
 
   next()
@@ -69,13 +74,12 @@ app.use((err, req, res, next) => {
 
 /**
  * catch 404 Error.
- * 
+ *
  * ExpressJS 문서(https://expressjs.com/en/starter/faq.html)에서
  * 미들웨어 최하단에 404 에러를 핸들링하도록 권장
  */
 app.use((req, res) => {
-  apiResponser({ req, res, statusCode: 404, message: '올바른 접근이 아닙니다.', })
+  apiResponser({ req, res, statusCode: 404, message: '올바른 접근이 아닙니다.' })
 })
-
 
 export default app

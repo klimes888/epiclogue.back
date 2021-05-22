@@ -34,9 +34,9 @@ export const checkWriter = async (req, res, next) => {
 }
 
 export const checkAdmin = skipTarget => async (req, res, next) => {
-    const isAdmin = await userDAO.isAdmin(req.user.id)
-    if (isAdmin) {
-      return next(skipTarget)
-    } 
-    return next()
+  const isAdmin = await userDAO.isAdmin(req.user.id)
+  if (isAdmin) {
+    return next(skipTarget)
   }
+  return next()
+}

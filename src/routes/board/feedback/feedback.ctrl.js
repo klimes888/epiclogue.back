@@ -32,10 +32,10 @@ export const postFeedback = async (req, res, next) => {
   }
 
   try {
-    const {
-      newerFeedbacks,
-      targetData,
-    } = await feedbackDAO.createAndGetNewList(req.params.boardId, feedbackData)
+    const { newerFeedbacks, targetData } = await feedbackDAO.createAndGetNewList(
+      req.params.boardId,
+      feedbackData
+    )
     /* 자신에게는 알림을 보내지 않음 */
     if (res.locals.uid !== targetData.writer.toString()) {
       await notificationDAO.makeNotification({

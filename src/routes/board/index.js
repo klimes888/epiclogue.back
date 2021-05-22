@@ -14,8 +14,22 @@ board.get('/', authToken, boardCtrl.getBoards)
 board.post('/', authToken, uploadImage.any(), boardCtrl.postBoard)
 board.post('/sec', authToken, uploadImage.any(), checkSecondaryAllow, boardCtrl.secPost)
 board.get('/:boardId', authToken, checkExistence, boardCtrl.viewBoard)
-board.delete('/:boardId', authToken, checkExistence, checkAdmin(boardCtrl.deleteBoard), checkWriter, boardCtrl.deleteBoard)
-board.get('/:boardId/edit', authToken, checkExistence, checkAdmin(boardCtrl.getEditInfo), checkWriter, boardCtrl.getEditInfo)
+board.delete(
+  '/:boardId',
+  authToken,
+  checkExistence,
+  checkAdmin(boardCtrl.deleteBoard),
+  checkWriter,
+  boardCtrl.deleteBoard
+)
+board.get(
+  '/:boardId/edit',
+  authToken,
+  checkExistence,
+  checkAdmin(boardCtrl.getEditInfo),
+  checkWriter,
+  boardCtrl.getEditInfo
+)
 board.post(
   '/:boardId/edit',
   authToken,

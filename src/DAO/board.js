@@ -119,23 +119,20 @@ export const searchByTitleOrTag = function (query, size = 35, latestId, category
     $or: [{ boardTitle: { $regex: query } }, { tags: query }],
     pub: 1,
   }
-  if(latestId) {
+  if (latestId) {
     option._id = { $lt: latestId }
   }
-  if(category) {
+  if (category) {
     option.category = category
   }
-  return Board.find(
-    option,
-    {
-      _id: 1,
-      boardTitle: 1,
-      uid: 1,
-      pub: 1,
-      category: 1,
-      thumbnail: 1,
-    }
-  )
+  return Board.find(option, {
+    _id: 1,
+    boardTitle: 1,
+    uid: 1,
+    pub: 1,
+    category: 1,
+    thumbnail: 1,
+  })
     .sort({ writeDate: -1 })
     .limit(size)
     .populate({

@@ -38,7 +38,7 @@ server.on('listening', onListening)
 server.on('close', onClose)
 process.on('uncaughtException', err => {
   logger.error(`***UNCAUGHT EXCEPTION: ${err}`)
-  
+
   if (process.env.NODE_ENV !== 'test') {
     const slack = new Slack()
     const errorObjectForSlack = {

@@ -68,7 +68,7 @@ export const snsLogin = async function (req, res, next) {
  */
 export const logout = async (req, res, next) => {
   if (req.cookies?.access_token) {
-    res.cookie('access_token', '', {expires: new Date(0)})
+    res.cookie('access_token', '', { expires: new Date(0) })
   } else {
     return next(apiErrorGenerator(400, '비정상적 요청입니다.'))
   }

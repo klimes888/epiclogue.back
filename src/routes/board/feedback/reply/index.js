@@ -8,7 +8,21 @@ const reply = Router({ mergeParams: true })
 
 reply.get('/', authToken, checkExistence, replyCtrl.getReplys)
 reply.post('/', authToken, checkExistence, replyCtrl.postReply)
-reply.patch('/:replyId', authToken, checkExistence, checkAdmin(replyCtrl.editReply), checkWriter, replyCtrl.editReply)
-reply.delete('/:replyId', authToken, checkExistence, checkAdmin(replyCtrl.deleteReply), checkWriter, replyCtrl.deleteReply)
+reply.patch(
+  '/:replyId',
+  authToken,
+  checkExistence,
+  checkAdmin(replyCtrl.editReply),
+  checkWriter,
+  replyCtrl.editReply
+)
+reply.delete(
+  '/:replyId',
+  authToken,
+  checkExistence,
+  checkAdmin(replyCtrl.deleteReply),
+  checkWriter,
+  replyCtrl.deleteReply
+)
 
 export default reply

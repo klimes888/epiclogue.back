@@ -15,10 +15,7 @@ export const getNoti = async (req, res, next) => {
   const size = parseInt(req.query.size, 10)
   const querySize = Number.isNaN(size) ? 15 : size
   try {
-    const notiData = await notificationDAO.getNotiList(req.user.id, 
-      req.query.latestId, 
-      querySize
-    )
+    const notiData = await notificationDAO.getNotiList(req.user.id, req.query.latestId, querySize)
     return apiResponser({ req, res, data: notiData })
   } catch (e) {
     return next(apiErrorGenerator(500, '알 수 없는 오류가 발생했습니다.', e))

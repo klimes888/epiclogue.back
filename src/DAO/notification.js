@@ -45,11 +45,11 @@ export const makeNotification = async ({
 }
 
 // 알림목록
-export const getNotiList = function (userId, latestId, size=15) {
+export const getNotiList = function (userId, latestId, size = 15) {
   const query = {
-    userId
+    userId,
   }
-  if(latestId) {
+  if (latestId) {
     query._id = { $lt: latestId }
   }
   return Notification.find(query)
