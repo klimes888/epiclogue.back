@@ -2,6 +2,7 @@ import { userDAO, followDAO, notificationDAO } from '../../../DAO'
 import { apiErrorGenerator } from '../../../lib/apiErrorGenerator'
 import { contentsWrapper } from '../../../lib/contentsWrapper'
 import { apiResponser } from '../../../lib/middleware/apiResponser'
+import { parseIntParam } from '../../../lib/parseParams'
 
 /**
  * @description 팔로우 추가
@@ -74,14 +75,14 @@ export const deleteFollow = async (req, res, next) => {
  * @returns 팔로잉 또는 팔로워 리스트
  */
 export const getFollow = async (req, res, next) => {
-  const { screenId, type } = req.query
+  const { screenId, type, latestId, size } = req.query
   const userId = await userDAO.getIdByScreenId(screenId)
-
+  const requestSize = await parseIntParam(size, 15)
   try {
     const requestedData =
       type === 'following'
-        ? await followDAO.getFollowingList(userId._id)
-        : await followDAO.getFollowerList(userId._id)
+        ? await followDAO.getFollowingList(userId._id, latestId, requestSize)
+        : await followDAO.getFollowerList(userId._id, latestId, requestSize)
 
     const wrappedFollowData = await contentsWrapper(req.user?.id, requestedData, 'Follow', false)
 

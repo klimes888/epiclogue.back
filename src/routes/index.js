@@ -8,7 +8,7 @@ import interactionRouter from './interaction'
 import authRouter from './auth'
 import notiRouter from './notification'
 import myboardRouter from './myboard'
-
+import reportRouter from './report'
 import { apiResponser } from '../lib/middleware/apiResponser'
 
 const router = express.Router({
@@ -26,5 +26,6 @@ router.use('/search', searchRouter)
 router.use('/suggest', suggestRouter)
 router.use('/notification', notiRouter)
 router.use('/myboard', myboardRouter)
+router.use('/report', reportRouter)
 
-module.exports = router
+export default router

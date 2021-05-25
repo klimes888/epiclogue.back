@@ -45,9 +45,14 @@ export const deleteBoard = function (buid) {
 }
 
 /* 글 전체 조회 */
-export const findAll = function (option) {
-  // uid를 이용해 유저 닉네임을 응답데이터에 넣어야하는데 어떻게 넣어야 효율적일지 고민이 필요
-  return Board.find(option, {
+export const findAll = function (writer, latestId, size) {
+  const query = {
+    writer
+  }
+  if(latestId) {
+    query._id = {$lt : latestId}
+  }
+  return Board.find(query, {
     _id: 1,
     writer: 1,
     boardTitle: 1,
@@ -58,7 +63,8 @@ export const findAll = function (option) {
     thumbnail: 1,
     originUserId: 1,
   })
-    .sort({ writeDate: -1 })
+  .sort({ writeDate: -1 })
+  .limit(size)
     .populate({
       path: 'writer',
       // match: { deactivatedAt: { $type: 10 } }, // BSON type: 10 is null value.
@@ -66,9 +72,20 @@ export const findAll = function (option) {
     })
 }
 
-export const getFeed = function (option, size) {
+export const getFeed = function (requestType, latestId, size) {
+  const query = {
+    pub: 1,
+  }
+  // 특정 카테고리만 요청할 경우
+  if (requestType) {
+    query.category = requestType === 'Illust' ? 0 : 1
+  }
+
+  if (latestId) {
+    query._id = { $lt: latestId }
+  }
   // 들어오는 id를 기준으로 이후 size만큼 반환
-  return Board.find(option, {
+  return Board.find(query, {
     _id: 1,
     writer: 1,
     boardTitle: 1,
@@ -87,9 +104,16 @@ export const getFeed = function (option, size) {
     })
 }
 
-export const findAllOriginOrSecondary = function (userId, isExists) {
+export const findAllOriginOrSecondary = function (userId, isExists, latestId, size) {
+  const query = { 
+    writer: userId, 
+    originUserId: { $exists: isExists }
+  }
+  if(latestId) {
+    query._id = { $lt : latestId }
+  }
   return Board.find(
-    { writer: userId, originUserId: { $exists: isExists } },
+    query,
     {
       _id: 1,
       writer: 1,
@@ -99,7 +123,10 @@ export const findAllOriginOrSecondary = function (userId, isExists) {
       category: 1,
       thumbnail: 1,
     }
-  ).populate({
+  )
+  .sort({ writeDate: -1 })
+  .limit(size)
+  .populate({
     path: 'writer',
     select: '_id screenId nickname profile',
   })
@@ -122,8 +149,8 @@ export const searchByTitleOrTag = function (query, size = 35, latestId, category
   if (latestId) {
     option._id = { $lt: latestId }
   }
-  if (category) {
-    option.category = category
+  if(category) {
+    option.category = category === 'Comic' ? 1 : 0
   }
   return Board.find(option, {
     _id: 1,

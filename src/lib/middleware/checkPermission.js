@@ -1,6 +1,6 @@
 import { boardDAO, replyDAO, feedbackDAO, userDAO } from '../../DAO'
 import { apiErrorGenerator } from '../apiErrorGenerator'
-
+import { apiResponser } from './apiResponser'
 // 작성자에 대한 인증 미들웨어
 export const checkWriter = async (req, res, next) => {
   let isWriter = null
@@ -33,10 +33,10 @@ export const checkWriter = async (req, res, next) => {
   }
 }
 
-export const checkAdmin = skipTarget => async (req, res, next) => {
-  const isAdmin = await userDAO.isAdmin(req.user.id)
-  if (isAdmin) {
-    return next(skipTarget)
+export const checkAdmin = (checkPass) => async (req, res, next) => {
+    const isAdmin = await userDAO.isAdmin(req.user.id)
+    if (isAdmin || checkPass) {
+      return next()
+    } 
+    return apiResponser(req,res,401,null,'you are not admin!')
   }
-  return next()
-}

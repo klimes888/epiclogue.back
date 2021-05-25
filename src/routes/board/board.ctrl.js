@@ -5,6 +5,7 @@ import { contentsWrapper } from '../../lib/contentsWrapper'
 import { tagPattern } from '../../options/options'
 import { apiErrorGenerator } from '../../lib/apiErrorGenerator'
 import { apiResponser } from '../../lib/middleware/apiResponser'
+import { parseIntParam } from '../../lib/parseParams'
 
 /**
  * @description 유저 피드
@@ -15,23 +16,10 @@ import { apiResponser } from '../../lib/middleware/apiResponser'
  * @returns 요청한 글 배열
  */
 export const getBoards = async (req, res, next) => {
-  const { type: requestType, latestId } = req.query
-  const size = parseInt(req.query.size, 10)
-  const requestSize = Number.isNaN(size) ? 35 : size
-  const option = {
-    pub: 1,
-  }
-  // 특정 카테고리만 요청할 경우
-  if (requestType) {
-    option.category = requestType === 'Illust' ? 0 : 1
-  }
-
-  if (latestId) {
-    option._id = { $lt: latestId }
-  }
+  const { type: requestType, latestId, size } = req.query
 
   try {
-    const boardList = await boardDAO.getFeed(option, requestSize)
+    const boardList = await boardDAO.getFeed(requestType, latestId, await parseIntParam(size, 35))
 
     const filteredBoardList = boardList.filter(each => each.writer !== null)
     const wrappedData = await contentsWrapper(req.user.id, filteredBoardList, 'Board', false)

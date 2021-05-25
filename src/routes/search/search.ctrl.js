@@ -2,6 +2,7 @@ import { userDAO, boardDAO } from '../../DAO'
 import { apiErrorGenerator } from '../../lib/apiErrorGenerator'
 import { contentsWrapper } from '../../lib/contentsWrapper'
 import { apiResponser } from '../../lib/middleware/apiResponser'
+import { parseIntParam } from '../../lib/parseParams'
 
 /**
  * @description 글 및 유저 검색
@@ -12,15 +13,13 @@ import { apiResponser } from '../../lib/middleware/apiResponser'
  * @returns 검색 결과 array
  */
 export const search = async (req, res, next) => {
-  const { q: queryString, type: searchType, latestId, category } = req.query
-  const size = parseInt(req.query.size, 10)
-  const querySize = Number.isNaN(size) ? 35 : size
+  const { q: queryString, type: searchType, latestId, category, size } = req.query
   let searchResult
-
+  const requestSize = await parseIntParam(size, 25)
   if (searchType === 'Board') {
     // 글 제목으로 검색
     try {
-      searchResult = await boardDAO.searchByTitleOrTag(queryString, querySize, latestId, category)
+      searchResult = await boardDAO.searchByTitleOrTag(queryString, requestSize, latestId, category)
     } catch (e) {
       return next(apiErrorGenerator(500, '글 검색에 실패했습니다.', e))
     }
@@ -29,8 +28,8 @@ export const search = async (req, res, next) => {
     try {
       searchResult =
         queryString[0] === '@'
-          ? await userDAO.searchByScreenIdOrNickname(queryString.substr(1), querySize, latestId)
-          : await userDAO.searchByScreenIdOrNickname(queryString, querySize, latestId)
+          ? await userDAO.searchByScreenIdOrNickname(queryString.substr(1), requestSize, latestId)
+          : await userDAO.searchByScreenIdOrNickname(queryString, requestSize, latestId)
     } catch (e) {
       return next(apiErrorGenerator(500, '유저 검색에 실패했습니다.', e))
     }

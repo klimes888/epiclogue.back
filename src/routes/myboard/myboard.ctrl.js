@@ -3,7 +3,7 @@ import { getBookmarkList } from '../interaction/bookmark/bookmark.ctrl'
 import { contentsWrapper } from '../../lib/contentsWrapper'
 import { apiResponser } from '../../lib/middleware/apiResponser'
 import { apiErrorGenerator } from '../../lib/apiErrorGenerator'
-
+import { parseIntParam } from '../../lib/parseParams'
 /**
  * @description 마이보드 - 유저의 프로필 정보 요청
  * @access GET /myboard/:screenId
@@ -54,9 +54,10 @@ export const getMyboard = async (req, res, next) => {
  * @returns Array of all works
  */
 export const allWorks = async (req, res, next) => {
-  const userId = await userDAO.getIdByScreenId(req.params.screenId)
+  const {latestId, screenId, size} = req.params
+  const userId = await userDAO.getIdByScreenId(screenId)
   try {
-    const userAllWorks = await boardDAO.findAll({ writer: userId._id })
+    const userAllWorks = await boardDAO.findAll(userId._id, latestId, await parseIntParam(size, 25))
     const wrappedWorks = req.user?.uid
       ? await contentsWrapper(req.user.id, userAllWorks, 'Board', false)
       : userAllWorks
@@ -78,7 +79,7 @@ export const allWorks = async (req, res, next) => {
 export const originals = async (req, res, next) => {
   try {
     const targetUser = await userDAO.getIdByScreenId(req.params.screenId)
-    const myContents = await boardDAO.findAllOriginOrSecondary(targetUser._id, false)
+    const myContents = await boardDAO.findAllOriginOrSecondary(targetUser._id, false, req.params.latestId, await parseIntParam(req.params.size, 25))
     const wrappedContents = await contentsWrapper(req.user.id, myContents, 'Board', false)
 
     return apiResponser({ req, res, data: wrappedContents })
@@ -98,7 +99,7 @@ export const originals = async (req, res, next) => {
 export const secondaryWorks = async (req, res, next) => {
   try {
     const targetUser = await userDAO.getIdByScreenId(req.params.screenId)
-    const userSecondaryWorks = await boardDAO.findAllOriginOrSecondary(targetUser._id, true)
+    const userSecondaryWorks = await boardDAO.findAllOriginOrSecondary(targetUser._id, true, req.params.latestId, await parseIntParam(req.params.size, 25))
     const wrappedContents = req.user?.uid
       ? await contentsWrapper(req.user.id, userSecondaryWorks, 'Board', false)
       : userSecondaryWorks
