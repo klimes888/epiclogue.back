@@ -1,5 +1,4 @@
-export const parseIntParam = async (targetparam, defaultValue) => {
-    const intParam = parseInt(targetparam, 10)
-    const result = Number.isNaN(intParam) ? defaultValue : intParam
-    return result
+export const parseIntParam = async (targetParam, defaultValue) => {
+    const intParam = parseInt(targetParam, 10)
+    return Number.isNaN(intParam) ? defaultValue : intParam
 }

@@ -10,7 +10,7 @@ const board = new mongoose.Schema({
   boardBody: { type: String, default: '' },
   category: { type: String, enum: [0, 1], default: 0 }, // [on future] 0: Illust, 1: Comic
   pub: { type: Number, enum: [0, 1], default: 1 }, // 0: private, 1: public
-  writeDate: { type: Date, default: Date.now },
+  writeDate: { type: Date, default: Date.now }, // 본인은 볼 수 있어야함
   language: { type: String, default: 0 }, // [on future] 0: Korean, 1: Japanese, 2: US, 3: China, 4: Taiwan
   allowSecondaryCreation: { type: Number, default: 1 }, // 0: not allow, 1: allow, 2: only allow on followers
   tags: { type: [String] },
@@ -18,6 +18,7 @@ const board = new mongoose.Schema({
   originBoardId: { type: ObjectId, ref: 'Board' },
   edited: { type: Boolean, default: false },
   sourceUrl: { type: String, default: null },
+  isBlind: { type: Boolean, default: false } // 신고 10건이상 누적시 자동 true
 })
 
 export default mongoose.model('Board', board)
