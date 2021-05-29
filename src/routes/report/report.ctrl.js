@@ -11,7 +11,7 @@ export const getReportGroupBy = async (req, res, next) => {
         return next(apiErrorGenerator(500, 'failed get reports group', e))
     }
 
-    return apiResponser(req, res, 201, result, 'get report group seccess')
+    return apiResponser({req, res, statusCode: 201, result, message: 'get report group seccess'})
 
 }
 
@@ -24,7 +24,7 @@ export const getReports = async (req, res, next) => {
         return next(apiErrorGenerator(500, 'error get reports', e))
     }
 
-    return apiResponser(req, res, 201, result, 'success get reports')
+    return apiResponser({req, res, statusCode: 201, result, message: 'success get reports'})
 }
 
 export const getReportLogs = async (req, res, next) => {
@@ -37,7 +37,7 @@ export const getReportLogs = async (req, res, next) => {
         return next(apiErrorGenerator(500, 'error get reportLog'))
     }
 
-    return apiResponser(req, res, 201, result, 'success get reportLog')
+    return apiResponser({req, res, statusCode: 201, result, message: 'success get reportLog'})
     
 }
 
@@ -50,7 +50,7 @@ export const deleteReportAndCreateLog = async (req, res, next) => {
         return next(apiErrorGenerator(500, 'error delete report and create report log', e))
     }
     
-    return apiResponser(req, res, 201, result, 'success delete and create log')
+    return apiResponser({req, res, statusCode: 201, result, message: 'success delete and create log'})
 }
 
 export const postReport = async (req, res, next) => {
@@ -67,5 +67,11 @@ export const postReport = async (req, res, next) => {
         return next(apiErrorGenerator(500, 'report create Error', e))
     }
 
-    return apiResponser(req, res, 201, reportData, 'success')
+    return apiResponser({
+        req,
+        res, 
+        statusCode: 201, 
+        data: reportData, 
+        message: 'success'
+    })
 }
