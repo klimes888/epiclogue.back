@@ -33,9 +33,9 @@ export const checkWriter = async (req, res, next) => {
   }
 }
 
-export const checkAdmin = (checkPass) => async (req, res, next) => {
+export const checkAdmin = async (req, res, next) => {
     const isAdmin = await userDAO.isAdmin(req.user.id)
-    if (isAdmin || checkPass) {
+    if (isAdmin) {
       return next()
     } 
     return apiResponser(req,res,401,null,'you are not admin!')
