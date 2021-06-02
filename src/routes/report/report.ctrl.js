@@ -10,7 +10,7 @@ export const getReportGroupBy = async (req, res, next) => {
     } catch(e) {
         return next(apiErrorGenerator(500, 'failed get reports group', e))
     }
-
+    console.log(result)
     return apiResponser({req, res, statusCode: 201, result, message: 'get report group seccess'})
 
 }
