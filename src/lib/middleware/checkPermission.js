@@ -39,5 +39,5 @@ export const checkAdmin = async (req, res, next) => {
     if (isAdmin) {
       return next()
     } 
-    return apiResponser(req,res,401,null,'you are not admin!')
+    return apiResponser({req,res,statusCode:401,data:null,message:'you are not admin!'})
   }
