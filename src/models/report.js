@@ -16,17 +16,20 @@ const report = new mongoose.Schema({
   */
   reporterId: { type: ObjectId, ref: 'User' },
   // reportBody is in copyright report only
-  reportBody: {
-    reporterName: { type: String },
-    reportCompany: { type: String },
-    tel: { type: String },
-    reporterEmail: { type: String },
-    reporterCountry: { type: String },
-    originLink: { type: [String] },
-    contentSubject: { type: String },
-    isAgreePolicy: { type: Boolean },
-    isAgreeCorrect: { type: Boolean },
-    signature: {type: String },
+  reportBody: { 
+    type: {
+      reporterName: { type: String },
+      reportCompany: { type: String },
+      tel: { type: String },
+      reporterEmail: { type: String },
+      reporterCountry: { type: String },
+      originLink: { type: [String] },
+      contentSubject: { type: String },
+      isAgreePolicy: { type: Boolean },
+      isAgreeCorrect: { type: Boolean },
+      signature: {type: String },
+    },
+    default: null
   },
   suspectUserId: { type: ObjectId, ref: 'User' },
   contentId: { type: ObjectId, refPath: 'contentType' },
