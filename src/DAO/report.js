@@ -27,8 +27,25 @@ export const getReportGroupBy = function () {
       $lookup:
         {
           from: "users",
-          localField: "_suspectUserId",
-          foreignField: "_id",
+          let: { suspactUserId : "_suspectUserId"},
+          pipeline: [
+            {
+              $match: { 
+                $expr: {
+                  $eq: [
+                    "$_id", "$$suspectUserId"
+                  ]
+                }
+              }
+            },
+            { 
+              $project: {
+                _id: 1, 
+                deactivatedAt: 1, 
+                screenId: 1
+              }
+            }
+          ],
           as: "suspactUserInfo"
         }
     },
