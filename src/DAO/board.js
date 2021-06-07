@@ -1,6 +1,15 @@
 import { Board } from '../models'
 
-export const create = async data => Board.create(data)
+export const create = async data => {
+  let result
+  try {
+    result = await Board.create(data)
+  } catch(e) {
+    throw new Error('error when create board')
+  }
+
+  return result
+}
 
 export const getById = async function (boardId, option) {
   return Board.findOne({ _id: boardId }, option || { __v: 0 })
@@ -172,8 +181,6 @@ export const countByWriterAndCategory = function (userId, category) {
   // 0: Illust, 1: Comic
   return Board.countDocuments({ writer: userId, category })
 }
-
-export const createSec = async boardData => Board.create(boardData)
 
 export const getSecondaryAllow = async boardId =>
   Board.findOne({ _id: boardId }, { allowSecondaryCreation: 1 })
