@@ -24,7 +24,7 @@ export const getReportGroupBy = function (page=0, size=20) {
         }
     },
     {
-      $skip: page
+      $skip: page*size
     },
     {
       $limit: size
