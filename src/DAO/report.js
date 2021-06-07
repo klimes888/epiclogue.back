@@ -5,7 +5,7 @@ export const create = function (data) {
   return Report.create(data)
 }
 
-export const getReportGroupBy = function () {
+export const getReportGroupBy = function (page=0, size=20) {
   return Report.aggregate([
     {
       $match:
@@ -24,10 +24,16 @@ export const getReportGroupBy = function () {
         }
     },
     {
+      $skip: page
+    },
+    {
+      $limit: size
+    },
+    {
       $lookup:
         {
           from: "users",
-          let: { suspactUserId : "_suspectUserId"},
+          let: { suspectUserId : "$_suspectUserId"},
           pipeline: [
             {
               $match: { 
@@ -46,7 +52,7 @@ export const getReportGroupBy = function () {
               }
             }
           ],
-          as: "suspactUserInfo"
+          as: "suspectUserInfo"
         }
     },
     {

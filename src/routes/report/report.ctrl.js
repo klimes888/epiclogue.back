@@ -4,14 +4,16 @@ import { apiResponser } from '../../lib/middleware/apiResponser'
 import { parseIntParam } from '../../lib/parseParams'
 
 export const getReportGroupBy = async (req, res, next) => {
+    const size = await parseIntParam(req.query.size, 20)
+    const page = await parseIntParam(req.query.page, 0)
     let data
     try {
-        data = await reportDAO.getReportGroupBy()
+        data = await reportDAO.getReportGroupBy(page, size)
     } catch(e) {
         return next(apiErrorGenerator(500, 'failed get reports group', e))
     }
 
-    return apiResponser({req, res, statusCode: 201, data, message: 'get report group seccess'})
+    return apiResponser({req, res, statusCode: 201, data, message: 'get report group success'})
 
 }
 
