@@ -21,7 +21,7 @@ export const getReports = async (req, res, next) => {
     const { contentId, contentType, isCopyright } = req.query
     let data
     try {
-        data = await reportDAO.getReports(contentId, contentType, isCopyright)
+        data = await reportDAO.getReports(contentId, contentType, isCopyright == 'true')
     } catch(e) {
         return next(apiErrorGenerator(500, 'error get reports', e))
     }

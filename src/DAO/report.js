@@ -66,7 +66,7 @@ export const getReportGroupBy = function (page=0, size=20) {
 }
 
 export const getReports = function (contentId, contentType, isCopyright) {
-  return Report.find({contentId, contentType, reportBody: { $exists: isCopyright }})
+  return Report.find({contentId, contentType, reportBody: isCopyright ? {$ne: null} : null})
   .populate({
     path: 'reporterId',
     select: '_id screenId nickname profile',
