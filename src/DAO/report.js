@@ -5,12 +5,12 @@ export const create = function (data) {
   return Report.create(data)
 }
 
-export const getReportGroupBy = function (page=0, size=20) {
+export const getReportGroupBy = function (page=0, size=20, isCopyright=false) {
   return Report.aggregate([
     {
       $match:
         {
-          reportBody: { "$exists": false }
+	  reportBody: isCopyright ? { $ne : null } : null
         }
     },
     {

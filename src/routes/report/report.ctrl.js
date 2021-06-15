@@ -6,9 +6,10 @@ import { parseIntParam } from '../../lib/parseParams'
 export const getReportGroupBy = async (req, res, next) => {
     const size = await parseIntParam(req.query.size, 20)
     const page = await parseIntParam(req.query.page, 0)
+    const isCopyright = req.query.isCopyright
     let data
     try {
-        data = await reportDAO.getReportGroupBy(page, size)
+        data = await reportDAO.getReportGroupBy(page, size, isCopyright == 'true')
     } catch(e) {
         return next(apiErrorGenerator(500, 'failed get reports group', e))
     }
