@@ -6,10 +6,10 @@ import { parseIntParam } from '../../lib/parseParams'
 export const getReportGroupBy = async (req, res, next) => {
     const size = await parseIntParam(req.query.size, 20)
     const page = await parseIntParam(req.query.page, 0)
-    const isCopyright = req.query.isCopyright
+    const { isCopyright } = req.query
     let data
     try {
-        data = await reportDAO.getReportGroupBy(page, size, isCopyright == 'true')
+        data = await reportDAO.getReportGroupBy(page, size, isCopyright === 'true')
     } catch(e) {
         return next(apiErrorGenerator(500, 'failed get reports group', e))
     }
@@ -22,7 +22,7 @@ export const getReports = async (req, res, next) => {
     const { contentId, contentType, isCopyright } = req.query
     let data
     try {
-        data = await reportDAO.getReports(contentId, contentType, isCopyright == 'true')
+        data = await reportDAO.getReports(contentId, contentType, isCopyright === 'true')
     } catch(e) {
         return next(apiErrorGenerator(500, 'error get reports', e))
     }
@@ -63,6 +63,30 @@ export const postReport = async (req, res, next) => {
         suspectUserId: req.body.suspectUserId,
         contentId: req.body.contentId,
         contentType: req.body.contentType
+    }
+    try {
+        await reportDAO.create(reportData)
+    } catch(e) {
+        return next(apiErrorGenerator(500, 'report create Error', e))
+    }
+
+    return apiResponser({
+        req,
+        res, 
+        statusCode: 201, 
+        data: reportData, 
+        message: 'success'
+    })
+}
+
+export const postCopyrightReport = async (req, res, next) => {
+    const reportData = {
+        reportType: req.body.reportType,
+        reporterId: req.user.id,
+        suspectUserId: req.body.suspectUserId,
+        contentId: req.body.contentId,
+        contentType: req.body.contentType,
+        reportBody: req.body.reportBody
     }
     try {
         await reportDAO.create(reportData)

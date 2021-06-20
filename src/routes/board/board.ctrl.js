@@ -270,7 +270,7 @@ export const secPost = async (req, res, next) => {
   }
 
   try {
-    const createdBoard = await boardDAO.createSec(boardData)
+    const createdBoard = await boardDAO.create(boardData)
     if (req.user.id !== boardData.originUserId) {
       await notificationDAO.makeNotification({
         targetUserId: req.body.originUserId,

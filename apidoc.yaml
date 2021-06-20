@@ -1625,6 +1625,69 @@ paths:
                 type: number
       security:
         - access_token: []
+  /report/copyright:
+    post:
+      tags:
+        - "report"
+      summary: "post copyright report"
+      description: ""
+      parameters:
+      - name: "Body"
+        in: "body"
+        description: "post data"
+        required: true
+        schema:
+          type: object
+          properties:
+            reportType:
+              type: string
+            suspectUserId:
+              type: string
+            contentId:
+              type: string
+            contentType:
+              type: string
+            reportBody:
+              type: object
+              properties:
+                reporterName:
+                  type: string
+                reportCompany:
+                  type: string
+                tel:
+                  type: string
+                reporterEmail:
+                  type: string
+                reporterCountry:
+                  type: string
+                originLink:
+                  type: array
+                  items:
+                    type: string
+                contentSubject:
+                  type: string
+                isAgreePolicy:
+                  type: boolean
+                isAgreeCorrect:
+                  type: boolean
+                signature:
+                  type: string
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            properties:
+              data:
+                type: object
+              message:
+                type: string
+              result:
+                type: string
+              status:
+                type: number
+      security:
+        - access_token: []
   /report/submittedReports:
     get:
       tags:
@@ -1663,6 +1726,8 @@ paths:
                 type: string
               status:
                 type: number
+      security:
+        - access_token: []
   /report/processedReports:
     get:
       tags:
@@ -1696,12 +1761,14 @@ paths:
                 type: string
               status:
                 type: number
+      security:
+        - access_token: []
 securityDefinitions:
   access_token:
     description: "insert your accessToken in login response."
     type: apiKey
-    name: "x-access-token"
-    in: "header"
+    name: "access-token"
+    in: "cookie"
 definitions:
   board_thumb:
     type: "object"

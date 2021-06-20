@@ -9,6 +9,7 @@ report.get('/', authToken, checkAdmin, reportCtrl.getReportGroupBy)
 report.get('/processedReports', authToken, checkAdmin, reportCtrl.getReportLogs)
 report.get('/submittedReports', authToken, checkAdmin, reportCtrl.getReports)
 report.post('/', authToken, reportCtrl.postReport)
+report.post('/copyright', authToken, reportCtrl.postCopyrightReport)
 report.delete('/', authToken, reportCtrl.deleteReportAndCreateLog)
 
 export default report
