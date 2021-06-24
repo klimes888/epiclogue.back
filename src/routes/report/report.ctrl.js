@@ -80,6 +80,7 @@ export const postReport = async (req, res, next) => {
 }
 
 export const postCopyrightReport = async (req, res, next) => {
+    console.log(req.body.reportBody)
     const reportData = {
         reportType: req.body.reportType,
         reporterId: req.user.id,
