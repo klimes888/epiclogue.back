@@ -4,7 +4,7 @@ import request from 'supertest'
 import { describe, test } from '@jest/globals'
 
 import { User } from '../../../src/models'
-import app from '../../../app'
+import app from '../../../src/app'
 
 dotenv.config()
 

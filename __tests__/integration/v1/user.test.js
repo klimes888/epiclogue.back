@@ -7,7 +7,7 @@ import path from 'path'
 import { describe, expect, test } from '@jest/globals'
 
 import { User } from '../../../src/models'
-import app from '../../../app'
+import app from '../../../src/app'
 
 dotenv.config()
 
