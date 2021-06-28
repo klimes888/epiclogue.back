@@ -4,7 +4,7 @@ export const create = async data => {
   let result
   try {
     result = await Board.create(data)
-  } catch(e) {
+  } catch (e) {
     throw new Error('error when create board')
   }
 
@@ -56,10 +56,10 @@ export const deleteBoard = function (buid) {
 /* 글 전체 조회 */
 export const findAll = function (writer, latestId, size) {
   const query = {
-    writer
+    writer,
   }
-  if(latestId) {
-    query._id = {$lt : latestId}
+  if (latestId) {
+    query._id = { $lt: latestId }
   }
   return Board.find(query, {
     _id: 1,
@@ -72,8 +72,8 @@ export const findAll = function (writer, latestId, size) {
     thumbnail: 1,
     originUserId: 1,
   })
-  .sort({ writeDate: -1 })
-  .limit(size)
+    .sort({ writeDate: -1 })
+    .limit(size)
     .populate({
       path: 'writer',
       // match: { deactivatedAt: { $type: 10 } }, // BSON type: 10 is null value.
@@ -114,31 +114,28 @@ export const getFeed = function (requestType, latestId, size) {
 }
 
 export const findAllOriginOrSecondary = function (userId, isExists, latestId, size) {
-  const query = { 
-    writer: userId, 
-    originUserId: { $exists: isExists }
+  const query = {
+    writer: userId,
+    originUserId: { $exists: isExists },
   }
-  if(latestId) {
-    query._id = { $lt : latestId }
+  if (latestId) {
+    query._id = { $lt: latestId }
   }
-  return Board.find(
-    query,
-    {
-      _id: 1,
-      writer: 1,
-      boardTitle: 1,
-      uid: 1,
-      pub: 1,
-      category: 1,
-      thumbnail: 1,
-    }
-  )
-  .sort({ writeDate: -1 })
-  .limit(size)
-  .populate({
-    path: 'writer',
-    select: '_id screenId nickname profile',
+  return Board.find(query, {
+    _id: 1,
+    writer: 1,
+    boardTitle: 1,
+    uid: 1,
+    pub: 1,
+    category: 1,
+    thumbnail: 1,
   })
+    .sort({ writeDate: -1 })
+    .limit(size)
+    .populate({
+      path: 'writer',
+      select: '_id screenId nickname profile',
+    })
 }
 
 export const getTitlesByQuery = function (query) {
@@ -158,7 +155,7 @@ export const searchByTitleOrTag = function (query, size = 35, latestId, category
   if (latestId) {
     option._id = { $lt: latestId }
   }
-  if(category) {
+  if (category) {
     option.category = category === 'Comic' ? 1 : 0
   }
   return Board.find(option, {

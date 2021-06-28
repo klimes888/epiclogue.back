@@ -34,10 +34,10 @@ export const checkWriter = async (req, res, next) => {
 }
 
 export const checkAdmin = async (req, res, next) => {
-    const isAdmin = await userDAO.isAdmin(req.user.id)
-    console.log(req.user.id, isAdmin)
-    if (isAdmin) {
-      return next()
-    } 
-    return apiResponser({req,res,statusCode:401,data:null,message:'you are not admin!'})
+  const isAdmin = await userDAO.isAdmin(req.user.id)
+  console.log(req.user.id, isAdmin)
+  if (isAdmin) {
+    return next()
   }
+  return apiResponser({ req, res, statusCode: 401, data: null, message: 'you are not admin!' })
+}

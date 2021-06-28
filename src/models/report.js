@@ -16,7 +16,7 @@ const report = new mongoose.Schema({
   */
   reporterId: { type: ObjectId, ref: 'User' },
   // reportBody is in copyright report only
-  reportBody: { 
+  reportBody: {
     type: {
       reporterName: { type: String },
       reportCompany: { type: String },
@@ -27,9 +27,9 @@ const report = new mongoose.Schema({
       contentSubject: { type: String },
       isAgreePolicy: { type: Boolean },
       isAgreeCorrect: { type: Boolean },
-      signature: {type: String },
+      signature: { type: String },
     },
-    default: null
+    default: null,
   },
   suspectUserId: { type: ObjectId, ref: 'User' },
   contentId: { type: ObjectId, refPath: 'contentType' },
