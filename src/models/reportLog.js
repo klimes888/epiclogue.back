@@ -7,8 +7,9 @@ const reportLog = new mongoose.Schema({
     contentId: { type: ObjectId, refPath: 'contentType' },
     contentType: { type: String, enum: ['Board', 'Feedback', 'Reply']},
     reportType: { type: Number },
-    reportStatus: { type: Number }, // 0: accepted, 1: rejected
-    contentStatus: { type: Number }, // 0: public, 1: private, 2: deleted
+    reportStatus: { type: Number }, // 0: delete, 1: stop, 2: unsign, 3: reject
+    contentStatus: { type: Number }, // 0: delete, 1: private, 2: public
+    isCopyright: { type: Boolean },
     closedAt: { type: Date, default: Date.now},
     closedBy: { type: ObjectId, default: null, ref: 'User' }
 })

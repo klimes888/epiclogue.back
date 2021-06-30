@@ -29,6 +29,7 @@ export const makeNotification = async ({
   targetType,
   targetInfo,
   highlightId,
+  message,
 }) => {
   try {
     await Notification.create({
@@ -38,6 +39,7 @@ export const makeNotification = async ({
       targetType,
       targetInfo,
       highlightId,
+      message
     })
   } catch (e) {
     throw new Error(`알림 생성중 오류가 발생했습니다. 사유: ${e}`)

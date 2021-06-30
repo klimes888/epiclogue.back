@@ -37,7 +37,7 @@ export const postFeedback = async (req, res, next) => {
       feedbackData
     )
     /* 자신에게는 알림을 보내지 않음 */
-    if (res.locals.uid !== targetData.writer.toString()) {
+    if (req.user.id !== targetData.writer.toString()) {
       await notificationDAO.makeNotification({
         targetUserId: targetData.writer,
         maker: req.user.id,
@@ -48,7 +48,7 @@ export const postFeedback = async (req, res, next) => {
     }
 
     const wrappedFeedbacks = await contentsWrapper(
-      res.locals.uid,
+      req.user.id,
       newerFeedbacks,
       'Feedback',
       false
@@ -89,7 +89,7 @@ export const editFeedback = async (req, res, next) => {
   try {
     const newerFeedbacks = await feedbackDAO.updateAndGetNewList(req.params.boardId, newForm)
     const wrappedFeedbacks = await contentsWrapper(
-      res.locals.uid,
+      req.user.id,
       newerFeedbacks,
       'Feedback',
       false
@@ -116,7 +116,7 @@ export const deleteFeedback = async (req, res, next) => {
       req.params.boardId
     )
     const wrappedFeedbacks = await contentsWrapper(
-      res.locals.uid,
+      req.user.id,
       newerFeedbacks,
       'Feedback',
       false

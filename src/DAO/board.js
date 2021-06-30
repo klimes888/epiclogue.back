@@ -84,6 +84,7 @@ export const findAll = function (writer, latestId, size) {
 export const getFeed = function (requestType, latestId, size) {
   const query = {
     pub: 1,
+    isBlind: false
   }
   // 특정 카테고리만 요청할 경우
   if (requestType) {
@@ -116,7 +117,7 @@ export const getFeed = function (requestType, latestId, size) {
 export const findAllOriginOrSecondary = function (userId, isExists, latestId, size) {
   const query = { 
     writer: userId, 
-    originUserId: { $exists: isExists }
+    originUserId: { $exists: isExists },
   }
   if(latestId) {
     query._id = { $lt : latestId }
@@ -143,7 +144,11 @@ export const findAllOriginOrSecondary = function (userId, isExists, latestId, si
 
 export const getTitlesByQuery = function (query) {
   return Board.find(
-    { boardTitle: { $regex: query } },
+    { 
+      boardTitle: { $regex: query },
+      pub: 1,
+      isBlind: false
+    },
     {
       boardTitle: 1,
     }
@@ -154,6 +159,7 @@ export const searchByTitleOrTag = function (query, size = 35, latestId, category
   const option = {
     $or: [{ boardTitle: { $regex: query } }, { tags: query }],
     pub: 1,
+    isBlind: false
   }
   if (latestId) {
     option._id = { $lt: latestId }
@@ -184,3 +190,7 @@ export const countByWriterAndCategory = function (userId, category) {
 
 export const getSecondaryAllow = async boardId =>
   Board.findOne({ _id: boardId }, { allowSecondaryCreation: 1 })
+
+export const setBlind = async boardId => Board.updateOne({ _id: boardId }, { $set: { isBlind: true } })
+
+export const unsetBlind = async boardId => Board.updateOne({ _id: boardId }, { $set: { isBlind: false } })

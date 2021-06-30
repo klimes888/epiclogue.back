@@ -28,6 +28,7 @@ const notification = new mongoose.Schema({
     required: true,
     enum: ['Board', 'Feedback', 'Reply', 'User'],
   },
+  message: { type: String, default: null },
   targetInfo: { type: ObjectId, required: true, refPath: 'targetType' },
   highlightId: { type: ObjectId },
   createdAt: { type: Date, default: Date.now },
