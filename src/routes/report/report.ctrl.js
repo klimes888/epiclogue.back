@@ -45,12 +45,12 @@ export const getReportLogs = async (req, res, next) => {
 }
 
 export const deleteReportAndCreateLog = async (req, res, next) => {
-    const { contentId, contentType, reportType, reportStatus, suspectUserId } = req.body
+    const { contentId, contentType, reportType, reportStatus, suspectUserId, isCopyright } = req.body
     const parsedReportStatus = await parseIntParam(reportStatus, 3)
     let data
     try {
         const result = await processReport(contentId, contentType, parsedReportStatus, suspectUserId)
-        data = await reportDAO.deleteProcessedReport(contentId, contentType, reportType, parsedReportStatus, result.contentStatus)
+        data = await reportDAO.deleteProcessedReport(contentId, contentType, reportType, parsedReportStatus, result.contentStatus, isCopyright)
             await notificationDAO.makeNotification({
               targetUserId: suspectUserId,
               maker: req.user.id,

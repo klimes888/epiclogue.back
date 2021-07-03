@@ -1624,7 +1624,7 @@ paths:
           type: object
           properties:
             reportType:
-              type: string
+              type: number
             reportStatus:
               type: number
             suspectUserId:
@@ -1771,6 +1771,12 @@ paths:
         required: false
         type: number
         example: 0
+      - name: "isCopyright"
+        in: "query"
+        description: "get isCopyright"
+        required: true
+        type: boolean
+        example: false
       responses:
         200:
           description: OK
