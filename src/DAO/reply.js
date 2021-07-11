@@ -89,6 +89,12 @@ export const isWriter = function (userId, replyId) {
   return Reply.findOne({ _id: replyId, writer: userId })
 }
 
-export const setBlind = async replyId => Reply.findByIdAndUpdate(replyId, { $set: { isBlind: true } })
+export const setBlind = async replyId => {
+  const data = await Reply.findByIdAndUpdate(replyId, { $set: { isBlind: true } })
+  return data.replyBody
+}
 
-export const unsetBlind = async replyId => Reply.findByIdAndUpdate(replyId, { $set: { isBlind: false } })
+export const unsetBlind = async replyId => {
+  const data = await Reply.findByIdAndUpdate(replyId, { $set: { isBlind: false } })
+  return data.replyBody
+}

@@ -49,7 +49,7 @@ export const update = function (articleData) {
   )
 }
 
-export const deleteBoard = function (buid) {
+export const deleteBoard = async function (buid) {
   const data = Board.findByIdAndDelete(buid)
   return data.boardTitle
 }
@@ -192,6 +192,12 @@ export const countByWriterAndCategory = function (userId, category) {
 export const getSecondaryAllow = async boardId =>
   Board.findOne({ _id: boardId }, { allowSecondaryCreation: 1 })
 
-export const setBlind = async boardId => Board.findByIdAndUpdate(boardId, { $set: { isBlind: true } })
+export const setBlind = async boardId => {
+  const data = await Board.findByIdAndUpdate(boardId, { $set: { isBlind: true } })
+  return data.boardTitle
+}
 
-export const unsetBlind = async boardId => Board.findByIdAndUpdate(boardId, { $set: { isBlind: false } })
+export const unsetBlind = async boardId => {
+  const data = await Board.findByIdAndUpdate(boardId, { $set: { isBlind: false } })
+  return data.boardTitle
+}

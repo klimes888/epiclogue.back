@@ -1,3 +1,4 @@
+import { json } from 'express'
 import { reportDAO, userDAO, boardDAO, replyDAO, feedbackDAO, notificationDAO } from '../../DAO'
 import { apiErrorGenerator } from '../../lib/apiErrorGenerator'
 import { apiResponser } from '../../lib/middleware/apiResponser'
@@ -51,6 +52,7 @@ export const deleteReportAndCreateLog = async (req, res, next) => {
     try {
         const result = await processReport(contentId, contentType, parsedReportStatus, suspectUserId)
         result.reportType = reportType
+        console.log(result)
         data = await reportDAO.deleteProcessedReport(contentId, contentType, reportType, parsedReportStatus, result.contentStatus, isCopyright)
             await notificationDAO.makeNotification({
               targetUserId: suspectUserId,
@@ -58,7 +60,7 @@ export const deleteReportAndCreateLog = async (req, res, next) => {
               notificationType: 'Notice',
               targetType: contentType,
               targetInfo: contentId,
-              message: result
+              message: json.toString(result)
             })
     } catch(e) {
         return next(apiErrorGenerator(500, 'error when delete report and create report log', e))

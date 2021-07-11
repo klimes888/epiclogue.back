@@ -105,6 +105,12 @@ export const getById = function (feedbackId, option) {
 
 export const getWriter = async feedbackId => Feedback.findOne({ _id: feedbackId }, { writer: 1 })
 
-export const setBlind = async feedbackId => Feedback.findByIdAndUpdate(feedbackId, { $set: { isBlind: true } })
+export const setBlind = async feedbackId => {
+  const data = await Feedback.findByIdAndUpdate(feedbackId, { $set: { isBlind: true } })
+  return data.feedbackBody
+}
 
-export const unsetBlind = async feedbackId => Feedback.findByIdAndUpdate(feedbackId, { $set: { isBlind: false } })
+export const unsetBlind = async feedbackId => {
+  const data = await Feedback.findByIdAndUpdate(feedbackId, { $set: { isBlind: false } })
+  return data.feedbackBody
+}
