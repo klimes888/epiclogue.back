@@ -50,7 +50,8 @@ export const update = function (articleData) {
 }
 
 export const deleteBoard = function (buid) {
-  return Board.deleteOne({ _id: buid })
+  const data = Board.findByIdAndDelete(buid)
+  return data.boardTitle
 }
 
 /* 글 전체 조회 */
@@ -191,6 +192,6 @@ export const countByWriterAndCategory = function (userId, category) {
 export const getSecondaryAllow = async boardId =>
   Board.findOne({ _id: boardId }, { allowSecondaryCreation: 1 })
 
-export const setBlind = async boardId => Board.updateOne({ _id: boardId }, { $set: { isBlind: true } })
+export const setBlind = async boardId => Board.findByIdAndUpdate(boardId, { $set: { isBlind: true } })
 
-export const unsetBlind = async boardId => Board.updateOne({ _id: boardId }, { $set: { isBlind: false } })
+export const unsetBlind = async boardId => Board.findByIdAndUpdate(boardId, { $set: { isBlind: false } })

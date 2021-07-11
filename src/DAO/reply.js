@@ -70,7 +70,10 @@ export const deleteByParentId = function (parentId) {
   return Reply.deleteMany({ parentId })
 }
 
-export const deleteById = async replyId => Reply.deleteOne({ _id: replyId })
+export const deleteById = async replyId => {
+  const data = Reply.findByIdAndDelete(replyId)
+  return data.replyBody
+}
 
 export const getById = function (replyId, option) {
   return Reply.findOne({ _id: replyId }, option)
@@ -86,6 +89,6 @@ export const isWriter = function (userId, replyId) {
   return Reply.findOne({ _id: replyId, writer: userId })
 }
 
-export const setBlind = async replyId => Reply.updateOne({ _id: replyId }, { $set: { isBlind: true } })
+export const setBlind = async replyId => Reply.findByIdAndUpdate(replyId, { $set: { isBlind: true } })
 
-export const unsetBlind = async replyId => Reply.updateOne({ _id: replyId }, { $set: { isBlind: false } })
+export const unsetBlind = async replyId => Reply.findByIdAndUpdate(replyId, { $set: { isBlind: false } })

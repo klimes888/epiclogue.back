@@ -50,6 +50,7 @@ export const deleteReportAndCreateLog = async (req, res, next) => {
     let data
     try {
         const result = await processReport(contentId, contentType, parsedReportStatus, suspectUserId)
+        result.reportType = reportType
         data = await reportDAO.deleteProcessedReport(contentId, contentType, reportType, parsedReportStatus, result.contentStatus, isCopyright)
             await notificationDAO.makeNotification({
               targetUserId: suspectUserId,
@@ -57,7 +58,7 @@ export const deleteReportAndCreateLog = async (req, res, next) => {
               notificationType: 'Notice',
               targetType: contentType,
               targetInfo: contentId,
-              message: result.message
+              message: result
             })
     } catch(e) {
         return next(apiErrorGenerator(500, 'error when delete report and create report log', e))
@@ -131,9 +132,11 @@ const processReport = async (contentId, contentType, reportStatus, suspectUserId
                     result.data = await replyDAO.deleteById(contentId)
                     break
                 default:
+                    result.data = 'content type is incorrect'
                     break
             }
-            result.message = '컨텐츠 삭제처리 됨'
+            console.log(result.data)
+            result.message =  `컨텐츠 ${result.data} 삭제처리 됨`
             result.contentStatus = 0
         } else if (reportStatus === 1 || reportStatus === 2) {
             switch (contentType) {
@@ -150,7 +153,7 @@ const processReport = async (contentId, contentType, reportStatus, suspectUserId
                     break
             }
             result.userData = reportStatus === 1 ? await userDAO.deactiveUser(suspectUserId) : await userDAO.deleteUser(suspectUserId)
-            result.message = `회원 ${reportStatus === 1 ? '정지' : '탈퇴'}처리 및 컨텐츠 비공개처리 완료`
+            result.message = `회원 ${reportStatus === 1 ? '정지' : '탈퇴'}처리 및 컨텐츠 ${result.data} 비공개처리 완료`
             result.contentStatus = 1
         } else {
             result.data = null

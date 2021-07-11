@@ -91,7 +91,10 @@ export const deleteByBoardId = function (boardId) {
   return Feedback.deleteMany({ boardId })
 }
 
-export const deleteById = async feedbackId => Feedback.deleteOne({ _id: feedbackId })
+export const deleteById = async feedbackId => {
+  const data = Feedback.findByIdAndDelete(feedbackId)
+  return data.feedbackBody
+}
 
 export const getById = function (feedbackId, option) {
   return Feedback.findOne({ _id: feedbackId }, option).populate({
@@ -102,6 +105,6 @@ export const getById = function (feedbackId, option) {
 
 export const getWriter = async feedbackId => Feedback.findOne({ _id: feedbackId }, { writer: 1 })
 
-export const setBlind = async feedbackId => Feedback.updateOne({ _id: feedbackId }, { $set: { isBlind: true } })
+export const setBlind = async feedbackId => Feedback.findByIdAndUpdate(feedbackId, { $set: { isBlind: true } })
 
-export const unsetBlind = async feedbackId => Feedback.updateOne({ _id: feedbackId }, { $set: { isBlind: false } })
+export const unsetBlind = async feedbackId => Feedback.findByIdAndUpdate(feedbackId, { $set: { isBlind: false } })
