@@ -1,4 +1,3 @@
-import { json } from 'express'
 import { reportDAO, userDAO, boardDAO, replyDAO, feedbackDAO, notificationDAO } from '../../DAO'
 import { apiErrorGenerator } from '../../lib/apiErrorGenerator'
 import { apiResponser } from '../../lib/middleware/apiResponser'
@@ -60,7 +59,7 @@ export const deleteReportAndCreateLog = async (req, res, next) => {
               notificationType: 'Notice',
               targetType: contentType,
               targetInfo: contentId,
-              message: json.toString(result)
+              message: result
             })
     } catch(e) {
         return next(apiErrorGenerator(500, 'error when delete report and create report log', e))
@@ -121,41 +120,44 @@ const processReport = async (contentId, contentType, reportStatus, suspectUserId
     const result = {
         status: reportStatus
     }
+    let data = ''
     try {
         if (reportStatus === 0) {
             switch (contentType) {
                 case 'Board':
-                    result.data = await boardDAO.deleteBoard(contentId)
+                    data = await boardDAO.deleteBoard(contentId)
                     break
                 case 'Feedback':
-                    result.data = await feedbackDAO.deleteById(contentId)
+                    data = await feedbackDAO.deleteById(contentId)
                     break
                 case 'Reply':
-                    result.data = await replyDAO.deleteById(contentId)
+                    data = await replyDAO.deleteById(contentId)
                     break
                 default:
-                    result.data = 'content type is incorrect'
+                    data = 'content type is incorrect'
                     break
             }
-            console.log(result.data)
-            result.message =  `컨텐츠 ${result.data} 삭제처리 됨`
+            console.log(data)
+            result.data = data
+            result.message =  `컨텐츠 ${data} 삭제처리 됨`
             result.contentStatus = 0
         } else if (reportStatus === 1 || reportStatus === 2) {
             switch (contentType) {
                 case 'Board':
-                    result.data = await boardDAO.setBlind(contentId)
+                    data = await boardDAO.setBlind(contentId)
                     break
                 case 'Feedback':
-                    result.data = await feedbackDAO.setBlind(contentId)
+                    data = await feedbackDAO.setBlind(contentId)
                     break
                 case 'Reply':
-                    result.data = await replyDAO.setBlind(contentId)
+                    data = await replyDAO.setBlind(contentId)
                     break
                 default:
                     break
             }
+            result.data = data
             result.userData = reportStatus === 1 ? await userDAO.deactiveUser(suspectUserId) : await userDAO.deleteUser(suspectUserId)
-            result.message = `회원 ${reportStatus === 1 ? '정지' : '탈퇴'}처리 및 컨텐츠 ${result.data} 비공개처리 완료`
+            result.message = `회원 ${reportStatus === 1 ? '정지' : '탈퇴'}처리 및 컨텐츠 ${data} 비공개처리 완료`
             result.contentStatus = 1
         } else {
             result.data = null
