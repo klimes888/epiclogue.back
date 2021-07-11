@@ -1,4 +1,4 @@
-import { reportDAO, userDAO, boardDAO, replyDAO, feedbackDAO, notificationDAO } from '../../DAO'
+import { reportDAO, boardDAO, replyDAO, feedbackDAO, notificationDAO } from '../../DAO'
 import { apiErrorGenerator } from '../../lib/apiErrorGenerator'
 import { apiResponser } from '../../lib/middleware/apiResponser'
 import { parseIntParam } from '../../lib/parseParams'
@@ -49,7 +49,7 @@ export const deleteReportAndCreateLog = async (req, res, next) => {
     const parsedReportStatus = await parseIntParam(reportStatus, 3)
     let data
     try {
-        const result = await processReport(contentId, contentType, parsedReportStatus, suspectUserId)
+        const result = await processReport(contentId, contentType, parsedReportStatus)
         result.reportType = reportType
         console.log(result)
         data = await reportDAO.deleteProcessedReport(contentId, contentType, reportType, parsedReportStatus, result.contentStatus, isCopyright)
@@ -116,7 +116,7 @@ export const postCopyrightReport = async (req, res, next) => {
     })
 }
 
-const processReport = async (contentId, contentType, reportStatus, suspectUserId) => {
+const processReport = async (contentId, contentType, reportStatus) => {
     const result = {
         status: reportStatus
     }
@@ -156,7 +156,6 @@ const processReport = async (contentId, contentType, reportStatus, suspectUserId
                     break
             }
             result.data = data
-            result.userData = reportStatus === 1 ? await userDAO.deactiveUser(suspectUserId) : await userDAO.deleteUser(suspectUserId)
             result.message = `회원 ${reportStatus === 1 ? '정지' : '탈퇴'}처리 및 컨텐츠 ${data} 비공개처리 완료`
             result.contentStatus = 1
         } else {
