@@ -71,7 +71,7 @@ export const deleteByParentId = function (parentId) {
 }
 
 export const deleteById = async replyId => {
-  const data = Reply.findByIdAndDelete(replyId)
+  const data = await Reply.findByIdAndDelete(replyId)
   return data.replyBody
 }
 

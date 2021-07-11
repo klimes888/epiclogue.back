@@ -50,7 +50,7 @@ export const update = function (articleData) {
 }
 
 export const deleteBoard = async function (buid) {
-  const data = Board.findByIdAndDelete(buid)
+  const data = await Board.findByIdAndDelete(buid)
   return data.boardTitle
 }
 

@@ -92,7 +92,7 @@ export const deleteByBoardId = function (boardId) {
 }
 
 export const deleteById = async feedbackId => {
-  const data = Feedback.findByIdAndDelete(feedbackId)
+  const data = await Feedback.findByIdAndDelete(feedbackId)
   return data.feedbackBody
 }
 
