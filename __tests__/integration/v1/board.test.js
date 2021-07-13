@@ -5,9 +5,10 @@ import randomString from 'random-string'
 import path from 'path'
 import { describe, test } from '@jest/globals'
 
-import { User } from '../../../src/models'
+import { confirmUser } from '../../../src/DAO/user'
 
 import app from '../../../src/app'
+import { getAccessTokenFromCookie } from '../../configs/cookieParser'
 
 dotenv.config()
 
@@ -51,16 +52,16 @@ describe('글 테스트', () => {
   // eslint-disable-next-line no-undef
   beforeAll(async () => {
     await request(app).post('/auth/join').send(writerData)
-    await User.confirmUser(writerData.email)
+    await confirmUser(writerData.email)
     const writerLoginResponse = await request(app).post('/auth/login').send(writerData)
-    userToken = writerLoginResponse.body.token
+    userToken = getAccessTokenFromCookie(writerLoginResponse.headers['set-cookie'])
   })
 
   describe('글 쓰기', () => {
     test('성공 | 201', async () => {
       const uploadInstance = request(app)
         .post('/boards')
-        .set('x-access-token', userToken)
+        .set('Cookie', `access_token=${userToken}`)
         .field('boardTitle', boardData.boardTitle)
         .field('boardBody', boardData.boardBody)
         .field('category', boardData.category)
@@ -78,7 +79,7 @@ describe('글 테스트', () => {
     test('실패: 이미지 누락 | 400', async () => {
       await request(app)
         .post('/boards')
-        .set('x-access-token', userToken)
+        .set('Cookie', `access_token=${userToken}`)
         .field('boardTitle', boardData.boardTitle)
         .field('boardBody', boardData.boardBody)
         .field('category', boardData.category)
@@ -92,7 +93,7 @@ describe('글 테스트', () => {
     test('실패: 필수 속성 누락 | 400', async () => {
       const uploadInstance = request(app)
         .post('/boards')
-        .set('x-access-token', userToken)
+        .set('Cookie', `access_token=${userToken}`)
         .field('boardTitle', boardData.boardTitle)
         .field('boardBody', boardData.boardBody)
         // .field('category', boardData.category)
@@ -107,7 +108,7 @@ describe('글 테스트', () => {
 
   describe('글 읽기', () => {
     test('성공 | 200', async () => {
-      await request(app).get(`/boards/${testBoardId}`).set('x-access-token', userToken).expect(200)
+      await request(app).get(`/boards/${testBoardId}`).set('Cookie', `access_token=${userToken}`).expect(200)
     })
 
     test('비회원 유저 접근 성공 | 200', async () => {
@@ -117,7 +118,7 @@ describe('글 테스트', () => {
     test('실패: 존재하지 않는 글 | 404', async () => {
       await request(app)
         .get(`/boards/${invalidBoardId}`)
-        .set('x-access-token', userToken)
+        .set('Cookie', `access_token=${userToken}`)
         .expect(404)
     })
   })
@@ -126,14 +127,14 @@ describe('글 테스트', () => {
     test('성공: 이전 정보 불러오기 | 200', async () => {
       await request(app)
         .get(`/boards/${testBoardId}/edit`)
-        .set('x-access-token', userToken)
+        .set('Cookie', `access_token=${userToken}`)
         .expect(200)
     })
 
     test('성공: 정상적인 수정 | 200', async () => {
       const uploadInstance = request(app)
         .post(`/boards/${testBoardId}/edit`)
-        .set('x-access-token', userToken)
+        .set('Cookie', `access_token=${userToken}`)
         .field('boardTitle', 'edited')
         .field('boardBody', 'edited')
         .field('category', 1)
@@ -148,7 +149,7 @@ describe('글 테스트', () => {
     test('실패: 존재하지 않는 boardId | 200', async () => {
       const uploadInstance = request(app)
         .post(`/boards/${invalidBoardId}/edit`)
-        .set('x-access-token', userToken)
+        .set('Cookie', `access_token=${userToken}`)
         .field('boardTitle', 'edited')
         .field('boardBody', 'edited')
         .field('category', 1)
@@ -165,18 +166,18 @@ describe('글 테스트', () => {
     test('성공 | 200', async () => {
       await request(app)
         .delete(`/boards/${testBoardId}`)
-        .set('x-access-token', userToken)
+        .set('Cookie', `access_token=${userToken}`)
         .expect(200)
     })
 
     test('실패: 올바르지 않은 boardId | 400', async () => {
-      await request(app).delete(`/boards/123`).set('x-access-token', userToken).expect(400)
+      await request(app).delete(`/boards/123`).set('Cookie', `access_token=${userToken}`).expect(400)
     })
 
     test('실패: 존재하지 않는 boardId | 400', async () => {
       await request(app)
         .delete(`/boards/${invalidBoardId}`)
-        .set('x-access-token', userToken)
+        .set('Cookie', `access_token=${userToken}`)
         .expect(404)
     })
   })

@@ -16,8 +16,8 @@ module.exports = {
     "./__tests__/middlewares/v1/token.test.js",
 
     /* integration */
-    // "./__tests__/integration/v1/user.test.js",
-    "./__tests__/integration/v1/board.test.js",
+    "./__tests__/integration/v1/user.test.js",
+    // "./__tests__/integration/v1/board.test.js",
     "./__tests__/integration/v1/feedback.test.js",
     "./__tests__/integration/v1/reply.test.js",
 
