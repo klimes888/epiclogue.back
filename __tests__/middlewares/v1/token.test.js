@@ -3,7 +3,7 @@ import request from 'supertest'
 import jwt from 'jsonwebtoken'
 import { describe, expect, test } from '@jest/globals'
 
-import { cookieParser } from '../../configs/cookieParser'
+import { getAccessTokenFromCookie } from '../../configs/cookieParser'
 import { confirmUser } from '../../../src/DAO/user'
 import app from '../../../src/app'
 
@@ -39,9 +39,8 @@ describe('토큰 테스트', () => {
     
     // 로그인 시도 후 액세스 토큰 취득
     const loginResponse = await request(app).post('/auth/login').send(verifiedUserData)
-    const cookies = cookieParser(loginResponse.headers['set-cookie'])
 
-    userToken = cookies[0].access_token
+    userToken = getAccessTokenFromCookie(loginResponse.headers['set-cookie'])
     screenId = loginResponse.body.data.screenId
 
     console.warn(`[Test] Testing token.test.js with userToken: ${userToken} and screenId: ${screenId}`)
@@ -49,22 +48,21 @@ describe('토큰 테스트', () => {
 
   describe('토큰 검사', () => {
     test('성공 | 200', async () => {
-      const tokenTestRequest = await request(app)
+      await request(app)
         .get(`/interaction/bookmark?screenId=${screenId}`)
         .set('Cookie', `access_token=${userToken}`)
-
-      expect(tokenTestRequest.statusCode).toEqual(200)
+        .expect(200)
     })
 
     test('실패: 인증 토큰 누락 | 401', async () => {
       await request(app).get(`/interaction/bookmark?screenId=${screenId}`).expect(401)
     })
 
-    test('실패: 손상된 인증 토큰 | 401', async () => {
+    test('실패: 손상된 인증 토큰 | 400', async () => {
       await request(app)
         .get(`/interaction/bookmark?screenId=${screenId}`)
-        .set('Cookie', `access_token=${userToken}`)
-        .expect(401)
+        .set('Cookie', `access_token=${userToken.slice(0, 60)}`)
+        .expect(400)
     })
   })
 
@@ -82,7 +80,7 @@ describe('토큰 테스트', () => {
         userPw: userData.userPw,
       })
 
-      const decodedJWT = jwt.verify(cookieParser(res.headers['set-cookie'])[0].access_token, process.env.SECRET_KEY)
+      const decodedJWT = jwt.verify(getAccessTokenFromCookie(res.headers['set-cookie']), process.env.SECRET_KEY)
 
       expect(decodedJWT.isConfirmed).toBeFalsy()
     })

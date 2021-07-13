@@ -62,7 +62,7 @@ export const getUserInfoByScreenId = function (screenId, option) {
   return User.findOne({ screenId }, option)
 }
 
-export const deleteUser = function (userId, userpw) {
+export const deleteUser = async function (userId, userpw) {
   return User.updateOne({ _id: userId, password: userpw }, { deactivatedAt: Date.now() })
 }
 
