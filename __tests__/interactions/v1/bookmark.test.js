@@ -5,8 +5,9 @@ import fs from 'fs'
 import path from 'path'
 import { describe, expect, test } from '@jest/globals'
 
-import { User } from '../../../src/models'
+import { confirmUser, isExist } from '../../../src/DAO/user'
 import app from '../../../src/app'
+import { getAccessTokenFromCookie } from '../../configs/cookieParser'
 
 dotenv.config()
 
@@ -38,6 +39,7 @@ describe('북마크 테스트', () => {
   fs.readdir(imgPath, (err, files) => {
     if (err) {
       console.error(err)
+      process.exit(1)
     }
     files.forEach(name => {
       imagePathArray.push(`${imgPath}/${name}`)
@@ -47,12 +49,12 @@ describe('북마크 테스트', () => {
   // eslint-disable-next-line no-undef
   beforeAll(async () => {
     await request(app).post('/auth/join').send(userData)
-    await User.confirmUser(userData.email)
+    await confirmUser(userData.email)
     const verifiedLoginReponse = await request(app).post('/auth/login').send(userData)
-    const rawUserData = await User.isExist(userData.email)
+    const rawUserData = await isExist(userData.email)
 
     screenId = rawUserData.screenId
-    userToken = verifiedLoginReponse.body.token
+    userToken = getAccessTokenFromCookie(verifiedLoginReponse.headers['set-cookie'])
   })
 
   describe('북마크 테스트', () => {
@@ -60,7 +62,7 @@ describe('북마크 테스트', () => {
       test('글 작성 | 201', async () => {
         const uploadInstance = await request(app)
           .post('/boards')
-          .set('x-access-token', userToken)
+          .set('Cookie', `access_token=${userToken}`)
           .field('boardTitle', boardData.boardTitle)
           .field('boardBody', boardData.boardBody)
           .field('category', boardData.category)
@@ -80,12 +82,12 @@ describe('북마크 테스트', () => {
         await request(app)
           .post(`/interaction/bookmark`)
           .send({ boardId: testBoardId })
-          .set('x-access-token', userToken)
+          .set('Cookie', `access_token=${userToken}`)
           .expect(201)
 
         const response = await request(app)
           .get(`/interaction/bookmark?screenId=${screenId}`)
-          .set('x-access-token', userToken)
+          .set('Cookie', `access_token=${userToken}`)
 
         expect(response.statusCode).toBe(200)
         expect(response.body.data.length).toBe(1)
@@ -97,12 +99,12 @@ describe('북마크 테스트', () => {
         await request(app)
           .delete(`/interaction/bookmark`)
           .send({ boardId: testBoardId })
-          .set('x-access-token', userToken)
+          .set('Cookie', `access_token=${userToken}`)
           .expect(200)
 
         const response = await request(app)
           .get(`/interaction/bookmark?screenId=${screenId}`)
-          .set('x-access-token', userToken)
+          .set('Cookie', `access_token=${userToken}`)
 
         expect(response.statusCode).toBe(200)
         expect(response.body.data.length).toBe(0)
@@ -113,7 +115,7 @@ describe('북마크 테스트', () => {
       await request(app)
         .post(`/interaction/bookmark`)
         .send({ boardId: invalidId })
-        .set('x-access-token', userToken)
+        .set('Cookie', `access_token=${userToken}`)
         .expect(404)
     })
 
@@ -121,7 +123,7 @@ describe('북마크 테스트', () => {
       await request(app)
         .post(`/interaction/bookmark`)
         .send({ boardId: '123' })
-        .set('x-access-token', userToken)
+        .set('Cookie', `access_token=${userToken}`)
         .expect(400)
     })
   })
@@ -130,7 +132,7 @@ describe('북마크 테스트', () => {
     test('S3 오브젝트 삭제 | 200', async () => {
       await request(app)
         .delete(`/boards/${testBoardId}`)
-        .set('x-access-token', userToken)
+        .set('Cookie', `access_token=${userToken}`)
         .expect(200)
     })
   })

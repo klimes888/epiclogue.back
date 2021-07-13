@@ -3,8 +3,10 @@ import randomString from 'random-string'
 import request from 'supertest'
 import { describe, test } from '@jest/globals'
 
-import { User } from '../../../src/models'
+import { confirmUser } from '../../../src/DAO/user'
+import User from '../../../src/models/user'
 import app from '../../../src/app'
+import { getAccessTokenFromCookie } from '../../configs/cookieParser'
 
 dotenv.config()
 
@@ -40,13 +42,13 @@ describe('팔로우 테스트', () => {
 
     // 이메일 인증된 사용자
     await request(app).post('/auth/join').send(verifiedUserData)
-    await User.confirmUser(verifiedUserData.email)
+    await confirmUser(verifiedUserData.email)
     const verifiedLoginReponse = await request(app).post('/auth/login').send({
       email: verifiedUserData.email,
       userPw: verifiedUserData.userPw,
     })
 
-    verifiedToken = verifiedLoginReponse.body.token
+    verifiedToken = getAccessTokenFromCookie(verifiedLoginReponse.headers['set-cookie'])
   })
 
   describe('팔로우 테스트', () => {
@@ -54,7 +56,7 @@ describe('팔로우 테스트', () => {
       await request(app)
         .post(`/interaction/follow`)
         .send({ targetUserId: newUserId })
-        .set('x-access-token', verifiedToken)
+        .set('Cookie', `access_token=${verifiedToken}`)
         .expect(201)
     })
 
@@ -62,7 +64,7 @@ describe('팔로우 테스트', () => {
       await request(app)
         .delete(`/interaction/follow`)
         .send({ targetUserId: newUserId })
-        .set('x-access-token', verifiedToken)
+        .set('Cookie', `access_token=${verifiedToken}`)
         .expect(200)
     })
 
@@ -70,7 +72,7 @@ describe('팔로우 테스트', () => {
       await request(app)
         .post(`/interaction/follow`)
         .send({ targetUserId: invalidId })
-        .set('x-access-token', verifiedToken)
+        .set('Cookie', `access_token=${verifiedToken}`)
         .expect(404)
     })
 
@@ -78,7 +80,7 @@ describe('팔로우 테스트', () => {
       await request(app)
         .post(`/interaction/follow`)
         .send({ targetUserId: '123' })
-        .set('x-access-token', verifiedToken)
+        .set('Cookie', `access_token=${verifiedToken}`)
         .expect(400)
     })
   })
