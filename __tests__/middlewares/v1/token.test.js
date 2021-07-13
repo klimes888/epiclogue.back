@@ -3,7 +3,8 @@ import request from 'supertest'
 import jwt from 'jsonwebtoken'
 import { describe, expect, test } from '@jest/globals'
 
-import { User } from '../../../src/models'
+import { cookieParser } from '../../configs/cookieParser'
+import { confirmUser } from '../../../src/DAO/user'
 import app from '../../../src/app'
 
 dotenv.config()
@@ -28,24 +29,31 @@ describe('토큰 테스트', () => {
   }
 
   let userToken
-  let screenId
+  let screenId // 인증 유저만 가능한 접근을 위해 screenId 사용
 
   // eslint-disable-next-line no-undef
   beforeAll(async () => {
+    // 회원가입 및 메일인증 처리
     await request(app).post('/auth/join').send(verifiedUserData)
-    await User.confirmUser(verifiedUserData.email)
+    await confirmUser(verifiedUserData.email)
+    
+    // 로그인 시도 후 액세스 토큰 취득
     const loginResponse = await request(app).post('/auth/login').send(verifiedUserData)
+    const cookies = cookieParser(loginResponse.headers['set-cookie'])
 
-    userToken = loginResponse.body.token
-    screenId = loginResponse.body.screenId
+    userToken = cookies[0].access_token
+    screenId = loginResponse.body.data.screenId
+
+    console.warn(`[Test] Testing token.test.js with userToken: ${userToken} and screenId: ${screenId}`)
   })
 
   describe('토큰 검사', () => {
     test('성공 | 200', async () => {
-      await request(app)
+      const tokenTestRequest = await request(app)
         .get(`/interaction/bookmark?screenId=${screenId}`)
-        .set('x-access-token', userToken)
-        .expect(200)
+        .set('Cookie', `access_token=${userToken}`)
+
+      expect(tokenTestRequest.statusCode).toEqual(200)
     })
 
     test('실패: 인증 토큰 누락 | 401', async () => {
@@ -55,22 +63,14 @@ describe('토큰 테스트', () => {
     test('실패: 손상된 인증 토큰 | 401', async () => {
       await request(app)
         .get(`/interaction/bookmark?screenId=${screenId}`)
-        .set('x-access-token', userToken.slice(0, 60))
+        .set('Cookie', `access_token=${userToken}`)
         .expect(401)
     })
   })
 
   describe('권한 검사 테스트', () => {
     test('성공: 이메일 인증된 토큰 | 200', async () => {
-      const res = await request(app)
-        .post('/auth/login')
-        .send({
-          email: verifiedUserData.email,
-          userPw: verifiedUserData.userPw,
-        })
-        .expect(200)
-
-      const decodedJWT = jwt.verify(res.body.token, process.env.SECRET_KEY)
+      const decodedJWT = jwt.verify(userToken, process.env.SECRET_KEY)
 
       expect(decodedJWT.isConfirmed).toBeTruthy()
     })
@@ -82,7 +82,7 @@ describe('토큰 테스트', () => {
         userPw: userData.userPw,
       })
 
-      const decodedJWT = jwt.verify(res.body.token, process.env.SECRET_KEY)
+      const decodedJWT = jwt.verify(cookieParser(res.headers['set-cookie'])[0].access_token, process.env.SECRET_KEY)
 
       expect(decodedJWT.isConfirmed).toBeFalsy()
     })
