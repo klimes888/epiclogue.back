@@ -70,6 +70,11 @@ export const deleteByParentId = function (parentId) {
   return Reply.deleteMany({ parentId })
 }
 
+export const deleteById = async replyId => {
+  const data = await Reply.findByIdAndDelete(replyId)
+  return data.replyBody
+}
+
 export const getById = function (replyId, option) {
   return Reply.findOne({ _id: replyId }, option)
 }
@@ -82,4 +87,14 @@ export const countReplys = async parentId => Reply.countDocuments({ parentId })
 
 export const isWriter = function (userId, replyId) {
   return Reply.findOne({ _id: replyId, writer: userId })
+}
+
+export const setBlind = async replyId => {
+  const data = await Reply.findByIdAndUpdate(replyId, { $set: { isBlind: true } })
+  return data.replyBody
+}
+
+export const unsetBlind = async replyId => {
+  const data = await Reply.findByIdAndUpdate(replyId, { $set: { isBlind: false } })
+  return data.replyBody
 }

@@ -14,10 +14,10 @@ import { parseIntParam } from '../../lib/parseParams'
  */
 export const getNoti = async (req, res, next) => {
   try {
-    const notiData = await notificationDAO.getNotiList(
-      req.user.id,
-      req.query.latestId,
-      await parseIntParam(req.params.size, 15)
+    const size = await parseIntParam(req.params.size, 15)
+    const notiData = await notificationDAO.getNotiList(req.user.id, 
+      req.query.latestId, 
+      size
     )
     return apiResponser({ req, res, data: notiData })
   } catch (e) {

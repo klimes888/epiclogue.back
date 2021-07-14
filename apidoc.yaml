@@ -1551,6 +1551,12 @@ paths:
         required: false
         type: number
         example: 0
+      - name: "isCopyright"
+        in: "query"
+        description: "get copyright or not param"
+        required: false
+        type: boolean
+        example: false
       responses:
         200:
           description: OK
@@ -1609,6 +1615,24 @@ paths:
         - "report"
       summary: "delete and logging report"
       description: ""
+      parameters:
+      - name: "Body"
+        in: "body"
+        description: "processed data"
+        required: true
+        schema:
+          type: object
+          properties:
+            reportType:
+              type: number
+            reportStatus:
+              type: number
+            suspectUserId:
+              type: string
+            contentId:
+              type: string
+            contentType:
+              type: string
       responses:
         200:
           description: OK
@@ -1747,6 +1771,12 @@ paths:
         required: false
         type: number
         example: 0
+      - name: "isCopyright"
+        in: "query"
+        description: "get isCopyright"
+        required: true
+        type: boolean
+        example: false
       responses:
         200:
           description: OK

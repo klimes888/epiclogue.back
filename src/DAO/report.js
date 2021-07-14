@@ -75,18 +75,16 @@ export const getReports = function (contentId, contentType, isCopyright) {
     })
 }
 
-export const getReportLogs = function (size = 30, page) {
-  return ReportLog.find()
-    .skip(page * 30)
-    .limit(size)
+export const getReportLogs = function (size = 30, page, isCopyright) {
+  return ReportLog.find({isCopyright}).skip(page*30).limit(size)
 }
 
-export const deleteProcessedReport = async function (reportData) {
+export const deleteProcessedReport = async function (contentId, contentType, reportType, reportStatus, contentStatus, isCopyright) {
   const session = await startSession()
   try {
-    await ReportLog.create([reportData], { session })
+    await ReportLog.create([{contentId, contentType, reportType, reportStatus, contentStatus, isCopyright}], { session })
     await Report.deleteMany({
-      contentId: reportData.contentId,
+      contentId
     }).session(session)
   } catch (e) {
     throw new Error(`Error in Report Transaction ${e}`)
