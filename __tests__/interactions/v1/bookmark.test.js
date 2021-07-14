@@ -53,6 +53,8 @@ describe('북마크 테스트', () => {
     const verifiedLoginReponse = await request(app).post('/auth/login').send(userData)
     const rawUserData = await isExist(userData.email)
 
+    console.log(verifiedLoginReponse.headers)
+
     screenId = rawUserData.screenId
     userToken = getAccessTokenFromCookie(verifiedLoginReponse.headers['set-cookie'])
   })
@@ -79,11 +81,12 @@ describe('북마크 테스트', () => {
 
     describe('추가', () => {
       test('성공 | 201', async () => {
-        await request(app)
+        const result = await request(app)
           .post(`/interaction/bookmark`)
           .send({ boardId: testBoardId })
           .set('Cookie', `access_token=${userToken}`)
-          .expect(201)
+
+        expect(result.statusCode).toEqual(201)
 
         const response = await request(app)
           .get(`/interaction/bookmark?screenId=${screenId}`)
@@ -92,15 +95,32 @@ describe('북마크 테스트', () => {
         expect(response.statusCode).toBe(200)
         expect(response.body.data.length).toBe(1)
       })
+
+      test('실패: 존재하지 않는 데이터에 접근 | 404', async () => {
+        await request(app)
+          .post(`/interaction/bookmark`)
+          .send({ boardId: invalidId })
+          .set('Cookie', `access_token=${userToken}`)
+          .expect(404)
+      })
+
+      test('실패: 부적절한 아이디에 접근 | 400', async () => {
+        await request(app)
+          .post(`/interaction/bookmark`)
+          .send({ boardId: '123' })
+          .set('Cookie', `access_token=${userToken}`)
+          .expect(400)
+      })
     })
 
     describe('북마크 삭제', () => {
       test('성공 | 200', async () => {
-        await request(app)
+        const result = await request(app)
           .delete(`/interaction/bookmark`)
           .send({ boardId: testBoardId })
           .set('Cookie', `access_token=${userToken}`)
-          .expect(200)
+
+        expect(result.statusCode).toEqual(200)
 
         const response = await request(app)
           .get(`/interaction/bookmark?screenId=${screenId}`)
@@ -109,22 +129,22 @@ describe('북마크 테스트', () => {
         expect(response.statusCode).toBe(200)
         expect(response.body.data.length).toBe(0)
       })
-    })
 
-    test('실패: 존재하지 않는 데이터에 접근 | 404', async () => {
-      await request(app)
-        .post(`/interaction/bookmark`)
-        .send({ boardId: invalidId })
-        .set('Cookie', `access_token=${userToken}`)
-        .expect(404)
-    })
+      test('실패: 존재하지 않는 데이터에 접근 | 404', async () => {
+        await request(app)
+          .delete(`/interaction/bookmark`)
+          .send({ boardId: invalidId })
+          .set('Cookie', `access_token=${userToken}`)
+          .expect(404)
+      })
 
-    test('실패: 부적절한 아이디에 접근 | 400', async () => {
-      await request(app)
-        .post(`/interaction/bookmark`)
-        .send({ boardId: '123' })
-        .set('Cookie', `access_token=${userToken}`)
-        .expect(400)
+      test('실패: 부적절한 아이디에 접근 | 400', async () => {
+        await request(app)
+          .delete(`/interaction/bookmark`)
+          .send({ boardId: '123' })
+          .set('Cookie', `access_token=${userToken}`)
+          .expect(400)
+      })
     })
   })
 
