@@ -97,7 +97,7 @@ describe('좋아요 테스트', () => {
     })
   })
 
-  describe.only('공통', () => {
+  describe('공통', () => {
     test('실패: 적절하지 않은 타입 | 400', async () => {
       await request(app)
         .post(`/interaction/like`)

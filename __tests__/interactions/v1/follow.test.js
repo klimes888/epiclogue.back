@@ -83,5 +83,21 @@ describe('팔로우 테스트', () => {
         .set('Cookie', `access_token=${verifiedToken}`)
         .expect(400)
     })
+
+    test('언팔로우 실패: 없는 아이디에 접근 | 404', async () => {
+      await request(app)
+        .delete(`/interaction/follow`)
+        .send({ targetUserId: invalidId })
+        .set('Cookie', `access_token=${verifiedToken}`)
+        .expect(404)
+    })
+
+    test('언팔로우 실패: 부적절한 아이디에 접근 | 400', async () => {
+      await request(app)
+        .delete(`/interaction/follow`)
+        .send({ targetUserId: '123' })
+        .set('Cookie', `access_token=${verifiedToken}`)
+        .expect(400)
+    })
   })
 })
