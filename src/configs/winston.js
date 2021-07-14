@@ -3,7 +3,9 @@ import winston from 'winston'
 import WinstonDaily from 'winston-daily-rotate-file'
 
 // logs dir
-const logDir = `${__dirname}/../../logs`
+const logDir = process.env.NODE_ENV !== 'test'
+  ? `${__dirname}/../../logs`
+  : `${__dirname}/../../logs/test`
 
 if (!fs.existsSync(logDir)) {
   fs.mkdirSync(logDir)

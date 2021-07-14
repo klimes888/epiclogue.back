@@ -174,12 +174,15 @@ export const deleteUser = async (req, res, next) => {
   try {
     const info = await userDAO.getUserInfo(uid)
     const crpytedPass = await cryptoData(userPw, info.salt)
+    const deleteResult = await userDAO.deleteUser(uid, crpytedPass)
+
+    if (deleteResult.nModified !== 1) {
+      return next(apiErrorGenerator(400, '비밀번호를 잘못 입력했습니다.'))
+    }
 
     // remove old images
     deleteImage(info.banner)
     deleteImage(info.profile)
-
-    await userDAO.deleteUser(uid, crpytedPass)
 
     return apiResponser({ req, res, message: '유저 탈퇴에 성공했습니다.' })
   } catch (e) {

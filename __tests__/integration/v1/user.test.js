@@ -6,8 +6,9 @@ import fs from 'fs'
 import path from 'path'
 import { describe, expect, test } from '@jest/globals'
 
-import { User } from '../../../src/models'
+import { confirmUser } from '../../../src/DAO/user'
 import app from '../../../src/app'
+import { getAccessTokenFromCookie } from '../../configs/cookieParser'
 
 dotenv.config()
 
@@ -47,8 +48,11 @@ describe('유저 테스트', () => {
   const imagePathArray = []
   fs.readdir(imgPath, (err, files) => {
     if (err) {
+      // 프로필 사진 수정을 위한 이미지를 찾을 수 없는 경우 에러 발생 후 종료
       console.error(err)
+      process.exit(1) 
     }
+
     files.forEach(name => {
       imagePathArray.push(`${imgPath}/${name}`)
     })
@@ -58,13 +62,15 @@ describe('유저 테스트', () => {
   beforeAll(async () => {
     // 이메일 인증된 사용자
     await request(app).post('/auth/join').send(verifiedUserData)
-    await User.confirmUser(verifiedUserData.email)
+    await confirmUser(verifiedUserData.email)
     const verifiedLoginReponse = await request(app).post('/auth/login').send({
       email: verifiedUserData.email,
       userPw: verifiedUserData.userPw,
     })
 
-    userToken = verifiedLoginReponse.body.token
+    userToken = getAccessTokenFromCookie(verifiedLoginReponse.headers['set-cookie'])
+
+    console.warn(`[Test] user.test.js used token: ${userToken}`)
   })
 
   describe('회원가입 테스트', () => {
@@ -123,7 +129,7 @@ describe('유저 테스트', () => {
         userPw: verifiedUserData.userPw,
       })
 
-      const jwtToken = jwt.verify(res.body.token, process.env.SECRET_KEY)
+      const jwtToken = jwt.verify(userToken, process.env.SECRET_KEY)
 
       expect(res.statusCode).toBe(200)
       expect(jwtToken.isConfirmed).toBeTruthy()
@@ -135,7 +141,8 @@ describe('유저 테스트', () => {
         userPw: userData.userPw,
       })
 
-      const jwtToken = jwt.verify(res.body.token, process.env.SECRET_KEY)
+      const unverifiedToken = getAccessTokenFromCookie(res.headers['set-cookie'])
+      const jwtToken = jwt.verify(unverifiedToken, process.env.SECRET_KEY)
 
       expect(res.statusCode).toBe(200)
       expect(jwtToken.isConfirmed).toBeFalsy()
@@ -166,7 +173,7 @@ describe('유저 테스트', () => {
     test('성공 | 200', async () => {
       await request(app)
         .patch('/user/changePass')
-        .set('x-access-token', userToken)
+        .set('Cookie', `access_token=${userToken}`)
         .send({
           userPw: verifiedUserData.userPw,
           userPwNew: newPw,
@@ -178,7 +185,7 @@ describe('유저 테스트', () => {
     test('실패: 적절하지 않은 비밀번호 | 400', async () => {
       await request(app)
         .patch('/user/changePass')
-        .set('x-access-token', userToken)
+        .set('Cookie', `access_token=${userToken}`)
         .send({
           userPw: verifiedUserData.userPw,
           userPwNew: '123',
@@ -190,7 +197,7 @@ describe('유저 테스트', () => {
     test('실패: 새로운 비밀번호가 이전 비밀번호와 동일 | 400', async () => {
       await request(app)
         .patch('/user/changePass')
-        .set('x-access-token', userToken)
+        .set('Cookie', `access_token=${userToken}`)
         .send({
           userPw: verifiedUserData.userPw,
           userPwNew: verifiedUserData.userPw,
@@ -203,7 +210,7 @@ describe('유저 테스트', () => {
       const differentPw = `${verifiedUserData.userPw}1`
       await request(app)
         .patch('/user/changePass')
-        .set('x-access-token', userToken)
+        .set('Cookie', `access_token=${userToken}`)
         .send({
           userPw: verifiedUserData.userPw,
           userPwNew: differentPw,
@@ -215,7 +222,7 @@ describe('유저 테스트', () => {
 
   describe('프로필 변경', () => {
     test('성공: 이전 데이터 불러오기 | 200', async () => {
-      const response = await request(app).get('/user/editProfile').set('x-access-token', userToken)
+      const response = await request(app).get('/user/editProfile').set('Cookie', `access_token=${userToken}`)
 
       expect(response.statusCode).toBe(200)
     })
@@ -223,7 +230,7 @@ describe('유저 테스트', () => {
     test('성공: 전체 변경 | 200', async () => {
       const response = await request(app)
         .post('/user/editProfile')
-        .set('x-access-token', userToken)
+        .set('Cookie', `access_token=${userToken}`)
         .field('screenId', newProfileData.screenId)
         .field('userNick', newProfileData.userNick)
         .field('userCountry', newProfileData.userCountry)
@@ -240,7 +247,7 @@ describe('유저 테스트', () => {
     test('성공: 일부 변경 | 200', async () => {
       const response = await request(app)
         .post('/user/editProfile')
-        .set('x-access-token', userToken)
+        .set('Cookie', `access_token=${userToken}`)
         .field('screenId', 'partialChange')
         // .field('userNick', newProfileData.userNick)
         // .field('userCountry', newProfileData.userCountry)
@@ -259,7 +266,7 @@ describe('유저 테스트', () => {
     test('실패: 비밀번호 누락 | 400', async () => {
       await request(app)
         .delete('/user')
-        .set('x-access-token', userToken)
+        .set('Cookie', `access_token=${userToken}`)
         // .send({ userPw: newPw })
         .expect(400)
     })
@@ -267,15 +274,15 @@ describe('유저 테스트', () => {
     test('실패: 잘못된 비밀번호 | 400', async () => {
       await request(app)
         .delete('/user')
-        .set('x-access-token', userToken)
-        .send({ userPw: randomString() })
+        .set('Cookie', `access_token=${userToken}`)
+        .send({ userPw: '1a2a3a' })
         .expect(400)
     })
 
     test('성공 | 200', async () => {
       await request(app)
         .delete('/user')
-        .set('x-access-token', userToken)
+        .set('Cookie', `access_token=${userToken}`)
         .send({ userPw: newPw })
         .expect(200)
     })

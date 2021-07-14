@@ -1,4 +1,4 @@
-import { connect, drop } from '../../src/lib/database'
+import { connectDatabase, dropDatabase } from '../../src/lib/database'
 
 module.exports = async () => {
   // console.log(`mongodb: ${Connection.readyState}`) // normally got 'undefined' while mongodb is running
@@ -15,6 +15,6 @@ module.exports = async () => {
   //   })
   // }
 
-  await connect()
-  await drop()
+  await connectDatabase()
+  await dropDatabase()
 }

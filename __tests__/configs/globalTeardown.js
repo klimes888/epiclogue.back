@@ -1,8 +1,8 @@
 import { logger } from '../../src/configs/winston'
-import Database from '../../src/lib/database'
+import { disconnectDatabase } from '../../src/lib/database'
 
 module.exports = async () => {
-  await Database.disconnect()
+  await disconnectDatabase()
   logger.info(`[JestGlobalTeardown] Test successfully ended!`)
   process.exit(0)
 }

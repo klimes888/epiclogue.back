@@ -39,6 +39,10 @@ export const getBoards = async (req, res, next) => {
  * @returns 생성된 글의 아이디
  */
 export const postBoard = async (req, res, next) => {
+  if (req.files.length === 0) {
+    return next(apiErrorGenerator(400, '글 작성시 이미지가 포함되어야 합니다.'))  
+  }
+
   const boardImg = req.files.map(file => file.location)
 
   let tags = ''
@@ -89,7 +93,7 @@ export const postBoard = async (req, res, next) => {
 
   try {
     const createdBoard = await boardDAO.create(boardData)
-    return apiResponser({ req, res, data: { _id: createdBoard._id } })
+    return apiResponser({ req, res, statusCode: 201, data: { _id: createdBoard._id } })
   } catch (e) {
     return next(apiErrorGenerator(500, '알 수 없는 에러가 발생했습니다.', e))
   }

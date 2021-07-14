@@ -5,9 +5,10 @@ import randomString from 'random-string'
 import path from 'path'
 import { describe, expect, test } from '@jest/globals'
 
-import { User } from '../../../src/models'
+import { confirmUser } from '../../../src/DAO/user'
 
 import app from '../../../src/app'
+import { getAccessTokenFromCookie } from '../../configs/cookieParser'
 
 dotenv.config()
 
@@ -42,6 +43,7 @@ describe('댓글 테스트', () => {
   fs.readdir(imgPath, (err, files) => {
     if (err) {
       console.error(err)
+      process.exit(1)
     }
     files.forEach(name => {
       imagePathArray.push(`${imgPath}/${name}`)
@@ -51,17 +53,16 @@ describe('댓글 테스트', () => {
   // eslint-disable-next-line no-undef
   beforeAll(async () => {
     await request(app).post('/auth/join').send(userData)
-    await User.confirmUser(userData.email)
+    await confirmUser(userData.email)
     const loginInstance = await request(app).post('/auth/login').send(userData)
-    userToken = loginInstance.body.token
-    // console.log(userToken) // ok
+    userToken = getAccessTokenFromCookie(loginInstance.headers['set-cookie'])
   })
 
   describe('선수 작업', () => {
     test('글 작성 | 201', async () => {
       const uploadInstance = await request(app)
         .post('/boards')
-        .set('x-access-token', userToken)
+        .set('Cookie', `access_token=${userToken}`)
         .field('boardTitle', boardData.boardTitle)
         .field('boardBody', boardData.boardBody)
         .field('category', boardData.category)
@@ -78,7 +79,7 @@ describe('댓글 테스트', () => {
     test('피드백 작성 | 201', async () => {
       const rawResponse = await request(app)
         .post(`/boards/${testBoardId}/feedback`)
-        .set('x-access-token', userToken)
+        .set('Cookie', `access_token=${userToken}`)
         .send({ feedbackBody: 'feedback body ever seen!' })
 
       // extract feedbackId
@@ -92,7 +93,7 @@ describe('댓글 테스트', () => {
     test('성공 | 201', async () => {
       const response = await request(app)
         .post(`/boards/${testBoardId}/feedback/${testFeedbackId}/reply`)
-        .set('x-access-token', userToken)
+        .set('Cookie', `access_token=${userToken}`)
         .send({ replyBody: 'hi, it is reply body' })
 
       expect(response.statusCode).toBe(201)
@@ -103,7 +104,7 @@ describe('댓글 테스트', () => {
     test('실패: replyBody 누락 | 400', async () => {
       const response = await request(app)
         .post(`/boards/${testBoardId}/feedback/${testFeedbackId}/reply`)
-        .set('x-access-token', userToken)
+        .set('Cookie', `access_token=${userToken}`)
 
       expect(response.statusCode).toBe(400)
     })
@@ -111,7 +112,7 @@ describe('댓글 테스트', () => {
     test('실패: replyBody가 공백 | 400', async () => {
       const response = await request(app)
         .post(`/boards/${testBoardId}/feedback/${testFeedbackId}/reply`)
-        .set('x-access-token', userToken)
+        .set('Cookie', `access_token=${userToken}`)
         .send({ replyBody: '   ' })
 
       expect(response.statusCode).toBe(400)
@@ -122,7 +123,7 @@ describe('댓글 테스트', () => {
     test('성공 | 200', async () => {
       const response = await request(app)
         .patch(`/boards/${testBoardId}/feedback/${testFeedbackId}/reply/${testReplyId}`)
-        .set('x-access-token', userToken)
+        .set('Cookie', `access_token=${userToken}`)
         .send({ newReplyBody: 'it is new reply body' })
 
       expect(response.statusCode).toBe(200)
@@ -131,7 +132,7 @@ describe('댓글 테스트', () => {
     test('실패: replyBody 누락 | 400', async () => {
       const response = await request(app)
         .patch(`/boards/${testBoardId}/feedback/${testFeedbackId}/reply/${testReplyId}`)
-        .set('x-access-token', userToken)
+        .set('Cookie', `access_token=${userToken}`)
 
       expect(response.statusCode).toBe(400)
     })
@@ -139,7 +140,7 @@ describe('댓글 테스트', () => {
     test('실패: replyBody가 공백 | 400', async () => {
       const response = await request(app)
         .patch(`/boards/${testBoardId}/feedback/${testFeedbackId}/reply/${testReplyId}`)
-        .set('x-access-token', userToken)
+        .set('Cookie', `access_token=${userToken}`)
         .send({ newReplyBody: '    ' })
 
       expect(response.statusCode).toBe(400)
@@ -148,7 +149,7 @@ describe('댓글 테스트', () => {
     test('실패: 존재하지 않는 댓글 | 404', async () => {
       const response = await request(app)
         .patch(`/boards/${testBoardId}/feedback/${testFeedbackId}/reply/${invalidId}`)
-        .set('x-access-token', userToken)
+        .set('Cookie', `access_token=${userToken}`)
         .send({ newReplyBody: 'ASDBDFA' })
 
       expect(response.statusCode).toBe(404)
@@ -159,7 +160,7 @@ describe('댓글 테스트', () => {
     test('성공 | 200', async () => {
       const response = await request(app)
         .delete(`/boards/${testBoardId}/feedback/${testFeedbackId}/reply/${testReplyId}`)
-        .set('x-access-token', userToken)
+        .set('Cookie', `access_token=${userToken}`)
 
       expect(response.statusCode).toBe(200)
     })
@@ -167,7 +168,7 @@ describe('댓글 테스트', () => {
     test('실패: 존재하지 않는 댓글 | 404', async () => {
       const response = await request(app)
         .delete(`/boards/${testBoardId}/feedback/${testFeedbackId}/reply/${invalidId}`)
-        .set('x-access-token', userToken)
+        .set('Cookie', `access_token=${userToken}`)
 
       expect(response.statusCode).toBe(404)
     })
@@ -177,7 +178,7 @@ describe('댓글 테스트', () => {
     test('S3 오브젝트 삭제 | 200', async () => {
       await request(app)
         .delete(`/boards/${testBoardId}`)
-        .set('x-access-token', userToken)
+        .set('Cookie', `access_token=${userToken}`)
         .expect(200)
     })
   })
