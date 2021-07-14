@@ -18,7 +18,7 @@ const board = new mongoose.Schema({
   originBoardId: { type: ObjectId, ref: 'Board' },
   edited: { type: Boolean, default: false },
   sourceUrl: { type: String, default: null },
-  isBlind: { type: Boolean, default: false } // 신고 10건이상 누적시 자동 true
+  isBlind: { type: Boolean, default: false }, // 신고 10건이상 누적시 자동 true
 })
 
 export default mongoose.model('Board', board)

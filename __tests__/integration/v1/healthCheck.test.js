@@ -1,6 +1,6 @@
 import request from 'supertest'
 import { describe, test } from '@jest/globals'
-import app from '../../../app'
+import app from '../../../src/app'
 
 describe('Health check', () => {
   test('Server | 200', async () => {

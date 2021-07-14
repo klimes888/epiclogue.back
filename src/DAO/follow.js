@@ -52,12 +52,10 @@ export const didFollow = async function ({ userId, targetUserId }, session) {
 // 유저의 팔로잉 목록
 export const getFollowingList = function (userId, latestId, size) {
   const query = { userId }
-  if(latestId) {
-    query._id = {$gt : latestId}
+  if (latestId) {
+    query._id = { $gt: latestId }
   }
-  return Follow.find(query, { userId: 0, __v: 0 })
-  .limit(size)
-  .populate({
+  return Follow.find(query, { userId: 0, __v: 0 }).limit(size).populate({
     path: 'targetUserId',
     select: '_id screenId nickname profile',
   })
@@ -70,12 +68,10 @@ export const getFollowingIdList = function (userId) {
 // 유저의 팔로워 목록
 export const getFollowerList = function (targetUserId, latestId, size) {
   const query = { targetUserId }
-  if(latestId) {
-    query._id = {$gt : latestId}
+  if (latestId) {
+    query._id = { $gt: latestId }
   }
-  return Follow.find(query, { targetUserId: 0, __v: 0 })
-  .limit(size)
-  .populate({
+  return Follow.find(query, { targetUserId: 0, __v: 0 }).limit(size).populate({
     path: 'userId',
     select: '_id screenId nickname profile',
   })
