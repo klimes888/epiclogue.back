@@ -5,6 +5,12 @@ import { Like, Board, Feedback, Reply, React } from '../models'
 export const like = async (likeData, targetInfo, targetType, loggedUserId) => {
   let targetData
   let likeCount
+  const likeTypes = ["Board", "Feedback", "Reply"]
+
+  if (!likeTypes.includes(likeData.targetType)) {
+    throw apiErrorGenerator(400, '좋아요를 하려는 게시글 형태가 적절하지 않습니다.')
+  }
+
   const session = await startSession()
   try {
     await session.withTransaction(async () => {
@@ -29,9 +35,7 @@ export const like = async (likeData, targetInfo, targetType, loggedUserId) => {
         targetData = await Feedback.findOne({ _id: targetInfo }, { writer: 1 })
       } else if (targetType === 'Reply') {
         targetData = await Reply.findOne({ _id: targetInfo }, { writer: 1 })
-      } else {
-        throw apiErrorGenerator(400, '좋아요를 하려는 게시글 형태가 적절하지 않습니다.')
-      }
+      } 
     })
   } catch (e) {
     throw apiErrorGenerator(500, `[LikeError] 알 수 없는 에러가 발생했습니다. ${e}`)
