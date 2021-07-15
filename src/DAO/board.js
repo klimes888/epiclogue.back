@@ -5,7 +5,7 @@ export const create = async data => {
   try {
     result = await Board.create(data)
   } catch (e) {
-    throw new Error('error when create board')
+    return e
   }
 
   return result

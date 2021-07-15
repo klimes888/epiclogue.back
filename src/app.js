@@ -37,7 +37,10 @@ app.use(
     secret: process.env.SECRET_KEY,
     resave: false,
     saveUninitialized: true,
-    store: new RedisStore({ client: redisClient.getClient, url: process.env.REDIS_URL }),
+    store: new RedisStore({
+      client: redisClient.getClient,
+      url: process.env.NODE_ENV === 'test' ? process.env.REDIS_TEST_URL : process.env.REDIS_URL,
+    }),
     cookie: {
       httpOnly: true,
       maxAge: 3600000, // 1h to ms

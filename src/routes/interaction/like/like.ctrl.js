@@ -25,12 +25,22 @@ export const addLike = async (req, res, next) => {
     if (didLike) {
       return next(apiErrorGenerator(400, '이미 처리된 요청입니다.'))
     }
-    const { likeCount, targetData } = await likeDAO.like(
-      likeData,
-      targetInfo,
-      targetType,
-      req.user.id
-    )
+
+    let likeCount
+    let targetData
+
+    try {
+      // 비구조화 할당을 위해 소괄호 사용
+      ;({ likeCount, targetData } = await likeDAO.like(
+        likeData,
+        targetInfo,
+        targetType,
+        req.user.id
+      ))
+    } catch (e) {
+      return next(e)
+    }
+
     /* 자기 자신에게는 알림을 보내지 않음 */
     if (targetData.writer.toString() !== req.user.id) {
       await notificationDAO.makeNotification({

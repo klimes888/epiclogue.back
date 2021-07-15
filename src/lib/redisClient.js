@@ -5,7 +5,7 @@ import { promisify } from 'util'
 import { logger } from '../configs/winston'
 
 const redisClient = redis.createClient({
-  url: process.env.REDIS_URL,
+  url: process.env.NODE_ENV === 'test' ? process.env.REDIS_TEST_URL : process.env.REDIS_URL,
 })
 
 redisClient.on('connect', () => {

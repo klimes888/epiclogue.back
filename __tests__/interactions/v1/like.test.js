@@ -97,6 +97,16 @@ describe('좋아요 테스트', () => {
     })
   })
 
+  describe('공통', () => {
+    test('실패: 적절하지 않은 타입 | 400', async () => {
+      await request(app)
+        .post(`/interaction/like`)
+        .send({ targetType: 'Test', targetInfo: testBoardId })
+        .set('Cookie', `access_token=${userToken}`)
+        .expect(400)
+    })
+  })
+
   describe('글', () => {
     test('성공: 좋아요 | 201', async () => {
       await request(app)
@@ -106,12 +116,44 @@ describe('좋아요 테스트', () => {
         .expect(201)
     })
 
+    test('실패: 적절하지 않은 글 ID에 좋아요 시도 | 400', async () => {
+      await request(app)
+        .post(`/interaction/like`)
+        .send({ targetType: 'Board', targetInfo: '123' })
+        .set('Cookie', `access_token=${userToken}`)
+        .expect(400)
+    })
+
+    test('실패: 존재하지 않는 글 ID에 좋아요 시도 | 400', async () => {
+      await request(app)
+        .post(`/interaction/like`)
+        .send({ targetType: 'Board', targetInfo: invalidId })
+        .set('Cookie', `access_token=${userToken}`)
+        .expect(404)
+    })
+
     test('성공: 좋아요 해제 | 200', async () => {
       await request(app)
         .delete(`/interaction/like`)
         .send({ targetType: 'Board', targetInfo: testBoardId })
         .set('Cookie', `access_token=${userToken}`)
         .expect(200)
+    })
+
+    test('실패: 적절하지 않은 글 ID에 좋아요 해제 시도 | 400', async () => {
+      await request(app)
+        .delete(`/interaction/like`)
+        .send({ targetType: 'Board', targetInfo: '123' })
+        .set('Cookie', `access_token=${userToken}`)
+        .expect(400)
+    })
+
+    test('실패: 존재하지 않는 글 ID에 좋아요 해제 시도 | 400', async () => {
+      await request(app)
+        .delete(`/interaction/like`)
+        .send({ targetType: 'Board', targetInfo: invalidId })
+        .set('Cookie', `access_token=${userToken}`)
+        .expect(404)
     })
   })
 
@@ -124,12 +166,44 @@ describe('좋아요 테스트', () => {
         .expect(201)
     })
 
+    test('실패: 적절하지 않은 피드백 ID에 좋아요 시도 | 400', async () => {
+      await request(app)
+        .post(`/interaction/like`)
+        .send({ targetType: 'Feedback', targetInfo: '123' })
+        .set('Cookie', `access_token=${userToken}`)
+        .expect(400)
+    })
+
+    test('실패: 존재하지 않는 피드백 ID에 좋아요 시도 | 400', async () => {
+      await request(app)
+        .post(`/interaction/like`)
+        .send({ targetType: 'Feedback', targetInfo: invalidId })
+        .set('Cookie', `access_token=${userToken}`)
+        .expect(404)
+    })
+
     test('성공: 좋아요 해제 | 200', async () => {
       await request(app)
         .delete(`/interaction/like`)
         .send({ targetType: 'Feedback', targetInfo: testFeedbackId })
         .set('Cookie', `access_token=${userToken}`)
         .expect(200)
+    })
+
+    test('실패: 적절하지 않은 피드백 ID에 좋아요 해제 시도 | 400', async () => {
+      await request(app)
+        .delete(`/interaction/like`)
+        .send({ targetType: 'Feedback', targetInfo: '123' })
+        .set('Cookie', `access_token=${userToken}`)
+        .expect(400)
+    })
+
+    test('실패: 존재하지 않는 피드백 ID에 좋아요 해제 시도 | 400', async () => {
+      await request(app)
+        .delete(`/interaction/like`)
+        .send({ targetType: 'Feedback', targetInfo: invalidId })
+        .set('Cookie', `access_token=${userToken}`)
+        .expect(404)
     })
   })
 
@@ -142,6 +216,22 @@ describe('좋아요 테스트', () => {
         .expect(201)
     })
 
+    test('실패: 적절하지 않은 댓글 ID에 좋아요 시도 | 400', async () => {
+      await request(app)
+        .post(`/interaction/like`)
+        .send({ targetType: 'Reply', targetInfo: '123' })
+        .set('Cookie', `access_token=${userToken}`)
+        .expect(400)
+    })
+
+    test('실패: 존재하지 않는 댓글 ID에 좋아요 시도 | 400', async () => {
+      await request(app)
+        .post(`/interaction/like`)
+        .send({ targetType: 'Reply', targetInfo: invalidId })
+        .set('Cookie', `access_token=${userToken}`)
+        .expect(404)
+    })
+
     test('성공: 좋아요 해제 | 201', async () => {
       await request(app)
         .delete(`/interaction/like`)
@@ -151,20 +241,20 @@ describe('좋아요 테스트', () => {
     })
   })
 
-  test('실패: 존재하지 않는 데이터에 접근 | 404', async () => {
+  test('실패: 적절하지 않은 댓글 ID에 좋아요 해제 시도 | 400', async () => {
     await request(app)
-      .post(`/interaction/like`)
-      .send({ targetType: 'Board', targetInfo: invalidId })
-      .set('Cookie', `access_token=${userToken}`)
-      .expect(404)
-  })
-
-  test('실패: 부적절한 아이디에 접근 | 400', async () => {
-    await request(app)
-      .post(`/interaction/like`)
-      .send({ targetType: 'Board', targetInfo: '123' })
+      .delete(`/interaction/like`)
+      .send({ targetType: 'Reply', targetInfo: '123' })
       .set('Cookie', `access_token=${userToken}`)
       .expect(400)
+  })
+
+  test('실패: 존재하지 않는 댓글 ID에 좋아요 해제 시도 | 400', async () => {
+    await request(app)
+      .delete(`/interaction/like`)
+      .send({ targetType: 'Reply', targetInfo: invalidId })
+      .set('Cookie', `access_token=${userToken}`)
+      .expect(404)
   })
 })
 
