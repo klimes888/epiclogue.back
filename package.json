@@ -12,8 +12,8 @@
     "format": "prettier --write \"src/**/*.js\" \"__tests__/**/*.js\"",
     "lint": "eslint --fix \"src/**/*.js\" \"__tests__/**/*.test.js\"",
     "lint:init": "eslint --init",
-    "test": "NODE_ENV=test MONGOMS_VERSION=4.4.0 ./node_modules/.bin/jest tests --config=jest.config.js --runInBand ",
-    "test:debug": "NODE_ENV=test &&./node_modules/.bin/jest tests --config=jest.config.js --runInBand --detectOpenHandles ",
+    "test": "NODE_ENV=test MONGOMS_VERSION=4.4.0 ./node_modules/.bin/jest tests --config=jest.config.js --runInBand",
+    "test:debug": "NODE_ENV=test &&./node_modules/.bin/jest tests --config=jest.config.js --runInBand --detectOpenHandles",
     "test:docker": "docker exec -it server yarn test",
     "test:echo": "echo `hello npm test!",
     "prepare": "husky install"
