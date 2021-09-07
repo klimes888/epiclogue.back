@@ -1,17 +1,18 @@
-import 'dotenv/config';
-import mailer from 'nodemailer';
-import AWS from 'aws-sdk';
+import '../env/env'
+import mailer from 'nodemailer'
+import AWS from 'aws-sdk'
+import { logger } from '../configs/winston'
 
-const { AWS_SES_ID, AWS_SES_SECRET, AWA_SES_REGION } = process.env;
+const { AWS_SES_ID, AWS_SES_SECRET, AWA_SES_REGION } = process.env
 
 const SES = new AWS.SES({
   apiVersion: '2010-12-01',
   accessKeyId: AWS_SES_ID,
   secretAccessKey: AWS_SES_SECRET,
   region: AWA_SES_REGION,
-});
+})
 
-const transporter = mailer.createTransport({ SES });
+const transporter = mailer.createTransport({ SES })
 
 export const emailText = (email, authToken) => `
   <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -74,7 +75,7 @@ export const emailText = (email, authToken) => `
                   </tr>
                                   <tr style="margin: 0; padding: 0;">
                       <td style="margin: 0; padding: 0;">
-                          <a href="https://www.epiclogue.com/auth/auth?email=${email}&token=${authToken}" style="margin: 0; padding: 0;"><button class="button" style="margin: 0; padding: 0; all: unset; display: inline-block; width: 70%; height: 42px; background: rgba(21, 146, 230, 0.8); border-radius: 25px; font-size: 16px; font-weight: 700; line-height: 42px; text-decoration: none; color: #fff;">인증하기</button></a>
+                          <a href="https://www.epiclogue.com/auth/?email=${email}&token=${authToken}" style="margin: 0; padding: 0;"><button class="button" style="margin: 0; padding: 0; all: unset; display: inline-block; width: 70%; height: 42px; background: rgba(21, 146, 230, 0.8); border-radius: 25px; font-size: 16px; font-weight: 700; line-height: 42px; text-decoration: none; color: #fff;">인증하기</button></a>
                       </td>
                   </tr>
                                                   <tr style="margin: 0; padding: 0;">
@@ -88,7 +89,7 @@ export const emailText = (email, authToken) => `
   </body>
   
   </html>
-`;
+`
 
 export const findPassText = (email, authToken) => `
     <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -136,7 +137,7 @@ export const findPassText = (email, authToken) => `
                     </tr>
                                     <tr style="margin: 0; padding: 0;">
                         <td style="margin: 0; padding: 0;">
-                            <a href="https://www.epiclogue.com/findPass?email=${email}&token=${authToken}" style="margin: 0; padding: 0;"><button class="button" style="margin: 0; padding: 0; all: unset; display: inline-block; width: 70%; height: 42px; background: rgba(21, 146, 230, 0.8); border-radius: 25px; font-size: 16px; font-weight: 700; line-height: 42px; text-decoration: none; color: #fff;">인증하기</button></a>
+                            <a href="https://www.epiclogue.com/findpass?email=${email}&token=${authToken}" style="margin: 0; padding: 0;"><button class="button" style="margin: 0; padding: 0; all: unset; display: inline-block; width: 70%; height: 42px; background: rgba(21, 146, 230, 0.8); border-radius: 25px; font-size: 16px; font-weight: 700; line-height: 42px; text-decoration: none; color: #fff;">인증하기</button></a>
                         </td>
                     </tr>
                                                     <tr style="margin: 0; padding: 0;">
@@ -150,6 +151,18 @@ export const findPassText = (email, authToken) => `
     </body>
     
     </html>
-  `;
+  `
 
-export default transporter;
+export const sendMail = async (email, subject, html) => {
+  try {
+    await transporter.sendMail({
+      from: `epiclogue <${process.env.MAIL_USER}>`,
+      to: email,
+      subject,
+      html,
+    })
+    logger.info(`[SendMail] ${email} 에게 성공적으로 메일을 보냈습니다`)
+  } catch (e) {
+    throw new Error('메일을 보내는 도중 오류가 발생했습니다.')
+  }
+}

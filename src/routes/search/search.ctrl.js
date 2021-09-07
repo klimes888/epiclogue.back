@@ -1,6 +1,8 @@
-import createError from 'http-errors';
-import { User, Board } from '../../models';
-import { contentsWrapper } from '../../lib/contentsWrapper';
+import { userDAO, boardDAO } from '../../DAO'
+import { apiErrorGenerator } from '../../lib/apiErrorGenerator'
+import { contentsWrapper } from '../../lib/contentsWrapper'
+import { apiResponser } from '../../lib/middleware/apiResponser'
+import { parseIntParam } from '../../lib/parseParams'
 
 /**
  * @description 글 및 유저 검색
@@ -11,36 +13,33 @@ import { contentsWrapper } from '../../lib/contentsWrapper';
  * @returns 검색 결과 array
  */
 export const search = async (req, res, next) => {
-  const { q: queryString, type: searchType } = req.query;
-
-  let searchResult;
-
+  const { q: queryString, type: searchType, latestId, category, size } = req.query
+  let searchResult
+  const requestSize = await parseIntParam(size, 25)
   if (searchType === 'Board') {
     // 글 제목으로 검색
     try {
-      searchResult = await Board.searchByTitleOrTag(queryString);
+      searchResult = await boardDAO.searchByTitleOrTag(queryString, requestSize, latestId, category)
     } catch (e) {
-      console.error(e);
-      return next(createError('글 검색에 실패했습니다.'));
+      return next(apiErrorGenerator(500, '글 검색에 실패했습니다.', e))
     }
   } else if (searchType === 'User') {
     // 유저 screenId/닉네임으로 검색
     try {
       searchResult =
         queryString[0] === '@'
-          ? await User.searchByScreenId(queryString.substr(1))
-          : await User.searchByNickname(queryString);
+          ? await userDAO.searchByScreenIdOrNickname(queryString.substr(1), requestSize, latestId)
+          : await userDAO.searchByScreenIdOrNickname(queryString, requestSize, latestId)
     } catch (e) {
-      console.error(e);
-      return next(createError('유저 검색에 실패했습니다.'));
+      return next(apiErrorGenerator(500, '유저 검색에 실패했습니다.', e))
     }
   }
 
-  console.log(`[INFO] 유저 ${res.locals.uid || '비회원유저'} 가 ${searchType} ${queryString} 을 검색했습니다.`);
-  return res.status(200).json({
-    result: 'ok',
-    data: res.locals.uid
-      ? await contentsWrapper(res.locals.uid, searchResult, searchType, false)
+  return apiResponser({
+    req,
+    res,
+    data: req.user.id
+      ? await contentsWrapper(req.user.id, searchResult, searchType, false)
       : searchResult,
-  });
-};
+  })
+}

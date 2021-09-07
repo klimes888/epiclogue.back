@@ -1,5 +1,6 @@
-import createError from 'http-errors';
-import { React } from '../../../models';
+import { reactDAO } from '../../../DAO'
+import { apiErrorGenerator } from '../../../lib/apiErrorGenerator'
+import { apiResponser } from '../../../lib/middleware/apiResponser'
 
 /**
  * @description 글의 반응 확인
@@ -11,19 +12,11 @@ import { React } from '../../../models';
  */
 export const getReact = async (req, res, next) => {
   try {
-    const reactData = await React.getByBoardId(req.params.boardId);
-    const filteredData = reactData.filter(data => data.user !== null);
-    console.log(
-      `[INFO] 유저 ${res.locals.uid || '비회원유저'} 가 글 ${
-        req.params.boardId
-      } 의 반응내역을 확인합니다.`
-    );
-    return res.status(200).json({
-      result: 'ok',
-      data: filteredData,
-    });
+    const reactData = await reactDAO.getByBoardId(req.params.boardId)
+    const filteredData = reactData.filter(data => data.user !== null)
+
+    return apiResponser({ req, res, data: filteredData })
   } catch (e) {
-    console.error(`[Error] ${e}`);
-    return next(createError(500, '알 수 없는 오류가 발생했습니다.'));
+    return next(apiErrorGenerator(500, '알 수 없는 오류가 발생했습니다.', e))
   }
-};
+}

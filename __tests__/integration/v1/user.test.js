@@ -1,29 +1,30 @@
-import dotenv from 'dotenv';
-import randomString from 'random-string';
-import request from 'supertest';
-import jwt from 'jsonwebtoken';
-import fs from 'fs';
-import path from 'path';
-import { describe, expect, test } from '@jest/globals';
+import dotenv from 'dotenv'
+import randomString from 'random-string'
+import request from 'supertest'
+import jwt from 'jsonwebtoken'
+import fs from 'fs'
+import path from 'path'
+import { describe, expect, test } from '@jest/globals'
 
-import { User } from '../../../src/models';
-import app from '../../../app';
+import { confirmUser } from '../../../src/DAO/user'
+import app from '../../../src/app'
+import { getAccessTokenFromCookie } from '../../configs/cookieParser'
 
-dotenv.config();
+dotenv.config()
 
-let userToken;
+let userToken
 
 describe('유저 테스트', () => {
   // user data
-  const tempPw = `${randomString()}1!2@3#4$`;
-  const newPw = `${randomString()}!!11@@22`;
+  const tempPw = `${randomString()}1!2@3#4$`
+  const newPw = `${randomString()}!!11@@22`
   const userData = {
     email: `${randomString()}@lunarcat.com`,
     userPw: tempPw,
     userPwRe: tempPw,
     userNick: 'AwesomeUser',
     userLang: 1,
-  };
+  }
 
   const verifiedUserData = {
     email: 'usertest@lunarcat.com',
@@ -31,7 +32,7 @@ describe('유저 테스트', () => {
     userPwRe: tempPw,
     userNick: 'Verification',
     userLang: 1,
-  };
+  }
 
   // profile data
   const newProfileData = {
@@ -40,37 +41,42 @@ describe('유저 테스트', () => {
     userCountry: 2,
     userLang: [1, 2],
     userIntro: `I'm the greatest writer ever`,
-  };
+  }
 
   // image data path
-  const imgPath = path.join(`${__dirname}/../../testImages`);
-  const imagePathArray = [];
+  const imgPath = path.join(`${__dirname}/../../testImages`)
+  const imagePathArray = []
   fs.readdir(imgPath, (err, files) => {
     if (err) {
-      console.error(err);
+      // 프로필 사진 수정을 위한 이미지를 찾을 수 없는 경우 에러 발생 후 종료
+      console.error(err)
+      process.exit(1) 
     }
+
     files.forEach(name => {
-      imagePathArray.push(`${imgPath}/${name}`);
-    });
-  });
+      imagePathArray.push(`${imgPath}/${name}`)
+    })
+  })
 
   // eslint-disable-next-line no-undef
   beforeAll(async () => {
     // 이메일 인증된 사용자
-    await request(app).post('/auth/join').send(verifiedUserData);
-    await User.confirmUser(verifiedUserData.email);
+    await request(app).post('/auth/join').send(verifiedUserData)
+    await confirmUser(verifiedUserData.email)
     const verifiedLoginReponse = await request(app).post('/auth/login').send({
       email: verifiedUserData.email,
       userPw: verifiedUserData.userPw,
-    });
+    })
 
-    userToken = verifiedLoginReponse.body.token;
-  });
+    userToken = getAccessTokenFromCookie(verifiedLoginReponse.headers['set-cookie'])
+
+    console.warn(`[Test] user.test.js used token: ${userToken}`)
+  })
 
   describe('회원가입 테스트', () => {
     test('성공 | 201', async () => {
-      await request(app).post('/auth/join').send(userData).expect(201);
-    });
+      await request(app).post('/auth/join').send(userData).expect(201)
+    })
 
     test('실패: 이메일 형식이 아님 | 400', async () => {
       await request(app)
@@ -81,8 +87,8 @@ describe('유저 테스트', () => {
           userPwRe: '1q2w3e4r!!',
           userNick: randomString(),
         })
-        .expect(400);
-    });
+        .expect(400)
+    })
 
     test('실패: 비밀번호 형식이 적절하지 않음 | 400', async () => {
       await request(app)
@@ -93,8 +99,8 @@ describe('유저 테스트', () => {
           userPwRe: '1q2w3e4r',
           userNick: randomString(),
         })
-        .expect(400);
-    });
+        .expect(400)
+    })
 
     test('실패: 필수 입력 누락 | 400', async () => {
       await request(app)
@@ -105,41 +111,42 @@ describe('유저 테스트', () => {
           userPwRe: '1q2w3e4r',
           // userNick: randomString()
         })
-        .expect(400);
-    });
+        .expect(400)
+    })
 
     test('실패: 중복 회원가입 시도 | 400', async () => {
-      await request(app).post('/auth/join').send(userData);
-      const res = await request(app).post('/auth/join').send(userData);
+      await request(app).post('/auth/join').send(userData)
+      const res = await request(app).post('/auth/join').send(userData)
 
-      expect(res.statusCode).toBe(400);
-    });
-  });
+      expect(res.statusCode).toBe(400)
+    })
+  })
 
   describe('로그인 테스트', () => {
     test('성공: 인증된 이메일 | 200', async () => {
       const res = await request(app).post('/auth/login').send({
         email: verifiedUserData.email,
         userPw: verifiedUserData.userPw,
-      });
+      })
 
-      const jwtToken = jwt.verify(res.body.token, process.env.SECRET_KEY);
+      const jwtToken = jwt.verify(userToken, process.env.SECRET_KEY)
 
-      expect(res.statusCode).toBe(200);
-      expect(jwtToken.isConfirmed).toBeTruthy();
-    });
+      expect(res.statusCode).toBe(200)
+      expect(jwtToken.isConfirmed).toBeTruthy()
+    })
 
     test('성공: 인증되지 않은 이메일 | 200', async () => {
       const res = await request(app).post('/auth/login').send({
         email: userData.email,
         userPw: userData.userPw,
-      });
+      })
 
-      const jwtToken = jwt.verify(res.body.token, process.env.SECRET_KEY);
+      const unverifiedToken = getAccessTokenFromCookie(res.headers['set-cookie'])
+      const jwtToken = jwt.verify(unverifiedToken, process.env.SECRET_KEY)
 
-      expect(res.statusCode).toBe(200);
-      expect(jwtToken.isConfirmed).toBeFalsy();
-    });
+      expect(res.statusCode).toBe(200)
+      expect(jwtToken.isConfirmed).toBeFalsy()
+    })
 
     test('실패: 잘못된 비밀번호 | 400', async () => {
       await request(app)
@@ -148,8 +155,8 @@ describe('유저 테스트', () => {
           email: userData.email,
           userPw: `${randomString()}1!2@3#4$`,
         })
-        .expect(400);
-    });
+        .expect(400)
+    })
 
     test('실패: 존재하지 않는 아이디 | 404', async () => {
       await request(app)
@@ -158,126 +165,126 @@ describe('유저 테스트', () => {
           email: `${randomString()}@test.com`,
           userPw: `${randomString()}1!2@3#4$`,
         })
-        .expect(404);
-    });
-  });
+        .expect(404)
+    })
+  })
 
   describe('비밀번호 변경', () => {
     test('성공 | 200', async () => {
       await request(app)
         .patch('/user/changePass')
-        .set('x-access-token', userToken)
+        .set('Cookie', `access_token=${userToken}`)
         .send({
           userPw: verifiedUserData.userPw,
           userPwNew: newPw,
           userPwNewRe: newPw,
         })
-        .expect(200);
-    });
+        .expect(200)
+    })
 
     test('실패: 적절하지 않은 비밀번호 | 400', async () => {
       await request(app)
         .patch('/user/changePass')
-        .set('x-access-token', userToken)
+        .set('Cookie', `access_token=${userToken}`)
         .send({
           userPw: verifiedUserData.userPw,
           userPwNew: '123',
           userPwNewRe: '123',
         })
-        .expect(400);
-    });
+        .expect(400)
+    })
 
     test('실패: 새로운 비밀번호가 이전 비밀번호와 동일 | 400', async () => {
       await request(app)
         .patch('/user/changePass')
-        .set('x-access-token', userToken)
+        .set('Cookie', `access_token=${userToken}`)
         .send({
           userPw: verifiedUserData.userPw,
           userPwNew: verifiedUserData.userPw,
           userPwNewRe: verifiedUserData.userPw,
         })
-        .expect(400);
-    });
+        .expect(400)
+    })
 
     test('실패: 새로운 비밀번호와 재입력이 다름 | 400', async () => {
-      const differentPw = `${verifiedUserData.userPw}1`;
+      const differentPw = `${verifiedUserData.userPw}1`
       await request(app)
         .patch('/user/changePass')
-        .set('x-access-token', userToken)
+        .set('Cookie', `access_token=${userToken}`)
         .send({
           userPw: verifiedUserData.userPw,
           userPwNew: differentPw,
           userPwNewRe: `${differentPw}1`,
         })
-        .expect(400);
-    });
-  });
+        .expect(400)
+    })
+  })
 
   describe('프로필 변경', () => {
     test('성공: 이전 데이터 불러오기 | 200', async () => {
-      const response = await request(app).get('/user/editProfile').set('x-access-token', userToken);
+      const response = await request(app).get('/user/editProfile').set('Cookie', `access_token=${userToken}`)
 
-      expect(response.statusCode).toBe(200);
-    });
+      expect(response.statusCode).toBe(200)
+    })
 
     test('성공: 전체 변경 | 200', async () => {
       const response = await request(app)
         .post('/user/editProfile')
-        .set('x-access-token', userToken)
+        .set('Cookie', `access_token=${userToken}`)
         .field('screenId', newProfileData.screenId)
         .field('userNick', newProfileData.userNick)
         .field('userCountry', newProfileData.userCountry)
         .field('userLang', newProfileData.userLang)
         .field('userIntro', newProfileData.userIntro)
         .attach('userBannerImg', imagePathArray[0])
-        .attach('userProfileImg', imagePathArray[1]);
+        .attach('userProfileImg', imagePathArray[1])
 
-      expect(response.statusCode).toBe(200);
+      expect(response.statusCode).toBe(200)
 
       // console.log(response)
-    });
+    })
 
     test('성공: 일부 변경 | 200', async () => {
       const response = await request(app)
         .post('/user/editProfile')
-        .set('x-access-token', userToken)
+        .set('Cookie', `access_token=${userToken}`)
         .field('screenId', 'partialChange')
         // .field('userNick', newProfileData.userNick)
         // .field('userCountry', newProfileData.userCountry)
         .field('userLang', newProfileData.userLang[0])
         .field('userIntro', newProfileData.userIntro)
-        .attach('userBannerImg', imagePathArray[0]);
+        .attach('userBannerImg', imagePathArray[0])
       // .attach('userProfileImg', imagePathArray[1])
 
-      expect(response.statusCode).toBe(200);
+      expect(response.statusCode).toBe(200)
 
       // console.log(response)
-    });
-  });
+    })
+  })
 
   describe('회원 탈퇴', () => {
     test('실패: 비밀번호 누락 | 400', async () => {
       await request(app)
         .delete('/user')
-        .set('x-access-token', userToken)
+        .set('Cookie', `access_token=${userToken}`)
         // .send({ userPw: newPw })
-        .expect(400);
-    });
+        .expect(400)
+    })
 
     test('실패: 잘못된 비밀번호 | 400', async () => {
       await request(app)
         .delete('/user')
-        .set('x-access-token', userToken)
-        .send({ userPw: randomString() })
-        .expect(400);
-    });
+        .set('Cookie', `access_token=${userToken}`)
+        .send({ userPw: '1a2a3a' })
+        .expect(400)
+    })
 
     test('성공 | 200', async () => {
       await request(app)
         .delete('/user')
-        .set('x-access-token', userToken)
+        .set('Cookie', `access_token=${userToken}`)
         .send({ userPw: newPw })
-        .expect(200);
-    });
-  });
-});
+        .expect(200)
+    })
+  })
+})

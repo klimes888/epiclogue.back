@@ -1,7 +1,8 @@
-import Database from '../../src/lib/database';
+import { disconnectDatabase, dropDatabase } from '../../src/lib/database'
 
 module.exports = async () => {
-  await Database.disconnect();
-  console.log(`[INFO] Test successfully ended!`);
-  process.exit(0);
-};
+  await dropDatabase()
+  await disconnectDatabase()
+  console.log(`[JestGlobalTeardown] Test successfully ended!`)
+  process.exit(0)
+}

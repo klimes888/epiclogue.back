@@ -1,8 +1,9 @@
-import createError from 'http-errors';
-import { User, Board, Follow } from '../../models';
-import { getBookmarkList } from '../interaction/bookmark/bookmark.ctrl';
-import { contentsWrapper } from '../../lib/contentsWrapper';
-
+import { userDAO, boardDAO, followDAO } from '../../DAO'
+import { getBookmarkList } from '../interaction/bookmark/bookmark.ctrl'
+import { contentsWrapper } from '../../lib/contentsWrapper'
+import { apiResponser } from '../../lib/middleware/apiResponser'
+import { apiErrorGenerator } from '../../lib/apiErrorGenerator'
+import { parseIntParam } from '../../lib/parseParams'
 /**
  * @description 마이보드 - 유저의 프로필 정보 요청
  * @access GET /myboard/:screenId
@@ -12,7 +13,7 @@ import { contentsWrapper } from '../../lib/contentsWrapper';
  * @returns 마이보드 소유자의 정보
  */
 export const getMyboard = async (req, res, next) => {
-  const { screenId } = req.params;
+  const { screenId } = req.params
   const projectionOpt = {
     _id: 1,
     nickname: 1,
@@ -21,35 +22,28 @@ export const getMyboard = async (req, res, next) => {
     banner: 1,
     profile: 1,
     joinDate: 1,
-  };
+  }
 
-  const userData = await User.getByScreenId(screenId, projectionOpt);
+  const userData = await userDAO.getByScreenId(screenId, projectionOpt)
 
   try {
-    const myBoardData = userData.toJSON();
+    const myBoardData = userData.toJSON()
+    // direct use model must change dao
+    myBoardData.followerCount = await followDAO.getFollowerCount(userData._id)
+    myBoardData.followingCount = await followDAO.getFollowingCount(userData._id)
 
-    myBoardData.followerCount = await Follow.countDocuments({ targetUserId: userData._id });
-    myBoardData.followingCount = await Follow.countDocuments({ userId: userData._id });
-    console.log(res.locals.uid, userData._id);
-    if (res.locals?.uid) {
+    if (req.user?.id) {
       myBoardData.isFollowing =
-        res.locals.uid === userData._id.toString()
+        req.user.id === userData._id.toString()
           ? 'me'
-          : !!(await Follow.isFollowing(res.locals.uid, userData._id));
+          : !!(await followDAO.isFollowing(req.user.id, userData._id))
     }
 
-    console.log(
-      `[INFO] ${res.locals?.uid || '비회원 유저'} 가 @${screenId} 의 마이보드를 열람합니다.`
-    );
-    return res.status(200).json({
-      result: 'ok',
-      data: myBoardData,
-    });
+    return apiResponser({ req, res, data: myBoardData })
   } catch (e) {
-    console.error(`[Error] ${e}`);
-    return next(createError(500, '알 수 없는 오류가 발생했습니다.'));
+    return next(apiErrorGenerator(500, '알 수 없는 오류가 발생했습니다.', e))
   }
-};
+}
 
 /**
  * @description 모든 작품 확인
@@ -60,23 +54,19 @@ export const getMyboard = async (req, res, next) => {
  * @returns Array of all works
  */
 export const allWorks = async (req, res, next) => {
-  const userId = await User.findOne({ screenId: req.params.screenId }, { _id: 1, screenId: 0 });
+  const { latestId, screenId, size } = req.params
+  const userId = await userDAO.getIdByScreenId(screenId)
   try {
-    const userAllWorks = await Board.findAll({ writer: userId._id });
-    const wrappedWorks = res.locals?.uid
-      ? await contentsWrapper(res.locals.uid, userAllWorks, 'Board', false)
-      : userAllWorks;
+    const userAllWorks = await boardDAO.findAll(userId._id, latestId, await parseIntParam(size, 25))
+    const wrappedWorks = req.user?.uid
+      ? await contentsWrapper(req.user.id, userAllWorks, 'Board', false)
+      : userAllWorks
 
-    console.log(`[INFO] ${res.locals.uid || '비회원유저'} 가 ${userId._id} 의 글들을 확인합니다.`);
-    return res.status(200).json({
-      result: 'ok',
-      data: wrappedWorks,
-    });
+    return apiResponser({ req, res, data: wrappedWorks })
   } catch (e) {
-    console.error(`[Error] ${e}`);
-    next(createError(500, '알 수 없는 오류가 발생했습니다.'));
+    next(apiErrorGenerator(500, '알 수 없는 오류가 발생했습니다.', e))
   }
-};
+}
 
 /**
  * @description 모든 작품 확인
@@ -88,24 +78,20 @@ export const allWorks = async (req, res, next) => {
  */
 export const originals = async (req, res, next) => {
   try {
-    const targetUser = await User.getIdByScreenId(req.params.screenId);
-    const myContents = await Board.findAllOriginOrSecondary(targetUser._id, false);
-    const wrappedContents = await contentsWrapper(res.locals.uid, myContents, 'Board', false);
+    const targetUser = await userDAO.getIdByScreenId(req.params.screenId)
+    const myContents = await boardDAO.findAllOriginOrSecondary(
+      targetUser._id,
+      false,
+      req.params.latestId,
+      await parseIntParam(req.params.size, 25)
+    )
+    const wrappedContents = await contentsWrapper(req.user.id, myContents, 'Board', false)
 
-    console.log(
-      `[INFO] 유저 ${res.locals.uid || '비회원유저'} 가 유저 ${
-        targetUser._id
-      } 의 원작들을 확인합니다.`
-    );
-    return res.status(200).json({
-      result: 'ok',
-      data: wrappedContents,
-    });
+    return apiResponser({ req, res, data: wrappedContents })
   } catch (e) {
-    console.error(`[Error] ${e}`);
-    return next(createError(500, '알 수 없는 에러가 발생했습니다.'));
+    return next(apiErrorGenerator(500, '알 수 없는 에러가 발생했습니다.', e))
   }
-};
+}
 
 /**
  * @description 이차창작물 확인
@@ -117,26 +103,22 @@ export const originals = async (req, res, next) => {
  */
 export const secondaryWorks = async (req, res, next) => {
   try {
-    const targetUser = await User.findOne({ screenId: req.params.screenId }, { _id: 1 });
-    const userSecondaryWorks = await Board.findAllOriginOrSecondary(targetUser._id, true);
-    const wrappedContents = res.locals?.uid
-      ? await contentsWrapper(res.locals.uid, userSecondaryWorks, 'Board', false)
-      : userSecondaryWorks;
+    const targetUser = await userDAO.getIdByScreenId(req.params.screenId)
+    const userSecondaryWorks = await boardDAO.findAllOriginOrSecondary(
+      targetUser._id,
+      true,
+      req.params.latestId,
+      await parseIntParam(req.params.size, 25)
+    )
+    const wrappedContents = req.user?.uid
+      ? await contentsWrapper(req.user.id, userSecondaryWorks, 'Board', false)
+      : userSecondaryWorks
 
-    console.log(
-      `[INFO] 유저 ${res.locals.uid || '비회원유저'} 가 유저 ${
-        targetUser._id
-      } 의 2차창작들을 확인합니다.`
-    );
-    return res.status(200).json({
-      result: 'ok',
-      data: wrappedContents,
-    });
+    return apiResponser({ req, res, data: wrappedContents })
   } catch (e) {
-    console.error(`[Error] ${e}`);
-    return next(createError(500, '알 수 없는 에러가 발생했습니다.'));
+    return next(apiErrorGenerator(500, '알 수 없는 에러가 발생했습니다.', e))
   }
-};
+}
 
 /**
  * @description 북마크 확인
@@ -146,4 +128,4 @@ export const secondaryWorks = async (req, res, next) => {
  * @param {*} next - Express next middleware
  * @returns 유저의 북마크 배열
  */
-export const bookmarks = (req, res, next) => getBookmarkList(req, res, next);
+export const bookmarks = (req, res, next) => getBookmarkList(req, res, next)

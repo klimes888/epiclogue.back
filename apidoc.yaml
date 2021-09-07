@@ -1,7 +1,7 @@
 swagger: "2.0"
 info:
   description: "This is a epiclogue api document."
-  version: "1.0.0"
+  version: "1.1.0"
   title: "epiclogue API"
   contact:
     email: "dladsds123@gmail.com"
@@ -24,6 +24,8 @@ tags:
   description: "notify functions"
 - name: "myboard"
   description: "myboard functions"
+- name: "report"
+  description: "report functions"
 schemes:
 - "https"
 paths:
@@ -403,6 +405,18 @@ paths:
         required: false
         type: string
         example: "Comic"
+      - name: "page"
+        in: "query"
+        description: "pagenation param"
+        required: false
+        type: number
+        example: 0
+      - name: "size"
+        in: "query"
+        description: "get size param"
+        required: false
+        type: number
+        example: 35
       responses:
         200:
           description: OK
@@ -1518,12 +1532,273 @@ paths:
       security:
         - access_token: []
 
+  /report:
+    get:
+      tags:
+        - "report"
+      summary: "get report as group"
+      description: ""
+      parameters:
+      - name: "size"
+        in: "query"
+        description: "get size"
+        required: false
+        type: number
+        example: 30
+      - name: "page"
+        in: "query"
+        description: "get pagenation param"
+        required: false
+        type: number
+        example: 0
+      - name: "isCopyright"
+        in: "query"
+        description: "get copyright or not param"
+        required: false
+        type: boolean
+        example: false
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            properties:
+              data:
+                type: object
+              message:
+                type: string
+              result:
+                type: string
+              status:
+                type: number
+      security:
+        - access_token: []
+    post:
+      tags:
+        - "report"
+      summary: "post report"
+      description: ""
+      parameters:
+      - name: "Body"
+        in: "body"
+        description: "post data"
+        required: true
+        schema:
+          type: object
+          properties:
+            reportType:
+              type: string
+            suspectUserId:
+              type: string
+            contentId:
+              type: string
+            contentType:
+              type: string
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            properties:
+              data:
+                type: object
+              message:
+                type: string
+              result:
+                type: string
+              status:
+                type: number
+      security:
+        - access_token: []
+    delete:
+      tags:
+        - "report"
+      summary: "delete and logging report"
+      description: ""
+      parameters:
+      - name: "Body"
+        in: "body"
+        description: "processed data"
+        required: true
+        schema:
+          type: object
+          properties:
+            reportType:
+              type: number
+            reportStatus:
+              type: number
+            suspectUserId:
+              type: string
+            contentId:
+              type: string
+            contentType:
+              type: string
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            properties:
+              data:
+                type: object
+              message:
+                type: string
+              result:
+                type: string
+              status:
+                type: number
+      security:
+        - access_token: []
+  /report/copyright:
+    post:
+      tags:
+        - "report"
+      summary: "post copyright report"
+      description: ""
+      parameters:
+      - name: "Body"
+        in: "body"
+        description: "post data"
+        required: true
+        schema:
+          type: object
+          properties:
+            reportType:
+              type: string
+            suspectUserId:
+              type: string
+            contentId:
+              type: string
+            contentType:
+              type: string
+            reportBody:
+              type: object
+              properties:
+                reporterName:
+                  type: string
+                reportCompany:
+                  type: string
+                tel:
+                  type: string
+                reporterEmail:
+                  type: string
+                reporterCountry:
+                  type: string
+                originLink:
+                  type: array
+                  items:
+                    type: string
+                contentSubject:
+                  type: string
+                isAgreePolicy:
+                  type: boolean
+                isAgreeCorrect:
+                  type: boolean
+                signature:
+                  type: string
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            properties:
+              data:
+                type: object
+              message:
+                type: string
+              result:
+                type: string
+              status:
+                type: number
+      security:
+        - access_token: []
+  /report/submittedReports:
+    get:
+      tags:
+        - "report"
+      summary: "get report"
+      description: ""
+      parameters:
+      - name: "contentId"
+        in: "query"
+        description: "reported target Id"
+        required: true
+        type: string
+      - name: "contentType"
+        in: "query"
+        description: "reported target type"
+        required: true
+        type: string
+        example: "Board"
+      - name: "isCopyright"
+        in: "query"
+        description: "is copyright report?"
+        required: true
+        type: boolean
+        example: false
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            properties:
+              data:
+                type: object
+              message:
+                type: string
+              result:
+                type: string
+              status:
+                type: number
+      security:
+        - access_token: []
+  /report/processedReports:
+    get:
+      tags:
+        - "report"
+      summary: "get report log"
+      description: ""
+      parameters:
+      - name: "size"
+        in: "query"
+        description: "get size"
+        required: false
+        type: number
+        example: 30
+      - name: "page"
+        in: "query"
+        description: "get pagenation param"
+        required: false
+        type: number
+        example: 0
+      - name: "isCopyright"
+        in: "query"
+        description: "get isCopyright"
+        required: true
+        type: boolean
+        example: false
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            properties:
+              data:
+                type: object
+              message:
+                type: string
+              result:
+                type: string
+              status:
+                type: number
+      security:
+        - access_token: []
 securityDefinitions:
   access_token:
     description: "insert your accessToken in login response."
     type: apiKey
-    name: "x-access-token"
-    in: "header"
+    name: "access-token"
+    in: "cookie"
 definitions:
   board_thumb:
     type: "object"

@@ -1,7 +1,8 @@
-import createError from 'http-errors';
-import Joi from 'joi';
-import { startSession } from 'mongoose';
-import { Notification } from '../../models';
+import Joi from 'joi'
+import { notificationDAO } from '../../DAO'
+import { apiErrorGenerator } from '../../lib/apiErrorGenerator'
+import { apiResponser } from '../../lib/middleware/apiResponser'
+import { parseIntParam } from '../../lib/parseParams'
 
 /**
  * @description 모든 알림 확인
@@ -12,22 +13,17 @@ import { Notification } from '../../models';
  * @returns 사용자의 모든 알림
  */
 export const getNoti = async (req, res, next) => {
-  const session = await startSession();
-
   try {
-    await session.withTransaction(async () => {
-      const notiData = await Notification.getNotiList(res.locals.uid).session(session);
-      console.log(`[INFO] 유저 ${res.locals.uid} 가 알림을 확인했습니다.`);
-      return res.status(200).json({
-        result: 'ok',
-        data: notiData,
-      });
-    });
+    const size = await parseIntParam(req.params.size, 15)
+    const notiData = await notificationDAO.getNotiList(req.user.id, 
+      req.query.latestId, 
+      size
+    )
+    return apiResponser({ req, res, data: notiData })
   } catch (e) {
-    console.error(`[Error] ${e}`);
-    return next(createError(500, '알 수 없는 오류가 발생했습니다.'));
+    return next(apiErrorGenerator(500, '알 수 없는 오류가 발생했습니다.', e))
   }
-};
+}
 
 /**
  * @description 특정 알림 읽음 처리
@@ -39,16 +35,12 @@ export const getNoti = async (req, res, next) => {
  */
 export const setRead = async (req, res, next) => {
   try {
-    await Notification.updateMany({ _id: req.body.notiId, userId: res.locals.uid }, { read: true });
-    console.log(`[INFO] 유저 ${res.locals.uid} 가 알림을 ${req.body.notiId} 를 확인했습니다.`);
-    return res.status(200).json({
-      result: 'ok',
-    });
+    await notificationDAO.setReadOne(req.body.notiId, req.user.id)
+    return apiResponser({ req, res, message: '알림 한 개를 읽음처리 했습니다.' })
   } catch (e) {
-    console.error(`[Error] ${e}`);
-    return next(createError(500, '알 수 없는 오류가 발생했습니다.'));
+    return next(apiErrorGenerator(500, '알 수 없는 오류가 발생했습니다.', e))
   }
-};
+}
 
 /**
  * @description 모든 알림 읽음처리
@@ -60,16 +52,12 @@ export const setRead = async (req, res, next) => {
  */
 export const setReadAll = async (req, res, next) => {
   try {
-    await Notification.updateMany({ userId: res.locals.uid }, { read: true });
-    console.log(`[INFO] 유저 ${res.locals.uid} 가 알림을 모두 읽음처리 했습니다.`);
-    return res.status(200).json({
-      result: 'ok',
-    });
+    await notificationDAO.setReadAll(req.user.id)
+    return apiResponser({ req, res, message: '모든 알림을 읽음처리 했습니다.' })
   } catch (e) {
-    console.error(`[Error] ${e}`);
-    return next(createError(500, '알 수 없는 오류가 발생했습니다.'));
+    return next(apiErrorGenerator(500, '알 수 없는 오류가 발생했습니다.', e))
   }
-};
+}
 
 /**
  * @description 새로운 알림 유무
@@ -81,22 +69,12 @@ export const setReadAll = async (req, res, next) => {
  */
 export const checkNotified = async (req, res, next) => {
   try {
-    const notified = await Notification.find({ userId: res.locals.uid, read: false }, { _id: 1 });
-    let notiCount = 0;
-    if (notified) {
-      notiCount = notified.length;
-    }
-
-    console.log(`[INFO] 유저 ${res.locals.uid} 가 알림유무를 확인했습니다.`);
-    return res.status(200).json({
-      result: 'ok',
-      data: { notiCount },
-    });
+    const notiCount = await notificationDAO.getUnreadNotiCount(req.user.id)
+    return apiResponser({ req, res, data: { notiCount } })
   } catch (e) {
-    console.error(`[Error] ${e}`);
-    return next(createError(500, '알 수 없는 오류가 발생했습니다.'));
+    return next(apiErrorGenerator(500, '알 수 없는 오류가 발생했습니다.', e))
   }
-};
+}
 
 /**
  * @description 알림 삭제
@@ -111,30 +89,23 @@ export const deleteNoti = async (req, res, next) => {
     _id: Joi.string()
       .regex(/^[a-fA-F0-9]{24}$/)
       .required(),
-  });
+  })
 
   try {
     await notiObjectId.validateAsync({
       _id: req.body.notiId,
-    });
+    })
   } catch (e) {
-    console.log(
-      `[INFO] 유저 ${res.locals.uid} 가 적절하지 않은 알림 ${req.body.notiId} 을 삭제처리 하려 했습니다.`
-    );
-    return next(createError(400, '적절하지 않은 ObjectId입니다.'));
+    return next(apiErrorGenerator(400, '적절하지 않은 ObjectId입니다.', e))
   }
 
   try {
-    await Notification.deleteOne({ _id: req.body.notiId });
-    console.log(`[INFO] 유저 ${res.locals.uid} 가 알림 ${req.body.notiId} 를 삭제했습니다.`);
-    return res.status(200).json({
-      result: 'ok',
-    });
+    await notificationDAO.deleteNoti(req.body.notiId)
+    return apiResponser({ req, res, message: '알림을 삭제했습니다.' })
   } catch (e) {
-    console.error(`[Error] ${e}`);
-    return next(createError(500, '알 수 없는 오류가 발생했습니다.'));
+    return next(apiErrorGenerator(500, '알 수 없는 오류가 발생했습니다.', e))
   }
-};
+}
 
 /**
  * @description 모든 알림 삭제
@@ -146,11 +117,9 @@ export const deleteNoti = async (req, res, next) => {
  */
 export const deleteAll = async (req, res, next) => {
   try {
-    await Notification.deleteMany({ userId: res.locals.uid });
-    console.log(`[INFO] 유저 ${res.locals.uid} 가 모든 알림을 삭제했습니다.`);
-    return res.status(200).json({ result: 'ok' });
+    await notificationDAO.deleteNotiAll(req.user.id)
+    return apiResponser({ req, res, message: '모든 알림을 삭제했습니다.' })
   } catch (e) {
-    console.error(`[Error] ${e}`);
-    return next(createError('알 수 없는 오류가 발생했습니다.'));
+    return next(apiErrorGenerator('알 수 없는 오류가 발생했습니다.', e))
   }
-};
+}

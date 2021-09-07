@@ -1,6 +1,6 @@
-import mongoose from 'mongoose';
+import mongoose from 'mongoose'
 
-const { ObjectId } = mongoose;
+const { ObjectId } = mongoose
 
 /**
  * Notification schema
@@ -28,29 +28,17 @@ const notification = new mongoose.Schema({
     required: true,
     enum: ['Board', 'Feedback', 'Reply', 'User'],
   },
+  message: { type: {
+    reportType: { type: Number },
+    data: { type: String },
+    message: { type: String },
+    contentStatus: { type: Number },
+    status: { type: Number }
+  }, default: null },
   targetInfo: { type: ObjectId, required: true, refPath: 'targetType' },
   highlightId: { type: ObjectId },
   createdAt: { type: Date, default: Date.now },
   read: { type: Boolean, default: false },
-});
+})
 
-// 알림목록
-notification.statics.getNotiList = function (userId) {
-  return this.find({ userId })
-    .populate({
-      path: 'maker',
-      select: '_id screenId nickname profile',
-    })
-    .populate({
-      path: 'targetInfo',
-      select: 'screenId nickname profile boardTitle feedbackBody replyBody boardId parentId',
-    })
-    .sort({ createdAt: -1 });
-};
-
-// 전체 읽음
-notification.statics.setReadAll = function (userId) {
-  return this.updateMany({ userId }, { $set: { read: true } });
-};
-
-export default mongoose.model('Notification', notification);
+export default mongoose.model('Notification', notification)
